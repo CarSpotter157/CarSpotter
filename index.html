@@ -1322,6 +1322,15 @@ function renderGarage() {
 }
 
 // ── HISTORY ──
+// ── DELETE RUN ──
+function deleteRun(id) {
+  allRuns = allRuns.filter(r => r.id !== id);
+  localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+  saveToCloud();
+  renderHistory();
+  renderGarage();
+}
+
 function renderHistory() {
   const best = getBest();
   const rw   = document.getElementById('recordWrap');
@@ -1370,6 +1379,7 @@ function renderHistory() {
           ${headlinerHTML}
         </div>
         ${isRec?'<div class="hist-rec">🏆 RECORD</div>':''}
+        <button class="del-btn" onclick="event.stopPropagation();deleteRun(${entry.id})" style="margin-right:4px">✕</button>
         <div class="hist-chev">▼</div>
       </div>
       <div class="hist-cars">${carsHTML}</div>`;
