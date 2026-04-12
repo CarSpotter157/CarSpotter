@@ -1358,5 +1358,53 @@ initNotes();
 
 
 </script>
+    // wait for login
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      console.log("Logged in:", user.uid);
+      loadUserData(user.uid);
+    }
+  });
+
+  // save data
+  function saveUserData(data) {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    firebase.database().ref("users/" + user.uid).set(data);
+  }
+
+  // load data
+  function loadUserData(uid) {
+    firebase.database().ref("users/" + uid).once("value")
+      .then((snapshot) => {
+        const data = snapshot.val();
+
+        if (data) {
+          console.log("Loaded data:", data);
+
+          // TEMP: just show it on screen so we know it works
+          document.body.innerHTML += "<pre>" + JSON.stringify(data, null, 2) + "</pre>";
+        } else {
+          console.log("No data yet");
+        }
+      });
+  }
+
+  // TEST BUTTON (temporary)
+  function testSave() {
+    const data = {
+      cars: ["GTR", "Supra"],
+      runs: [12.3, 11.8],
+      topRun: 11.8,
+      history: ["race1", "race2"]
+    };
+
+    saveUserData(data);
+    alert("Saved test data");
+  }
+</script>
+
+<button onclick="testSave()">TEST SAVE DATA</button>
 </body>
 </html>
