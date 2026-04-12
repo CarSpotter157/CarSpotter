@@ -407,6 +407,28 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
 .sync-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background 0.3s;}
 .sync-dot.ok{background:var(--green);}
 .sync-dot.syncing{background:var(--accent);animation:pulse 1s ease infinite;}
+
+/* ── NEWS ── */
+.news-source-btn{
+  font-size:0.6rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;
+  background:var(--surf2);border:1px solid var(--border);border-radius:20px;
+  padding:4px 12px;cursor:pointer;color:var(--muted);transition:all 0.15s;font-family:inherit;
+}
+.news-source-btn.active{background:var(--adim);border-color:var(--accent);color:var(--accent);}
+.news-card{
+  background:var(--surf);border:1px solid var(--border);border-radius:12px;
+  padding:13px 14px;margin-bottom:9px;animation:fadeUp 0.25s ease both;
+  display:block;text-decoration:none;color:inherit;transition:border-color 0.15s;
+}
+.news-card:hover{border-color:var(--accent);}
+.news-source-tag{font-size:0.55rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:5px;}
+.news-title{font-size:0.88rem;font-weight:600;line-height:1.4;margin-bottom:5px;}
+.news-date{font-size:0.6rem;color:var(--muted);letter-spacing:1px;}
+.news-loading{text-align:center;padding:40px 12px;color:var(--muted);font-size:0.72rem;letter-spacing:1px;}
+.news-error{text-align:center;padding:30px 12px;color:var(--red);font-size:0.72rem;letter-spacing:1px;border:1px dashed var(--border);border-radius:10px;}
+@media(min-width:800px){
+  #page-news{overflow-y:auto;padding:28px 36px;}
+}
 </style>
 </head>
 <body>
@@ -591,6 +613,17 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
       </div>
       <textarea id="notesArea" class="notes-area" placeholder="Ferrari 488 red&#10;Yellow Lambo&#10;Blue Porsche GT3 992&#10;&#10;Just type or hit the mic — nothing happens until you&#39;re ready..."></textarea>
     </div>
+
+    <!-- NEWS PAGE -->
+    <div class="page" id="page-news">
+      <div class="sec-row" style="margin-bottom:10px">
+        <div class="sec-title">🗞️ CAR NEWS</div>
+        <button class="txt-btn" onclick="loadNews()">Refresh</button>
+      </div>
+      <div id="newsSources" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;"></div>
+      <div id="newsList"></div>
+    </div>
+
   </div><!-- /pages -->
 
   <nav class="bottom-nav" id="bottomNav">
@@ -610,6 +643,10 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
     <button class="nav-btn" onclick="goTo('voice')" id="nav-voice">
       <span class="nav-icon">📝</span>
       <span class="nav-label">Notes</span>
+    </button>
+    <button class="nav-btn" onclick="goTo('news')" id="nav-news">
+      <span class="nav-icon">🗞️</span>
+      <span class="nav-label">News</span>
     </button>
   </nav>
 
@@ -838,6 +875,7 @@ function goTo(page) {
   closeQP();
   if (page==='garage')  renderGarage();
   if (page==='history') renderHistory();
+  if (page==='news' && !newsLoaded) { newsLoaded=true; renderNewsSources(); loadNews(); }
 }
 
 // ── FORMAT ──
@@ -1359,6 +1397,51 @@ function stopMic() {
 }
 
 initNotes();
+
+// ── NEWS ──
+const NEWS_SOURCES = [
+  { name: 'Car & Driver',  rss: 'https://www.caranddriver.com/rss/all.xml/' },
+  { name: 'Motor Trend',   rss: 'https://www.motortrend.com/feed/' },
+  { name: 'The Drive',     rss: 'https://www.thedrive.com/feed' },
+];
+let activeSource = 0;
+let newsLoaded = false;
+
+function renderNewsSources() {
+  const el = document.getElementById('newsSources');
+  el.innerHTML = NEWS_SOURCES.map((s, i) =>
+    `<button class="news-source-btn ${i === activeSource ? 'active' : ''}" onclick="switchSource(${i})">${s.name}</button>`
+  ).join('');
+}
+
+function switchSource(i) {
+  activeSource = i;
+  renderNewsSources();
+  loadNews();
+}
+
+async function loadNews() {
+  const el = document.getElementById('newsList');
+  el.innerHTML = '<div class="news-loading">⏳ Loading latest news...</div>';
+  const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(NEWS_SOURCES[activeSource].rss)}&api_key=public&count=20`;
+  try {
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (!data.items || !data.items.length) throw new Error('No items');
+    el.innerHTML = data.items.map(item => {
+      const date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
+      const title = item.title || 'No title';
+      const link  = item.link  || '#';
+      return `<a class="news-card" href="${link}" target="_blank" rel="noopener">
+        <div class="news-source-tag">${NEWS_SOURCES[activeSource].name}</div>
+        <div class="news-title">${title}</div>
+        <div class="news-date">${date}</div>
+      </a>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="news-error">⚠️ Could not load news. Check your connection and try refreshing.</div>';
+  }
+}
 
 
 </script>
