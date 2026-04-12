@@ -1423,7 +1423,7 @@ function switchSource(i) {
 async function loadNews() {
   const el = document.getElementById('newsList');
   el.innerHTML = '<div class="news-loading">⏳ Loading latest news...</div>';
-  const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(NEWS_SOURCES[activeSource].rss)}&api_key=public&count=20`;
+  const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(NEWS_SOURCES[activeSource].rss)}&api_key=kkv1zj5yfbnz1ldwxehfesg358e3ttagbc8wzxiq&count=20`;
   try {
     const res  = await fetch(url);
     const data = await res.json();
