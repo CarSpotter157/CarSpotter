@@ -408,7 +408,23 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
 .sync-dot.ok{background:var(--green);}
 .sync-dot.syncing{background:var(--accent);animation:pulse 1s ease infinite;}
 
-/* ── NEWS ── */
+/* ── STATS ── */
+.st-bar-wrap{margin-bottom:8px;}
+.st-bar-label{display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:4px;}
+.st-bar-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%;}
+.st-bar-val{color:var(--accent);font-family:'Bebas Neue',cursive;font-size:0.88rem;letter-spacing:1px;}
+.st-bar-track{height:6px;background:var(--surf2);border-radius:3px;overflow:hidden;}
+.st-bar-fill{height:100%;background:var(--accent);border-radius:3px;transition:width 0.6s ease;}
+.st-chart-bar-wrap{display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:4px;}
+.st-chart-bar{flex:1;background:var(--accent);border-radius:3px 3px 0 0;opacity:0.85;min-width:0;transition:height 0.5s ease;cursor:pointer;position:relative;}
+.st-chart-bar:hover{opacity:1;}
+.st-chart-labels{display:flex;gap:4px;}
+.st-chart-lbl{flex:1;font-size:0.48rem;color:var(--muted);text-align:center;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.st-empty{color:var(--muted);font-size:0.72rem;letter-spacing:1px;text-align:center;padding:12px 0;}
+@media(min-width:800px){
+  #page-stats{overflow-y:auto;padding:28px 36px;}
+}
+</style>
 .news-source-btn{
   font-size:0.6rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;
   background:var(--surf2);border:1px solid var(--border);border-radius:20px;
@@ -614,6 +630,47 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
       <textarea id="notesArea" class="notes-area" placeholder="Ferrari 488 red&#10;Yellow Lambo&#10;Blue Porsche GT3 992&#10;&#10;Just type or hit the mic — nothing happens until you&#39;re ready..."></textarea>
     </div>
 
+    <!-- STATS PAGE -->
+    <div class="page" id="page-stats">
+      <div class="sec-title" style="margin-bottom:12px">📊 YOUR STATS</div>
+
+      <!-- Summary row -->
+      <div class="stats-row" id="st-summary"></div>
+
+      <!-- Best run -->
+      <div class="card" id="st-bestrun"></div>
+
+      <!-- Top cars by value -->
+      <div class="card">
+        <div class="card-title">💰 TOP CARS BY VALUE</div>
+        <div id="st-topcars"></div>
+      </div>
+
+      <!-- Most spotted makes -->
+      <div class="card">
+        <div class="card-title">🔢 MOST SPOTTED MAKES</div>
+        <div id="st-makes"></div>
+      </div>
+
+      <!-- Most spotted types -->
+      <div class="card">
+        <div class="card-title">🏷️ BY TYPE</div>
+        <div id="st-types"></div>
+      </div>
+
+      <!-- Run history chart -->
+      <div class="card">
+        <div class="card-title">📈 RUN VALUES OVER TIME</div>
+        <div id="st-chart" style="padding-top:8px"></div>
+      </div>
+
+      <!-- Best day of week -->
+      <div class="card">
+        <div class="card-title">📅 BEST DAY TO SPOT</div>
+        <div id="st-days"></div>
+      </div>
+    </div>
+
     <!-- NEWS PAGE -->
     <div class="page" id="page-news">
       <div class="sec-row" style="margin-bottom:10px">
@@ -647,6 +704,10 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
     <button class="nav-btn" onclick="goTo('news')" id="nav-news">
       <span class="nav-icon">🗞️</span>
       <span class="nav-label">News</span>
+    </button>
+    <button class="nav-btn" onclick="goTo('stats')" id="nav-stats">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">Stats</span>
     </button>
   </nav>
 
@@ -875,6 +936,7 @@ function goTo(page) {
   closeQP();
   if (page==='garage')  renderGarage();
   if (page==='history') renderHistory();
+  if (page==='stats')   renderStats();
   if (page==='news' && !newsLoaded) { newsLoaded=true; renderNewsSources(); loadNews(); }
 }
 
@@ -1397,6 +1459,97 @@ function stopMic() {
 }
 
 initNotes();
+
+// ── STATS ──
+function renderStats() {
+  // Gather all cars from all runs + spots
+  const allCars = allRuns.flatMap(r => r.cars || []);
+  const runs = allRuns.filter(r => !r.spotted);
+  const spots = allRuns.filter(r => r.spotted);
+
+  // ── Summary boxes ──
+  const totalValue = allCars.reduce((s,c) => s + (c.value||0), 0);
+  const bestRun = runs.length ? runs.reduce((a,b) => a.total>b.total?a:b) : null;
+  document.getElementById('st-summary').innerHTML = `
+    <div class="stat-box"><div class="stat-v">${allCars.length}</div><div class="stat-l">Total Cars</div></div>
+    <div class="stat-box"><div class="stat-v">${fmt(totalValue)}</div><div class="stat-l">Total Value</div></div>
+    <div class="stat-box"><div class="stat-v">${runs.length}</div><div class="stat-l">Runs</div></div>`;
+
+  // ── Best run ──
+  const br = document.getElementById('st-bestrun');
+  if (bestRun) {
+    br.innerHTML = `<div class="card-title">🏆 BEST RUN</div>
+      <div style="font-family:'Bebas Neue',cursive;font-size:2rem;color:var(--accent);letter-spacing:1px;">${fmt(bestRun.total)}</div>
+      <div style="font-size:0.65rem;color:var(--text2);margin-top:4px;">${bestRun.cars.length} cars · ${bestRun.date}</div>`;
+  } else {
+    br.innerHTML = `<div class="card-title">🏆 BEST RUN</div><div class="st-empty">No runs yet</div>`;
+  }
+
+  // ── Top cars by value ──
+  const topCars = [...allCars].sort((a,b) => b.value-a.value).slice(0,5);
+  const maxVal = topCars[0]?.value || 1;
+  document.getElementById('st-topcars').innerHTML = topCars.length
+    ? topCars.map(c => `<div class="st-bar-wrap">
+        <div class="st-bar-label"><span class="st-bar-name">${c.type} ${c.name}</span><span class="st-bar-val">${fmt(c.value)}</span></div>
+        <div class="st-bar-track"><div class="st-bar-fill" style="width:${Math.round(c.value/maxVal*100)}%"></div></div>
+      </div>`).join('')
+    : '<div class="st-empty">No cars yet</div>';
+
+  // ── Most spotted makes ──
+  const makeCounts = {};
+  allCars.forEach(c => {
+    const make = c.name.trim().split(' ')[0];
+    makeCounts[make] = (makeCounts[make]||0) + 1;
+  });
+  const topMakes = Object.entries(makeCounts).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxMake = topMakes[0]?.[1] || 1;
+  document.getElementById('st-makes').innerHTML = topMakes.length
+    ? topMakes.map(([make,count]) => `<div class="st-bar-wrap">
+        <div class="st-bar-label"><span class="st-bar-name">${make}</span><span class="st-bar-val">${count}x</span></div>
+        <div class="st-bar-track"><div class="st-bar-fill" style="width:${Math.round(count/maxMake*100)}%"></div></div>
+      </div>`).join('')
+    : '<div class="st-empty">No cars yet</div>';
+
+  // ── By type ──
+  const typeMap = {'🏎️':'Supercar','🚗':'Sports Car','🐎':'Muscle Car','🏁':'Track Car','🔥':'Exotic','⚡':'EV'};
+  const typeCounts = {};
+  allCars.forEach(c => { const t=typeMap[c.type]||c.type; typeCounts[t]=(typeCounts[t]||0)+1; });
+  const topTypes = Object.entries(typeCounts).sort((a,b)=>b[1]-a[1]);
+  const maxType = topTypes[0]?.[1] || 1;
+  document.getElementById('st-types').innerHTML = topTypes.length
+    ? topTypes.map(([type,count]) => `<div class="st-bar-wrap">
+        <div class="st-bar-label"><span class="st-bar-name">${type}</span><span class="st-bar-val">${count}x</span></div>
+        <div class="st-bar-track"><div class="st-bar-fill" style="width:${Math.round(count/maxType*100)}%"></div></div>
+      </div>`).join('')
+    : '<div class="st-empty">No cars yet</div>';
+
+  // ── Run chart (last 10 runs) ──
+  const chartRuns = runs.slice(0,10).reverse();
+  const maxChart = Math.max(...chartRuns.map(r=>r.total), 1);
+  document.getElementById('st-chart').innerHTML = chartRuns.length >= 2
+    ? `<div class="st-chart-bar-wrap">${chartRuns.map(r =>
+        `<div class="st-chart-bar" style="height:${Math.max(8,Math.round(r.total/maxChart*100))}%" title="${fmt(r.total)}"></div>`
+      ).join('')}</div>
+      <div class="st-chart-labels">${chartRuns.map(r =>
+        `<div class="st-chart-lbl">${r.date.split(',')[0]}</div>`
+      ).join('')}</div>`
+    : '<div class="st-empty">Need 2+ runs to show chart</div>';
+
+  // ── Best day of week ──
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dayCounts = {Sun:0,Mon:0,Tue:0,Wed:0,Thu:0,Fri:0,Sat:0};
+  allRuns.forEach(r => {
+    if (r.id) { const d = new Date(r.id); dayCounts[days[d.getDay()]] += r.total||0; }
+  });
+  const maxDay = Math.max(...Object.values(dayCounts), 1);
+  document.getElementById('st-days').innerHTML = `
+    <div class="st-chart-bar-wrap">${days.map(d =>
+      `<div class="st-chart-bar" style="height:${Math.max(4,Math.round(dayCounts[d]/maxDay*100))}%;${dayCounts[d]===maxDay?'background:var(--accent2)':''}" title="${d}: ${fmt(dayCounts[d])}"></div>`
+    ).join('')}</div>
+    <div class="st-chart-labels">${days.map(d =>
+      `<div class="st-chart-lbl" style="${dayCounts[d]===maxDay?'color:var(--accent2)':''}">${d}</div>`
+    ).join('')}</div>`;
+}
 
 // ── NEWS ──
 const NEWS_SOURCES = [
