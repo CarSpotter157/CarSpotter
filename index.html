@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CarSpotter">
+<meta name="theme-color" content="#0a0a0a">
+<title>CarSpotter</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='55%25' font-size='110' text-anchor='middle' dominant-baseline='middle'%3E%F0%9F%9B%B5%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug",
+  authDomain: "carspotter-d5d82.firebaseapp.com",
+  projectId: "carspotter-d5d82",
+  storageBucket: "carspotter-d5d82.firebasestorage.app",
+  messagingSenderId: "1052055414051",
+  appId: "1:1052055414051:web:cd8ee5100f9e591d739896"
+});
+const auth = firebase.auth();
+const db   = firebase.firestore();
+</script>
+<style>
+:root{
+  --bg:#0a0a0a;--surf:#141414;--surf2:#1c1c1c;--surf3:#222;
+  --border:#2a2a2a;--accent:#f5c842;--adim:rgba(245,200,66,0.10);
+  --accent2:#ff5733;--text:#f0f0f0;--text2:#888;--muted:#505050;
+  --green:#4ade80;--red:#f87171;--nav-h:62px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);}
+body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:flex;flex-direction:column;}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp   {from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn   {from{opacity:0}to{opacity:1}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn  {from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:translateX(0)}}
+@keyframes popIn    {from{opacity:0;transform:scale(0.88)}to{opacity:1;transform:scale(1)}}
+@keyframes pulse    {0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes roadmove {from{transform:translateX(110vw)}to{transform:translateX(-80px)}}
+@keyframes scoot    {0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-4px) rotate(1deg)}}
+@keyframes glow     {0%,100%{box-shadow:0 0 0 0 rgba(245,200,66,0)}50%{box-shadow:0 0 18px 4px rgba(245,200,66,0.15)}}
+@keyframes numPop   {0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+
+/* ── MOBILE SHELL ── */
+.app-shell{
+  width:100%;max-width:430px;margin:0 auto;
+  height:100%;display:flex;flex-direction:column;
+  background:var(--bg);position:relative;
+}
+
+/* ── DESKTOP OVERRIDES ── */
+@media(min-width:800px){
+  html,body{overflow:hidden;}
+  body{flex-direction:row;}
+  .app-shell{max-width:100%;width:100%;height:100vh;flex-direction:row;}
+
+  .app-header{display:none;}
+
+  .bottom-nav{
+    flex-direction:column;flex-shrink:0;
+    width:88px;height:100vh;
+    border-top:none;border-right:1px solid var(--border);
+    order:-1;padding-bottom:0;
+    background:var(--surf);
+  }
+  .nav-btn{flex:none;height:76px;width:100%;padding:0;}
+  .nav-btn.active::before{
+    top:0;bottom:0;left:0;right:auto;
+    width:3px;height:100%;border-radius:0 3px 3px 0;
+  }
+  .nav-label{font-size:0.5rem;}
+  .dsk-logo{
+    display:flex;flex-direction:column;align-items:center;
+    padding:16px 0 12px;border-bottom:1px solid var(--border);
+  }
+  .dsk-logo .logo{font-size:0.95rem;writing-mode:vertical-lr;transform:rotate(180deg);letter-spacing:3px;}
+  .dsk-best{text-align:center;padding:8px 4px;border-bottom:1px solid var(--border);}
+  .dsk-best-lbl{font-size:0.46rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+  .dsk-best-v{font-family:'Bebas Neue',cursive;font-size:0.95rem;color:var(--accent);letter-spacing:1px;}
+
+  .pages{flex:1;overflow:hidden;height:100vh;}
+  .page{padding:0;}
+
+  #page-spot{display:flex;flex-direction:column;overflow:hidden;}
+  .dsk-cols{display:grid;grid-template-columns:1fr 1fr;flex:1;overflow:hidden;}
+  .dsk-col{overflow-y:auto;padding:24px 26px;height:100%;}
+  .dsk-col:first-child{border-right:1px solid var(--border);overflow:visible;}
+
+  #page-garage,#page-history{overflow-y:auto;padding:28px 36px;}
+
+  .road-deco{display:none;}
+  .scooter-deco{display:block;}
+}
+
+/* ── HEADER ── */
+.app-header{
+  flex-shrink:0;background:var(--surf);border-bottom:1px solid var(--border);
+  padding:11px 16px 9px;display:flex;align-items:center;justify-content:space-between;
+  animation:fadeIn 0.3s ease;
+}
+.logo{font-family:'Bebas Neue',cursive;font-size:1.7rem;letter-spacing:3px;color:var(--accent);line-height:1;}
+.logo span{color:var(--text);}
+.hdr-r{text-align:right;}
+.hdr-lbl{font-size:0.55rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+.hdr-val{font-family:'Bebas Neue',cursive;font-size:1.3rem;color:var(--accent);letter-spacing:1px;line-height:1;}
+
+/* ── PAGES ── */
+.pages{flex:1;overflow:hidden;position:relative;}
+.page{
+  position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:14px 14px calc(var(--nav-h) + 24px + env(safe-area-inset-bottom,0px));
+  opacity:0;pointer-events:none;transform:translateY(8px);
+  transition:opacity 0.22s ease,transform 0.22s ease;
+}
+.page.active{opacity:1;pointer-events:all;transform:translateY(0);}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{
+  flex-shrink:0;background:var(--surf);border-top:1px solid var(--border);
+  display:flex;height:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  background:none;border:none;cursor:pointer;color:var(--muted);transition:color 0.2s;position:relative;
+}
+.nav-btn.active{color:var(--accent);}
+.nav-btn.active::before{
+  content:'';position:absolute;top:0;left:20%;right:20%;
+  height:2px;background:var(--accent);border-radius:0 0 3px 3px;animation:fadeIn 0.2s ease;
+}
+.nav-icon{font-size:1.25rem;line-height:1;transition:transform 0.2s;}
+.nav-btn.active .nav-icon{transform:scale(1.15);}
+.nav-label{font-size:0.55rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;}
+
+/* ── ROAD DECO ── */
+.road-deco{position:fixed;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));left:0;right:0;height:2px;overflow:hidden;z-index:5;pointer-events:none;}
+.rdl{position:absolute;top:0;height:2px;width:48px;background:var(--accent);opacity:0.2;animation:roadmove 1.5s linear infinite;}
+.rdl:nth-child(1){animation-delay:0s;}.rdl:nth-child(2){animation-delay:0.5s;}.rdl:nth-child(3){animation-delay:1s;}
+
+/* ── SCOOTER ── */
+.scooter-deco{display:none;position:fixed;bottom:16px;right:20px;font-size:1.5rem;animation:scoot 1s ease-in-out infinite;filter:drop-shadow(0 0 6px rgba(245,200,66,0.3));z-index:5;}
+
+/* ── SCORE BANNER ── */
+.score-banner{
+  background:var(--surf);border:1px solid var(--border);border-radius:13px;
+  padding:14px 16px;margin-bottom:12px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  animation:fadeUp 0.3s ease;
+}
+.s-lbl{font-size:0.58rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;}
+.s-num{font-family:'Bebas Neue',cursive;font-size:2rem;color:var(--accent);letter-spacing:1px;line-height:1;}
+.s-sub{font-size:0.65rem;color:var(--muted);margin-top:2px;}
+.vs{font-family:'Bebas Neue',cursive;font-size:0.85rem;color:var(--muted);padding:4px 8px;border:1px solid var(--border);border-radius:6px;letter-spacing:2px;flex-shrink:0;}
+.b-num{font-family:'Bebas Neue',cursive;font-size:2rem;letter-spacing:1px;line-height:1;color:var(--text);}
+.beat{font-size:0.58rem;letter-spacing:1px;margin-top:2px;}
+.beat.beating{color:var(--green);animation:pulse 1.5s ease infinite;}
+.beat.behind{color:var(--red);}
+.beat.tied{color:var(--muted);}
+
+/* ── CARD ── */
+.card{background:var(--surf);border:1px solid var(--border);border-radius:13px;padding:14px;margin-bottom:12px;animation:fadeUp 0.3s ease both;overflow:visible;}
+.card-title{font-family:'Bebas Neue',cursive;font-size:0.88rem;letter-spacing:2.5px;color:var(--muted);margin-bottom:12px;}
+
+/* ── FORM ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.ff label{font-size:0.58rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:4px;font-weight:600;}
+.ff input,.ff select{
+  width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-size:0.88rem;padding:9px 10px;outline:none;
+  transition:border-color 0.15s,box-shadow 0.15s;appearance:none;-webkit-appearance:none;font-family:inherit;
+}
+.ff input:focus,.ff select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,200,66,0.08);}
+.ff input::placeholder{color:var(--muted);}
+
+/* ── BUTTONS ── */
+.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.btn-run{
+  background:var(--accent);color:#0a0a0a;border:none;border-radius:9px;
+  font-family:'Bebas Neue',cursive;font-size:1.05rem;letter-spacing:3px;
+  padding:13px;cursor:pointer;transition:all 0.15s;
+}
+.btn-run:hover{background:#f0be25;}
+.btn-run:active{transform:scale(0.97);}
+.btn-spot{
+  background:var(--surf2);color:var(--text);border:1px solid var(--border);border-radius:9px;
+  font-family:'Bebas Neue',cursive;font-size:1.05rem;letter-spacing:2px;
+  padding:13px;cursor:pointer;transition:all 0.15s;
+}
+.btn-spot:hover{border-color:var(--accent2);color:var(--accent2);}
+.btn-spot:active{transform:scale(0.97);}
+.btn-end{
+  width:100%;background:var(--accent2);color:#fff;border:none;border-radius:9px;
+  font-family:'Bebas Neue',cursive;font-size:1.05rem;letter-spacing:3px;
+  padding:13px;cursor:pointer;transition:all 0.2s;
+  box-shadow:0 3px 14px rgba(255,87,51,0.25);margin-top:6px;
+}
+.btn-end:hover{background:#e04020;}
+.btn-end:active{transform:scale(0.98);}
+
+/* ── QUICK PICKS DROPDOWN ── */
+.qp-wrap{position:relative;margin-bottom:10px;}
+.qp-trigger{
+  width:100%;display:flex;align-items:center;justify-content:space-between;
+  background:var(--surf2);border:1px solid var(--border);border-radius:9px;
+  padding:9px 12px;cursor:pointer;transition:border-color 0.15s;
+  font-family:inherit;color:var(--text2);font-size:0.8rem;
+}
+.qp-trigger:hover{border-color:var(--accent);}
+.qp-arrow{font-size:0.7rem;transition:transform 0.2s;color:var(--muted);}
+.qp-wrap.open .qp-arrow{transform:rotate(180deg);}
+.qp-wrap.open .qp-trigger{border-color:var(--accent);border-bottom-left-radius:0;border-bottom-right-radius:0;}
+.qp-dropdown{
+  display:none;position:absolute;top:100%;left:0;right:0;z-index:999;
+  background:var(--surf2);border:1px solid var(--accent);border-top:none;
+  border-bottom-left-radius:9px;border-bottom-right-radius:9px;
+  max-height:240px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.4);
+}
+.qp-wrap.open .qp-dropdown{display:block;animation:slideDown 0.18s ease;}
+.qp-search{position:sticky;top:0;padding:8px;background:var(--surf2);border-bottom:1px solid var(--border);}
+.qp-search input{width:100%;background:var(--surf3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.8rem;padding:7px 10px;outline:none;font-family:inherit;}
+.qp-search input:focus{border-color:var(--accent);}
+.qp-search input::placeholder{color:var(--muted);}
+.qp-list{padding:4px;}
+.qp-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:7px;cursor:pointer;transition:background 0.12s;font-size:0.82rem;}
+.qp-item:hover{background:var(--adim);}
+.qp-item-emoji{font-size:1.1rem;flex-shrink:0;}
+.qp-item-name{flex:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.qp-item-val{font-family:'Bebas Neue',cursive;font-size:0.95rem;color:var(--accent);flex-shrink:0;}
+.qp-empty{padding:16px;text-align:center;color:var(--muted);font-size:0.75rem;letter-spacing:1px;}
+
+/* ── RUN LIST ── */
+.sec-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.sec-title{font-family:'Bebas Neue',cursive;font-size:0.88rem;letter-spacing:2.5px;color:var(--muted);}
+.txt-btn{font-size:0.62rem;color:var(--muted);background:none;border:1px solid var(--border);border-radius:5px;padding:3px 8px;cursor:pointer;letter-spacing:1px;font-family:inherit;transition:all 0.12s;}
+.txt-btn:hover{color:var(--red);border-color:var(--red);}
+
+.run-item{
+  display:flex;align-items:center;background:var(--surf);border:1px solid var(--border);
+  border-left:3px solid var(--accent);border-radius:10px;padding:11px 12px;margin-bottom:7px;
+  transition:border-color 0.15s;
+}
+.re{font-size:1.3rem;margin-right:10px;flex-shrink:0;}
+.ri{flex:1;min-width:0;}
+.rn{font-weight:600;font-size:0.87rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rc{font-size:0.62rem;color:var(--text2);margin-top:2px;}
+.rv{font-family:'Bebas Neue',cursive;font-size:1.2rem;color:var(--accent);letter-spacing:1px;margin-right:8px;flex-shrink:0;}
+.del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.85rem;padding:4px;line-height:1;flex-shrink:0;transition:color 0.12s;}
+.del-btn:active{color:var(--red);}
+
+.empty-run{text-align:center;padding:26px 12px;color:var(--muted);font-size:0.72rem;letter-spacing:1px;border:1px dashed var(--border);border-radius:10px;animation:fadeIn 0.3s ease;}
+.ei{font-size:1.8rem;display:block;margin-bottom:6px;}
+
+/* ── GARAGE ── */
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+.stat-box{background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;animation:fadeUp 0.3s ease both;}
+.stat-v{font-family:'Bebas Neue',cursive;font-size:1.5rem;color:var(--accent);line-height:1;}
+.stat-l{font-size:0.55rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px;font-weight:600;}
+
+.garage-row{
+  display:flex;align-items:center;background:var(--surf);border:1px solid var(--border);
+  border-radius:10px;padding:12px 13px;margin-bottom:7px;
+  cursor:pointer;text-decoration:none;color:inherit;
+  transition:border-color 0.15s,transform 0.15s;animation:fadeUp 0.25s ease both;
+}
+.garage-row:hover{border-color:var(--accent);transform:translateX(3px);}
+.g-rank{font-family:'Bebas Neue',cursive;font-size:0.82rem;color:var(--muted);width:22px;flex-shrink:0;}
+.g-emoji{font-size:1.2rem;margin-right:9px;flex-shrink:0;}
+.g-info{flex:1;min-width:0;}
+.g-name{font-weight:600;font-size:0.87rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.g-meta{font-size:0.6rem;color:var(--text2);margin-top:2px;}
+.g-val{font-family:'Bebas Neue',cursive;font-size:1.2rem;color:var(--accent);letter-spacing:1px;margin-right:5px;flex-shrink:0;}
+.g-arrow{font-size:0.7rem;color:var(--muted);flex-shrink:0;margin-right:4px;}
+.g-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.82rem;padding:4px 2px 4px 4px;line-height:1;flex-shrink:0;transition:color 0.12s;}
+.g-del:active{color:var(--red);}
+.empty-garage{text-align:center;padding:40px 12px;color:var(--muted);font-size:0.72rem;letter-spacing:1px;border:1px dashed var(--border);border-radius:10px;}
+
+/* ── HISTORY ── */
+.record-card{background:var(--surf);border:1px solid var(--accent);border-radius:13px;padding:14px 16px;margin-bottom:12px;animation:glow 3s ease infinite,fadeUp 0.3s ease both;}
+.rec-lbl{font-size:0.6rem;color:var(--accent);letter-spacing:2px;margin-bottom:4px;font-weight:600;}
+.rec-val{font-family:'Bebas Neue',cursive;font-size:2.6rem;color:var(--accent);letter-spacing:2px;line-height:1;}
+.rec-sub{font-size:0.65rem;color:var(--text2);margin-top:4px;}
+
+.hist-item{background:var(--surf);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;transition:border-color 0.15s;animation:fadeUp 0.25s ease both;}
+.hist-item.open{border-color:var(--accent);}
+.hist-item.is-spot{border-left:3px solid var(--accent2);}
+.hist-hdr{display:flex;align-items:center;padding:12px 14px;gap:10px;cursor:pointer;transition:background 0.15s;}
+.hist-hdr:hover{background:rgba(255,255,255,0.02);}
+.hist-num{font-family:'Bebas Neue',cursive;font-size:0.78rem;color:var(--muted);letter-spacing:2px;min-width:38px;flex-shrink:0;}
+.hist-num.spot-num{color:var(--accent2);}
+.hist-info{flex:1;}
+.hist-date{font-size:0.62rem;color:var(--text2);margin-bottom:1px;}
+.hist-total{font-family:'Bebas Neue',cursive;font-size:1.4rem;letter-spacing:1px;line-height:1;}
+.hist-count{font-size:0.6rem;color:var(--muted);margin-top:2px;}
+.hist-rec{background:var(--accent);color:#0a0a0a;font-size:0.58rem;font-weight:700;letter-spacing:1.5px;padding:2px 7px;border-radius:20px;flex-shrink:0;}
+.hist-chev{color:var(--muted);font-size:0.68rem;transition:transform 0.2s;flex-shrink:0;}
+.hist-item.open .hist-chev{transform:rotate(180deg);}
+.hist-cars{display:none;border-top:1px solid var(--border);}
+.hist-item.open .hist-cars{display:block;animation:slideDown 0.2s ease;}
+.hc-row{display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border);cursor:pointer;text-decoration:none;color:inherit;transition:background 0.12s;}
+.hc-row:last-child{border-bottom:none;}
+.hc-row:hover{background:var(--adim);}
+.hc-emoji{font-size:1rem;margin-right:8px;flex-shrink:0;}
+.hc-name{flex:1;font-size:0.83rem;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.hc-val{font-size:0.75rem;color:var(--accent);font-weight:600;margin-right:4px;flex-shrink:0;}
+.hc-arrow{font-size:0.6rem;color:var(--muted);flex-shrink:0;}
+.no-history{text-align:center;padding:40px 12px;color:var(--muted);font-size:0.72rem;letter-spacing:1px;border:1px dashed var(--border);border-radius:10px;}
+
+/* ── INSTALL BANNER ── */
+.install-banner{background:var(--adim);border:1px solid var(--accent);border-radius:10px;padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;animation:fadeUp 0.4s ease;}
+.install-text{flex:1;font-size:0.72rem;color:var(--text2);line-height:1.45;}
+.install-text strong{color:var(--text);}
+.install-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:2px;line-height:1;}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 12px);
+  left:50%;transform:translateX(-50%) translateY(8px);
+  background:var(--accent);color:#0a0a0a;font-family:'Bebas Neue',cursive;
+  font-size:0.88rem;letter-spacing:2px;padding:8px 20px;border-radius:8px;
+  opacity:0;pointer-events:none;transition:all 0.25s;z-index:999;
+  white-space:nowrap;max-width:90vw;box-shadow:0 4px 16px rgba(245,200,66,0.3);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+@media(min-width:800px){
+  .toast{bottom:20px;left:calc(88px + 50%);}
+}
+
+/* ── NOTES PAGE ── */
+.notes-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px; gap: 12px;
+}
+.notes-sub { font-size: 0.62rem; color: var(--muted); letter-spacing: 1px; margin-top: 2px; }
+
+.mic-btn {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; background: var(--surf2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 10px 14px; cursor: pointer;
+  transition: all 0.2s; flex-shrink: 0; font-family: inherit;
+}
+.mic-btn:hover { border-color: var(--accent); }
+.mic-btn.active {
+  background: rgba(248,113,113,0.1); border-color: var(--red);
+  animation: micPulse 1.2s ease-in-out infinite;
+}
+@keyframes micPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(248,113,113,0.4); }
+  50%      { box-shadow: 0 0 0 10px rgba(248,113,113,0); }
+}
+.mic-icon { font-size: 1.4rem; line-height: 1; }
+.mic-lbl  { font-size: 0.52rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+.mic-btn.active .mic-lbl { color: var(--red); }
+
+.notes-area {
+  width: 100%; height: calc(100vh - 200px);
+  background: var(--surf); border: 1px solid var(--border);
+  border-radius: 13px; padding: 16px; color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 0.92rem;
+  line-height: 1.75; resize: none; outline: none;
+  transition: border-color 0.15s;
+}
+.notes-area:focus { border-color: var(--accent); }
+.notes-area.listening { border-color: var(--red); }
+.notes-area::placeholder { color: var(--muted); }
+@media(min-width:800px){
+  #page-voice { overflow-y: hidden; padding: 28px 36px; display: flex; flex-direction: column; }
+  .notes-area { flex: 1; height: auto; }
+}
+/* ── AUTH OVERLAY ── */
+.auth-overlay{
+  position:fixed;inset:0;z-index:9999;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:18px;padding:32px;
+}
+.auth-logo{font-family:'Bebas Neue',cursive;font-size:3rem;letter-spacing:4px;color:var(--accent);line-height:1;}
+.auth-logo span{color:var(--text);}
+.auth-sub{font-size:0.75rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;text-align:center;}
+.auth-card{background:var(--surf);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:320px;display:flex;flex-direction:column;gap:14px;}
+.auth-title{font-size:0.65rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;text-align:center;}
+.btn-google{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  background:#fff;color:#222;border:none;border-radius:9px;
+  font-family:'DM Sans',-apple-system,sans-serif;font-size:0.92rem;font-weight:600;
+  padding:13px 20px;cursor:pointer;transition:all 0.15s;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+}
+.btn-google:hover{background:#f0f0f0;}
+.btn-google:active{transform:scale(0.97);}
+.auth-note{font-size:0.6rem;color:var(--muted);text-align:center;line-height:1.5;}
+.user-pill{
+  display:flex;align-items:center;gap:7px;
+  background:var(--surf2);border:1px solid var(--border);border-radius:20px;
+  padding:4px 10px 4px 5px;cursor:pointer;transition:border-color 0.15s;
+  font-size:0.65rem;color:var(--text2);
+}
+.user-pill:hover{border-color:var(--accent);}
+.user-avatar{width:22px;height:22px;border-radius:50%;object-fit:cover;}
+.user-avatar-ph{width:22px;height:22px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;color:#0a0a0a;}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background 0.3s;}
+.sync-dot.ok{background:var(--green);}
+.sync-dot.syncing{background:var(--accent);animation:pulse 1s ease infinite;}
+</style>
+</head>
+<body>
+
+<!-- AUTH OVERLAY -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-logo">Car<span>Spotter</span></div>
+  <div class="auth-sub">Sign in to sync across devices</div>
+  <div class="auth-card">
+    <div class="auth-title">Welcome back</div>
+    <button class="btn-google" onclick="signInGoogle()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" height="20" alt="">
+      Continue with Google
+    </button>
+    <div class="auth-note">Your spots, runs &amp; garage sync automatically.<br>Works on any device you sign into.</div>
+  </div>
+</div>
+
+<div class="app-shell" id="appShell" style="display:none">
+
+  <!-- mobile header -->
+  <header class="app-header">
+    <div class="logo">Car<span>Spotter</span></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="hdr-r">
+        <div class="hdr-lbl">Best Run</div>
+        <div class="hdr-val" id="headerBest">—</div>
+      </div>
+      <div id="userPillWrap"></div>
+    </div>
+  </header>
+
+  <div class="pages">
+
+    <!-- SPOT PAGE -->
+    <div class="page active" id="page-spot">
+      <div id="installBanner" style="display:none" class="install-banner">
+        <div class="install-text"><strong>Install as app:</strong> Share → Add to Home Screen (iPhone) · Install icon in Chrome (PC)</div>
+        <button class="install-close" onclick="dismissInstall()">✕</button>
+      </div>
+
+      <!-- desktop two cols wrapper -->
+      <div class="dsk-cols" style="height:100%">
+        <div class="dsk-col">
+
+          <div class="score-banner">
+            <div>
+              <div class="s-lbl">This Run</div>
+              <div class="s-num" id="runTotal">$0</div>
+              <div class="s-sub" id="runCount">0 cars</div>
+            </div>
+            <div class="vs">VS</div>
+            <div style="text-align:right">
+              <div class="s-lbl">Best</div>
+              <div class="b-num" id="bestTotal">—</div>
+              <div class="beat tied" id="beatMsg">No record yet</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">🚗 LOG A CAR</div>
+            <div class="form-grid">
+              <div class="ff">
+                <label>Make / Model</label>
+                <input id="carName" type="text" placeholder="Ferrari 488" autocomplete="off">
+              </div>
+              <div class="ff">
+                <label>Value ($)</label>
+                <input id="carValue" type="number" placeholder="280000" min="0" inputmode="numeric">
+              </div>
+              <div class="ff">
+                <label>Color</label>
+                <input id="carColor" type="text" placeholder="Rosso Corsa" autocomplete="off">
+              </div>
+              <div class="ff">
+                <label>Type</label>
+                <select id="carType">
+                  <option value="🏎️">🏎️ Supercar</option>
+                  <option value="🚗">🚗 Sports Car</option>
+                  <option value="🐎">🐎 Muscle Car</option>
+                  <option value="🏁">🏁 Track Car</option>
+                  <option value="🔥">🔥 Exotic</option>
+                  <option value="⚡">⚡ EV</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Quick Picks -->
+            <div class="qp-wrap" id="qpWrap" style="display:none">
+              <button class="qp-trigger" onclick="toggleQP()">
+                <span>⚡ QUICK PICKS</span>
+                <span class="qp-arrow" id="qpArrow">▼</span>
+              </button>
+              <div class="qp-dropdown">
+                <div class="qp-search">
+                  <input type="text" id="qpSearch" placeholder="Search..." oninput="renderQPList(this.value)" autocomplete="off">
+                </div>
+                <div class="qp-list" id="qpList"></div>
+              </div>
+            </div>
+
+            <!-- Two action buttons: run vs spotted -->
+            <div class="btn-row">
+              <button class="btn-run" onclick="logRun()">+ TO RUN</button>
+              <button class="btn-spot" onclick="logSpotted()">👁 SPOTTED</button>
+            </div>
+            <div style="font-size:0.6rem;color:var(--muted);text-align:center;letter-spacing:1px;margin-top:-4px;">
+              SPOTTED → goes straight to garage &amp; history
+            </div>
+          </div>
+
+        </div><!-- /dsk-col left -->
+
+        <div class="dsk-col">
+          <div class="sec-row">
+            <div class="sec-title">CURRENT RUN</div>
+            <button class="txt-btn" onclick="clearRun()">Clear</button>
+          </div>
+          <div id="runList">
+            <div class="empty-run"><span class="ei">🛣️</span>Add cars to your run</div>
+          </div>
+          <div id="endWrap" style="display:none">
+            <button class="btn-end" onclick="endRun()">🏁 END RUN & SAVE</button>
+          </div>
+        </div><!-- /dsk-col right -->
+
+      </div><!-- /dsk-cols -->
+    </div><!-- /page-spot -->
+
+    <!-- GARAGE PAGE -->
+    <div class="page" id="page-garage">
+      <div class="sec-row" style="margin-bottom:10px">
+        <div class="sec-title">ALL SPOTTED</div>
+        <button class="txt-btn" id="sortBtn" onclick="cycleSort()">Value ↓</button>
+      </div>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-v" id="gCars">0</div><div class="stat-l">Cars</div></div>
+        <div class="stat-box"><div class="stat-v" id="gTotal">$0</div><div class="stat-l">Total</div></div>
+        <div class="stat-box"><div class="stat-v" id="gAvg">—</div><div class="stat-l">Avg</div></div>
+      </div>
+      <div id="garageList">
+        <div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">🏎️</span>No cars yet!</div>
+      </div>
+    </div>
+
+    <!-- HISTORY PAGE -->
+    <div class="page" id="page-history">
+      <div id="recordWrap" style="display:none" class="record-card">
+        <div class="rec-lbl">🏆 ALL-TIME BEST RUN</div>
+        <div class="rec-val" id="recordVal">—</div>
+        <div class="rec-sub" id="recordSub"></div>
+      </div>
+      <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div style="font-size:0.7rem;color:var(--text2);line-height:1.5;"><strong style="color:var(--text)">📂 Import backup</strong><br>Restore from a carspotter-backup.json file</div>
+        <label style="background:var(--accent);color:#0a0a0a;border:none;border-radius:7px;font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:1.5px;padding:8px 13px;cursor:pointer;flex-shrink:0;">
+          IMPORT
+          <input type="file" accept=".json" style="display:none" onchange="importFromFile(this)">
+        </label>
+      </div>
+      <div class="sec-title" style="margin-bottom:8px">HISTORY</div>
+      <div id="histList">
+        <div class="no-history"><span style="font-size:1.8rem;display:block;margin-bottom:8px">📋</span>Nothing saved yet</div>
+      </div>
+    </div>
+
+
+    <!-- NOTES PAGE -->
+    <div class="page" id="page-voice">
+      <div class="notes-header">
+        <div>
+          <div class="sec-title">📝 NOTES</div>
+          <div class="notes-sub">Type or speak — saves automatically</div>
+        </div>
+        <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+          <span class="mic-icon">🎤</span>
+          <span class="mic-lbl" id="micLbl">Tap to speak</span>
+        </button>
+      </div>
+      <textarea id="notesArea" class="notes-area" placeholder="Ferrari 488 red&#10;Yellow Lambo&#10;Blue Porsche GT3 992&#10;&#10;Just type or hit the mic — nothing happens until you&#39;re ready..."></textarea>
+    </div>
+  </div><!-- /pages -->
+
+  <nav class="bottom-nav" id="bottomNav">
+    <!-- desktop logo injected by JS -->
+    <button class="nav-btn active" onclick="goTo('spot')" id="nav-spot">
+      <span class="nav-icon">🛵</span>
+      <span class="nav-label">Spot</span>
+    </button>
+    <button class="nav-btn" onclick="goTo('garage')" id="nav-garage">
+      <span class="nav-icon">🏎️</span>
+      <span class="nav-label">Garage</span>
+    </button>
+    <button class="nav-btn" onclick="goTo('history')" id="nav-history">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">History</span>
+    </button>
+    <button class="nav-btn" onclick="goTo('voice')" id="nav-voice">
+      <span class="nav-icon">📝</span>
+      <span class="nav-label">Notes</span>
+    </button>
+  </nav>
+
+</div><!-- /app-shell -->
+
+<div class="road-deco"><div class="rdl"></div><div class="rdl"></div><div class="rdl"></div></div>
+<div class="scooter-deco">🛵</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── FIREBASE AUTH & SYNC ──
+let currentUser = null;
+let syncUnsub   = null;
+let syncTimer   = null;
+let _lastSave   = 0;
+
+function signInGoogle() {
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    .catch(e => alert('Sign-in error: ' + e.message));
+}
+function signOutUser() {
+  if (!confirm('Sign out?')) return;
+  if (syncUnsub) { syncUnsub(); syncUnsub = null; }
+  auth.signOut();
+}
+
+function importLocalData() {
+  const localRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
+  const localCurrent = JSON.parse(localStorage.getItem('cs_current') || '[]');
+  const localQP = JSON.parse(localStorage.getItem('cs_qp') || '[]');
+  const localNotes = localStorage.getItem('cs_notes') || '';
+
+  if (!localRuns.length && !localCurrent.length && !localQP.length) {
+    alert('No local data found on this device to import.');
+    return;
+  }
+
+  // Merge: combine local runs with cloud runs, avoiding duplicates by id
+  const existingIds = new Set(allRuns.map(r => r.id));
+  const newRuns = localRuns.filter(r => !existingIds.has(r.id));
+  allRuns = [...newRuns, ...allRuns];
+
+  // Merge quick picks
+  localQP.forEach(car => {
+    if (!quickPicks.find(q => q.name.toLowerCase() === car.name.toLowerCase())) {
+      quickPicks.push(car);
+    }
+  });
+
+  // Merge current run if cloud has none
+  if (!currentRun.length && localCurrent.length) currentRun = localCurrent;
+
+  // Merge notes
+  if (!localStorage.getItem('cs_notes') && localNotes) {
+    localStorage.setItem('cs_notes', localNotes);
+    const a = document.getElementById('notesArea');
+    if (a) a.value = localNotes;
+  }
+
+  saveToCloud();
+  renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
+  document.getElementById('importBtn')?.remove();
+  showToast('✅ Imported ' + newRuns.length + ' runs from this device!');
+}
+
+auth.onAuthStateChanged(async user => {
+  currentUser = user;
+  if (user) {
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('appShell').style.display    = 'flex';
+    renderUserPill();
+    await loadFromCloud();
+    subscribeCloud();
+    // Show import button if this device has local data
+    const localRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
+    if (localRuns.length > 0) showImportBanner(localRuns.length);
+  } else {
+    document.getElementById('authOverlay').style.display = 'flex';
+    document.getElementById('appShell').style.display    = 'none';
+    document.getElementById('userPillWrap').innerHTML    = '';
+    if (syncUnsub) { syncUnsub(); syncUnsub = null; }
+  }
+});
+
+function showImportBanner(count) {
+  if (document.getElementById('importBtn')) return;
+  const div = document.createElement('div');
+  div.id = 'importBtn';
+  div.style.cssText = 'background:var(--adim);border:1px solid var(--accent);border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;animation:fadeUp 0.3s ease;';
+  div.innerHTML = `
+    <div style="font-size:0.72rem;color:var(--text2);line-height:1.45;">
+      <strong style="color:var(--text)">📦 Found ${count} runs on this device</strong><br>Import to sync them to your account?
+    </div>
+    <div style="display:flex;gap:6px;flex-shrink:0;">
+      <button onclick="importLocalData()" style="background:var(--accent);color:#0a0a0a;border:none;border-radius:7px;font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:1.5px;padding:7px 12px;cursor:pointer;">IMPORT</button>
+      <button onclick="document.getElementById('importBtn').remove()" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:7px;font-size:0.75rem;padding:7px 10px;cursor:pointer;">✕</button>
+    </div>`;
+  // Insert at top of spot page
+  const spotPage = document.getElementById('page-spot');
+  const dskCols = spotPage.querySelector('.dsk-cols');
+  const firstCol = dskCols.querySelector('.dsk-col');
+  firstCol.insertBefore(div, firstCol.firstChild);
+}
+
+function renderUserPill() {
+  if (!currentUser) return;
+  const name  = (currentUser.displayName || 'You').split(' ')[0];
+  const photo = currentUser.photoURL;
+  const avatar = photo
+    ? `<img class="user-avatar" src="${photo}" referrerpolicy="no-referrer">`
+    : `<div class="user-avatar-ph">${name[0]}</div>`;
+  document.getElementById('userPillWrap').innerHTML =
+    `<div class="user-pill" onclick="signOutUser()">
+       ${avatar}<span>${name}</span><span class="sync-dot" id="syncDot"></span>
+     </div>`;
+}
+
+function setSyncDot(state) {
+  const d = document.getElementById('syncDot');
+  if (d) d.className = 'sync-dot ' + state;
+}
+
+async function loadFromCloud() {
+  if (!currentUser) return;
+  setSyncDot('syncing');
+  try {
+    const snap = await db.collection('users').doc(currentUser.uid).get();
+    if (snap.exists) {
+      const d = snap.data();
+      if (d.currentRun) currentRun = d.currentRun;
+      if (d.allRuns)    allRuns    = d.allRuns;
+      if (d.quickPicks) quickPicks = d.quickPicks;
+      if (d.notes != null) {
+        localStorage.setItem('cs_notes', d.notes);
+        const a = document.getElementById('notesArea');
+        if (a) a.value = d.notes;
+      }
+      localStorage.setItem('cs_current', JSON.stringify(currentRun));
+      localStorage.setItem('cs_runs',    JSON.stringify(allRuns));
+      localStorage.setItem('cs_qp',      JSON.stringify(quickPicks));
+    }
+    setSyncDot('ok');
+  } catch(e) { setSyncDot(''); console.error(e); }
+  renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
+  if (currentRun.length > 0)
+    setTimeout(() => showToast('▶ Run resumed — ' + currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '') + ' restored!'), 700);
+}
+
+function subscribeCloud() {
+  if (!currentUser) return;
+  syncUnsub = db.collection('users').doc(currentUser.uid).onSnapshot(snap => {
+    if (!snap.exists) return;
+    const d = snap.data();
+    if (d.updatedAt && d.updatedAt > _lastSave) {
+      if (d.currentRun) currentRun = d.currentRun;
+      if (d.allRuns)    allRuns    = d.allRuns;
+      if (d.quickPicks) quickPicks = d.quickPicks;
+      if (d.notes != null) {
+        localStorage.setItem('cs_notes', d.notes);
+        const a = document.getElementById('notesArea');
+        if (a && document.activeElement !== a) a.value = d.notes;
+      }
+      localStorage.setItem('cs_current', JSON.stringify(currentRun));
+      localStorage.setItem('cs_runs',    JSON.stringify(allRuns));
+      localStorage.setItem('cs_qp',      JSON.stringify(quickPicks));
+      renderQPTrigger(); renderSpot();
+      const pg = document.querySelector('.page.active')?.id;
+      if (pg === 'page-garage')  renderGarage();
+      if (pg === 'page-history') renderHistory();
+    }
+  });
+}
+
+function saveToCloud() {
+  if (!currentUser) return;
+  setSyncDot('syncing');
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    _lastSave = Date.now();
+    db.collection('users').doc(currentUser.uid).set({
+      currentRun, allRuns, quickPicks,
+      notes: localStorage.getItem('cs_notes') || '',
+      updatedAt: _lastSave
+    }).then(() => setSyncDot('ok')).catch(() => setSyncDot(''));
+  }, 1500);
+}
+
+// ── STATE ──
+let currentRun = JSON.parse(localStorage.getItem('cs_current') || '[]');
+let allRuns    = JSON.parse(localStorage.getItem('cs_runs')    || '[]');
+let quickPicks = JSON.parse(localStorage.getItem('cs_qp')      || '[]');
+let sortMode   = 'desc';
+let qpOpen     = false;
+
+// ── DESKTOP SIDEBAR LOGO ──
+function injectDesktopLogo() {
+  if (window.innerWidth < 800) return;
+  const nav = document.getElementById('bottomNav');
+  if (nav.querySelector('.dsk-logo')) return;
+  const div = document.createElement('div');
+  div.className = 'dsk-logo';
+  div.innerHTML = `<div class="logo">Car<span>Spotter</span></div><div class="dsk-best"><div class="dsk-best-lbl">Best</div><div class="dsk-best-v" id="dskBest">—</div></div>`;
+  nav.insertBefore(div, nav.firstChild);
+}
+injectDesktopLogo();
+window.addEventListener('resize', injectDesktopLogo);
+
+// ── INSTALL ──
+function showInstall() {
+  if (localStorage.getItem('cs_install_dismissed')) return;
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  if (!standalone) document.getElementById('installBanner').style.display = 'flex';
+}
+function dismissInstall() {
+  document.getElementById('installBanner').style.display = 'none';
+  localStorage.setItem('cs_install_dismissed','1');
+}
+setTimeout(showInstall, 1500);
+
+// ── NAV ──
+function goTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.getElementById('nav-'+page).classList.add('active');
+  closeQP();
+  if (page==='garage')  renderGarage();
+  if (page==='history') renderHistory();
+}
+
+// ── FORMAT ──
+function fmt(n) {
+  if (n>=1000000) return '$'+(n/1000000).toFixed(1)+'M';
+  if (n>=1000)    return '$'+Math.round(n/1000)+'K';
+  return '$'+Math.round(n).toLocaleString();
+}
+function fmtFull(n) { return '$'+Math.round(n).toLocaleString(); }
+function carUrl(name) { return 'https://www.google.com/search?q='+encodeURIComponent(name+' car specs price'); }
+
+// ── QUICK PICKS ──
+function saveToQP(car) {
+  quickPicks = quickPicks.filter(q => q.name.toLowerCase() !== car.name.toLowerCase());
+  quickPicks.unshift({ name:car.name, value:car.value, color:car.color, type:car.type });
+  localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
+  saveToCloud();
+}
+
+function toggleQP() {
+  qpOpen = !qpOpen;
+  document.getElementById('qpWrap').classList.toggle('open', qpOpen);
+  if (qpOpen) {
+    renderQPList('');
+    setTimeout(() => document.getElementById('qpSearch').focus(), 80);
+  }
+}
+function closeQP() {
+  qpOpen = false;
+  document.getElementById('qpWrap').classList.remove('open');
+}
+function renderQPList(query) {
+  const el = document.getElementById('qpList');
+  const q  = query.toLowerCase().trim();
+  const list = q ? quickPicks.filter(c => c.name.toLowerCase().includes(q)) : quickPicks;
+  if (!list.length) { el.innerHTML = '<div class="qp-empty">'+(q?'No matches':'No picks yet — log some cars!')+'</div>'; return; }
+  el.innerHTML = '';
+  list.forEach(c => {
+    const d = document.createElement('div');
+    d.className = 'qp-item';
+    d.innerHTML = `<span class="qp-item-emoji">${c.type}</span><span class="qp-item-name">${c.name}</span><span class="qp-item-val">${fmtFull(c.value)}</span>`;
+    d.onclick = () => {
+      document.getElementById('carName').value  = c.name;
+      document.getElementById('carValue').value = c.value;
+      document.getElementById('carColor').value = c.color||'';
+      document.getElementById('carType').value  = c.type;
+      closeQP();
+      document.getElementById('qpSearch').value = '';
+    };
+    el.appendChild(d);
+  });
+}
+function renderQPTrigger() {
+  document.getElementById('qpWrap').style.display = quickPicks.length ? 'block' : 'none';
+}
+document.addEventListener('click', e => {
+  if (qpOpen && !document.getElementById('qpWrap').contains(e.target)) closeQP();
+});
+
+// ── GET INPUTS ──
+function getInputs() {
+  return {
+    name:  document.getElementById('carName').value.trim(),
+    value: parseFloat(document.getElementById('carValue').value),
+    color: document.getElementById('carColor').value.trim(),
+    type:  document.getElementById('carType').value,
+  };
+}
+function clearInputs() {
+  document.getElementById('carName').value  = '';
+  document.getElementById('carValue').value = '';
+  document.getElementById('carColor').value = '';
+}
+
+// ── LOG TO RUN ──
+// Adds to current run list only. Does NOT go to history until you End Run.
+function logRun() {
+  const { name, value, color, type } = getInputs();
+  if (!name)               { showToast('Enter a car name!');    return; }
+  if (isNaN(value)||value<0){ showToast('Enter a valid value!'); return; }
+
+  const car = { name, value, color, type, ts: Date.now() };
+  currentRun.push(car);
+  saveToQP(car);
+  saveCurrentRun();
+  clearInputs();
+  renderQPTrigger();
+  renderSpot();
+
+  const el = document.getElementById('runTotal');
+  el.style.animation = 'none';
+  requestAnimationFrame(() => { el.style.animation = 'numPop 0.3s ease'; });
+  showToast(type+' '+name+' added to run!');
+}
+
+// ── LOG AS SPOTTED ──
+// Saves DIRECTLY to garage & history as a standalone entry. Never touches run list.
+function logSpotted() {
+  const { name, value, color, type } = getInputs();
+  if (!name)               { showToast('Enter a car name!');    return; }
+  if (isNaN(value)||value<0){ showToast('Enter a valid value!'); return; }
+
+  const car = { name, value, color, type, ts: Date.now() };
+  saveToQP(car);
+
+  // Save as a standalone spotted entry in history
+  const entry = {
+    id:      Date.now(),
+    date:    new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
+    total:   value,
+    spotted: true,   // flag — NOT a run
+    cars:    [car]
+  };
+  allRuns.unshift(entry);
+  localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+  saveToCloud();
+
+  clearInputs();
+  renderQPTrigger();
+  showToast(type+' '+name+' spotted & saved to garage!');
+}
+
+// ── REMOVE FROM RUN ──
+function removeCar(i) {
+  currentRun.splice(i,1);
+  saveCurrentRun();
+  renderSpot();
+}
+
+function clearRun() {
+  if (!currentRun.length) return;
+  if (!confirm('Clear this run?')) return;
+  currentRun = [];
+  saveCurrentRun();
+  renderSpot();
+}
+
+function saveCurrentRun() {
+  localStorage.setItem('cs_current', JSON.stringify(currentRun));
+  saveToCloud();
+}
+
+// ── END RUN ──
+// Saves current run (run-mode cars only) to history as a proper run with a total.
+function endRun() {
+  if (!currentRun.length) { showToast('No cars in run!'); return; }
+  const total = currentRun.reduce((s,c)=>s+c.value,0);
+  [...currentRun].reverse().forEach(c => saveToQP(c));
+  const run = {
+    id:      Date.now(),
+    date:    new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
+    total,
+    spotted: false,
+    cars:    JSON.parse(JSON.stringify(currentRun))
+  };
+  allRuns.unshift(run);
+  localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+  saveToCloud();
+  const isRec  = total >= best;
+  showToast(isRec ? '🏆 NEW RECORD: '+fmtFull(total)+'!' : 'Run saved! '+fmtFull(total));
+  currentRun = [];
+  saveCurrentRun();
+  renderQPTrigger();
+  renderSpot();
+}
+
+// ── BEST (runs only, not spotted) ──
+function getBest() {
+  const runs = allRuns.filter(r => !r.spotted);
+  if (!runs.length) return 0;
+  return Math.max(...runs.map(r=>r.total));
+}
+
+// ── RENDER SPOT PAGE ──
+function renderSpot() {
+  const total = currentRun.reduce((s,c)=>s+c.value,0);
+  const best  = getBest();
+
+  document.getElementById('runTotal').textContent = fmtFull(total);
+  document.getElementById('runCount').textContent = currentRun.length+' car'+(currentRun.length!==1?'s':'');
+
+  if (best>0) {
+    document.getElementById('bestTotal').textContent = fmtFull(best);
+    document.getElementById('headerBest').textContent = fmt(best);
+    const db = document.getElementById('dskBest');
+    if (db) db.textContent = fmt(best);
+    const diff = total-best;
+    const m = document.getElementById('beatMsg');
+    if (diff>0)      { m.textContent='▲ '+fmtFull(diff)+' ahead!'; m.className='beat beating'; }
+    else if (diff<0) { m.textContent='▼ '+fmtFull(Math.abs(diff))+' to beat'; m.className='beat behind'; }
+    else             { m.textContent='⚡ Tied!'; m.className='beat tied'; }
+  } else {
+    document.getElementById('bestTotal').textContent='—';
+    document.getElementById('headerBest').textContent='—';
+    document.getElementById('beatMsg').textContent='No record yet';
+    document.getElementById('beatMsg').className='beat tied';
+  }
+
+  const el = document.getElementById('runList');
+  if (!currentRun.length) {
+    el.innerHTML='<div class="empty-run"><span class="ei">🛣️</span>Add cars to your run</div>';
+  } else {
+    el.innerHTML='';
+    [...currentRun].reverse().forEach((car,ri) => {
+      const i = currentRun.length-1-ri;
+      const d = document.createElement('div');
+      d.className = 'run-item';
+      d.style.animationDelay = (ri*0.04)+'s';
+      d.innerHTML = `<div class="re">${car.type}</div>
+        <div class="ri">
+          <div class="rn">${car.name}</div>
+          ${car.color?`<div class="rc">${car.color}</div>`:''}
+        </div>
+        <div class="rv">${fmtFull(car.value)}</div>
+        <button class="del-btn" onclick="removeCar(${i})">✕</button>`;
+      el.appendChild(d);
+    });
+  }
+  document.getElementById('endWrap').style.display = currentRun.length ? 'block' : 'none';
+}
+
+// ── GARAGE ──
+function getAllCars() {
+  const seen = new Map();
+  [...allRuns].reverse().forEach(run => {
+    run.cars.forEach(car => {
+      const label = run.spotted ? 'Spotted · '+run.date : 'Run · '+run.date;
+      seen.set(car.name.toLowerCase(), {...car, runDate: label});
+    });
+  });
+  currentRun.forEach(car => seen.set(car.name.toLowerCase(), {...car, runDate:'Current Run'}));
+  return Array.from(seen.values());
+}
+
+function cycleSort() {
+  const modes  = ['desc','asc','alpha'];
+  const labels = {desc:'Value ↓',asc:'Value ↑',alpha:'A–Z'};
+  sortMode = modes[(modes.indexOf(sortMode)+1)%modes.length];
+  document.getElementById('sortBtn').textContent = labels[sortMode];
+  renderGarage();
+}
+function sorted(cars) {
+  const c = [...cars];
+  if (sortMode==='desc')  return c.sort((a,b)=>b.value-a.value);
+  if (sortMode==='asc')   return c.sort((a,b)=>a.value-b.value);
+  if (sortMode==='alpha') return c.sort((a,b)=>a.name.localeCompare(b.name));
+  return c;
+}
+
+function deleteCarEverywhere(name) {
+  if (!confirm('Remove "'+name+'" from everything?')) return;
+  const key = name.toLowerCase();
+  allRuns = allRuns.map(run => ({
+    ...run,
+    cars:  run.cars.filter(c=>c.name.toLowerCase()!==key),
+    total: run.cars.filter(c=>c.name.toLowerCase()!==key).reduce((s,c)=>s+c.value,0)
+  })).filter(run=>run.cars.length>0);
+  localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+  quickPicks = quickPicks.filter(q=>q.name.toLowerCase()!==key);
+  localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
+  currentRun = currentRun.filter(c=>c.name.toLowerCase()!==key);
+  saveCurrentRun(); // also calls saveToCloud
+  renderQPTrigger();
+  renderSpot();
+  renderGarage();
+  showToast(name+' removed');
+}
+
+function renderGarage() {
+  const cars = getAllCars();
+  const s    = sorted(cars);
+  const total = cars.reduce((x,c)=>x+c.value,0);
+  document.getElementById('gCars').textContent  = cars.length;
+  document.getElementById('gTotal').textContent = fmt(total);
+  document.getElementById('gAvg').textContent   = cars.length ? fmt(total/cars.length) : '—';
+
+  const el = document.getElementById('garageList');
+  if (!s.length) { el.innerHTML='<div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">🏎️</span>No cars yet!</div>'; return; }
+  el.innerHTML='';
+  s.forEach((car,idx)=>{
+    const a = document.createElement('a');
+    a.className='garage-row';
+    a.href=carUrl(car.name);a.target='_blank';a.rel='noopener noreferrer';
+    a.style.animationDelay=(idx*0.03)+'s';
+    a.innerHTML=`<div class="g-rank">${sortMode!=='alpha'?'#'+(idx+1):''}</div>
+      <div class="g-emoji">${car.type}</div>
+      <div class="g-info">
+        <div class="g-name">${car.name}</div>
+        <div class="g-meta">${[car.color,car.runDate].filter(Boolean).join(' · ')}</div>
+      </div>
+      <div class="g-val">${fmtFull(car.value)}</div>
+      <div class="g-arrow">↗</div>
+      <button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="${car.name.replace(/"/g,'&quot;')}">✕</button>`;
+    el.appendChild(a);
+  });
+}
+
+// ── HISTORY ──
+function renderHistory() {
+  const best = getBest();
+  const rw   = document.getElementById('recordWrap');
+  rw.style.display = best>0 ? 'block' : 'none';
+  if (best>0) {
+    document.getElementById('recordVal').textContent = fmtFull(best);
+    const br = allRuns.find(r=>!r.spotted && r.total===best);
+    if (br) document.getElementById('recordSub').textContent = br.cars.length+' cars · '+br.date;
+  }
+
+  const el = document.getElementById('histList');
+  if (!allRuns.length) { el.innerHTML='<div class="no-history"><span style="font-size:1.8rem;display:block;margin-bottom:8px">📋</span>Nothing saved yet</div>'; return; }
+
+  // count only actual runs for numbering
+  let runCounter = allRuns.filter(r=>!r.spotted).length;
+
+  el.innerHTML='';
+  allRuns.forEach((entry,idx)=>{
+    const isSpot = entry.spotted;
+    const isRec  = !isSpot && entry.total===best;
+    const div = document.createElement('div');
+    div.className = 'hist-item'+(isSpot?' is-spot':'');
+    div.style.animationDelay = (idx*0.04)+'s';
+
+    const label = isSpot ? 'SPOT' : 'RUN '+(runCounter--);
+
+    const carsHTML = [...entry.cars].sort((a,b)=>b.value-a.value).map(car=>`
+      <a class="hc-row" href="${carUrl(car.name)}" target="_blank" rel="noopener noreferrer">
+        <span class="hc-emoji">${car.type}</span>
+        <span class="hc-name">${car.name}${car.color?' <span style="font-weight:400;color:var(--text2)">· '+car.color+'</span>':''}</span>
+        <span class="hc-val">${fmtFull(car.value)}</span>
+        <span class="hc-arrow">↗</span>
+      </a>`).join('');
+
+    div.innerHTML=`
+      <div class="hist-hdr" onclick="this.parentElement.classList.toggle('open')">
+        <div class="hist-num${isSpot?' spot-num':''}">${label}</div>
+        <div class="hist-info">
+          <div class="hist-date">${entry.date}</div>
+          <div class="hist-total">${fmtFull(entry.total)}</div>
+          <div class="hist-count">${entry.cars.length} car${entry.cars.length!==1?'s':''}</div>
+        </div>
+        ${isRec?'<div class="hist-rec">🏆 RECORD</div>':''}
+        <div class="hist-chev">▼</div>
+      </div>
+      <div class="hist-cars">${carsHTML}</div>`;
+    el.appendChild(div);
+  });
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2300);
+}
+
+function exportLocalData() {
+  const data = {
+    cs_runs:    localStorage.getItem('cs_runs')    || '[]',
+    cs_current: localStorage.getItem('cs_current') || '[]',
+    cs_qp:      localStorage.getItem('cs_qp')      || '[]',
+    cs_notes:   localStorage.getItem('cs_notes')   || '',
+    exported:   new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'carspotter-backup.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importFromFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const importedRuns = JSON.parse(data.cs_runs || '[]');
+      const importedQP   = JSON.parse(data.cs_qp   || '[]');
+      const importedCur  = JSON.parse(data.cs_current || '[]');
+      const importedNotes = data.cs_notes || '';
+
+      const existingIds = new Set(allRuns.map(r => r.id));
+      const newRuns = importedRuns.filter(r => !existingIds.has(r.id));
+      allRuns = [...newRuns, ...allRuns];
+
+      importedQP.forEach(car => {
+        if (!quickPicks.find(q => q.name.toLowerCase() === car.name.toLowerCase()))
+          quickPicks.push(car);
+      });
+
+      if (!currentRun.length && importedCur.length) currentRun = importedCur;
+
+      const area = document.getElementById('notesArea');
+      if (!localStorage.getItem('cs_notes') && importedNotes) {
+        localStorage.setItem('cs_notes', importedNotes);
+        if (area) area.value = importedNotes;
+      }
+
+      saveToCloud();
+      renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
+      showToast('✅ Restored ' + newRuns.length + ' runs from backup!');
+    } catch(err) {
+      alert('Could not read backup file. Make sure it\'s a valid carspotter-backup.json');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── ENTER KEYS ──
+document.getElementById('carName').addEventListener('keydown',  e=>{ if(e.key==='Enter') document.getElementById('carValue').focus(); });
+document.getElementById('carValue').addEventListener('keydown', e=>{ if(e.key==='Enter') logRun(); });
+
+// ── INIT ──
+// Auth state change handles data load — just bootstrap UI
+renderQPTrigger();
+renderSpot();
+
+// ── SERVICE WORKER ──
+if ('serviceWorker' in navigator) {
+  const sw=`const C='cs-v3';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['.'])));});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));});`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'})));
+}
+
+// ── NOTES (autosave notepad + voice) ──
+let micRecog    = null;
+let micActive   = false;
+let micInterim  = '';
+
+function initNotes() {
+  const area = document.getElementById('notesArea');
+  if (!area) return;
+  area.value = localStorage.getItem('cs_notes') || '';
+  area.addEventListener('input', () => {
+    localStorage.setItem('cs_notes', area.value);
+    saveToCloud();
+  });
+
+  // Set up speech recognition
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    const btn = document.getElementById('micBtn');
+    if (btn) { btn.title = 'Voice not supported in this browser — use Chrome or Safari'; btn.style.opacity = '0.4'; }
+    return;
+  }
+
+  micRecog = new SR();
+  micRecog.continuous     = true;
+  micRecog.interimResults = true;
+  micRecog.lang           = 'en-US';
+
+  micRecog.onresult = (e) => {
+    const area = document.getElementById('notesArea');
+    let interim = '';
+    let newFinal = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) newFinal += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    // Remove old interim, append new final + new interim
+    if (micInterim && area.value.endsWith(micInterim)) {
+      area.value = area.value.slice(0, -micInterim.length);
+    }
+    if (newFinal) {
+      // Insert final text with a newline if cursor is at start of line
+      const needsNewline = area.value.length > 0 && !area.value.endsWith('\n');
+      area.value += (needsNewline && newFinal.trim() ? '' : '') + newFinal;
+      micInterim = '';
+    }
+    micInterim = interim;
+    if (interim) area.value += interim;
+    localStorage.setItem('cs_notes', area.value);
+    saveToCloud();
+    area.scrollTop = area.scrollHeight;
+  };
+
+  micRecog.onerror = (e) => {
+    if (e.error === 'no-speech') return;
+    stopMic();
+    showToast('Mic error: ' + e.error);
+  };
+
+  micRecog.onend = () => {
+    if (micActive) {
+      try { micRecog.start(); } catch(e) {}
+    }
+  };
+}
+
+function toggleMic() {
+  if (!micRecog) { showToast('Use Chrome or Safari for voice'); return; }
+  if (micActive) stopMic();
+  else startMic();
+}
+
+function startMic() {
+  micActive  = true;
+  micInterim = '';
+  document.getElementById('micBtn').classList.add('active');
+  document.getElementById('micLbl').textContent = 'Listening...';
+  document.getElementById('notesArea').classList.add('listening');
+  document.getElementById('notesArea').focus();
+  try { micRecog.start(); } catch(e) {}
+}
+
+function stopMic() {
+  micActive = false;
+  // Remove any dangling interim text
+  const area = document.getElementById('notesArea');
+  if (micInterim && area.value.endsWith(micInterim)) {
+    area.value = area.value.slice(0, -micInterim.length);
+    localStorage.setItem('cs_notes', area.value);
+  }
+  micInterim = '';
+  document.getElementById('micBtn').classList.remove('active');
+  document.getElementById('micLbl').textContent = 'Tap to speak';
+  document.getElementById('notesArea').classList.remove('listening');
+  try { micRecog.stop(); } catch(e) {}
+}
+
+initNotes();
+
+
+</script>
+</body>
+</html>
