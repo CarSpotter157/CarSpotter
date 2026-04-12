@@ -875,7 +875,7 @@ async function loadFromCloud() {
     if (snap.exists) {
       const d = snap.data();
       if (d.currentRun) currentRun = d.currentRun;
-      if (d.allRuns)    allRuns    = d.allRuns;
+      if (d.allRuns)    allRuns    = d.allRuns.filter((r,i,a) => a.findIndex(x=>x.id===r.id)===i);
       if (d.quickPicks) quickPicks = d.quickPicks;
       if (d.notes != null) {
         localStorage.setItem('cs_notes', d.notes);
@@ -900,7 +900,7 @@ function subscribeCloud() {
     const d = snap.data();
     if (d.updatedAt && d.updatedAt > _lastSave) {
       if (d.currentRun) currentRun = d.currentRun;
-      if (d.allRuns)    allRuns    = d.allRuns;
+      if (d.allRuns)    allRuns    = d.allRuns.filter((r,i,a) => a.findIndex(x=>x.id===r.id)===i);
       if (d.quickPicks) quickPicks = d.quickPicks;
       if (d.notes != null) {
         localStorage.setItem('cs_notes', d.notes);
