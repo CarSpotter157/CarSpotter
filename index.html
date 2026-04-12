@@ -623,9 +623,15 @@ let syncTimer   = null;
 let _lastSave   = 0;
 
 function signInGoogle() {
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
-    .catch(e => alert('Sign-in error: ' + e.message));
+  auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
 }
+
+// Handle the redirect result when the page loads back
+auth.getRedirectResult().catch(e => {
+  if (e.code !== 'auth/no-auth-event') {
+    alert('Sign-in error: ' + e.message);
+  }
+});
 function signOutUser() {
   if (!confirm('Sign out?')) return;
   if (syncUnsub) { syncUnsub(); syncUnsub = null; }
