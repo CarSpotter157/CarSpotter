@@ -408,7 +408,24 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
 .sync-dot.ok{background:var(--green);}
 .sync-dot.syncing{background:var(--accent);animation:pulse 1s ease infinite;}
 
-/* ── STATS ── */
+/* ── MORE MENU ── */
+.more-menu{
+  position:fixed;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 6px);
+  right:8px;background:var(--surf);border:1px solid var(--border);
+  border-radius:12px;z-index:9998;box-shadow:0 8px 24px rgba(0,0,0,0.4);
+  overflow:hidden;animation:popIn 0.15s ease;
+}
+.more-item{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:13px 20px;background:none;border:none;border-bottom:1px solid var(--border);
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.88rem;
+  cursor:pointer;transition:background 0.12s;text-align:left;
+}
+.more-item:last-child{border-bottom:none;}
+.more-item:hover{background:var(--adim);}
+@media(min-width:800px){
+  .more-menu{bottom:auto;top:50%;right:auto;left:96px;transform:translateY(-50%);}
+}
 .st-bar-wrap{margin-bottom:8px;}
 .st-bar-label{display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:4px;}
 .st-bar-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60%;}
@@ -696,19 +713,18 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
       <span class="nav-icon">📋</span>
       <span class="nav-label">History</span>
     </button>
-    <button class="nav-btn" onclick="goTo('voice')" id="nav-voice">
-      <span class="nav-icon">📝</span>
-      <span class="nav-label">Notes</span>
-    </button>
-    <button class="nav-btn" onclick="goTo('news')" id="nav-news">
-      <span class="nav-icon">🗞️</span>
-      <span class="nav-label">News</span>
-    </button>
-    <button class="nav-btn" onclick="goTo('stats')" id="nav-stats">
-      <span class="nav-icon">📊</span>
-      <span class="nav-label">Stats</span>
+    <button class="nav-btn" onclick="toggleMoreMenu()" id="nav-more">
+      <span class="nav-icon">•••</span>
+      <span class="nav-label">More</span>
     </button>
   </nav>
+
+  <!-- More dropdown menu -->
+  <div id="moreMenu" class="more-menu" style="display:none">
+    <button class="more-item" onclick="goToMore('voice')">📝 <span>Notes</span></button>
+    <button class="more-item" onclick="goToMore('news')">🗞️ <span>News</span></button>
+    <button class="more-item" onclick="goToMore('stats')">📊 <span>Stats</span></button>
+  </div>
 
 </div><!-- /app-shell -->
 
@@ -1458,6 +1474,36 @@ function stopMic() {
 }
 
 initNotes();
+
+// ── MORE MENU ──
+function toggleMoreMenu() {
+  const m = document.getElementById('moreMenu');
+  const btn = document.getElementById('nav-more');
+  const isOpen = m.style.display !== 'none';
+  m.style.display = isOpen ? 'none' : 'block';
+  btn.classList.toggle('active', !isOpen);
+}
+
+function goToMore(page) {
+  document.getElementById('moreMenu').style.display = 'none';
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('nav-more').classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  closeQP();
+  if (page==='stats') renderStats();
+  if (page==='news' && !newsLoaded) { newsLoaded=true; renderNewsSources(); loadNews(); }
+}
+
+// Close more menu when clicking outside
+document.addEventListener('click', e => {
+  const menu = document.getElementById('moreMenu');
+  const btn  = document.getElementById('nav-more');
+  if (menu && menu.style.display !== 'none' && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.style.display = 'none';
+    btn.classList.remove('active');
+  }
+});
 
 // ── STATS ──
 function renderStats() {
