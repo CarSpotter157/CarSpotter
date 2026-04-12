@@ -1111,7 +1111,8 @@ function endRun() {
   allRuns.unshift(run);
   localStorage.setItem('cs_runs', JSON.stringify(allRuns));
   saveToCloud();
-  const isRec  = total >= best;
+ const best   = getBest();
+const isRec  = total >= best;
   showToast(isRec ? '🏆 NEW RECORD: '+fmtFull(total)+'!' : 'Run saved! '+fmtFull(total));
   currentRun = [];
   saveCurrentRun();
