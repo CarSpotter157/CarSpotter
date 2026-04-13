@@ -280,6 +280,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
 .g-arrow{font-size:0.7rem;color:var(--muted);flex-shrink:0;margin-right:4px;}
 .g-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.82rem;padding:4px 2px 4px 4px;line-height:1;flex-shrink:0;transition:color 0.12s;}
 .g-del:active{color:var(--red);}
+.g-spotted-count{font-size:0.58rem;color:var(--accent2);letter-spacing:1px;margin-top:2px;font-weight:600;}
 .empty-garage{text-align:center;padding:40px 12px;color:var(--muted);font-size:0.72rem;letter-spacing:1px;border:1px dashed var(--border);border-radius:10px;}
 
 /* ── HISTORY ── */
@@ -1250,11 +1251,25 @@ function getAllCars() {
   const seen = new Map();
   [...allRuns].reverse().forEach(run => {
     run.cars.forEach(car => {
+      const key = car.name.toLowerCase();
       const label = run.spotted ? 'Spotted · '+run.date : 'Run · '+run.date;
-      seen.set(car.name.toLowerCase(), {...car, runDate: label});
+      if (seen.has(key)) {
+        seen.get(key).spotCount++;
+        seen.get(key).runDate = label; // update to most recent
+      } else {
+        seen.set(key, {...car, runDate: label, spotCount: 1});
+      }
     });
   });
-  currentRun.forEach(car => seen.set(car.name.toLowerCase(), {...car, runDate:'Current Run'}));
+  currentRun.forEach(car => {
+    const key = car.name.toLowerCase();
+    if (seen.has(key)) {
+      seen.get(key).spotCount++;
+      seen.get(key).runDate = 'Current Run';
+    } else {
+      seen.set(key, {...car, runDate:'Current Run', spotCount: 1});
+    }
+  });
   return Array.from(seen.values());
 }
 
@@ -1313,6 +1328,7 @@ function renderGarage() {
       <div class="g-info">
         <div class="g-name">${car.name}</div>
         <div class="g-meta">${[car.color,car.runDate].filter(Boolean).join(' · ')}</div>
+        ${car.value>=50000 && car.spotCount>1 ? `<div class="g-spotted-count">👁 Spotted ${car.spotCount}x</div>` : ''}
       </div>
       <div class="g-val">${fmtFull(car.value)}</div>
       <div class="g-arrow">↗</div>
