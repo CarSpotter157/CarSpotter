@@ -434,6 +434,65 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
   #page-voice { overflow-y: hidden; padding: 28px 36px; display: flex; flex-direction: column; }
   .notes-area { flex: 1; height: auto; }
 }
+/* ── THEME SELECTOR ── */
+.theme-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+.theme-swatch{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform 0.15s,border-color 0.15s;flex-shrink:0;}
+.theme-swatch:hover{transform:scale(1.15);}
+.theme-swatch.active{border-color:#fff;transform:scale(1.1);}
+
+/* ── SOUND TOGGLE ── */
+.sound-toggle{display:flex;align-items:center;gap:10px;}
+.toggle-pill{position:relative;width:40px;height:22px;background:var(--border);border-radius:11px;cursor:pointer;transition:background 0.2s;flex-shrink:0;border:none;}
+.toggle-pill.on{background:var(--accent);}
+.toggle-knob{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform 0.2s;}
+.toggle-pill.on .toggle-knob{transform:translateX(18px);}
+
+/* ── UNDO BAR ── */
+.undo-bar{
+  position:fixed;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 14px);
+  left:50%;transform:translateX(-50%);
+  background:var(--surf2);border:1px solid var(--border);border-radius:10px;
+  padding:9px 14px;display:flex;align-items:center;gap:12px;
+  z-index:9998;box-shadow:0 4px 20px rgba(0,0,0,0.5);
+  white-space:nowrap;max-width:90vw;opacity:0;pointer-events:none;
+  transition:opacity 0.25s,transform 0.25s;
+  transform:translateX(-50%) translateY(6px);
+}
+.undo-bar.show{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0);}
+.undo-msg{font-size:0.75rem;color:var(--text2);}
+.undo-btn{font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:1.5px;color:var(--accent);background:none;border:none;cursor:pointer;padding:0;}
+.undo-btn:hover{opacity:0.8;}
+@media(min-width:800px){.undo-bar{bottom:20px;left:calc(88px + 50%);}}
+
+/* ── BULK DELETE ── */
+.bulk-bar{display:none;background:var(--surf);border-bottom:1px solid var(--border);padding:10px 16px;position:sticky;top:0;z-index:10;gap:10px;align-items:center;}
+.bulk-bar.active{display:flex;}
+.bulk-count{font-size:0.7rem;color:var(--text2);flex:1;}
+.bulk-del-btn{font-family:'Bebas Neue',cursive;font-size:0.8rem;letter-spacing:1.5px;background:var(--red);color:#fff;border:none;border-radius:7px;padding:6px 12px;cursor:pointer;}
+.bulk-cancel-btn{font-size:0.7rem;color:var(--muted);background:none;border:1px solid var(--border);border-radius:7px;padding:6px 10px;cursor:pointer;}
+.hist-check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border);background:var(--surf2);cursor:pointer;appearance:none;-webkit-appearance:none;flex-shrink:0;transition:all 0.15s;margin-right:2px;position:relative;}
+.hist-check:checked{background:var(--accent2);border-color:var(--accent2);}
+.bulk-mode .hist-hdr{padding-left:8px;}
+
+/* ── ALIAS MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99990;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.2s ease;}
+.modal-card{width:100%;max-width:480px;background:var(--surf);border-top:1px solid var(--border);border-radius:20px 20px 0 0;padding:24px 20px 36px;animation:slideUpRecap 0.3s cubic-bezier(0.34,1.56,0.64,1);max-height:85vh;overflow-y:auto;}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px;}
+.modal-title{font-family:'Bebas Neue',cursive;font-size:1rem;letter-spacing:2.5px;color:var(--muted);margin-bottom:8px;}
+.alias-hint{font-size:0.62rem;color:var(--muted);letter-spacing:1px;margin-bottom:12px;line-height:1.5;}
+.alias-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.alias-abbr{flex:1;background:var(--surf2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;padding:9px 10px;outline:none;font-family:inherit;transition:border-color 0.15s;}
+.alias-abbr:focus{border-color:var(--accent);}
+.alias-arrow{color:var(--muted);font-size:0.8rem;flex-shrink:0;}
+.alias-full{flex:2;background:var(--surf2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.85rem;padding:9px 10px;outline:none;font-family:inherit;transition:border-color 0.15s;}
+.alias-full:focus{border-color:var(--accent);}
+.alias-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.9rem;padding:4px;flex-shrink:0;transition:color 0.12s;}
+.alias-del:hover{color:var(--red);}
+.alias-add-btn{width:100%;background:var(--surf2);border:1px dashed var(--border);border-radius:8px;color:var(--muted);font-size:0.78rem;letter-spacing:1px;padding:9px;cursor:pointer;font-family:inherit;transition:all 0.15s;margin-top:4px;}
+.alias-add-btn:hover{border-color:var(--accent);color:var(--accent);}
+.modal-save-btn{width:100%;background:var(--accent);color:#0a0a0a;border:none;border-radius:10px;font-family:'Bebas Neue',cursive;font-size:1rem;letter-spacing:3px;padding:13px;cursor:pointer;margin-top:14px;transition:all 0.15s;}
+.modal-save-btn:active{transform:scale(0.98);}
+
 /* ── AUTH OVERLAY ── */
 .auth-overlay{
   position:fixed;inset:0;z-index:9999;background:var(--bg);
@@ -684,7 +743,15 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
           <input type="file" accept=".json" style="display:none" onchange="importFromFile(this)">
         </label>
       </div>
-      <div class="sec-title" style="margin-bottom:8px">HISTORY</div>
+      <div class="sec-title" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+        <span>HISTORY</span>
+        <button class="txt-btn" onclick="toggleBulkMode()" id="bulkToggleBtn">Select</button>
+      </div>
+      <div class="bulk-bar" id="bulkBar">
+        <span class="bulk-count" id="bulkCount">0 selected</span>
+        <button class="bulk-cancel-btn" onclick="toggleBulkMode()">Cancel</button>
+        <button class="bulk-del-btn" onclick="bulkDelete()">🗑 Delete</button>
+      </div>
       <div id="histList">
         <div class="no-history"><span style="font-size:1.8rem;display:block;margin-bottom:8px">📋</span>Nothing saved yet</div>
       </div>
@@ -747,6 +814,37 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
       </div>
     </div>
 
+    <!-- SETTINGS PAGE -->
+    <div class="page" id="page-settings">
+      <div class="sec-title" style="margin-bottom:14px">⚙️ SETTINGS</div>
+
+      <!-- Themes -->
+      <div class="card">
+        <div class="card-title">🎨 THEME</div>
+        <div class="theme-bar" id="themeBar"></div>
+        <div style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;margin-top:8px;" id="themeName">Default</div>
+      </div>
+
+      <!-- Sound FX -->
+      <div class="card">
+        <div class="card-title">🔊 SOUND EFFECTS</div>
+        <div class="sound-toggle">
+          <span style="font-size:0.78rem;color:var(--text2);flex:1;">Play sounds when logging cars</span>
+          <button class="toggle-pill" id="soundToggle" onclick="toggleSound()"><div class="toggle-knob"></div></button>
+        </div>
+      </div>
+
+      <!-- Aliases -->
+      <div class="card">
+        <div class="card-title">🏷️ CAR NICKNAMES</div>
+        <div style="font-size:0.7rem;color:var(--text2);margin-bottom:12px;line-height:1.5;">Map abbreviations to full names so your stats group correctly. E.g. "GT3 RS" → "Porsche 911 GT3 RS"</div>
+        <button onclick="openAliasModal()" style="width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:0.82rem;padding:11px;cursor:pointer;font-family:inherit;transition:border-color 0.15s;text-align:left;display:flex;align-items:center;justify-content:space-between;">
+          <span>Manage nicknames</span>
+          <span id="aliasCount" style="font-family:'Bebas Neue',cursive;font-size:0.9rem;color:var(--accent);letter-spacing:1px;">0 saved</span>
+        </button>
+      </div>
+    </div>
+
     <!-- NEWS PAGE -->
     <div class="page" id="page-news">
       <div class="sec-row" style="margin-bottom:10px">
@@ -758,6 +856,12 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
     </div>
 
   </div><!-- /pages -->
+
+  <!-- UNDO BAR -->
+  <div class="undo-bar" id="undoBar">
+    <span class="undo-msg" id="undoMsg">Car removed</span>
+    <button class="undo-btn" onclick="doUndo()">↩ UNDO</button>
+  </div>
 
   <nav class="bottom-nav" id="bottomNav">
     <!-- desktop logo injected by JS -->
@@ -784,6 +888,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
     <button class="more-item" onclick="goToMore('history')">📋 <span>History</span></button>
     <button class="more-item" onclick="goToMore('news')">🗞️ <span>News</span></button>
     <button class="more-item" onclick="goToMore('stats')">📊 <span>Stats</span></button>
+    <button class="more-item" onclick="goToMore('settings')">⚙️ <span>Settings</span></button>
   </div>
 
 </div><!-- /app-shell -->
@@ -978,6 +1083,235 @@ let sortMode     = 'desc';
 let qpOpen       = false;
 let headlinerIdx = -1; // index in currentRun of starred car
 
+// ── NEW FEATURE STATE ──
+let undoStack      = null;   // { type:'run'|'spot'|'history', data, msg }
+let undoTimer      = null;
+let bulkMode       = false;
+let bulkSelected   = new Set();
+let soundEnabled   = localStorage.getItem('cs_sound') !== 'off';
+let aliases        = JSON.parse(localStorage.getItem('cs_aliases') || '{}'); // { abbr: fullName }
+
+// ── THEMES ──
+const THEMES = [
+  { name:'Default',      accent:'#f5c842', accent2:'#ff5733', bg:'#0a0a0a', surf:'#141414' },
+  { name:'Carbon',       accent:'#e0e0e0', accent2:'#ff4444', bg:'#0d0d0d', surf:'#1a1a1a' },
+  { name:'Stealth',      accent:'#6ee7b7', accent2:'#f472b6', bg:'#050505', surf:'#101010' },
+  { name:'Inferno',      accent:'#fb923c', accent2:'#f43f5e', bg:'#0c0a09', surf:'#1c1410' },
+  { name:'Cobalt',       accent:'#60a5fa', accent2:'#a78bfa', bg:'#080c14', surf:'#0f1624' },
+  { name:'Acid',         accent:'#a3e635', accent2:'#facc15', bg:'#090a05', surf:'#131505' },
+];
+let activeTheme = parseInt(localStorage.getItem('cs_theme') || '0');
+
+// ── THEMES ──
+function applyTheme(idx) {
+  const t = THEMES[idx];
+  const r = document.documentElement.style;
+  r.setProperty('--accent',  t.accent);
+  r.setProperty('--accent2', t.accent2);
+  r.setProperty('--bg',      t.bg);
+  r.setProperty('--surf',    t.surf);
+  r.setProperty('--surf2',   t.surf);
+  r.setProperty('--adim',    hexToRgba(t.accent, 0.10));
+  activeTheme = idx;
+  localStorage.setItem('cs_theme', idx);
+}
+function hexToRgba(hex, a) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function renderThemeBar() {
+  const bar = document.getElementById('themeBar');
+  if (!bar) return;
+  bar.innerHTML = THEMES.map((t,i) =>
+    `<div class="theme-swatch${i===activeTheme?' active':''}" style="background:${t.accent};box-shadow:0 0 0 3px ${t.bg}" onclick="selectTheme(${i})" title="${t.name}"></div>`
+  ).join('');
+  document.getElementById('themeName').textContent = THEMES[activeTheme].name;
+}
+function selectTheme(idx) {
+  applyTheme(idx);
+  renderThemeBar();
+}
+
+// ── SOUND ──
+let _audioCtx = null;
+function getAudioCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return _audioCtx;
+}
+function playSound(type) {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioCtx();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    if (type === 'log') {
+      o.frequency.setValueAtTime(520, ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(780, ctx.currentTime + 0.08);
+      g.gain.setValueAtTime(0.18, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+      o.start(); o.stop(ctx.currentTime + 0.18);
+    } else if (type === 'end') {
+      // Three note fanfare
+      [440,550,660].forEach((freq, i) => {
+        const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+        o2.connect(g2); g2.connect(ctx.destination);
+        o2.frequency.value = freq;
+        g2.gain.setValueAtTime(0, ctx.currentTime + i*0.1);
+        g2.gain.linearRampToValueAtTime(0.15, ctx.currentTime + i*0.1 + 0.04);
+        g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i*0.1 + 0.2);
+        o2.start(ctx.currentTime + i*0.1);
+        o2.stop(ctx.currentTime + i*0.1 + 0.2);
+      });
+    } else if (type === 'delete') {
+      o.frequency.setValueAtTime(300, ctx.currentTime);
+      o.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.12);
+      g.gain.setValueAtTime(0.12, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+      o.start(); o.stop(ctx.currentTime + 0.15);
+    }
+  } catch(e) {}
+}
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  localStorage.setItem('cs_sound', soundEnabled ? 'on' : 'off');
+  const btn = document.getElementById('soundToggle');
+  if (btn) btn.classList.toggle('on', soundEnabled);
+  showToast(soundEnabled ? '🔊 Sounds on' : '🔇 Sounds off');
+}
+function initSoundToggle() {
+  const btn = document.getElementById('soundToggle');
+  if (btn) btn.classList.toggle('on', soundEnabled);
+}
+
+// ── UNDO ──
+function pushUndo(type, data, msg) {
+  undoStack = { type, data };
+  clearTimeout(undoTimer);
+  const bar = document.getElementById('undoBar');
+  document.getElementById('undoMsg').textContent = msg;
+  bar.classList.add('show');
+  undoTimer = setTimeout(() => { bar.classList.remove('show'); undoStack = null; }, 5000);
+}
+function doUndo() {
+  if (!undoStack) return;
+  clearTimeout(undoTimer);
+  document.getElementById('undoBar').classList.remove('show');
+  const { type, data } = undoStack;
+  undoStack = null;
+  if (type === 'run') {
+    currentRun = data.run;
+    headlinerIdx = data.headlinerIdx;
+    saveCurrentRun();
+    renderSpot();
+  } else if (type === 'history') {
+    allRuns = data;
+    localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+    saveToCloud();
+    renderHistory();
+    renderGarage();
+  }
+  showToast('↩ Undone!');
+}
+
+// ── BULK DELETE ──
+function toggleBulkMode() {
+  bulkMode = !bulkMode;
+  bulkSelected.clear();
+  const bar = document.getElementById('bulkBar');
+  const btn = document.getElementById('bulkToggleBtn');
+  bar.classList.toggle('active', bulkMode);
+  btn.textContent = bulkMode ? 'Done' : 'Select';
+  renderHistory();
+}
+function toggleBulkSelect(id) {
+  if (bulkSelected.has(id)) bulkSelected.delete(id);
+  else bulkSelected.add(id);
+  document.getElementById('bulkCount').textContent = bulkSelected.size + ' selected';
+  // update checkbox visuals
+  document.querySelectorAll('.hist-check').forEach(cb => {
+    cb.checked = bulkSelected.has(parseInt(cb.dataset.id));
+  });
+}
+function bulkDelete() {
+  if (!bulkSelected.size) { showToast('Nothing selected'); return; }
+  const prev = [...allRuns];
+  const count = bulkSelected.size;
+  allRuns = allRuns.filter(r => !bulkSelected.has(r.id));
+  localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+  saveToCloud();
+  pushUndo('history', prev, count + ' entr' + (count===1?'y':'ies') + ' deleted');
+  bulkSelected.clear();
+  toggleBulkMode();
+  renderGarage();
+  showToast('🗑 Deleted ' + count + ' ' + (count===1?'entry':'entries'));
+  playSound('delete');
+}
+
+// ── ALIASES ──
+function resolveAlias(name) {
+  const key = name.toLowerCase().trim();
+  for (const [abbr, full] of Object.entries(aliases)) {
+    if (key === abbr.toLowerCase().trim()) return full;
+  }
+  return name;
+}
+function saveAliases() {
+  localStorage.setItem('cs_aliases', JSON.stringify(aliases));
+  updateAliasCount();
+}
+function updateAliasCount() {
+  const el = document.getElementById('aliasCount');
+  if (el) { const c = Object.keys(aliases).length; el.textContent = c + ' saved'; }
+}
+function openAliasModal() {
+  const existing = Object.entries(aliases);
+  let rows = existing.map(([a,f]) => `
+    <div class="alias-row" data-abbr="${a.replace(/"/g,'&quot;')}">
+      <input class="alias-abbr" placeholder="GT3 RS" value="${a.replace(/"/g,'&quot;')}">
+      <span class="alias-arrow">→</span>
+      <input class="alias-full" placeholder="Porsche 911 GT3 RS" value="${f.replace(/"/g,'&quot;')}">
+      <button class="alias-del" onclick="this.closest('.alias-row').remove()">✕</button>
+    </div>`).join('');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'aliasModal';
+  overlay.innerHTML = `
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-title">🏷️ CAR NICKNAMES</div>
+      <div class="alias-hint">Abbreviation on the left → Full name on the right.<br>Stats will group entries with matching full names together.</div>
+      <div id="aliasRows">${rows}</div>
+      <button class="alias-add-btn" onclick="addAliasRow()">+ Add nickname</button>
+      <button class="modal-save-btn" onclick="saveAliasModal()">SAVE NICKNAMES</button>
+    </div>`;
+  overlay.onclick = () => overlay.remove();
+  document.body.appendChild(overlay);
+}
+function addAliasRow() {
+  const d = document.createElement('div');
+  d.className = 'alias-row';
+  d.innerHTML = `
+    <input class="alias-abbr" placeholder="GT3 RS">
+    <span class="alias-arrow">→</span>
+    <input class="alias-full" placeholder="Porsche 911 GT3 RS">
+    <button class="alias-del" onclick="this.closest('.alias-row').remove()">✕</button>`;
+  document.getElementById('aliasRows').appendChild(d);
+  d.querySelector('.alias-abbr').focus();
+}
+function saveAliasModal() {
+  aliases = {};
+  document.querySelectorAll('#aliasRows .alias-row').forEach(row => {
+    const abbr = row.querySelector('.alias-abbr').value.trim();
+    const full = row.querySelector('.alias-full').value.trim();
+    if (abbr && full) aliases[abbr] = full;
+  });
+  saveAliases();
+  document.getElementById('aliasModal')?.remove();
+  showToast('✅ Nicknames saved!');
+}
+
 // ── DESKTOP SIDEBAR LOGO ──
 function injectDesktopLogo() {
   if (window.innerWidth < 800) return;
@@ -1091,10 +1425,13 @@ function clearInputs() {
 // ── LOG TO RUN ──
 // Adds to current run list only. Does NOT go to history until you End Run.
 function logRun() {
-  const { name, value, color, type } = getInputs();
-  if (!name)               { showToast('Enter a car name!');    return; }
+  const { name: rawName, value, color, type } = getInputs();
+  if (!rawName)             { showToast('Enter a car name!');    return; }
   if (isNaN(value)||value<0){ showToast('Enter a valid value!'); return; }
+  const name = resolveAlias(rawName);
 
+  const prevRun = JSON.parse(JSON.stringify(currentRun));
+  const prevHL  = headlinerIdx;
   const car = { name, value, color, type, ts: Date.now() };
   currentRun.push(car);
   saveToQP(car);
@@ -1102,6 +1439,8 @@ function logRun() {
   clearInputs();
   renderQPTrigger();
   renderSpot();
+  playSound('log');
+  pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, type + ' ' + name + ' removed');
 
   const el = document.getElementById('runTotal');
   el.style.animation = 'none';
@@ -1112,24 +1451,28 @@ function logRun() {
 // ── LOG AS SPOTTED ──
 // Saves DIRECTLY to garage & history as a standalone entry. Never touches run list.
 function logSpotted() {
-  const { name, value, color, type } = getInputs();
-  if (!name)               { showToast('Enter a car name!');    return; }
+  const { name: rawName, value, color, type } = getInputs();
+  if (!rawName)             { showToast('Enter a car name!');    return; }
   if (isNaN(value)||value<0){ showToast('Enter a valid value!'); return; }
+  const name = resolveAlias(rawName);
 
   const car = { name, value, color, type, ts: Date.now() };
   saveToQP(car);
 
+  const prevRuns = JSON.parse(JSON.stringify(allRuns));
   // Save as a standalone spotted entry in history
   const entry = {
     id:      Date.now(),
     date:    new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
     total:   value,
-    spotted: true,   // flag — NOT a run
+    spotted: true,
     cars:    [car]
   };
   allRuns.unshift(entry);
   localStorage.setItem('cs_runs', JSON.stringify(allRuns));
   saveToCloud();
+  playSound('log');
+  pushUndo('history', prevRuns, type + ' ' + name + ' removed');
 
   clearInputs();
   renderQPTrigger();
@@ -1138,11 +1481,16 @@ function logSpotted() {
 
 // ── REMOVE FROM RUN ──
 function removeCar(i) {
+  const prevRun = JSON.parse(JSON.stringify(currentRun));
+  const prevHL  = headlinerIdx;
+  const car = currentRun[i];
   if (headlinerIdx === i) headlinerIdx = -1;
   else if (headlinerIdx > i) headlinerIdx--;
   currentRun.splice(i,1);
   saveCurrentRun();
   renderSpot();
+  playSound('delete');
+  pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, car.type + ' ' + car.name + ' removed');
 }
 
 function clearRun() {
@@ -1218,6 +1566,7 @@ function endRun() {
   saveCurrentRun();
   renderQPTrigger();
   renderSpot();
+  playSound('end');
   showRecap({ total, cars: runCars, headliner, isRec: isRec || isFirstRec, prevBest });
 }
 
@@ -1455,9 +1804,13 @@ function renderGarage() {
 // ── HISTORY ──
 // ── DELETE RUN ──
 function deleteRun(id) {
+  const prev = JSON.parse(JSON.stringify(allRuns));
+  const entry = allRuns.find(r => r.id === id);
   allRuns = allRuns.filter(r => r.id !== id);
   localStorage.setItem('cs_runs', JSON.stringify(allRuns));
   saveToCloud();
+  playSound('delete');
+  pushUndo('history', prev, (entry?.spotted ? 'Spot' : 'Run') + ' deleted');
   renderHistory();
   renderGarage();
 }
@@ -1501,7 +1854,8 @@ function renderHistory() {
       : '';
 
     div.innerHTML=`
-      <div class="hist-hdr" onclick="this.parentElement.classList.toggle('open')">
+      <div class="hist-hdr" onclick="${bulkMode ? `toggleBulkSelect(${entry.id})` : `this.parentElement.classList.toggle('open')`}">
+        ${bulkMode ? `<input type="checkbox" class="hist-check" data-id="${entry.id}" ${bulkSelected.has(entry.id)?'checked':''} onclick="event.stopPropagation();toggleBulkSelect(${entry.id})">` : ''}
         <div class="hist-num${isSpot?' spot-num':''}">${label}</div>
         <div class="hist-info">
           <div class="hist-date">${entry.date}</div>
@@ -1510,8 +1864,8 @@ function renderHistory() {
           ${headlinerHTML}
         </div>
         ${isRec?'<div class="hist-rec">🏆 RECORD</div>':''}
-        <button class="del-btn" onclick="event.stopPropagation();deleteRun(${entry.id})" style="margin-right:4px">✕</button>
-        <div class="hist-chev">▼</div>
+        ${!bulkMode ? `<button class="del-btn" onclick="event.stopPropagation();deleteRun(${entry.id})" style="margin-right:4px">✕</button>` : ''}
+        ${!bulkMode ? `<div class="hist-chev">▼</div>` : ''}
       </div>
       <div class="hist-cars">${carsHTML}</div>`;
     el.appendChild(div);
@@ -1587,6 +1941,8 @@ document.getElementById('carValue').addEventListener('keydown', e=>{ if(e.key===
 // Auth state change handles data load — just bootstrap UI
 renderQPTrigger();
 renderSpot();
+applyTheme(activeTheme);
+initSoundToggle();
 
 // ── SERVICE WORKER ──
 if ('serviceWorker' in navigator) {
@@ -1710,6 +2066,7 @@ function goToMore(page) {
   closeQP();
   if (page==='stats') renderStats();
   if (page==='history') renderHistory();
+  if (page==='settings') { renderThemeBar(); initSoundToggle(); updateAliasCount(); }
   if (page==='news' && !newsLoaded) { newsLoaded=true; renderNewsSources(); loadNews(); }
 }
 
