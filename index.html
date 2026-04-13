@@ -441,8 +441,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
 .theme-swatch.active{border-color:#fff;transform:scale(1.1);}
 
 /* ── CARBON FIBER TEXTURE ── */
-/* The weave is built with two layered CSS gradients — no images needed */
-@keyframes cfShimmer{0%,100%{opacity:0.04}50%{opacity:0.07}}
+/* Real twill weave: each 'tow' is a parallelogram highlight on dark base */
 body.carbon-on .card,
 body.carbon-on .hist-item,
 body.carbon-on .garage-row,
@@ -454,40 +453,23 @@ body.carbon-on .more-menu,
 body.carbon-on .recap-card,
 body.carbon-on .modal-card,
 body.carbon-on .specs-card {
-  background-image:
-    repeating-linear-gradient(
-      45deg,
-      rgba(255,255,255,0.03) 0px,
-      rgba(255,255,255,0.03) 1px,
-      transparent 1px,
-      transparent 4px
-    ),
-    repeating-linear-gradient(
-      -45deg,
-      rgba(255,255,255,0.03) 0px,
-      rgba(255,255,255,0.03) 1px,
-      transparent 1px,
-      transparent 4px
-    );
-  background-size:8px 8px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%23111'/%3E%3C!-- top-left tow --%3E%3Cpolygon points='0,4 4,0 8,0 4,4' fill='%23222'/%3E%3Cpolygon points='0,4 4,0 4,4 0,8' fill='%23282828'/%3E%3Cpolygon points='4,0 8,0 8,4 4,4' fill='%231a1a1a'/%3E%3C!-- highlight sheen top-left tow --%3E%3Cpolygon points='1,3 3,1 4,2 2,4' fill='%2333333380'/%3E%3C!-- top-right tow --%3E%3Cpolygon points='8,4 12,0 16,0 12,4' fill='%23222'/%3E%3Cpolygon points='8,4 12,0 12,4 8,8' fill='%23282828'/%3E%3Cpolygon points='12,0 16,0 16,4 12,4' fill='%231a1a1a'/%3E%3Cpolygon points='9,3 11,1 12,2 10,4' fill='%2333333380'/%3E%3C!-- bottom-left tow --%3E%3Cpolygon points='0,12 4,8 8,8 4,12' fill='%231e1e1e'/%3E%3Cpolygon points='0,12 4,8 4,12 0,16' fill='%23242424'/%3E%3Cpolygon points='4,8 8,8 8,12 4,12' fill='%23181818'/%3E%3Cpolygon points='1,11 3,9 4,10 2,12' fill='%2330303080'/%3E%3C!-- bottom-right tow --%3E%3Cpolygon points='8,12 12,8 16,8 12,12' fill='%231e1e1e'/%3E%3Cpolygon points='8,12 12,8 12,12 8,16' fill='%23242424'/%3E%3Cpolygon points='12,8 16,8 16,12 12,12' fill='%23181818'/%3E%3Cpolygon points='9,11 11,9 12,10 10,12' fill='%2330303080'/%3E%3C!-- gap lines between tows --%3E%3Cline x1='0' y1='8' x2='8' y2='0' stroke='%230a0a0a' stroke-width='0.8'/%3E%3Cline x1='8' y1='8' x2='16' y2='0' stroke='%230a0a0a' stroke-width='0.8'/%3E%3Cline x1='0' y1='16' x2='8' y2='8' stroke='%230a0a0a' stroke-width='0.8'/%3E%3Cline x1='8' y1='16' x2='16' y2='8' stroke='%230a0a0a' stroke-width='0.8'/%3E%3Cline x1='0' y1='0' x2='0' y2='16' stroke='%230a0a0a' stroke-width='0.5' opacity='0.5'/%3E%3Cline x1='8' y1='0' x2='8' y2='16' stroke='%230a0a0a' stroke-width='0.5' opacity='0.5'/%3E%3C/svg%3E");
+  background-size: 16px 16px;
 }
-/* Subtle highlight edge on cards when carbon is on */
+/* Subtle inset shadow to give depth to the weave */
 body.carbon-on .card,
 body.carbon-on .hist-item,
 body.carbon-on .score-banner,
 body.carbon-on .run-item {
-  border-color: rgba(255,255,255,0.08);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.06);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -1px 0 rgba(0,0,0,0.4);
 }
 /* Carbon toggle row in settings */
 .carbon-toggle-row{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
 .carbon-preview{
   width:28px;height:28px;border-radius:6px;flex-shrink:0;border:1px solid var(--border);
-  background-color:#141414;
-  background-image:
-    repeating-linear-gradient(45deg,rgba(255,255,255,0.07) 0px,rgba(255,255,255,0.07) 1px,transparent 1px,transparent 4px),
-    repeating-linear-gradient(-45deg,rgba(255,255,255,0.07) 0px,rgba(255,255,255,0.07) 1px,transparent 1px,transparent 4px);
-  background-size:8px 8px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%23111'/%3E%3Cpolygon points='0,4 4,0 8,0 4,4' fill='%23222'/%3E%3Cpolygon points='0,4 4,0 4,4 0,8' fill='%23282828'/%3E%3Cpolygon points='4,0 8,0 8,4 4,4' fill='%231a1a1a'/%3E%3Cpolygon points='1,3 3,1 4,2 2,4' fill='%2333333380'/%3E%3Cpolygon points='8,4 12,0 16,0 12,4' fill='%23222'/%3E%3Cpolygon points='8,4 12,0 12,4 8,8' fill='%23282828'/%3E%3Cpolygon points='12,0 16,0 16,4 12,4' fill='%231a1a1a'/%3E%3Cpolygon points='9,3 11,1 12,2 10,4' fill='%2333333380'/%3E%3Cpolygon points='0,12 4,8 8,8 4,12' fill='%231e1e1e'/%3E%3Cpolygon points='0,12 4,8 4,12 0,16' fill='%23242424'/%3E%3Cpolygon points='4,8 8,8 8,12 4,12' fill='%23181818'/%3E%3Cpolygon points='8,12 12,8 16,8 12,12' fill='%231e1e1e'/%3E%3Cpolygon points='8,12 12,8 12,12 8,16' fill='%23242424'/%3E%3Cpolygon points='12,8 16,8 16,12 12,12' fill='%23181818'/%3E%3Cline x1='0' y1='8' x2='8' y2='0' stroke='%230a0a0a' stroke-width='0.8'/%3E%3Cline x1='8' y1='8' x2='16' y2='0' stroke='%230a0a0a' stroke-width='0.8'/%3E%3Cline x1='0' y1='16' x2='8' y2='8' stroke='%230a0a0a' stroke-width='0.8'/%3E%3Cline x1='8' y1='16' x2='16' y2='8' stroke='%230a0a0a' stroke-width='0.8'/%3E%3C/svg%3E");
+  background-size: 16px 16px;
 }
 
 /* ── SPECS CARD ── */
@@ -2099,55 +2081,88 @@ async function showSpecsCard(car) {
 }
 
 async function fetchCarSpecs(carName) {
+  // Free static specs for popular cars — no API key needed
+  const name = carName.toLowerCase();
+  const db = [
+    { match:['ferrari 488','488 gtb'],       year:'2019', hp:'660',  tq:'560',  z60:'3.0', top:'205', eng:'3.9L Twin-Turbo V8',    dr:'RWD', wt:'3252', tag:'The twin-turbo V8 that rewrote the Ferrari rulebook.' },
+    { match:['ferrari sf90'],                year:'2021', hp:'986',  tq:'590',  z60:'2.5', top:'211', eng:'4.0L V8 Hybrid PHEV',    dr:'AWD', wt:'3461', tag:'Ferrari\'s first series production plug-in hybrid.' },
+    { match:['lamborghini huracán','huracan'],year:'2021', hp:'631',  tq:'443',  z60:'2.9', top:'202', eng:'5.2L Naturally Aspirated V10', dr:'AWD', wt:'3135', tag:'Italian thunder with no turbo in sight.' },
+    { match:['lamborghini aventador'],        year:'2021', hp:'769',  tq:'531',  z60:'2.9', top:'217', eng:'6.5L V12',               dr:'AWD', wt:'3472', tag:'The last naturally aspirated Lamborghini flagship.' },
+    { match:['porsche 911 gt3','gt3 rs','911 gt3'], year:'2022', hp:'502', tq:'346', z60:'3.2', top:'184', eng:'4.0L Flat-Six',     dr:'RWD', wt:'3126', tag:'The benchmark track machine you can drive to work.' },
+    { match:['porsche 911 turbo s'],          year:'2023', hp:'640',  tq:'590',  z60:'2.6', top:'205', eng:'3.8L Twin-Turbo Flat-Six', dr:'AWD', wt:'3625', tag:'All-weather supercar with zero excuses.' },
+    { match:['mclaren 720s','720s'],          year:'2022', hp:'710',  tq:'568',  z60:'2.8', top:'212', eng:'4.0L Twin-Turbo V8',    dr:'RWD', wt:'2828', tag:'Carbon everything, mid-engine magic.' },
+    { match:['mclaren senna'],                year:'2019', hp:'789',  tq:'590',  z60:'2.7', top:'208', eng:'4.0L Twin-Turbo V8',    dr:'RWD', wt:'2641', tag:'Built for the track. Barely legal for the street.' },
+    { match:['bugatti chiron'],               year:'2022', hp:'1479', tq:'1180', z60:'2.4', top:'261', eng:'8.0L Quad-Turbo W16',   dr:'AWD', wt:'4398', tag:'The 261-mph mile-muncher with 1,479 horsepower.' },
+    { match:['koenigsegg jesko'],             year:'2022', hp:'1600', tq:'1106', z60:'2.5', top:'300', eng:'5.0L Twin-Turbo V8',    dr:'RWD', wt:'3130', tag:'Designed to hit 300 mph. No, really.' },
+    { match:['dodge viper','srt viper'],      year:'2017', hp:'645',  tq:'600',  z60:'3.4', top:'206', eng:'8.4L V10',              dr:'RWD', wt:'3374', tag:'Ten cylinders, zero stability nannies, maximum drama.' },
+    { match:['dodge challenger hellcat','challenger hellcat'], year:'2023', hp:'717', tq:'656', z60:'3.6', top:'199', eng:'6.2L Supercharged HEMI V8', dr:'RWD', wt:'4455', tag:'The loudest muscle car you can buy brand new.' },
+    { match:['dodge challenger','charger r/t','charger sxt','dodge charger'], year:'2023', hp:'375', tq:'410', z60:'5.1', top:'155', eng:'5.7L HEMI V8', dr:'RWD', wt:'4189', tag:'Four-door muscle car that refuses to grow up.' },
+    { match:['ford mustang gt500','shelby gt500'], year:'2022', hp:'760', tq:'625', z60:'3.3', top:'180', eng:'5.2L Supercharged V8', dr:'RWD', wt:'4225', tag:'The most powerful street-legal Mustang ever built.' },
+    { match:['ford mustang mach 1'],          year:'2023', hp:'480',  tq:'420',  z60:'4.4', top:'163', eng:'5.0L Coyote V8',       dr:'RWD', wt:'3886', tag:'Track-tuned Mustang with the Voodoo\'s intake.' },
+    { match:['ford mustang gt','mustang gt'], year:'2023', hp:'450',  tq:'410',  z60:'4.5', top:'155', eng:'5.0L Coyote V8',       dr:'RWD', wt:'3842', tag:'The pony car that started it all, still kicking.' },
+    { match:['chevrolet camaro ss','camaro ss'], year:'2023', hp:'455', tq:'455', z60:'4.0', top:'165', eng:'6.2L LT1 V8',        dr:'RWD', wt:'3650', tag:'The bowtie bruiser built to beat Mustangs.' },
+    { match:['chevrolet camaro zl1','camaro zl1'], year:'2023', hp:'650', tq:'650', z60:'3.5', top:'198', eng:'6.2L Supercharged LT4 V8', dr:'RWD', wt:'3850', tag:'Supercharged, track-ready, unhinged fun.' },
+    { match:['chevrolet corvette z06','corvette z06'], year:'2023', hp:'670', tq:'460', z60:'2.6', top:'196', eng:'5.5L Flat-Plane V8', dr:'RWD', wt:'3366', tag:'America\'s answer to a Ferrari GT3.' },
+    { match:['chevrolet corvette','corvette c8'], year:'2023', hp:'495', tq:'470', z60:'2.9', top:'194', eng:'6.2L LT2 V8',       dr:'RWD', wt:'3366', tag:'Mid-engine American dream, finally.' },
+    { match:['bmw m3','m3 competition'],      year:'2023', hp:'503',  tq:'479',  z60:'3.4', top:'180', eng:'3.0L Twin-Turbo I6',   dr:'RWD', wt:'3827', tag:'The benchmark sports sedan, still setting the bar.' },
+    { match:['bmw m4'],                       year:'2023', hp:'503',  tq:'479',  z60:'3.5', top:'180', eng:'3.0L Twin-Turbo I6',   dr:'RWD', wt:'3891', tag:'Two fewer doors, same M-car fury.' },
+    { match:['mercedes amg gt','amg gt63'],   year:'2022', hp:'630',  tq:'664',  z60:'3.1', top:'196', eng:'4.0L Twin-Turbo V8',   dr:'AWD', wt:'4564', tag:'Four-door GT car with supercar intentions.' },
+    { match:['maserati mc20'],                year:'2022', hp:'621',  tq:'538',  z60:'2.9', top:'202', eng:'3.0L Twin-Turbo V6',   dr:'RWD', wt:'3306', tag:'Maserati\'s comeback car, and what a comeback.' },
+    { match:['aston martin vantage'],         year:'2023', hp:'503',  tq:'505',  z60:'3.5', top:'195', eng:'4.0L Twin-Turbo V8',   dr:'RWD', wt:'3461', tag:'British muscle dressed in a tuxedo.' },
+    { match:['rolls royce','rolls-royce'],    year:'2023', hp:'563',  tq:'664',  z60:'4.7', top:'155', eng:'6.75L Twin-Turbo V12', dr:'RWD', wt:'5644', tag:'The best car in the world, if money is no object.' },
+    { match:['bentley continental','bentayga'],year:'2023',hp:'542',  tq:'568',  z60:'3.6', top:'207', eng:'4.0L Twin-Turbo V8',   dr:'AWD', wt:'4938', tag:'Grand touring perfection with a twin-turbo punch.' },
+    { match:['tesla model s plaid'],          year:'2023', hp:'1020', tq:'1050', z60:'1.99',top:'200', eng:'Three Motor Electric',  dr:'AWD', wt:'4766', tag:'The quickest production car ever made. Full stop.' },
+    { match:['rimac nevera','rimac'],         year:'2023', hp:'1914', tq:'1740', z60:'1.85',top:'258', eng:'Four Motor Electric',   dr:'AWD', wt:'4740', tag:'Two thousand horsepower of Croatian hypercar.' },
+    { match:['pagani huayra','pagani zonda'], year:'2021', hp:'764',  tq:'738',  z60:'2.8', top:'238', eng:'6.0L Twin-Turbo V12',  dr:'RWD', wt:'2822', tag:'Rolling sculpture with a Mercedes AMG heartbeat.' },
+    { match:['genesis coupe','genesis 3.8'], year:'2016', hp:'348',  tq:'295',  z60:'5.3', top:'149', eng:'3.8L Lambda V6',       dr:'RWD', wt:'3461', tag:'Korea\'s surprise rear-wheel drive sports coupe.' },
+    { match:['nissan gt-r','gtr','nissan gtr'], year:'2020', hp:'565', tq:'467', z60:'2.7', top:'196', eng:'3.8L Twin-Turbo V6',  dr:'AWD', wt:'3931', tag:'Godzilla. Still.' },
+    { match:['toyota supra','gr supra'],      year:'2023', hp:'382',  tq:'368',  z60:'3.9', top:'155', eng:'3.0L Twin-Turbo I6',  dr:'RWD', wt:'3181', tag:'The legend reborn with a BMW engine inside.' },
+  ];
+
+  const entry = db.find(e => e.match.some(m => name.includes(m)));
+  if (entry) {
+    return {
+      year: entry.year, horsepower: entry.hp, torque: entry.tq,
+      zeroToSixty: entry.z60, topSpeed: entry.top, engine: entry.eng,
+      drivetrain: entry.dr, weight: entry.wt, tagline: entry.tag
+    };
+  }
+
+  // For unknown cars try NHTSA's free public API for basic info
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 400,
-        system: 'You are a car specs database. Return ONLY a valid JSON object with these fields (omit any you don\'t know): year, horsepower (number as string, e.g. "503"), torque (number as string), zeroToSixty (e.g. "3.5"), topSpeed (number as string in mph), engine (e.g. "5.0L V8"), drivetrain (e.g. "RWD"), weight (number as string in lbs), tagline (one punchy sentence about the car, max 12 words). No markdown, no explanation, just the JSON object.',
-        messages: [{ role: 'user', content: `Specs for: ${carName}` }]
-      })
-    });
-    const data = await res.json();
-    const text = data.content?.[0]?.text || '';
-    const clean = text.replace(/```json|```/g, '').trim();
-    return JSON.parse(clean);
-  } catch(e) { return null; }
+    const words = carName.trim().split(/\s+/);
+    const make  = words[0];
+    const model = words.slice(1).join('%20');
+    const res   = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/getmodelsformake/${encodeURIComponent(make)}?format=json`);
+    if (res.ok) {
+      const data = await res.json();
+      const found = data.Results?.find(r => r.Model_Name?.toLowerCase().includes(words.slice(1).join(' ').toLowerCase()));
+      if (found) return { tagline: `${found.Make_Name} ${found.Model_Name} — a verified chassis on record.` };
+    }
+  } catch(e) {}
+  return null;
 }
 
 async function fetchCarImage(carName) {
-  // Try Wikipedia's open REST API for a car thumbnail — no key needed, CORS-friendly
-  try {
-    const query = encodeURIComponent(carName.replace(/\s+/g, '_'));
-    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${query}`, {
-      headers: { 'Accept': 'application/json' }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const url = data.thumbnail?.source || data.originalimage?.source;
-      if (url) return url;
-    }
-  } catch(e) {}
-
-  // Fallback: ask Claude for a Wikimedia Commons direct image URL
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 120,
-        system: 'Return ONLY a single direct Wikimedia Commons image URL (must end in .jpg, .jpeg, or .png and start with https://upload.wikimedia.org). No explanation. If you cannot provide one with confidence, return: NONE',
-        messages: [{ role: 'user', content: `Wikimedia Commons direct image URL for: ${carName}` }]
-      })
-    });
-    const data = await res.json();
-    const url = (data.content?.[0]?.text || '').trim();
-    if (url && url !== 'NONE' && url.startsWith('https://upload.wikimedia.org')) return url;
-  } catch(e) {}
-
+  // Wikipedia REST API — completely free, no key needed
+  // Try exact name first, then make-only fallback
+  const attempts = [
+    carName.replace(/\s+/g, '_'),
+    carName.split(' ').slice(0,2).join('_'),
+    carName.split(' ')[0]
+  ];
+  for (const q of attempts) {
+    try {
+      const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`, {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const url = data.thumbnail?.source || data.originalimage?.source;
+        if (url) return url;
+      }
+    } catch(e) {}
+  }
   return null;
 }
 
