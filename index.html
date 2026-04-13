@@ -440,7 +440,115 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
 .theme-swatch:hover{transform:scale(1.15);}
 .theme-swatch.active{border-color:#fff;transform:scale(1.1);}
 
-/* ── SOUND TOGGLE ── */
+/* ── CARBON FIBER TEXTURE ── */
+/* The weave is built with two layered CSS gradients — no images needed */
+@keyframes cfShimmer{0%,100%{opacity:0.04}50%{opacity:0.07}}
+body.carbon-on .card,
+body.carbon-on .hist-item,
+body.carbon-on .garage-row,
+body.carbon-on .score-banner,
+body.carbon-on .run-item,
+body.carbon-on .bottom-nav,
+body.carbon-on .app-header,
+body.carbon-on .more-menu,
+body.carbon-on .recap-card,
+body.carbon-on .modal-card,
+body.carbon-on .specs-card {
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      rgba(255,255,255,0.03) 0px,
+      rgba(255,255,255,0.03) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255,255,255,0.03) 0px,
+      rgba(255,255,255,0.03) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+  background-size:8px 8px;
+}
+/* Subtle highlight edge on cards when carbon is on */
+body.carbon-on .card,
+body.carbon-on .hist-item,
+body.carbon-on .score-banner,
+body.carbon-on .run-item {
+  border-color: rgba(255,255,255,0.08);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+/* Carbon toggle row in settings */
+.carbon-toggle-row{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.carbon-preview{
+  width:28px;height:28px;border-radius:6px;flex-shrink:0;border:1px solid var(--border);
+  background-color:#141414;
+  background-image:
+    repeating-linear-gradient(45deg,rgba(255,255,255,0.07) 0px,rgba(255,255,255,0.07) 1px,transparent 1px,transparent 4px),
+    repeating-linear-gradient(-45deg,rgba(255,255,255,0.07) 0px,rgba(255,255,255,0.07) 1px,transparent 1px,transparent 4px);
+  background-size:8px 8px;
+}
+
+/* ── SPECS CARD ── */
+.specs-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:99995;
+  display:flex;align-items:flex-end;justify-content:center;
+  animation:fadeIn 0.2s ease;
+}
+.specs-card{
+  width:100%;max-width:480px;
+  background:var(--surf);border-top:1px solid var(--border);
+  border-radius:20px 20px 0 0;
+  animation:slideUpRecap 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  max-height:88vh;overflow-y:auto;
+}
+.specs-img-wrap{
+  width:100%;height:200px;overflow:hidden;border-radius:20px 20px 0 0;
+  background:var(--surf2);position:relative;flex-shrink:0;
+}
+.specs-img{width:100%;height:100%;object-fit:cover;display:block;}
+.specs-img-skeleton{
+  width:100%;height:100%;background:linear-gradient(90deg,var(--surf2) 25%,var(--surf3) 50%,var(--surf2) 75%);
+  background-size:200% 100%;animation:shimmer 1.4s infinite;
+}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.specs-img-placeholder{
+  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  font-size:3.5rem;background:var(--surf2);
+}
+.specs-body{padding:20px 20px 32px;}
+.specs-badge-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
+.specs-type-badge{font-size:0.55rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;border-radius:20px;border:1px solid transparent;}
+.specs-name{font-family:'Bebas Neue',cursive;font-size:1.9rem;letter-spacing:2px;line-height:1.05;margin-bottom:4px;}
+.specs-tagline{font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.4;}
+.specs-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.specs-cell{background:var(--surf2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;}
+.specs-cell-label{font-size:0.52rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;font-weight:600;}
+.specs-cell-value{font-family:'Bebas Neue',cursive;font-size:1.25rem;letter-spacing:1px;color:var(--text);line-height:1;}
+.specs-cell-unit{font-size:0.6rem;color:var(--text2);margin-top:1px;}
+.specs-highlight{grid-column:1/-1;background:var(--adim);border-color:var(--accent);}
+.specs-highlight .specs-cell-value{color:var(--accent);font-size:1.5rem;}
+.specs-close-btn{
+  width:100%;background:var(--accent);color:#0a0a0a;border:none;border-radius:10px;
+  font-family:'Bebas Neue',cursive;font-size:1.05rem;letter-spacing:3px;
+  padding:13px;cursor:pointer;transition:all 0.15s;
+}
+.specs-close-btn:active{transform:scale(0.98);}
+.specs-loading{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px 20px;gap:14px;
+}
+.specs-loading-spinner{
+  width:36px;height:36px;border:3px solid var(--border);
+  border-top-color:var(--accent);border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.specs-loading-text{font-size:0.68rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.specs-error{text-align:center;padding:32px 20px;color:var(--muted);font-size:0.75rem;line-height:1.6;}
+
+
 .sound-toggle{display:flex;align-items:center;gap:10px;}
 .toggle-pill{position:relative;width:40px;height:22px;background:var(--border);border-radius:11px;cursor:pointer;transition:background 0.2s;flex-shrink:0;border:none;}
 .toggle-pill.on{background:var(--accent);}
@@ -823,6 +931,11 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
         <div class="card-title">🎨 THEME</div>
         <div class="theme-bar" id="themeBar"></div>
         <div style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;margin-top:8px;" id="themeName">Default</div>
+        <div class="carbon-toggle-row">
+          <div class="carbon-preview"></div>
+          <span style="font-size:0.78rem;color:var(--text2);flex:1;">Carbon fiber texture on surfaces</span>
+          <button class="toggle-pill" id="carbonToggle" onclick="toggleCarbon()"><div class="toggle-knob"></div></button>
+        </div>
       </div>
 
       <!-- Sound FX -->
@@ -1101,6 +1214,7 @@ const THEMES = [
   { name:'Acid',         accent:'#a3e635', accent2:'#facc15', bg:'#090a05', surf:'#131505' },
 ];
 let activeTheme = parseInt(localStorage.getItem('cs_theme') || '0');
+let carbonOn    = localStorage.getItem('cs_carbon') === 'on';
 
 // ── THEMES ──
 function applyTheme(idx) {
@@ -1130,6 +1244,22 @@ function renderThemeBar() {
 function selectTheme(idx) {
   applyTheme(idx);
   renderThemeBar();
+}
+function toggleCarbon() {
+  carbonOn = !carbonOn;
+  localStorage.setItem('cs_carbon', carbonOn ? 'on' : 'off');
+  applyCarbon();
+  const btn = document.getElementById('carbonToggle');
+  if (btn) btn.classList.toggle('on', carbonOn);
+  showToast(carbonOn ? '🏁 Carbon fiber on' : 'Carbon fiber off');
+}
+function applyCarbon() {
+  document.body.classList.toggle('carbon-on', carbonOn);
+}
+function initCarbonToggle() {
+  applyCarbon();
+  const btn = document.getElementById('carbonToggle');
+  if (btn) btn.classList.toggle('on', carbonOn);
 }
 
 // ── SOUND ──
@@ -1446,6 +1576,7 @@ function logRun() {
   el.style.animation = 'none';
   requestAnimationFrame(() => { el.style.animation = 'numPop 0.3s ease'; });
   showToast(type+' '+name+' added to run!');
+  showSpecsCard({ name, value, color, type });
 }
 
 // ── LOG AS SPOTTED ──
@@ -1477,6 +1608,7 @@ function logSpotted() {
   clearInputs();
   renderQPTrigger();
   showToast(type+' '+name+' spotted & saved to garage!');
+  showSpecsCard({ name, value, color, type });
 }
 
 // ── REMOVE FROM RUN ──
@@ -1872,6 +2004,153 @@ function renderHistory() {
   });
 }
 
+// ── SPECS CARD ──
+async function showSpecsCard(car) {
+  // Build overlay immediately with loading state
+  const overlay = document.createElement('div');
+  overlay.className = 'specs-overlay';
+  overlay.id = 'specsOverlay';
+  overlay.innerHTML = `
+    <div class="specs-card" onclick="event.stopPropagation()">
+      <div class="specs-img-wrap"><div class="specs-img-skeleton"></div></div>
+      <div class="specs-body">
+        <div class="specs-loading">
+          <div class="specs-loading-spinner"></div>
+          <div class="specs-loading-text">Looking up ${car.name}…</div>
+        </div>
+      </div>
+    </div>`;
+  overlay.onclick = () => overlay.remove();
+  document.body.appendChild(overlay);
+
+  // Fetch specs from Claude API and image in parallel
+  const [specsData, imgUrl] = await Promise.all([
+    fetchCarSpecs(car.name),
+    fetchCarImage(car.name)
+  ]);
+
+  // Replace content
+  const card = overlay.querySelector('.specs-card');
+  if (!card || !document.body.contains(overlay)) return;
+
+  const rarity = getRarity(car.value);
+  const imgHTML = imgUrl
+    ? `<img class="specs-img" src="${imgUrl}" alt="${car.name}" onerror="this.parentElement.innerHTML='<div class=specs-img-placeholder>${car.type}</div>'">`
+    : `<div class="specs-img-placeholder">${car.type}</div>`;
+
+  if (!specsData) {
+    card.innerHTML = `
+      <div class="specs-img-wrap">${imgHTML}</div>
+      <div class="specs-body">
+        <div class="specs-name">${car.name}</div>
+        <div class="specs-error">Couldn't load specs right now.<br>Tap anywhere to dismiss.</div>
+        <button class="specs-close-btn" onclick="document.getElementById('specsOverlay').remove()">GOT IT</button>
+      </div>`;
+    return;
+  }
+
+  const s = specsData;
+  card.innerHTML = `
+    <div class="specs-img-wrap">${imgHTML}</div>
+    <div class="specs-body">
+      <div class="specs-badge-row">
+        <span class="specs-type-badge" style="color:${rarity.color};background:${rarity.bg};border-color:${rarity.color}44">${rarity.label}</span>
+        ${s.year ? `<span style="font-size:0.6rem;color:var(--muted);letter-spacing:1px">${s.year}</span>` : ''}
+      </div>
+      <div class="specs-name">${car.name}</div>
+      ${s.tagline ? `<div class="specs-tagline">${s.tagline}</div>` : ''}
+      <div class="specs-grid">
+        ${s.horsepower ? `<div class="specs-cell specs-highlight">
+          <div class="specs-cell-label">Power</div>
+          <div class="specs-cell-value">${s.horsepower}</div>
+          <div class="specs-cell-unit">horsepower</div>
+        </div>` : ''}
+        ${s.torque ? `<div class="specs-cell">
+          <div class="specs-cell-label">Torque</div>
+          <div class="specs-cell-value">${s.torque}</div>
+          <div class="specs-cell-unit">lb-ft</div>
+        </div>` : ''}
+        ${s.zeroToSixty ? `<div class="specs-cell">
+          <div class="specs-cell-label">0–60 mph</div>
+          <div class="specs-cell-value">${s.zeroToSixty}</div>
+          <div class="specs-cell-unit">seconds</div>
+        </div>` : ''}
+        ${s.topSpeed ? `<div class="specs-cell">
+          <div class="specs-cell-label">Top Speed</div>
+          <div class="specs-cell-value">${s.topSpeed}</div>
+          <div class="specs-cell-unit">mph</div>
+        </div>` : ''}
+        ${s.engine ? `<div class="specs-cell" style="grid-column:1/-1">
+          <div class="specs-cell-label">Engine</div>
+          <div class="specs-cell-value" style="font-size:0.95rem;font-family:'DM Sans',sans-serif;font-weight:600;letter-spacing:0">${s.engine}</div>
+        </div>` : ''}
+        ${s.drivetrain ? `<div class="specs-cell">
+          <div class="specs-cell-label">Drivetrain</div>
+          <div class="specs-cell-value" style="font-size:1rem">${s.drivetrain}</div>
+        </div>` : ''}
+        ${s.weight ? `<div class="specs-cell">
+          <div class="specs-cell-label">Weight</div>
+          <div class="specs-cell-value">${s.weight}</div>
+          <div class="specs-cell-unit">lbs</div>
+        </div>` : ''}
+      </div>
+      <button class="specs-close-btn" onclick="document.getElementById('specsOverlay').remove()">NICE 🤙</button>
+    </div>`;
+}
+
+async function fetchCarSpecs(carName) {
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 400,
+        system: 'You are a car specs database. Return ONLY a valid JSON object with these fields (omit any you don\'t know): year, horsepower (number as string, e.g. "503"), torque (number as string), zeroToSixty (e.g. "3.5"), topSpeed (number as string in mph), engine (e.g. "5.0L V8"), drivetrain (e.g. "RWD"), weight (number as string in lbs), tagline (one punchy sentence about the car, max 12 words). No markdown, no explanation, just the JSON object.',
+        messages: [{ role: 'user', content: `Specs for: ${carName}` }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+    const clean = text.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  } catch(e) { return null; }
+}
+
+async function fetchCarImage(carName) {
+  // Try Wikipedia's open REST API for a car thumbnail — no key needed, CORS-friendly
+  try {
+    const query = encodeURIComponent(carName.replace(/\s+/g, '_'));
+    const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${query}`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const url = data.thumbnail?.source || data.originalimage?.source;
+      if (url) return url;
+    }
+  } catch(e) {}
+
+  // Fallback: ask Claude for a Wikimedia Commons direct image URL
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 120,
+        system: 'Return ONLY a single direct Wikimedia Commons image URL (must end in .jpg, .jpeg, or .png and start with https://upload.wikimedia.org). No explanation. If you cannot provide one with confidence, return: NONE',
+        messages: [{ role: 'user', content: `Wikimedia Commons direct image URL for: ${carName}` }]
+      })
+    });
+    const data = await res.json();
+    const url = (data.content?.[0]?.text || '').trim();
+    if (url && url !== 'NONE' && url.startsWith('https://upload.wikimedia.org')) return url;
+  } catch(e) {}
+
+  return null;
+}
+
 // ── TOAST ──
 function showToast(msg) {
   const t=document.getElementById('toast');
@@ -1942,6 +2221,7 @@ document.getElementById('carValue').addEventListener('keydown', e=>{ if(e.key===
 renderQPTrigger();
 renderSpot();
 applyTheme(activeTheme);
+applyCarbon();
 initSoundToggle();
 
 // ── SERVICE WORKER ──
@@ -2066,7 +2346,7 @@ function goToMore(page) {
   closeQP();
   if (page==='stats') renderStats();
   if (page==='history') renderHistory();
-  if (page==='settings') { renderThemeBar(); initSoundToggle(); updateAliasCount(); }
+  if (page==='settings') { renderThemeBar(); initSoundToggle(); initCarbonToggle(); updateAliasCount(); }
   if (page==='news' && !newsLoaded) { newsLoaded=true; renderNewsSources(); loadNews(); }
 }
 
