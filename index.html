@@ -769,9 +769,9 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
       <span class="nav-icon">🏎️</span>
       <span class="nav-label">Garage</span>
     </button>
-    <button class="nav-btn" onclick="goTo('history')" id="nav-history">
-      <span class="nav-icon">📋</span>
-      <span class="nav-label">History</span>
+    <button class="nav-btn" onclick="goTo('voice')" id="nav-voice">
+      <span class="nav-icon">📝</span>
+      <span class="nav-label">Notes</span>
     </button>
     <button class="nav-btn" onclick="toggleMoreMenu()" id="nav-more">
       <span class="nav-icon">•••</span>
@@ -781,7 +781,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
 
   <!-- More dropdown menu -->
   <div id="moreMenu" class="more-menu" style="display:none">
-    <button class="more-item" onclick="goToMore('voice')">📝 <span>Notes</span></button>
+    <button class="more-item" onclick="goToMore('history')">📋 <span>History</span></button>
     <button class="more-item" onclick="goToMore('news')">🗞️ <span>News</span></button>
     <button class="more-item" onclick="goToMore('stats')">📊 <span>Stats</span></button>
   </div>
@@ -1709,6 +1709,7 @@ function goToMore(page) {
   document.getElementById('page-'+page).classList.add('active');
   closeQP();
   if (page==='stats') renderStats();
+  if (page==='history') renderHistory();
   if (page==='news' && !newsLoaded) { newsLoaded=true; renderNewsSources(); loadNews(); }
 }
 
