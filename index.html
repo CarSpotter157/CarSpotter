@@ -31,6 +31,23 @@ const db   = firebase.firestore();
   --border:#2a2a2a;--accent:#f5c842;--adim:rgba(245,200,66,0.10);
   --accent2:#ff5733;--text:#f0f0f0;--text2:#888;--muted:#505050;
   --green:#4ade80;--red:#f87171;--nav-h:62px;
+  --overlay-bg:rgba(0,0,0,0.82);--input-bg:var(--surf2);
+}
+body.theme-light{
+  --bg:#f5f5f0;--surf:#ffffff;--surf2:#f0efe9;--surf3:#e8e7e0;
+  --border:#d8d6cc;--text:#1a1a1a;--text2:#666;--muted:#999;
+  --green:#16a34a;--red:#dc2626;
+  --overlay-bg:rgba(0,0,0,0.6);--input-bg:#ffffff;
+}
+body.theme-cyberpunk{
+  --bg:#08001a;--surf:#100028;--surf2:#180038;--surf3:#200044;
+  --border:#3d0080;--text:#f0f0ff;--text2:#a880ff;--muted:#5533aa;
+  --green:#00ff88;--red:#ff2266;
+}
+body.theme-retro80s{
+  --bg:#0d0d1a;--surf:#131325;--surf2:#1a1a30;--surf3:#20203a;
+  --border:#2d2d5a;--text:#f5f0ff;--text2:#b8a8ff;--muted:#6060aa;
+  --green:#00ffcc;--red:#ff6680;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);}
@@ -530,6 +547,58 @@ body.carbon-on .run-item {
 .specs-loading-text{font-size:0.68rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
 .specs-error{text-align:center;padding:32px 20px;color:var(--muted);font-size:0.75rem;line-height:1.6;}
 
+/* ── PHOTO SUPPORT ── */
+.photo-btn{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;background:var(--surf2);border:1px dashed var(--border);
+  border-radius:9px;color:var(--muted);font-size:0.78rem;letter-spacing:1px;
+  padding:9px;cursor:pointer;font-family:inherit;transition:all 0.15s;margin-bottom:8px;
+}
+.photo-btn:hover{border-color:var(--accent);color:var(--accent);}
+.photo-preview-wrap{position:relative;margin-bottom:8px;border-radius:10px;overflow:hidden;border:1px solid var(--border);}
+.photo-preview-img{width:100%;max-height:160px;object-fit:cover;display:block;}
+.photo-remove{position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.7);border:none;color:#fff;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:0.75rem;line-height:1;display:flex;align-items:center;justify-content:center;}
+.run-item-photo{width:44px;height:44px;border-radius:7px;object-fit:cover;margin-right:8px;flex-shrink:0;border:1px solid var(--border);}
+.hc-photo{width:36px;height:36px;border-radius:6px;object-fit:cover;margin-right:8px;flex-shrink:0;border:1px solid var(--border);}
+
+/* ── SMART VOICE FILL ── */
+.voice-fill-bar{
+  display:none;background:var(--adim);border:1px solid var(--accent);
+  border-radius:10px;padding:10px 12px;margin-bottom:10px;
+  animation:fadeUp 0.3s ease;
+}
+.voice-fill-bar.show{display:flex;align-items:center;gap:8px;}
+.vf-icon{font-size:1rem;flex-shrink:0;}
+.vf-text{flex:1;font-size:0.72rem;color:var(--text2);line-height:1.4;}
+.vf-accept{background:var(--accent);color:#0a0a0a;border:none;border-radius:6px;font-family:'Bebas Neue',cursive;font-size:0.75rem;letter-spacing:1.5px;padding:5px 10px;cursor:pointer;flex-shrink:0;}
+.vf-dismiss{background:none;border:none;color:var(--muted);font-size:0.85rem;cursor:pointer;flex-shrink:0;padding:2px;}
+
+/* ── OFFLINE BANNER ── */
+.offline-banner{
+  position:fixed;top:0;left:50%;transform:translateX(-50%);
+  background:var(--red);color:#fff;font-family:'Bebas Neue',cursive;
+  font-size:0.8rem;letter-spacing:2px;padding:5px 18px;
+  border-radius:0 0 8px 8px;z-index:9999;
+  opacity:0;pointer-events:none;transition:opacity 0.3s;
+}
+.offline-banner.show{opacity:1;}
+.offline-queue-badge{
+  position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;
+  font-size:0.5rem;font-weight:700;border-radius:50%;width:16px;height:16px;
+  display:flex;align-items:center;justify-content:center;border:2px solid var(--bg);
+}
+
+/* ── THEME LABEL PILLS for light mode contrast ── */
+body.theme-light .toast{color:#fff;}
+body.theme-light .btn-run{background:var(--accent);color:#fff;}
+body.theme-light .hdr-val{color:var(--accent);}
+body.theme-light .s-num{color:var(--accent);}
+body.theme-light .run-item,.body.theme-light .card{background:#fff;}
+body.theme-light .more-menu{background:#fff;}
+body.theme-light .qp-dropdown{background:#f9f9f5;}
+body.theme-light .auth-overlay{background:var(--bg);}
+body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .modal-card{background:#fff;}
+
 
 .sound-toggle{display:flex;align-items:center;gap:10px;}
 .toggle-pill{position:relative;width:40px;height:22px;background:var(--border);border-radius:11px;cursor:pointer;transition:background 0.2s;flex-shrink:0;border:none;}
@@ -757,6 +826,21 @@ body.carbon-on .run-item {
               </div>
             </div>
 
+            <!-- Voice Smart Fill -->
+            <div class="voice-fill-bar" id="voiceFillBar">
+              <span class="vf-icon">✨</span>
+              <span class="vf-text" id="voiceFillText">Detected a car — tap to fill form</span>
+              <button class="vf-accept" id="voiceFillAccept" onclick="acceptVoiceFill()">FILL</button>
+              <button class="vf-dismiss" onclick="dismissVoiceFill()">✕</button>
+            </div>
+
+            <!-- Photo attach -->
+            <div id="photoPreviewWrap" style="display:none"></div>
+            <label class="photo-btn">
+              📷 <span>Attach photo (optional)</span>
+              <input type="file" accept="image/*" capture="environment" style="display:none" id="photoInput" onchange="handlePhotoInput(this)">
+            </label>
+
             <!-- Quick Picks -->
             <div class="qp-wrap" id="qpWrap" style="display:none">
               <button class="qp-trigger" onclick="toggleQP()">
@@ -855,10 +939,19 @@ body.carbon-on .run-item {
           <div class="sec-title">📝 NOTES</div>
           <div class="notes-sub">Type or speak — saves automatically</div>
         </div>
-        <button class="mic-btn" id="micBtn" onclick="toggleMic()">
-          <span class="mic-icon">🎤</span>
-          <span class="mic-lbl" id="micLbl">Tap to speak</span>
-        </button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="mic-btn" id="smartFillBtn" onclick="smartVoiceFill()" style="background:var(--adim);border-color:var(--accent);">
+            <span class="mic-icon">✨</span>
+            <span class="mic-lbl" style="color:var(--accent)">Smart Fill</span>
+          </button>
+          <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+            <span class="mic-icon">🎤</span>
+            <span class="mic-lbl" id="micLbl">Tap to speak</span>
+          </button>
+        </div>
+      </div>
+      <div style="font-size:0.62rem;color:var(--muted);letter-spacing:1px;margin-bottom:8px;line-height:1.6;">
+        💡 Say <em style="color:var(--accent2)">"Log a red Ferrari 488 worth 280 thousand"</em> then tap ✨ Smart Fill to auto-fill the form
       </div>
       <textarea id="notesArea" class="notes-area" placeholder="Ferrari 488 red&#10;Yellow Lambo&#10;Blue Porsche GT3 992&#10;&#10;Just type or hit the mic — nothing happens until you&#39;re ready..."></textarea>
     </div>
@@ -913,11 +1006,23 @@ body.carbon-on .run-item {
         <div class="card-title">🎨 THEME</div>
         <div class="theme-bar" id="themeBar"></div>
         <div style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;margin-top:8px;" id="themeName">Default</div>
+        <div style="font-size:0.6rem;color:var(--muted);margin-top:4px;line-height:1.5;">Dark: Default · Carbon · Stealth · Inferno · Cobalt · Acid<br>Light: ☀️ Light &nbsp;|&nbsp; Special: 💜 Cyberpunk · 🌸 Retro 80s</div>
         <div class="carbon-toggle-row">
           <div class="carbon-preview"></div>
           <span style="font-size:0.78rem;color:var(--text2);flex:1;">Carbon fiber texture on surfaces</span>
           <button class="toggle-pill" id="carbonToggle" onclick="toggleCarbon()"><div class="toggle-knob"></div></button>
         </div>
+      </div>
+
+      <!-- Offline Status -->
+      <div class="card">
+        <div class="card-title">✈ OFFLINE MODE</div>
+        <div style="font-size:0.72rem;color:var(--text2);margin-bottom:10px;line-height:1.5;">CarSpotter always saves locally — you can log spots with no internet. Changes sync automatically when you reconnect.</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div id="offlineStatusDot" style="width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0;"></div>
+          <span id="offlineStatusText" style="font-size:0.78rem;color:var(--text2);flex:1;">Online — syncing to cloud</span>
+        </div>
+        <div id="offlineQueueInfo" style="display:none;font-size:0.65rem;color:var(--accent2);margin-top:6px;letter-spacing:1px;"></div>
       </div>
 
       <!-- Sound FX -->
@@ -991,6 +1096,7 @@ body.carbon-on .run-item {
 <div class="road-deco"><div class="rdl"></div><div class="rdl"></div><div class="rdl"></div></div>
 <div class="scooter-deco">🛵</div>
 <div class="toast" id="toast"></div>
+<div class="offline-banner" id="offlineBanner">✈ OFFLINE — Changes saved locally</div>
 
 <script>
 // ── FIREBASE AUTH & SYNC ──
@@ -1157,7 +1263,19 @@ function subscribeCloud() {
 }
 
 function saveToCloud() {
-  if (!currentUser) return;
+  // Always persist locally first — works offline
+  localStorage.setItem('cs_runs',    JSON.stringify(allRuns));
+  localStorage.setItem('cs_current', JSON.stringify(currentRun));
+  localStorage.setItem('cs_qp',      JSON.stringify(quickPicks));
+
+  if (!currentUser || !navigator.onLine) {
+    // Queue for when we come back online
+    if (!navigator.onLine) {
+      offlineQueue.push(Date.now());
+      localStorage.setItem('cs_offline_queue', JSON.stringify(offlineQueue));
+    }
+    return;
+  }
   setSyncDot('syncing');
   clearTimeout(syncTimer);
   syncTimer = setTimeout(() => {
@@ -1188,12 +1306,15 @@ let aliases        = JSON.parse(localStorage.getItem('cs_aliases') || '{}'); // 
 
 // ── THEMES ──
 const THEMES = [
-  { name:'Default',      accent:'#f5c842', accent2:'#ff5733', bg:'#0a0a0a', surf:'#141414' },
-  { name:'Carbon',       accent:'#e0e0e0', accent2:'#ff4444', bg:'#0d0d0d', surf:'#1a1a1a' },
-  { name:'Stealth',      accent:'#6ee7b7', accent2:'#f472b6', bg:'#050505', surf:'#101010' },
-  { name:'Inferno',      accent:'#fb923c', accent2:'#f43f5e', bg:'#0c0a09', surf:'#1c1410' },
-  { name:'Cobalt',       accent:'#60a5fa', accent2:'#a78bfa', bg:'#080c14', surf:'#0f1624' },
-  { name:'Acid',         accent:'#a3e635', accent2:'#facc15', bg:'#090a05', surf:'#131505' },
+  { name:'Default',      accent:'#f5c842', accent2:'#ff5733', bg:'#0a0a0a', surf:'#141414', bodyClass:'' },
+  { name:'Carbon',       accent:'#e0e0e0', accent2:'#ff4444', bg:'#0d0d0d', surf:'#1a1a1a', bodyClass:'' },
+  { name:'Stealth',      accent:'#6ee7b7', accent2:'#f472b6', bg:'#050505', surf:'#101010', bodyClass:'' },
+  { name:'Inferno',      accent:'#fb923c', accent2:'#f43f5e', bg:'#0c0a09', surf:'#1c1410', bodyClass:'' },
+  { name:'Cobalt',       accent:'#60a5fa', accent2:'#a78bfa', bg:'#080c14', surf:'#0f1624', bodyClass:'' },
+  { name:'Acid',         accent:'#a3e635', accent2:'#facc15', bg:'#090a05', surf:'#131505', bodyClass:'' },
+  { name:'Light',        accent:'#e65c00', accent2:'#ff3366', bg:'#f5f5f0', surf:'#ffffff', bodyClass:'theme-light' },
+  { name:'Cyberpunk',    accent:'#bf00ff', accent2:'#00ffee', bg:'#08001a', surf:'#100028', bodyClass:'theme-cyberpunk' },
+  { name:'Retro 80s',    accent:'#ff6ec7', accent2:'#ffe600', bg:'#0d0d1a', surf:'#131325', bodyClass:'theme-retro80s' },
 ];
 let activeTheme = parseInt(localStorage.getItem('cs_theme') || '0');
 let carbonOn    = localStorage.getItem('cs_carbon') === 'on';
@@ -1208,8 +1329,14 @@ function applyTheme(idx) {
   r.setProperty('--surf',    t.surf);
   r.setProperty('--surf2',   t.surf);
   r.setProperty('--adim',    hexToRgba(t.accent, 0.10));
+  // Remove all theme body classes then apply new one
+  document.body.classList.remove('theme-light','theme-cyberpunk','theme-retro80s');
+  if (t.bodyClass) document.body.classList.add(t.bodyClass);
   activeTheme = idx;
   localStorage.setItem('cs_theme', idx);
+  // Update theme-color meta
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) metaTheme.content = t.bg;
 }
 function hexToRgba(hex, a) {
   const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
@@ -1218,9 +1345,13 @@ function hexToRgba(hex, a) {
 function renderThemeBar() {
   const bar = document.getElementById('themeBar');
   if (!bar) return;
-  bar.innerHTML = THEMES.map((t,i) =>
-    `<div class="theme-swatch${i===activeTheme?' active':''}" style="background:${t.accent};box-shadow:0 0 0 3px ${t.bg}" onclick="selectTheme(${i})" title="${t.name}"></div>`
-  ).join('');
+  bar.innerHTML = THEMES.map((t,i) => {
+    const isLight = t.bodyClass === 'theme-light';
+    const border = isLight ? '#ccc' : t.bg;
+    return `<div class="theme-swatch${i===activeTheme?' active':''}" 
+      style="background:${t.accent};box-shadow:0 0 0 3px ${border};${isLight?'border:2px solid #ddd;':''}" 
+      onclick="selectTheme(${i})" title="${t.name}"></div>`;
+  }).join('');
   document.getElementById('themeName').textContent = THEMES[activeTheme].name;
 }
 function selectTheme(idx) {
@@ -1544,7 +1675,8 @@ function logRun() {
 
   const prevRun = JSON.parse(JSON.stringify(currentRun));
   const prevHL  = headlinerIdx;
-  const car = { name, value, color, type, ts: Date.now() };
+  const photo = getPhotoAndClear();
+  const car = { name, value, color, type, ts: Date.now(), ...(photo ? {photo} : {}) };
   currentRun.push(car);
   saveToQP(car);
   saveCurrentRun();
@@ -1569,7 +1701,8 @@ function logSpotted() {
   if (isNaN(value)||value<0){ showToast('Enter a valid value!'); return; }
   const name = resolveAlias(rawName);
 
-  const car = { name, value, color, type, ts: Date.now() };
+  const photo = getPhotoAndClear();
+  const car = { name, value, color, type, ts: Date.now(), ...(photo ? {photo} : {}) };
   saveToQP(car);
 
   const prevRuns = JSON.parse(JSON.stringify(allRuns));
@@ -1804,7 +1937,7 @@ function renderSpot() {
       d.className = 'run-item';
       d.style.animationDelay = (ri*0.04)+'s';
       if (isHL) d.style.borderColor = 'var(--accent)';
-      d.innerHTML = `<div class="re">${car.type}</div>
+      d.innerHTML = `${car.photo ? `<img class="run-item-photo" src="${car.photo}" alt="car">` : `<div class="re">${car.type}</div>`}
         <div class="ri">
           <div class="rn">${car.name}</div>
           ${car.color?`<div class="rc">${car.color}</div>`:''}
@@ -1899,7 +2032,7 @@ function renderGarage() {
     a.style.animationDelay=(idx*0.03)+'s';
     const rarity = getRarity(car.value);
     a.innerHTML=`<div class="g-rank">${sortMode!=='alpha'?'#'+(idx+1):''}</div>
-      <div class="g-emoji">${car.type}</div>
+      ${car.photo ? `<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="${car.photo}" alt="car">` : `<div class="g-emoji">${car.type}</div>`}
       <div class="g-info">
         <div class="g-name">${car.name}</div>
         <div class="g-meta">${[car.color,car.runDate].filter(Boolean).join(' · ')}</div>
@@ -1957,7 +2090,7 @@ function renderHistory() {
 
     const carsHTML = [...entry.cars].sort((a,b)=>b.value-a.value).map(car=>`
       <a class="hc-row" href="${carUrl(car.name)}" target="_blank" rel="noopener noreferrer">
-        <span class="hc-emoji">${car.type}</span>
+        ${car.photo ? `<img class="hc-photo" src="${car.photo}" alt="car">` : `<span class="hc-emoji">${car.type}</span>`}
         <span class="hc-name">${car.name}${car.color?' <span style="font-weight:400;color:var(--text2)">· '+car.color+'</span>':''}</span>
         <span class="hc-val">${fmtFull(car.value)}</span>
         <span class="hc-arrow">↗</span>
@@ -2241,8 +2374,52 @@ initSoundToggle();
 
 // ── SERVICE WORKER ──
 if ('serviceWorker' in navigator) {
-  const sw=`const C='cs-v3';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['.'])));});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));});`;
+  const sw=`const C='cs-v4';const CACHE_URLS=['.'];self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(CACHE_URLS)));self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==C).map(k=>caches.delete(k)))));});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('.'))));});`;
   navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'})));
+}
+
+// ── OFFLINE MODE ──
+let isOffline = !navigator.onLine;
+let offlineQueue = JSON.parse(localStorage.getItem('cs_offline_queue') || '[]'); // queued saves
+
+function updateOfflineBanner() {
+  const b = document.getElementById('offlineBanner');
+  if (!b) return;
+  isOffline = !navigator.onLine;
+  b.classList.toggle('show', isOffline);
+  if (b) b.textContent = isOffline ? '✈ OFFLINE — Changes saved locally' : '✅ Back online — Syncing...';
+  if (!isOffline && offlineQueue.length) flushOfflineQueue();
+}
+window.addEventListener('online',  updateOfflineBanner);
+window.addEventListener('offline', updateOfflineBanner);
+setTimeout(updateOfflineBanner, 1000);
+
+function flushOfflineQueue() {
+  if (!offlineQueue.length || !currentUser) return;
+  // Just do a normal save — it will catch up
+  offlineQueue = [];
+  localStorage.removeItem('cs_offline_queue');
+  saveToCloud();
+  showToast('☁ Synced ' + offlineQueue.length + ' offline saves!');
+}
+
+function refreshOfflineStatus() {
+  const dot  = document.getElementById('offlineStatusDot');
+  const text = document.getElementById('offlineStatusText');
+  const info = document.getElementById('offlineQueueInfo');
+  if (!dot || !text) return;
+  if (!navigator.onLine) {
+    dot.style.background  = 'var(--red)';
+    text.textContent      = 'Offline — logging locally';
+    if (info && offlineQueue.length) {
+      info.style.display  = 'block';
+      info.textContent    = offlineQueue.length + ' pending saves waiting to sync';
+    }
+  } else {
+    dot.style.background  = 'var(--green)';
+    text.textContent      = 'Online — syncing to cloud';
+    if (info) info.style.display = 'none';
+  }
 }
 
 // ── NOTES (autosave notepad + voice) ──
@@ -2339,6 +2516,120 @@ function stopMic() {
   document.getElementById('micLbl').textContent = 'Tap to speak';
   document.getElementById('notesArea').classList.remove('listening');
   try { micRecog.stop(); } catch(e) {}
+
+  // Auto-suggest smart fill if notes contains car-like keywords
+  const val = area.value.trim();
+  const carKeywords = /\b(log|spotted|ferrari|lamborghini|porsche|bmw|mercedes|mclaren|bugatti|ford|chevy|dodge|mustang|camaro|corvette|charger|challenger|tesla|gt3|amg|supercar|hypercar)\b/i;
+  if (val && carKeywords.test(val)) {
+    setTimeout(() => showToast('✨ Tap Smart Fill to auto-log from notes!'), 600);
+  }
+}
+
+// ── PHOTO SUPPORT ──
+let pendingPhotoDataUrl = null; // base64 of attached photo for current log
+
+function handlePhotoInput(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    pendingPhotoDataUrl = e.target.result;
+    const wrap = document.getElementById('photoPreviewWrap');
+    wrap.style.display = 'block';
+    wrap.innerHTML = `<div class="photo-preview-wrap">
+      <img class="photo-preview-img" src="${pendingPhotoDataUrl}" alt="Car photo">
+      <button class="photo-remove" onclick="removePhoto()">✕</button>
+    </div>`;
+    showToast('📷 Photo attached!');
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function removePhoto() {
+  pendingPhotoDataUrl = null;
+  const wrap = document.getElementById('photoPreviewWrap');
+  wrap.style.display = 'none';
+  wrap.innerHTML = '';
+}
+
+function getPhotoAndClear() {
+  const p = pendingPhotoDataUrl;
+  pendingPhotoDataUrl = null;
+  const wrap = document.getElementById('photoPreviewWrap');
+  if (wrap) { wrap.style.display = 'none'; wrap.innerHTML = ''; }
+  return p;
+}
+
+function photoThumb(dataUrl) {
+  if (!dataUrl) return '';
+  return `<img class="run-item-photo" src="${dataUrl}" alt="car" onclick="event.stopPropagation();viewPhoto('${dataUrl.substring(0,30)}...')" style="cursor:pointer">`;
+}
+
+function photoThumbSmall(dataUrl) {
+  if (!dataUrl) return '';
+  return `<img class="hc-photo" src="${dataUrl}" alt="car">`;
+}
+
+// ── SMART VOICE FILL (AI-powered) ──
+let voiceFillPending = null; // { name, value, color, type }
+
+async function smartVoiceFill() {
+  const notes = document.getElementById('notesArea')?.value?.trim();
+  if (!notes) { showToast('Nothing in notes to parse!'); return; }
+
+  const btn = document.getElementById('smartFillBtn');
+  const origInner = btn.innerHTML;
+  btn.innerHTML = '<span class="mic-icon">⏳</span><span class="mic-lbl" style="color:var(--accent)">Parsing...</span>';
+  btn.disabled = true;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 300,
+        system: `You are a car spotting assistant. Extract ONE car from the user's notes text to fill a log form. Return ONLY valid JSON with these exact keys: {"name":"Make Model (string)","value":NUMBER,"color":"color string or empty string","type":"one of: 🏎️ 🚗 🐎 🏁 🔥 ⚡"}. For type pick the best emoji: 🏎️=supercar/ferrari/lambo/mclaren, 🚗=sports/bmw/porsche/mustang/generic, 🐎=muscle/camaro/challenger/charger, 🏁=track/race, 🔥=exotic/rare, ⚡=electric/tesla/ev. For value: if user says "250k" use 250000, "1.2m" use 1200000, if no value given make a best guess based on typical market price. Return ONLY the JSON, no other text.`,
+        messages: [{ role: 'user', content: notes }]
+      })
+    });
+    const data = await response.json();
+    const raw = data.content?.[0]?.text || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    if (!parsed.name) throw new Error('No car found');
+
+    voiceFillPending = parsed;
+    const bar = document.getElementById('voiceFillBar');
+    document.getElementById('voiceFillText').textContent =
+      `${parsed.type} ${parsed.name}${parsed.color ? ' · ' + parsed.color : ''} · $${Number(parsed.value).toLocaleString()}`;
+    bar.classList.add('show');
+    // Switch to spot tab so user can see the fill bar
+    goTo('spot');
+    showToast('✨ Car detected — tap FILL!');
+  } catch(e) {
+    showToast('Could not parse a car from notes');
+  } finally {
+    btn.innerHTML = origInner;
+    btn.disabled = false;
+  }
+}
+
+function acceptVoiceFill() {
+  if (!voiceFillPending) return;
+  const p = voiceFillPending;
+  document.getElementById('carName').value  = p.name  || '';
+  document.getElementById('carValue').value = p.value || '';
+  document.getElementById('carColor').value = p.color || '';
+  if (p.type) document.getElementById('carType').value = p.type;
+  dismissVoiceFill();
+  showToast('✅ Form filled!');
+}
+
+function dismissVoiceFill() {
+  voiceFillPending = null;
+  document.getElementById('voiceFillBar').classList.remove('show');
 }
 
 initNotes();
@@ -2361,7 +2652,7 @@ function goToMore(page) {
   closeQP();
   if (page==='stats') renderStats();
   if (page==='history') renderHistory();
-  if (page==='settings') { renderThemeBar(); initSoundToggle(); initCarbonToggle(); updateAliasCount(); }
+  if (page==='settings') { renderThemeBar(); initSoundToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); }
   if (page==='news' && !newsLoaded) { newsLoaded=true; renderNewsSources(); loadNews(); }
 }
 
