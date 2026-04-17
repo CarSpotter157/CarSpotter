@@ -1252,11 +1252,54 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 <div class="offline-banner" id="offlineBanner">✈ OFFLINE — Changes saved locally</div>
 
 <script>
+// ══════════════════════════════════════════
+// ── ALL STATE (must be declared first) ──
+// ══════════════════════════════════════════
+let currentUser  = null;
+let syncUnsub    = null;
+let syncTimer    = null;
+let _lastSave    = 0;
+
+let currentRun   = JSON.parse(localStorage.getItem('cs_current') || '[]');
+let allRuns      = JSON.parse(localStorage.getItem('cs_runs')    || '[]');
+let quickPicks   = JSON.parse(localStorage.getItem('cs_qp')      || '[]');
+let sortMode     = 'desc';
+let qpOpen       = false;
+let headlinerIdx = -1;
+
+let undoStack    = null;
+let undoTimer    = null;
+let bulkMode     = false;
+let bulkSelected = new Set();
+let soundEnabled = localStorage.getItem('cs_sound') !== 'off';
+let aliases      = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
+
+// Garage view — declared here so renderGarage() works before auth fires
+let garageFilter = 'all';
+let garageView   = 'list';
+
+// Achievements — declared here so getUnlockedAchievements() works at any point
+const ACHIEVEMENTS = [
+  { id:'first_car',    icon:'🚗', name:'First Spot',      desc:'Log your first car',           check:(c,r)=>c.length>=1 },
+  { id:'ten_cars',     icon:'🔟', name:'Decade',           desc:'Log 10 cars total',            check:(c,r)=>c.length>=10 },
+  { id:'fifty_cars',   icon:'💯', name:'Century Half',     desc:'Log 50 cars total',            check:(c,r)=>c.length>=50 },
+  { id:'first_run',    icon:'🏁', name:'First Run',        desc:'Complete your first run',      check:(c,r)=>r.filter(x=>!x.spotted).length>=1 },
+  { id:'five_runs',    icon:'🎯', name:'Regular',          desc:'Complete 5 runs',              check:(c,r)=>r.filter(x=>!x.spotted).length>=5 },
+  { id:'supercar',     icon:'🏎️', name:'Supercar Spotter', desc:'Log a Supercar (🏎️)',         check:(c,r)=>c.some(x=>x.type==='🏎️') },
+  { id:'ev_spotter',   icon:'⚡', name:'Electric Dreams',  desc:'Log 5 EVs',                   check:(c,r)=>c.filter(x=>x.type==='⚡').length>=5 },
+  { id:'muscle_fan',   icon:'🐎', name:'Muscle Head',      desc:'Log 5 Muscle Cars',            check:(c,r)=>c.filter(x=>x.type==='🐎').length>=5 },
+  { id:'half_mil',     icon:'💰', name:'Half a Milly',     desc:'Single run over $500K',        check:(c,r)=>r.some(x=>!x.spotted&&x.total>=500000) },
+  { id:'millionaire',  icon:'🦄', name:'Millionaire Run',  desc:'Single run over $1M',         check:(c,r)=>r.some(x=>!x.spotted&&x.total>=1000000) },
+  { id:'legend_spot',  icon:'👑', name:'Legend Spotter',   desc:'Spot a Legend ($1M+) car',    check:(c,r)=>c.some(x=>x.value>=1000000) },
+  { id:'hypercar',     icon:'🔴', name:'Hypercar Hunter',  desc:'Spot a Hypercar ($500K+)',    check:(c,r)=>c.some(x=>x.value>=500000) },
+  { id:'five_makes',   icon:'🌍', name:'Make Explorer',    desc:'Spot 5 different makes',      check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=5 },
+  { id:'ten_makes',    icon:'🗺️', name:'Globe Trotter',    desc:'Spot 10 different makes',     check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=10 },
+  { id:'photographer', icon:'📷', name:'Photographer',     desc:'Log 5 cars with photos',      check:(c,r)=>c.filter(x=>x.photo).length>=5 },
+  { id:'triple_run',   icon:'🔥', name:'Hat Trick',        desc:'Log 3 cars in one run',       check:(c,r)=>r.some(x=>!x.spotted&&(x.cars||[]).length>=3) },
+];
+let _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
+
 // ── FIREBASE AUTH & SYNC ──
-let currentUser = null;
-let syncUnsub   = null;
-let syncTimer   = null;
-let _lastSave   = 0;
 
 function signInGoogle() {
   auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
@@ -1440,22 +1483,6 @@ function saveToCloud() {
     }).then(() => setSyncDot('ok')).catch(() => setSyncDot(''));
   }, 1500);
 }
-
-// ── STATE ──
-let currentRun = JSON.parse(localStorage.getItem('cs_current') || '[]');
-let allRuns    = JSON.parse(localStorage.getItem('cs_runs')    || '[]');
-let quickPicks = JSON.parse(localStorage.getItem('cs_qp')      || '[]');
-let sortMode     = 'desc';
-let qpOpen       = false;
-let headlinerIdx = -1; // index in currentRun of starred car
-
-// ── NEW FEATURE STATE ──
-let undoStack      = null;   // { type:'run'|'spot'|'history', data, msg }
-let undoTimer      = null;
-let bulkMode       = false;
-let bulkSelected   = new Set();
-let soundEnabled   = localStorage.getItem('cs_sound') !== 'off';
-let aliases        = JSON.parse(localStorage.getItem('cs_aliases') || '{}'); // { abbr: fullName }
 
 // ── THEMES ──
 const THEMES = [
@@ -1745,16 +1772,6 @@ function goTo(page) {
   if (page==='stats')   renderStats();
   if (page==='news' && !newsLoaded) { newsLoaded=true; renderNewsSources(); loadNews(); }
 }
-
-// Seed existing achievements silently so returning users don't get toasted on first load
-(function seedAchievements() {
-  if (!localStorage.getItem('cs_ach')) {
-    // First time v13 runs: pre-populate with what they've already earned
-    const earned = getUnlockedAchievements();
-    localStorage.setItem('cs_ach', JSON.stringify(earned));
-    _prevAchievements = earned;
-  }
-})();
 
 // ── FORMAT ──
 function fmt(n) {
@@ -2181,8 +2198,6 @@ function deleteCarEverywhere(name) {
 }
 
 // ── GARAGE FILTER & VIEW STATE ──
-let garageFilter = 'all';
-let garageView   = 'list'; // 'list' | 'grid'
 
 function setGarageFilter(f, btn) {
   garageFilter = f;
@@ -2872,26 +2887,16 @@ initNotes();
 // ══════════════════════════════════════════
 // ── ACHIEVEMENTS ENGINE ──
 // ══════════════════════════════════════════
-const ACHIEVEMENTS = [
-  { id:'first_car',    icon:'🚗', name:'First Spot',      desc:'Log your first car',           check:(c,r)=>c.length>=1 },
-  { id:'ten_cars',     icon:'🔟', name:'Decade',           desc:'Log 10 cars total',            check:(c,r)=>c.length>=10 },
-  { id:'fifty_cars',   icon:'💯', name:'Century Half',     desc:'Log 50 cars total',            check:(c,r)=>c.length>=50 },
-  { id:'first_run',    icon:'🏁', name:'First Run',        desc:'Complete your first run',      check:(c,r)=>r.filter(x=>!x.spotted).length>=1 },
-  { id:'five_runs',    icon:'🎯', name:'Regular',          desc:'Complete 5 runs',              check:(c,r)=>r.filter(x=>!x.spotted).length>=5 },
-  { id:'supercar',     icon:'🏎️', name:'Supercar Spotter', desc:'Log a Supercar (🏎️)',         check:(c,r)=>c.some(x=>x.type==='🏎️') },
-  { id:'ev_spotter',   icon:'⚡', name:'Electric Dreams',  desc:'Log 5 EVs',                   check:(c,r)=>c.filter(x=>x.type==='⚡').length>=5 },
-  { id:'muscle_fan',   icon:'🐎', name:'Muscle Head',      desc:'Log 5 Muscle Cars',            check:(c,r)=>c.filter(x=>x.type==='🐎').length>=5 },
-  { id:'half_mil',     icon:'💰', name:'Half a Milly',     desc:'Single run over $500K',        check:(c,r)=>r.some(x=>!x.spotted&&x.total>=500000) },
-  { id:'millionaire',  icon:'🦄', name:'Millionaire Run',  desc:'Single run over $1M',         check:(c,r)=>r.some(x=>!x.spotted&&x.total>=1000000) },
-  { id:'legend_spot',  icon:'👑', name:'Legend Spotter',   desc:'Spot a Legend ($1M+) car',    check:(c,r)=>c.some(x=>x.value>=1000000) },
-  { id:'hypercar',     icon:'🔴', name:'Hypercar Hunter',  desc:'Spot a Hypercar ($500K+)',    check:(c,r)=>c.some(x=>x.value>=500000) },
-  { id:'five_makes',   icon:'🌍', name:'Make Explorer',    desc:'Spot 5 different makes',      check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=5 },
-  { id:'ten_makes',    icon:'🗺️', name:'Globe Trotter',    desc:'Spot 10 different makes',     check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=10 },
-  { id:'photographer', icon:'📷', name:'Photographer',     desc:'Log 5 cars with photos',      check:(c,r)=>c.filter(x=>x.photo).length>=5 },
-  { id:'triple_run',   icon:'🔥', name:'Hat Trick',        desc:'Log 3 cars in one run',       check:(c,r)=>r.some(x=>!x.spotted&&(x.cars||[]).length>=3) },
-];
+// (ACHIEVEMENTS array and _prevAchievements declared early in state block above)
 
-let _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
+// Seed existing achievements silently so returning users don't get toasted on first load
+(function seedAchievements() {
+  if (!localStorage.getItem('cs_ach')) {
+    const earned = getUnlockedAchievements();
+    localStorage.setItem('cs_ach', JSON.stringify(earned));
+    _prevAchievements = earned;
+  }
+})();
 
 function getUnlockedAchievements() {
   const allCars = [...allRuns.flatMap(r=>r.cars||[]), ...currentRun];
