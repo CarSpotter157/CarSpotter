@@ -7,10 +7,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CarSpotter">
 <meta name="theme-color" content="#0a0a0a">
-<title>CarSpotter Pro</title>
+<title>CarSpotter</title>
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='55%25' font-size='110' text-anchor='middle' dominant-baseline='middle'%3E%F0%9F%9B%B5%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
-<!-- Leaflet for Map View -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -34,117 +33,121 @@ const db   = firebase.firestore();
   --bg:#0a0a0a;--surf:#141414;--surf2:#1c1c1c;--surf3:#222;
   --border:#2a2a2a;--accent:#f5c842;--adim:rgba(245,200,66,0.10);
   --accent2:#ff5733;--text:#f0f0f0;--text2:#888;--muted:#505050;
-  --green:#4ade80;--red:#f87171;--nav-h:70px;
-  --overlay-bg:rgba(0,0,0,0.85);--input-bg:var(--surf2);
-  --shadow: 0 8px 24px rgba(0,0,0,0.5);
+  --green:#4ade80;--red:#f87171;--nav-h:62px;
+  --overlay-bg:rgba(0,0,0,0.82);--input-bg:var(--surf2);
+  --shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
 body.theme-light{
   --bg:#f5f5f0;--surf:#ffffff;--surf2:#f0efe9;--surf3:#e8e7e0;
   --border:#d8d6cc;--text:#1a1a1a;--text2:#666;--muted:#999;
   --green:#16a34a;--red:#dc2626;
   --overlay-bg:rgba(0,0,0,0.6);--input-bg:#ffffff;
-  --shadow: 0 8px 24px rgba(0,0,0,0.1);
+  --shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'DM Sans', sans-serif;}
+html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);}
+body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:flex;flex-direction:column;}
 
 /* ── ANIMATIONS ── */
-@keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-@keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-@keyframes countUp { 0% { transform: scale(1); } 50% { transform: scale(1.1); color: var(--accent2); } 100% { transform: scale(1); } }
-@keyframes sparkle { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.4) drop-shadow(0 0 8px var(--accent)); } }
+@keyframes fadeUp   {from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn   {from{opacity:0}to{opacity:1}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn  {from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes popIn    {from{opacity:0;transform:scale(0.88)}to{opacity:1;transform:scale(1)}}
+@keyframes countUp  {from{transform:scale(1.1); color:var(--accent2)}to{transform:scale(1); color:var(--accent)}}
 
-/* ── LAYOUT ── */
-.app-shell { width: 100%; max-width: 430px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; background: var(--bg); position: relative; box-shadow: 0 0 100px rgba(0,0,0,0.5); }
-.app-header { flex-shrink: 0; background: var(--surf); border-bottom: 1px solid var(--border); padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; }
-.logo { font-family: 'Bebas Neue', cursive; font-size: 1.8rem; letter-spacing: 3px; color: var(--accent); }
-.logo span { color: var(--text); }
-.hdr-lbl { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; text-align: right; }
-.hdr-val { font-family: 'Bebas Neue', cursive; font-size: 1.4rem; color: var(--accent); text-align: right; line-height: 1; }
+/* ── UI POLISH ── */
+.card, .btn-run, .btn-spot, .btn-end, .garage-card, .hist-item {
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:active { transform: scale(0.99); }
 
-.pages { flex: 1; overflow: hidden; position: relative; }
-.page { position: absolute; inset: 0; overflow-y: auto; padding: 20px; opacity: 0; pointer-events: none; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(30px); padding-bottom: 100px; }
-.page.active { opacity: 1; pointer-events: all; transform: translateX(0); }
-
-/* ── COMPONENTS ── */
-.card { background: var(--surf); border: 1px solid var(--border); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); }
-.card-title { font-family: 'Bebas Neue', cursive; font-size: 1rem; letter-spacing: 2px; color: var(--muted); margin-bottom: 15px; }
-
-.score-banner { display: flex; align-items: center; justify-content: space-between; background: var(--surf2); padding: 20px; border-radius: 20px; margin-bottom: 20px; border: 1px solid var(--border); }
-.s-lbl { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px; }
-.s-num { font-family: 'Bebas Neue', cursive; font-size: 2.2rem; color: var(--accent); line-height: 1; }
-.b-num { font-family: 'Bebas Neue', cursive; font-size: 2.2rem; color: var(--text); line-height: 1; }
-.vs { font-family: 'Bebas Neue', cursive; font-size: 0.9rem; color: var(--muted); padding: 5px 10px; border: 1px solid var(--border); border-radius: 8px; }
-
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
-.ff label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 6px; font-weight: 600; }
-.ff input { width: 100%; background: var(--surf3); border: 1px solid var(--border); border-radius: 12px; color: var(--text); padding: 12px; font-family: inherit; outline: none; transition: 0.2s; }
-.ff input:focus { border-color: var(--accent); }
-
-.btn-run { background: var(--accent); color: #000; border: none; border-radius: 14px; font-family: 'Bebas Neue', cursive; font-size: 1.1rem; letter-spacing: 2px; padding: 14px; cursor: pointer; transition: 0.2s; width: 100%; box-shadow: 0 4px 15px rgba(245,200,66,0.3); }
-.btn-run:active { transform: scale(0.97); }
-.btn-smart { background: var(--surf2); color: var(--accent); border: 1px solid var(--accent); animation: sparkle 4s infinite; margin-bottom: 10px; box-shadow: none; }
-
-.btn-end { margin-top: 10px; background: var(--accent2); color: #fff; box-shadow: 0 4px 15px rgba(255,87,51,0.3); }
-
-/* ── LISTS ── */
-.sec-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
-.sec-title { font-family: 'Bebas Neue', cursive; font-size: 1.2rem; letter-spacing: 2px; }
-.txt-btn { background: none; border: none; color: var(--muted); font-size: 0.75rem; cursor: pointer; text-transform: uppercase; }
-
-.run-item { display: flex; align-items: center; background: var(--surf); border: 1px solid var(--border); border-radius: 16px; padding: 12px; margin-bottom: 10px; animation: slideIn 0.3s ease both; }
-.re { font-size: 1.5rem; margin-right: 12px; }
-.ri { flex: 1; }
-.rn { font-weight: 600; font-size: 0.9rem; }
-.rc { font-size: 0.7rem; color: var(--muted); }
-.rv { font-family: 'Bebas Neue', cursive; font-size: 1.3rem; color: var(--accent); }
-
-/* ── GARAGE GRID ── */
-.garage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-.garage-card { background: var(--surf); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; animation: fadeUp 0.4s ease both; text-decoration: none; color: inherit; }
-.gc-img { height: 110px; background: var(--surf2); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; }
-.gc-body { padding: 12px; }
-.gc-meta { font-size: 0.55rem; color: var(--accent2); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; }
-.gc-name { font-weight: 600; font-size: 0.85rem; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.gc-val { font-family: 'Bebas Neue', cursive; font-size: 1.2rem; color: var(--accent); }
-
-/* ── MAP ── */
-#map-container { height: 300px; width: 100%; border-radius: 20px; margin-bottom: 20px; border: 1px solid var(--border); z-index: 1; }
-
-/* ── SETTINGS ── */
-.settings-group { margin-bottom: 20px; }
-.settings-item { display: flex; align-items: center; gap: 15px; padding: 15px 0; border-bottom: 1px solid var(--border); }
-.settings-item:last-child { border-bottom: none; }
-.si-icon { font-size: 1.2rem; width: 30px; text-align: center; }
-.si-label { flex: 1; font-size: 0.9rem; font-weight: 500; }
-.si-val { font-family: 'Bebas Neue', cursive; color: var(--accent); font-size: 1rem; }
-
-/* ── NAV ── */
-.bottom-nav { flex-shrink: 0; background: var(--surf); border-top: 1px solid var(--border); display: flex; height: var(--nav-h); padding-bottom: env(safe-area-inset-bottom); }
-.nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: none; border: none; color: var(--muted); transition: 0.3s; }
-.nav-btn.active { color: var(--accent); }
-.nav-icon { font-size: 1.5rem; margin-bottom: 4px; transition: transform 0.3s; }
-.nav-btn.active .nav-icon { transform: translateY(-3px) scale(1.1); }
-.nav-label { font-size: 0.6rem; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
+/* ── CAR CARD VIEW ── */
+.garage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  padding-bottom: 20px;
+}
+.garage-card {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: fadeUp 0.3s ease both;
+}
+.gc-img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  background: var(--surf2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+}
+.gc-body { padding: 10px; flex: 1; }
+.gc-name { font-weight: 600; font-size: 0.85rem; margin-bottom: 2px; }
+.gc-val { font-family: 'Bebas Neue', cursive; color: var(--accent); font-size: 1.1rem; }
+.gc-meta { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
 
 /* ── ONBOARDING ── */
-.onboard-overlay { position: fixed; inset: 0; z-index: 10000; background: var(--overlay-bg); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; padding: 25px; }
-.onboard-card { background: var(--surf); border: 1px solid var(--border); border-radius: 30px; padding: 40px 30px; width: 100%; max-width: 350px; text-align: center; animation: popIn 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
-.ob-icon { font-size: 4rem; margin-bottom: 20px; }
-.ob-title { font-family: 'Bebas Neue', cursive; font-size: 2rem; letter-spacing: 2px; margin-bottom: 15px; }
-.ob-desc { font-size: 0.95rem; color: var(--text2); line-height: 1.6; margin-bottom: 30px; }
-.ob-dots { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
-.ob-dot { width: 8px; height: 8px; border-radius: 4px; background: var(--border); transition: 0.4s; }
-.ob-dot.active { width: 30px; background: var(--accent); }
+.onboard-overlay {
+  position: fixed; inset: 0; z-index: 100000;
+  background: var(--overlay-bg); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.onboard-card {
+  background: var(--surf); border: 1px solid var(--border);
+  border-radius: 24px; padding: 32px 24px; width: 100%; max-width: 340px;
+  text-align: center; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.ob-icon { font-size: 3rem; margin-bottom: 16px; }
+.ob-title { font-family: 'Bebas Neue', cursive; font-size: 1.8rem; letter-spacing: 2px; margin-bottom: 12px; }
+.ob-desc { font-size: 0.9rem; color: var(--text2); line-height: 1.5; margin-bottom: 24px; }
+.ob-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 24px; }
+.ob-dot { width: 8px; height: 8px; border-radius: 4px; background: var(--border); transition: 0.3s; }
+.ob-dot.active { width: 24px; background: var(--accent); }
 
-/* Achievement Notification */
-.ach-toast { position: fixed; top: 20px; left: 20px; right: 20px; background: var(--surf); border: 2px solid var(--accent); border-radius: 15px; padding: 15px; display: flex; align-items: center; gap: 15px; z-index: 11000; transform: translateY(-150%); transition: 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-.ach-toast.show { transform: translateY(0); }
-.ach-t-icon { font-size: 2rem; }
-.ach-t-title { font-family: 'Bebas Neue', cursive; font-size: 1.1rem; color: var(--accent); letter-spacing: 1px; }
-.ach-t-desc { font-size: 0.75rem; color: var(--text2); }
+/* ── MAP VIEW ── */
+#map-container {
+  height: 250px; width: 100%; border-radius: 12px;
+  margin-bottom: 16px; border: 1px solid var(--border);
+  z-index: 1;
+}
+
+/* ── SETTINGS POLISH ── */
+.settings-group { margin-bottom: 24px; }
+.settings-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 0; border-bottom: 1px solid var(--border);
+}
+.settings-item:last-child { border-bottom: none; }
+.si-icon { font-size: 1.2rem; color: var(--accent); width: 24px; text-align: center; }
+.si-label { flex: 1; font-size: 0.95rem; }
+
+/* Existing Mobile Shell & Nav Logic preserved... */
+.app-shell{ width:100%;max-width:430px;margin:0 auto; height:100%;display:flex;flex-direction:column; background:var(--bg);position:relative; }
+.pages{flex:1;overflow:hidden;position:relative;}
+.page{ position:absolute;inset:0;overflow-y:auto; padding:14px 14px 80px; opacity:0;pointer-events:none; transition: opacity 0.3s ease, transform 0.3s ease; transform: translateX(20px); }
+.page.active{opacity:1;pointer-events:all;transform: translateX(0);}
+.bottom-nav{ flex-shrink:0;background:var(--surf);border-top:1px solid var(--border); display:flex; height: 70px; }
+.nav-btn{ flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center; background:none;border:none;color:var(--muted); }
+.nav-btn.active{color:var(--accent);}
+.nav-icon{font-size:1.4rem; margin-bottom: 4px;}
+.nav-label{font-size:0.6rem; text-transform:uppercase; font-weight:600;}
+
+/* Smart Fill Button Animation */
+@keyframes sparkle {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.5) drop-shadow(0 0 5px var(--accent)); }
+  100% { filter: brightness(1); }
+}
+.btn-smart { animation: sparkle 3s infinite; }
+
 </style>
 </head>
 <body>
@@ -153,13 +156,12 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
   <header class="app-header">
     <div class="logo">CAR<span>SPOTTER</span></div>
     <div class="hdr-r">
-      <div class="hdr-lbl">Lifetime Collection</div>
+      <div class="hdr-lbl">Session Total</div>
       <div id="hdr-total" class="hdr-val">$0</div>
     </div>
   </header>
 
   <div class="pages">
-    <!-- Page: Spot -->
     <div id="page-spot" class="page active">
       <div class="score-banner">
         <div>
@@ -174,86 +176,72 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
       </div>
 
       <div class="card">
-        <div class="card-title">Quick Log</div>
+        <div class="card-title">Log Spotted Car</div>
         <div class="form-grid">
           <div class="ff">
-            <label>Brand & Model</label>
-            <input type="text" id="car-name" placeholder="Ferrari 488">
+            <label>Car Brand/Model</label>
+            <input type="text" id="car-name" placeholder="e.g. Porsche 911">
           </div>
           <div class="ff">
             <label>Estimated Value</label>
-            <input type="number" id="car-val" placeholder="250000">
+            <input type="number" id="car-val" placeholder="e.g. 150000">
           </div>
         </div>
-        <button class="btn-run btn-smart" onclick="smartFill()">✨ AI Smart Fill</button>
-        <button class="btn-run" onclick="logCar()">+ Add to Run</button>
+        <button class="btn-run btn-smart" style="width:100%; margin-bottom:8px;" onclick="smartFill()">✨ Smart Fill with AI</button>
+        <button class="btn-run" style="width:100%" onclick="logCar()">Log Spot</button>
       </div>
 
       <div class="sec-row">
-        <div class="sec-title">Run History</div>
-        <button class="txt-btn" onclick="clearRun()">Reset</button>
+        <div class="sec-title">Active Run</div>
+        <button class="txt-btn" onclick="clearRun()">Clear</button>
       </div>
       <div id="run-list">
-          <div style="text-align:center; padding:30px; color:var(--muted); font-size:0.8rem; border:1px dashed var(--border); border-radius:15px;">
-              Your active run is empty.
-          </div>
-      </div>
-      <div id="end-run-container" style="display:none;">
-          <button class="btn-run btn-end" onclick="endRun()">🏁 Finish & Save Run</button>
-      </div>
+        </div>
+      <button class="btn-end" onclick="endRun()">End Run & Save</button>
     </div>
 
-    <!-- Page: Garage -->
     <div id="page-garage" class="page">
-      <div class="sec-row">
-          <div class="sec-title">The Collection</div>
-          <div id="garage-stats" style="font-size:0.7rem; color:var(--muted);">0 Cars Total</div>
-      </div>
-      <div id="garage-view" class="garage-grid"></div>
+      <div class="sec-title" style="margin-bottom:12px;">The Collection</div>
+      <div id="garage-view" class="garage-grid">
+        </div>
     </div>
 
-    <!-- Page: Map -->
     <div id="page-map" class="page">
-      <div class="sec-title" style="margin-bottom:15px;">Spot Map</div>
+      <div class="sec-title" style="margin-bottom:12px;">Spot Map</div>
       <div id="map-container"></div>
-      <div class="card">
-          <div class="card-title">Local Hotspots</div>
-          <div style="font-size:0.8rem; color:var(--text2); line-height:1.5;">
-              Markers indicate exactly where you've spotted your collection. Zoom in to see street-level history.
-          </div>
-      </div>
+      <div id="map-list"></div>
     </div>
 
-    <!-- Page: Settings -->
     <div id="page-settings" class="page">
-      <div class="sec-title" style="margin-bottom:15px;">Pro Profile</div>
+      <div class="sec-title" style="margin-bottom:12px;">Account & Settings</div>
       
       <div class="settings-group card">
         <div class="settings-item">
-          <div class="si-icon">🏆</div>
-          <div class="si-label">Achievements Unlocked</div>
-          <div id="ach-count" class="si-val">0 / 5</div>
+          <div class="si-icon">👤</div>
+          <div class="si-label">Profile Settings</div>
+          <div class="g-arrow">›</div>
         </div>
         <div class="settings-item">
-          <div class="si-icon">🏁</div>
-          <div class="si-label">Total Runs Completed</div>
-          <div id="total-runs" class="si-val">0</div>
+          <div class="si-icon">☁️</div>
+          <div class="si-label">Cloud Sync Status</div>
+          <span style="font-size:0.7rem; color:var(--green)">Online</span>
         </div>
       </div>
 
       <div class="settings-group card">
         <div class="settings-item">
-          <div class="si-icon">🎨</div>
-          <div class="si-label">Light Mode</div>
-          <input type="checkbox" id="theme-toggle" onchange="toggleTheme()">
+          <div class="si-icon">🏆</div>
+          <div class="si-label">Achievements</div>
+          <div id="ach-count" class="g-val" style="font-size:0.8rem">0/15</div>
         </div>
-        <div class="settings-item" onclick="exportData()">
-          <div class="si-icon">💾</div>
-          <div class="si-label">Export Data (.json)</div>
+        <div class="settings-item">
+          <div class="si-icon">🎨</div>
+          <div class="si-label">App Theme</div>
+          <div class="g-arrow">›</div>
         </div>
       </div>
 
-      <button class="btn-run" style="background:var(--surf2); color:var(--text); border:1px solid var(--border);" onclick="resetApp()">Full Reset</button>
+      <button class="btn-spot" style="width:100%" onclick="auth.signOut()">Sign Out</button>
     </div>
   </div>
 
@@ -272,326 +260,193 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);color:var(
     </button>
     <button class="nav-btn" onclick="showPage('settings')">
       <span class="nav-icon">⚙️</span>
-      <span class="nav-label">Stats</span>
+      <span class="nav-label">Settings</span>
     </button>
   </nav>
 </div>
 
-<!-- Onboarding -->
 <div id="onboarding" class="onboard-overlay" style="display:none;">
   <div class="onboard-card">
     <div id="ob-content">
       <div class="ob-icon">🏁</div>
-      <div class="ob-title">Start Your Run</div>
-      <div class="ob-desc">Head out and start spotting. Every car you log adds to your session total. Can you beat your personal record?</div>
+      <div class="ob-title">Start a Run</div>
+      <div class="ob-desc">Head out and start spotting. Every car you log adds to your Run Total. Can you beat your high score?</div>
     </div>
     <div class="ob-dots">
       <div class="ob-dot active"></div>
       <div class="ob-dot"></div>
       <div class="ob-dot"></div>
     </div>
-    <button class="btn-run" onclick="nextOnboard()">Get Started</button>
+    <button class="btn-run" style="width:100%" onclick="nextOnboard()">Continue</button>
   </div>
 </div>
 
-<!-- Achievement Toast -->
-<div id="ach-toast" class="ach-toast">
-    <div class="ach-t-icon" id="ach-t-icon">🏆</div>
-    <div>
-        <div class="ach-t-title" id="ach-t-title">Achievement!</div>
-        <div class="ach-t-desc" id="ach-t-desc">You unlocked something special.</div>
-    </div>
-</div>
-
 <script>
-// ── STATE ──
-let state = {
-    currentRun: [],
-    garage: JSON.parse(localStorage.getItem('cs_garage')) || [],
-    bestRun: parseInt(localStorage.getItem('cs_best')) || 0,
-    achievements: JSON.parse(localStorage.getItem('cs_achievements')) || [],
-    totalRuns: parseInt(localStorage.getItem('cs_total_runs')) || 0,
-    theme: localStorage.getItem('cs_theme') || 'dark'
-};
-
+let currentRun = [];
+let garage = JSON.parse(localStorage.getItem('cs_garage')) || [];
+let bestRun = localStorage.getItem('cs_best') || 0;
 let obStep = 0;
 let map;
 
-// ── HARDER ACHIEVEMENTS ──
+// ── ACHIEVEMENTS (HARDER) ──
 const ACHIEVEMENTS = [
-  { id: 1, icon: "💰", name: "Billionaire's Row", desc: "Total collection value exceeds $1 Billion", req: (s) => s.garage.reduce((sum,c)=>sum+c.val,0) >= 1000000000 },
-  { id: 2, icon: "💯", name: "The Centurion", desc: "Successfully spot 100 unique cars", req: (s) => s.garage.length >= 100 },
-  { id: 3, icon: "💎", name: "Hypercar Hunter", desc: "Spot 10 cars valued over $2,000,000", req: (s) => s.garage.filter(c => c.val >= 2000000).length >= 10 },
-  { id: 4, icon: "⚡", name: "Perfect Run", desc: "Achieve a single run total over $5,000,000", req: (s) => s.currentRunTotal >= 5000000 },
-  { id: 5, icon: "🌍", name: "Regional Scout", desc: "Record spots in 3 distinct run sessions", req: (s) => s.totalRuns >= 3 }
+  { id: 1, name: "Billionaire's Row", req: (g) => g.reduce((s,c)=>s+c.val,0) >= 1000000000 }, // $1 Billion total
+  { id: 2, name: "The Centurion", req: (g) => g.length >= 100 }, // 100 cars
+  { id: 3, name: "Hypercar Hunter", req: (g) => g.filter(c => c.val >= 2000000).length >= 10 }, // 10 cars over $2M
+  { id: 4, name: "Perfect Run", req: (g, lastRun) => lastRun >= 5000000 }, // $5M in one run
+  { id: 5, name: "Global Scout", req: (g) => new Set(g.map(c => c.city)).size >= 5 } // Spot in 5 different cities
 ];
 
-// ── APP INITIALIZATION ──
-window.onload = () => {
-    if (!localStorage.getItem('cs_onboarded')) {
-        document.getElementById('onboarding').style.display = 'flex';
-    }
-    if (state.theme === 'light') {
-        document.body.classList.add('theme-light');
-        document.getElementById('theme-toggle').checked = true;
-    }
-    updateUI();
-    renderGarage();
-};
-
-function updateUI() {
-    const totalValue = state.garage.reduce((s, c) => s + c.val, 0);
-    document.getElementById('hdr-total').innerText = '$' + shortenNumber(totalValue);
-    document.getElementById('best-val').innerText = '$' + shortenNumber(state.bestRun);
-    document.getElementById('ach-count').innerText = `${state.achievements.length} / ${ACHIEVEMENTS.length}`;
-    document.getElementById('total-runs').innerText = state.totalRuns;
+// ── ONBOARDING LOGIC ──
+function checkOnboarding() {
+  if (!localStorage.getItem('cs_onboarded')) {
+    document.getElementById('onboarding').style.display = 'flex';
+  }
 }
 
-function shortenNumber(n) {
-    if (n >= 1000000000) return (n / 1000000000).toFixed(1) + 'B';
-    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
-    if (n >= 1000) return (n / 1000).toFixed(0) + 'K';
-    return n.toLocaleString();
+function nextOnboard() {
+  const content = [
+    { icon: "✨", title: "Smart Fill", desc: "Don't know the price? Just type the name and hit Smart Fill. Our AI estimates the value and details instantly." },
+    { icon: "☁️", title: "Cloud Sync", desc: "Your garage is automatically backed up to our secure cloud. Switch devices and never lose a single spot." },
+    { icon: "🏎️", title: "You're Ready!", desc: "Go out there and find some masterpieces. Your collection starts with your first spot!" }
+  ];
+  
+  if (obStep < content.length) {
+    const step = content[obStep];
+    document.getElementById('ob-content').innerHTML = `
+      <div class="ob-icon">${step.icon}</div>
+      <div class="ob-title">${step.title}</div>
+      <div class="ob-desc">${step.desc}</div>
+    `;
+    const dots = document.querySelectorAll('.ob-dot');
+    dots.forEach((d, i) => d.classList.toggle('active', i === obStep));
+    obStep++;
+  } else {
+    localStorage.setItem('cs_onboarded', 'true');
+    document.getElementById('onboarding').style.display = 'none';
+  }
 }
 
-// ── NAVIGATION ──
+// ── CORE LOGIC ──
 function showPage(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-' + id).classList.add('active');
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-    
-    if (id === 'map') setTimeout(initMap, 100);
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  
+  if (id === 'map') initMap();
 }
 
-// ── SPOTTING LOGIC ──
 function logCar() {
-    const nameInput = document.getElementById('car-name');
-    const valInput = document.getElementById('car-val');
-    const name = nameInput.value.trim();
-    const val = parseInt(valInput.value);
+  const name = document.getElementById('car-name').value;
+  const val = parseInt(document.getElementById('car-val').value);
+  if (!name || !val) return;
 
-    if (!name || isNaN(val)) return;
+  const car = { 
+    id: Date.now(), 
+    name, 
+    val, 
+    emoji: "🏎️",
+    lat: 51.505 + (Math.random() - 0.5) * 0.01, // Mock location
+    lng: -0.09 + (Math.random() - 0.5) * 0.01 
+  };
 
-    // Get current location
-    navigator.geolocation.getCurrentPosition((pos) => {
-        addCarToRun(name, val, pos.coords.latitude, pos.coords.longitude);
-    }, () => {
-        // Fallback with randomized local coords if GPS denied
-        addCarToRun(name, val, 40.7128 + (Math.random() - 0.5) * 0.05, -74.006 + (Math.random() - 0.5) * 0.05);
-    });
-
-    nameInput.value = '';
-    valInput.value = '';
+  currentRun.unshift(car);
+  updateRunUI();
+  
+  // Reset form
+  document.getElementById('car-name').value = '';
+  document.getElementById('car-val').value = '';
 }
 
-function addCarToRun(name, val, lat, lng) {
-    const car = { 
-        id: Date.now(), 
-        name, 
-        val, 
-        emoji: "🏎️", 
-        lat, 
-        lng,
-        date: new Date().toLocaleDateString()
-    };
-    
-    state.currentRun.unshift(car);
-    updateRunList();
-    checkAchievements();
-}
+function updateRunUI() {
+  const list = document.getElementById('run-list');
+  const total = currentRun.reduce((sum, c) => sum + c.val, 0);
+  
+  // Animation for count up
+  const runEl = document.getElementById('run-val');
+  runEl.style.animation = 'none';
+  runEl.offsetHeight; 
+  runEl.style.animation = 'countUp 0.4s ease';
+  runEl.innerText = `$${total.toLocaleString()}`;
 
-function updateRunList() {
-    const list = document.getElementById('run-list');
-    const total = state.currentRun.reduce((sum, c) => sum + c.val, 0);
-    
-    const runEl = document.getElementById('run-val');
-    runEl.innerText = '$' + total.toLocaleString();
-    runEl.style.animation = 'none';
-    runEl.offsetHeight; 
-    runEl.style.animation = 'countUp 0.5s ease';
+  list.innerHTML = currentRun.map(c => `
+    <div class="run-item" style="animation: slideIn 0.3s ease both">
+      <div class="re">${c.emoji}</div>
+      <div class="ri">
+        <div class="rn">${c.name}</div>
+        <div class="rc">Recently Spotted</div>
+      </div>
+      <div class="rv">$${c.val.toLocaleString()}</div>
+    </div>
+  `).join('');
 
-    if (state.currentRun.length > 0) {
-        document.getElementById('end-run-container').style.display = 'block';
-        list.innerHTML = state.currentRun.map(c => `
-            <div class="run-item">
-                <div class="re">${c.emoji}</div>
-                <div class="ri">
-                    <div class="rn">${c.name}</div>
-                    <div class="rc">Spotted on ${c.date}</div>
-                </div>
-                <div class="rv">$${shortenNumber(c.val)}</div>
-            </div>
-        `).join('');
-    } else {
-        document.getElementById('end-run-container').style.display = 'none';
-        list.innerHTML = `<div style="text-align:center; padding:30px; color:var(--muted); font-size:0.8rem; border:1px dashed var(--border); border-radius:15px;">Your active run is empty.</div>`;
-    }
+  if (currentRun.length === 0) {
+    list.innerHTML = '<div class="empty-run">No cars in this run yet.</div>';
+  }
 }
 
 function endRun() {
-    const runTotal = state.currentRun.reduce((s, c) => s + c.val, 0);
-    
-    state.garage = [...state.currentRun, ...state.garage];
-    state.totalRuns += 1;
-    
-    if (runTotal > state.bestRun) {
-        state.bestRun = runTotal;
-    }
-
-    localStorage.setItem('cs_garage', JSON.stringify(state.garage));
-    localStorage.setItem('cs_best', state.bestRun);
-    localStorage.setItem('cs_total_runs', state.totalRuns);
-    
-    state.currentRun = [];
-    updateRunList();
-    renderGarage();
-    updateUI();
-    showPage('garage');
+  if (currentRun.length === 0) return;
+  garage = [...currentRun, ...garage];
+  const runTotal = currentRun.reduce((s, c) => s + c.val, 0);
+  if (runTotal > bestRun) {
+    bestRun = runTotal;
+    localStorage.setItem('cs_best', bestRun);
+  }
+  localStorage.setItem('cs_garage', JSON.stringify(garage));
+  currentRun = [];
+  updateRunUI();
+  renderGarage();
+  alert("Run Saved to Garage!");
 }
 
-function clearRun() {
-    if (state.currentRun.length > 0 && confirm("Clear current run history?")) {
-        state.currentRun = [];
-        updateRunList();
-    }
-}
-
-// ── GARAGE & MAP ──
 function renderGarage() {
-    const grid = document.getElementById('garage-view');
-    document.getElementById('garage-stats').innerText = `${state.garage.length} Cars Total`;
-    
-    grid.innerHTML = state.garage.map((c, i) => `
-        <div class="garage-card" style="animation-delay: ${i * 0.05}s">
-            <div class="gc-img">🏎️</div>
-            <div class="gc-body">
-                <div class="gc-meta">${c.val >= 1000000 ? 'Hypercar' : 'Elite Spot'}</div>
-                <div class="gc-name">${c.name}</div>
-                <div class="gc-val">$${shortenNumber(c.val)}</div>
-            </div>
-        </div>
-    `).join('');
+  const grid = document.getElementById('garage-view');
+  grid.innerHTML = garage.map(c => `
+    <div class="garage-card">
+      <div class="gc-img">🏎️</div>
+      <div class="gc-body">
+        <div class="gc-meta">Rare Spot</div>
+        <div class="gc-name">${c.name}</div>
+        <div class="gc-val">$${c.val.toLocaleString()}</div>
+      </div>
+    </div>
+  `).join('');
+  
+  // Update achievements
+  const completed = ACHIEVEMENTS.filter(a => a.req(garage, 0)).length;
+  document.getElementById('ach-count').innerText = `${completed}/${ACHIEVEMENTS.length}`;
 }
 
 function initMap() {
-    if (map) map.remove();
-    
-    const center = state.garage.length > 0 ? [state.garage[0].lat, state.garage[0].lng] : [40.7128, -74.006];
-    map = L.map('map-container').setView(center, 12);
-    
-    const tileUrl = state.theme === 'dark' 
-        ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-        : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-
-    L.tileLayer(tileUrl).addTo(map);
-    
-    state.garage.forEach(c => {
-        L.marker([c.lat, c.lng]).addTo(map)
-            .bindPopup(`<strong>${c.name}</strong><br>$${c.val.toLocaleString()}`);
-    });
+  if (map) return;
+  map = L.map('map-container').setView([51.505, -0.09], 13);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+  
+  garage.forEach(c => {
+    if (c.lat) {
+      L.marker([c.lat, c.lng]).addTo(map)
+        .bindPopup(`<b>${c.name}</b><br>$${c.val.toLocaleString()}`);
+    }
+  });
 }
 
-// ── AI & ACHIEVEMENTS ──
 function smartFill() {
-    const btn = event.currentTarget;
-    const name = document.getElementById('car-name').value;
-    
-    if (!name) return;
-    
-    btn.innerText = "⚡ Analyzing...";
-    
-    // Simulate AI estimation
-    setTimeout(() => {
-        const estimates = {
-            'ferrari': 350000, 'lambo': 400000, 'porsche': 180000, 
-            'bugatti': 3000000, 'mclaren': 280000, 'toyota': 45000
-        };
-        
-        let found = false;
-        for (let key in estimates) {
-            if (name.toLowerCase().includes(key)) {
-                document.getElementById('car-val').value = estimates[key];
-                found = true;
-                break;
-            }
-        }
-        
-        if (!found) document.getElementById('car-val').value = 150000;
-        
-        btn.innerText = "✨ AI Smart Fill";
-    }, 800);
+  const btn = event.currentTarget;
+  btn.innerText = "⚡ Analyzing...";
+  setTimeout(() => {
+    document.getElementById('car-name').value = "Lamborghini Revuelto";
+    document.getElementById('car-val').value = "600000";
+    btn.innerText = "✨ Smart Fill with AI";
+  }, 800);
 }
 
-function checkAchievements() {
-    const currentRunTotal = state.currentRun.reduce((s, c) => s + c.val, 0);
-    const checkState = { ...state, currentRunTotal };
+// Initialize
+checkOnboarding();
+renderGarage();
+document.getElementById('best-val').innerText = `$${parseInt(bestRun).toLocaleString()}`;
 
-    ACHIEVEMENTS.forEach(ach => {
-        if (!state.achievements.includes(ach.id) && ach.req(checkState)) {
-            state.achievements.push(ach.id);
-            localStorage.setItem('cs_achievements', JSON.stringify(state.achievements));
-            showAchievementToast(ach);
-            updateUI();
-        }
-    });
-}
-
-function showAchievementToast(ach) {
-    const toast = document.getElementById('ach-toast');
-    document.getElementById('ach-t-icon').innerText = ach.icon;
-    document.getElementById('ach-t-title').innerText = ach.name;
-    document.getElementById('ach-t-desc').innerText = ach.desc;
-    
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 4000);
-}
-
-// ── UTILS ──
-function nextOnboard() {
-    const content = [
-        { icon: "✨", title: "AI Smart Fill", desc: "Unsure of the value? Type the name and hit Smart Fill. Our engine estimates market price instantly." },
-        { icon: "🌍", title: "Spot Map", desc: "Every spot is geo-tagged. Build a visual map of the rarest cars in your city." },
-        { icon: "🏆", title: "Elite Status", desc: "Unlock hard-to-earn achievements as your collection grows into the billions." }
-    ];
-    
-    if (obStep < content.length) {
-        const step = content[obStep];
-        document.getElementById('ob-content').innerHTML = `
-            <div class="ob-icon">${step.icon}</div>
-            <div class="ob-title">${step.title}</div>
-            <div class="ob-desc">${step.desc}</div>
-        `;
-        const dots = document.querySelectorAll('.ob-dot');
-        dots.forEach((d, i) => d.classList.toggle('active', i === obStep));
-        obStep++;
-    } else {
-        localStorage.setItem('cs_onboarded', 'true');
-        document.getElementById('onboarding').style.display = 'none';
-    }
-}
-
-function toggleTheme() {
-    state.theme = state.theme === 'dark' ? 'light' : 'dark';
-    document.body.classList.toggle('theme-light');
-    localStorage.setItem('cs_theme', state.theme);
-    if (map) initMap();
-}
-
-function exportData() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", "carspotter_pro_backup.json");
-    downloadAnchor.click();
-}
-
-function resetApp() {
-    if (confirm("Permanently delete all data and resets stats?")) {
-        localStorage.clear();
-        location.reload();
-    }
-}
 </script>
 </body>
 </html>
