@@ -1699,6 +1699,28 @@ function saveToCloud() {
 }
 
 // ── THEMES ──
+
+async function publishRunToLeaderboard(run) {
+  if (!currentUser || !run || run.spotted) return;
+  try {
+    await db.collection('leaderboardRuns').doc(String(run.id)).set({
+      runId: String(run.id),
+      userId: currentUser.uid,
+      name: currentUser.displayName || 'Spotter',
+      photo: currentUser.photoURL || '',
+      total: Number(run.total) || 0,
+      date: run.date || '',
+      cars: Array.isArray(run.cars) ? run.cars.length : 0,
+      headliner: run.headliner?.name || (run.cars?.[0]?.name || ''),
+      createdAt: run.id || Date.now(),
+      updatedAt: Date.now()
+    }, { merge: true });
+    leaderboardLoaded = false;
+  } catch (e) {
+    console.error('Leaderboard publish failed', e);
+  }
+}
+
 const THEMES = [
   { name:'Default',      accent:'#f5c842', accent2:'#ff5733', bg:'#0a0a0a', surf:'#141414', bodyClass:'' },
   { name:'Carbon',       accent:'#e0e0e0', accent2:'#ff4444', bg:'#0d0d0d', surf:'#1a1a1a', bodyClass:'' },
@@ -2205,6 +2227,7 @@ function endRun() {
   allRuns.unshift(run);
   localStorage.setItem('cs_runs', JSON.stringify(allRuns));
   saveToCloud();
+  publishRunToLeaderboard(run);
   currentRun = [];
   headlinerIdx = -1;
   saveCurrentRun();
@@ -3530,25 +3553,19 @@ async function loadLeaderboard(force) {
   const el = document.getElementById('leaderboardList');
   if (el) el.innerHTML = '<div class="lb-loading">Loading leaderboard...</div>';
   try {
-    const snap = await db.collection('users').get();
-    const rows = [];
-    snap.forEach(doc => {
+    const snap = await db.collection('leaderboardRuns').orderBy('total', 'desc').limit(100).get();
+    leaderboardRuns = snap.docs.map(doc => {
       const data = doc.data() || {};
-      const name = data.profileName || 'Spotter';
-      const runs = Array.isArray(data.allRuns) ? data.allRuns : [];
-      runs.filter(r => r && !r.spotted && Array.isArray(r.cars) && r.cars.length).forEach(run => {
-        rows.push({
-          userId: doc.id,
-          name,
-          total: Number(run.total) || 0,
-          date: run.date || '',
-          cars: run.cars.length,
-          headliner: run.headliner?.name || (run.cars[0]?.name || ''),
-          isMe: !!currentUser && currentUser.uid === doc.id
-        });
-      });
+      return {
+        userId: data.userId || '',
+        name: data.name || 'Spotter',
+        total: Number(data.total) || 0,
+        date: data.date || '',
+        cars: Number(data.cars) || 0,
+        headliner: data.headliner || '',
+        isMe: !!currentUser && currentUser.uid === data.userId
+      };
     });
-    leaderboardRuns = rows.sort((a,b) => b.total - a.total).slice(0, 100);
     leaderboardLoaded = true;
     renderLeaderboard();
   } catch (e) {
@@ -3931,6 +3948,9 @@ async function loadNews() {
 </script>
 </body>
 </html>
+
+
+
 
 
 
