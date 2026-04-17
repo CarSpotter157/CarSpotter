@@ -1003,6 +1003,21 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 }
 .scmd-send:disabled{opacity:0.5;cursor:default;}
 .scmd-hint{font-size:0.5rem;color:var(--muted);letter-spacing:0.5px;text-align:center;margin-top:2px;}
+
+.leaderboard-list{display:grid;gap:10px;}
+.leaderboard-topbar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.leaderboard-sub{font-size:0.68rem;color:var(--text2);line-height:1.5;margin-bottom:12px;}
+.lb-row{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;background:var(--surf);border:1px solid var(--border);border-radius:14px;padding:12px 14px;box-shadow:0 10px 22px rgba(0,0,0,0.10);animation:fadeUp 0.25s ease both;}
+.lb-rank{width:44px;height:44px;border-radius:12px;background:var(--surf2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:1.1rem;letter-spacing:1px;color:var(--accent);}
+.lb-rank.top{background:var(--adim);border-color:var(--accent);}
+.lb-main{min-width:0;}
+.lb-name{font-weight:700;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lb-meta{font-size:0.64rem;color:var(--text2);margin-top:3px;line-height:1.45;}
+.lb-score{text-align:right;}
+.lb-total{font-family:'Bebas Neue',cursive;font-size:1.35rem;letter-spacing:1px;color:var(--accent);line-height:1;}
+.lb-cars{font-size:0.62rem;color:var(--muted);margin-top:3px;}
+.lb-empty,.lb-loading{text-align:center;padding:36px 12px;color:var(--muted);font-size:0.74rem;letter-spacing:1px;border:1px dashed var(--border);border-radius:12px;}
+@media(min-width:800px){#page-leaderboard{overflow-y:auto;padding:28px 36px;}}
 </style>
 </head>
 <body>
@@ -1384,6 +1399,15 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
         </button>
       </div>
     </div><!-- NEWS PAGE -->
+    <div class="page" id="page-leaderboard">
+      <div class="leaderboard-topbar">
+        <div class="sec-title">LEADERBOARD</div>
+        <button class="txt-btn" onclick="loadLeaderboard(true)">Refresh</button>
+      </div>
+      <div class="leaderboard-sub">All completed runs across CarSpotter, ranked by total dollar amount.</div>
+      <div id="leaderboardList"><div class="lb-loading">Loading leaderboard...</div></div>
+    </div>
+
     <div class="page" id="page-news">
       <div class="sec-row" style="margin-bottom:10px">
         <div class="sec-title">🗞️ CAR NEWS</div>
@@ -1424,6 +1448,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
   <!-- More dropdown menu -->
   <div id="moreMenu" class="more-menu" style="display:none">
     <button class="more-item" onclick="goToMore('history')">📋 <span>History</span></button>
+    <button class="more-item" onclick="goToMore('leaderboard')">🏆 <span>Leaderboard</span></button>
     <button class="more-item" onclick="goToMore('news')">🗞️ <span>News</span></button>
     <button class="more-item" onclick="goToMore('stats')">📊 <span>Stats</span></button>
     <button class="more-item" onclick="goToMore('settings')">⚙️ <span>Settings</span></button>
@@ -1458,6 +1483,8 @@ let bulkMode     = false;
 let bulkSelected = new Set();
 let soundEnabled = localStorage.getItem('cs_sound') !== 'off';
 let aliases      = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
+let leaderboardRuns = [];
+let leaderboardLoaded = false;
 
 // Garage view — declared here so renderGarage() works before auth fires
 let garageFilter = 'all';
@@ -1664,8 +1691,10 @@ function saveToCloud() {
     db.collection('users').doc(currentUser.uid).set({
       currentRun, allRuns, quickPicks,
       notes: localStorage.getItem('cs_notes') || '',
+      profileName: currentUser?.displayName || 'Spotter',
+      profilePhoto: currentUser?.photoURL || '',
       updatedAt: _lastSave
-    }).then(() => setSyncDot('ok')).catch(() => setSyncDot(''));
+    }).then(() => { setSyncDot('ok'); leaderboardLoaded = false; }).catch(() => setSyncDot(''));
   }, 1500);
 }
 
@@ -1956,6 +1985,7 @@ function goTo(page) {
   if (page==='history') renderHistory();
   if (page==='stats')   renderStats();
   if (page==='news' && !newsLoaded) { newsLoaded=true; renderNewsSources(); loadNews(); }
+  if (page==='leaderboard') loadLeaderboard(true);
 }
 
 // ── FORMAT ──
@@ -3382,6 +3412,7 @@ function goToMore(page) {
   if (page==='history') renderHistory();
   if (page==='settings') { renderThemeBar(); initSoundToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); }
   if (page==='news' && !newsLoaded) { newsLoaded=true; renderNewsSources(); loadNews(); }
+  if (page==='leaderboard') loadLeaderboard(true);
 }
 
 // Close more menu when clicking outside
@@ -3489,6 +3520,69 @@ function renderStats() {
 }
 
 // ── NEWS ──
+
+function fmtLeaderboardDate(v) {
+  return v || 'Unknown date';
+}
+
+async function loadLeaderboard(force) {
+  if (leaderboardLoaded && !force) { renderLeaderboard(); return; }
+  const el = document.getElementById('leaderboardList');
+  if (el) el.innerHTML = '<div class="lb-loading">Loading leaderboard...</div>';
+  try {
+    const snap = await db.collection('users').get();
+    const rows = [];
+    snap.forEach(doc => {
+      const data = doc.data() || {};
+      const name = data.profileName || 'Spotter';
+      const runs = Array.isArray(data.allRuns) ? data.allRuns : [];
+      runs.filter(r => r && !r.spotted && Array.isArray(r.cars) && r.cars.length).forEach(run => {
+        rows.push({
+          userId: doc.id,
+          name,
+          total: Number(run.total) || 0,
+          date: run.date || '',
+          cars: run.cars.length,
+          headliner: run.headliner?.name || (run.cars[0]?.name || ''),
+          isMe: !!currentUser && currentUser.uid === doc.id
+        });
+      });
+    });
+    leaderboardRuns = rows.sort((a,b) => b.total - a.total).slice(0, 100);
+    leaderboardLoaded = true;
+    renderLeaderboard();
+  } catch (e) {
+    console.error(e);
+    if (el) el.innerHTML = '<div class="lb-empty">Could not load leaderboard right now.</div>';
+  }
+}
+
+function renderLeaderboard() {
+  const el = document.getElementById('leaderboardList');
+  if (!el) return;
+  if (!leaderboardRuns.length) {
+    el.innerHTML = '<div class="lb-empty">No completed runs have been synced yet.</div>';
+    return;
+  }
+  el.className = 'leaderboard-list';
+  el.innerHTML = leaderboardRuns.map((run, idx) => {
+    const top = idx < 3 ? 'top' : '';
+    const who = run.isMe ? run.name + ' (You)' : run.name;
+    return `
+      <div class="lb-row" style="animation-delay:${idx * 0.03}s">
+        <div class="lb-rank ${top}">#${idx + 1}</div>
+        <div class="lb-main">
+          <div class="lb-name">${who}</div>
+          <div class="lb-meta">${fmtLeaderboardDate(run.date)}   ${run.headliner ? run.headliner + '   ' : ''}${run.cars} cars</div>
+        </div>
+        <div class="lb-score">
+          <div class="lb-total">${fmtFull(run.total)}</div>
+          <div class="lb-cars">Run total</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
 const NEWS_SOURCES = [
   { name: 'Car & Driver',  rss: 'https://www.caranddriver.com/rss/all.xml/' },
   { name: 'Motor Trend',   rss: 'https://www.motor1.com/rss/news/all/' },
@@ -3837,6 +3931,8 @@ async function loadNews() {
 </script>
 </body>
 </html>
+
+
 
 
 
