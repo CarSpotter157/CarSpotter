@@ -10,9 +10,12 @@
 <title>CarSpotter</title>
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='55%25' font-size='110' text-anchor='middle' dominant-baseline='middle'%3E%F0%9F%9B%B5%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js">
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js">
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js">
+</script>
 <script>
 firebase.initializeApp({
   apiKey: "AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug",
@@ -24,6 +27,7 @@ firebase.initializeApp({
 });
 const auth = firebase.auth();
 const db   = firebase.firestore();
+
 </script>
 <style>
 :root{
@@ -64,6 +68,11 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
 @keyframes scoot    {0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-4px) rotate(1deg)}}
 @keyframes glow     {0%,100%{box-shadow:0 0 0 0 rgba(245,200,66,0)}50%{box-shadow:0 0 18px 4px rgba(245,200,66,0.15)}}
 @keyframes numPop   {0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes driveIn  {from{opacity:0;transform:translateX(38px) scale(0.96)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes smartPulse{0%,100%{transform:translateY(0) scale(1);box-shadow:0 8px 18px rgba(245,200,66,0.16)}50%{transform:translateY(-2px) scale(1.03);box-shadow:0 12px 24px rgba(245,200,66,0.28)}}
+@keyframes floatGlow{0%,100%{box-shadow:0 10px 22px rgba(0,0,0,0.18)}50%{box-shadow:0 14px 28px rgba(0,0,0,0.28)}}
+@keyframes slideLeftFade{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes badgeBlink{0%,100%{opacity:1}50%{opacity:0.6}}
 
 /* ── MOBILE SHELL ── */
 .app-shell{
@@ -137,6 +146,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
   transition:opacity 0.22s ease,transform 0.22s ease;
 }
 .page.active{opacity:1;pointer-events:all;transform:translateY(0);}
+.page.page-enter-forward{animation:slideLeftFade 0.24s ease;}
+.page.page-enter-back{animation:slideIn 0.24s ease;}
 
 /* ── BOTTOM NAV ── */
 .bottom-nav{
@@ -183,7 +194,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
 .beat.tied{color:var(--muted);}
 
 /* ── CARD ── */
-.card{background:var(--surf);border:1px solid var(--border);border-radius:13px;padding:14px;margin-bottom:12px;animation:fadeUp 0.3s ease both;overflow:visible;}
+.card{background:var(--surf);border:1px solid var(--border);border-radius:13px;padding:14px;margin-bottom:12px;animation:fadeUp 0.3s ease both;overflow:visible;box-shadow:0 10px 24px rgba(0,0,0,0.12);}
 .card-title{font-family:'Bebas Neue',cursive;font-size:0.88rem;letter-spacing:2.5px;color:var(--muted);margin-bottom:12px;}
 
 /* ── FORM ── */
@@ -202,14 +213,14 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
 .btn-run{
   background:var(--accent);color:#0a0a0a;border:none;border-radius:9px;
   font-family:'Bebas Neue',cursive;font-size:1.05rem;letter-spacing:3px;
-  padding:13px;cursor:pointer;transition:all 0.15s;
+  padding:13px;cursor:pointer;transition:all 0.15s;box-shadow:0 10px 20px rgba(245,200,66,0.16);
 }
 .btn-run:hover{background:#f0be25;}
 .btn-run:active{transform:scale(0.97);}
 .btn-spot{
   background:var(--surf2);color:var(--text);border:1px solid var(--border);border-radius:9px;
   font-family:'Bebas Neue',cursive;font-size:1.05rem;letter-spacing:2px;
-  padding:13px;cursor:pointer;transition:all 0.15s;
+  padding:13px;cursor:pointer;transition:all 0.15s;box-shadow:0 8px 18px rgba(0,0,0,0.12);
 }
 .btn-spot:hover{border-color:var(--accent2);color:var(--accent2);}
 .btn-spot:active{transform:scale(0.97);}
@@ -262,7 +273,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
 .run-item{
   display:flex;align-items:center;background:var(--surf);border:1px solid var(--border);
   border-left:3px solid var(--accent);border-radius:10px;padding:11px 12px;margin-bottom:7px;
-  transition:border-color 0.15s;
+  transition:border-color 0.15s;box-shadow:0 10px 18px rgba(0,0,0,0.10);
 }
 .re{font-size:1.3rem;margin-right:10px;flex-shrink:0;}
 .ri{flex:1;min-width:0;}
@@ -427,6 +438,9 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
 .mic-btn.active {
   background: rgba(248,113,113,0.1); border-color: var(--red);
   animation: micPulse 1.2s ease-in-out infinite;
+}
+.smart-fill-btn{
+  animation:smartPulse 2.2s ease-in-out infinite,floatGlow 2.2s ease-in-out infinite;
 }
 @keyframes micPulse {
   0%,100% { box-shadow: 0 0 0 0 rgba(248,113,113,0.4); }
@@ -701,6 +715,90 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 }
 .more-item:last-child{border-bottom:none;}
 .more-item:hover{background:var(--adim);}
+.setting-card{padding:18px 16px;box-shadow:0 12px 26px rgba(0,0,0,0.14);}
+.setting-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:8px;}
+.setting-icon{
+  width:40px;height:40px;border-radius:12px;background:var(--adim);border:1px solid rgba(255,255,255,0.06);
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;
+}
+.setting-copy{flex:1;}
+.setting-copy .card-title{margin-bottom:4px;}
+.setting-desc{font-size:0.72rem;color:var(--text2);line-height:1.6;}
+.setting-row{display:flex;align-items:center;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.setting-row:first-of-type{margin-top:0;padding-top:0;border-top:none;}
+.setting-link{
+  width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:11px;color:var(--text);
+  font-size:0.82rem;padding:12px 13px;cursor:pointer;font-family:inherit;transition:border-color 0.15s,transform 0.15s;
+  text-align:left;display:flex;align-items:center;justify-content:space-between;box-shadow:0 10px 18px rgba(0,0,0,0.08);
+}
+.setting-link:hover{border-color:var(--accent);transform:translateY(-1px);}
+@media(min-width:800px){#page-settings{padding:34px 42px;}}
+
+.tutorial-overlay{
+  position:fixed;inset:0;z-index:99997;background:rgba(0,0,0,0.86);
+  display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.25s ease;
+}
+.tutorial-card{
+  width:100%;max-width:500px;background:var(--surf);border-top:1px solid var(--border);border-radius:22px 22px 0 0;
+  padding:24px 20px 34px;animation:slideUpRecap 0.32s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow:0 -10px 32px rgba(0,0,0,0.35);position:relative;
+}
+.tutorial-steps{display:flex;gap:8px;margin-bottom:18px;}
+.tutorial-step-dot{height:6px;flex:1;border-radius:999px;background:var(--border);overflow:hidden;}
+.tutorial-step-dot.active{background:var(--accent);}
+.tutorial-eyebrow{font-size:0.58rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:8px;}
+.tutorial-title{font-family:'Bebas Neue',cursive;font-size:1.65rem;letter-spacing:2px;line-height:1.05;margin-bottom:10px;}
+.tutorial-desc{font-size:0.8rem;color:var(--text2);line-height:1.7;margin-bottom:16px;}
+.tutorial-visual{
+  background:linear-gradient(180deg,var(--adim),transparent);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:18px;
+}
+.tutorial-mini-run{display:grid;gap:8px;}
+.tutorial-mini-row,.tutorial-mini-sync{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surf2);border:1px solid var(--border);border-radius:12px;padding:10px 12px;
+}
+.tutorial-mini-row strong,.tutorial-mini-sync strong{font-size:0.76rem;}
+.tutorial-mini-row span,.tutorial-mini-sync span{font-size:0.64rem;color:var(--text2);}
+.tutorial-smart{
+  background:var(--surf2);border:1px dashed var(--accent);border-radius:14px;padding:12px;
+}
+.tutorial-smart-badge{
+  display:inline-flex;align-items:center;gap:6px;background:var(--adim);border:1px solid var(--accent);border-radius:999px;
+  padding:6px 10px;font-size:0.62rem;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;
+  animation:badgeBlink 1.8s ease infinite;
+}
+.tutorial-map{
+  height:120px;border-radius:14px;background:
+    radial-gradient(circle at 35% 45%, rgba(245,200,66,0.18), transparent 25%),
+    radial-gradient(circle at 70% 35%, rgba(255,87,51,0.16), transparent 24%),
+    linear-gradient(180deg,var(--surf2),var(--surf3));
+  border:1px solid var(--border);position:relative;overflow:hidden;
+}
+.tutorial-map::before,.tutorial-map::after{
+  content:'';position:absolute;border-radius:50%;width:16px;height:16px;background:var(--accent);box-shadow:0 0 0 6px rgba(245,200,66,0.12);
+}
+.tutorial-map::before{top:28px;left:80px;}
+.tutorial-map::after{right:72px;bottom:24px;background:var(--accent2);box-shadow:0 0 0 6px rgba(255,87,51,0.12);}
+.tutorial-actions{display:flex;gap:8px;}
+.tutorial-skip,.tutorial-next{
+  flex:1;border:none;border-radius:11px;padding:13px;cursor:pointer;font-family:'Bebas Neue',cursive;font-size:1rem;letter-spacing:2px;
+}
+.tutorial-skip{background:var(--surf2);color:var(--text);border:1px solid var(--border);}
+.tutorial-next{background:var(--accent);color:#0a0a0a;}
+.tutorial-close{
+  position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;
+}
+
+.location-chip-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
+.location-chip,.location-tag{
+  background:var(--surf2);border:1px solid var(--border);border-radius:999px;padding:8px 11px;font-size:0.68rem;color:var(--text2);
+}
+.location-chip button{all:unset;cursor:pointer;color:var(--accent);font-weight:700;margin-left:6px;}
+.geo-btn{
+  background:var(--surf2);border:1px dashed var(--border);border-radius:9px;color:var(--text2);font-size:0.75rem;
+  padding:10px 12px;cursor:pointer;transition:all 0.15s;width:100%;margin-bottom:8px;box-shadow:0 8px 18px rgba(0,0,0,0.08);
+}
+.geo-btn:hover{border-color:var(--accent);color:var(--accent);}
+.geo-btn.locating{border-color:var(--accent);animation:pulse 1s ease infinite;}
 @media(min-width:800px){
   .more-menu{bottom:auto;top:50%;right:auto;left:96px;transform:translateY(-50%);}
 }
@@ -824,9 +922,9 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 .garage-card{
   background:var(--surf);border:1px solid var(--border);border-radius:12px;
   overflow:hidden;cursor:pointer;transition:border-color 0.15s,transform 0.15s;
-  animation:fadeUp 0.25s ease both;text-decoration:none;color:inherit;display:block;
+  animation:fadeUp 0.25s ease both;text-decoration:none;color:inherit;display:block;box-shadow:0 14px 26px rgba(0,0,0,0.15);
 }
-.garage-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.garage-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 18px 30px rgba(0,0,0,0.22);}
 .gc-img-wrap{height:90px;background:var(--surf2);overflow:hidden;position:relative;}
 .gc-img{width:100%;height:100%;object-fit:cover;display:block;}
 .gc-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem;}
@@ -834,6 +932,57 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 .gc-name{font-weight:700;font-size:0.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
 .gc-val{font-family:'Bebas Neue',cursive;font-size:1rem;color:var(--accent);letter-spacing:1px;line-height:1;}
 .gc-rarity{display:block;font-size:0.52rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
+.gc-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
+.gc-meta-chip{background:var(--surf2);border:1px solid var(--border);border-radius:9px;padding:7px 8px;}
+.gc-meta-label{font-size:0.5rem;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:2px;}
+.gc-meta-val{font-size:0.65rem;color:var(--text2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+.garage-map{
+  position:relative;min-height:320px;border-radius:16px;border:1px solid var(--border);
+  background:
+    radial-gradient(circle at 20% 20%, rgba(245,200,66,0.12), transparent 28%),
+    radial-gradient(circle at 75% 25%, rgba(96,165,250,0.10), transparent 26%),
+    linear-gradient(180deg,var(--surf),var(--surf2));
+  overflow:hidden;box-shadow:0 14px 28px rgba(0,0,0,0.16);
+}
+.map-grid{
+  position:absolute;inset:0;opacity:0.2;
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size:42px 42px;
+}
+.map-hud{
+  position:absolute;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;gap:8px;z-index:2;
+}
+.map-badge{
+  background:rgba(0,0,0,0.35);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);
+  border-radius:999px;padding:7px 12px;font-size:0.62rem;color:var(--text2);letter-spacing:1px;text-transform:uppercase;
+}
+.map-pin{
+  position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;gap:4px;z-index:1;
+  animation:fadeUp 0.3s ease both;
+}
+.map-pin-btn{
+  width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,0.18);
+  background:var(--accent);color:#0a0a0a;display:flex;align-items:center;justify-content:center;
+  font-size:0.95rem;cursor:pointer;box-shadow:0 10px 22px rgba(0,0,0,0.22);
+}
+.map-pin-btn.hot{background:var(--accent2);color:#fff;}
+.map-pin-label{
+  background:rgba(0,0,0,0.5);color:#fff;border-radius:999px;padding:4px 8px;font-size:0.56rem;max-width:110px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.map-empty{
+  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;color:var(--muted);font-size:0.72rem;letter-spacing:1px;padding:22px;
+}
+.garage-map-list{margin-top:10px;display:grid;gap:8px;}
+.garage-map-row{
+  display:flex;align-items:center;gap:10px;background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:10px 12px;
+}
+.garage-map-row strong{font-size:0.82rem;}
+.garage-map-row span{font-size:0.66rem;color:var(--text2);}
 
 /* ── SMART COMMAND BAR ── */
 .smart-cmd-wrap{
@@ -959,6 +1108,9 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
               <input type="file" accept="image/*" capture="environment" style="display:none" id="photoInput" onchange="handlePhotoInput(this)">
             </label>
 
+            <button class="geo-btn" id="geoBtn" onclick="captureLocation()">Save current location for this spot (optional)</button>
+            <div class="location-chip-row" id="locationChipRow" style="display:none"></div>
+
             <!-- Quick Picks -->
             <div class="qp-wrap" id="qpWrap" style="display:none">
               <button class="qp-trigger" onclick="toggleQP()">
@@ -1008,7 +1160,8 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
         <div style="display:flex;gap:6px;align-items:center;">
           <div class="garage-view-toggle">
             <button class="gv-btn active" id="gvList" onclick="setGarageView('list')" title="List view">&#9776;</button>
-            <button class="gv-btn" id="gvGrid" onclick="setGarageView('grid')" title="Grid view">&#8862;</button>
+            <button class="gv-btn" id="gvGrid" onclick="setGarageView('grid')" title="Car cards">Cards</button>
+            <button class="gv-btn" id="gvMap" onclick="setGarageView('map')" title="Map view">Map</button>
           </div>
           <button class="txt-btn" id="sortBtn" onclick="cycleSort()">Value &#8595;</button>
         </div>
@@ -1079,7 +1232,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
           <div class="notes-sub">Type or speak — saves automatically</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
-          <button class="mic-btn" id="smartFillBtn" onclick="smartVoiceFill()" style="background:var(--adim);border-color:var(--accent);">
+          <button class="mic-btn smart-fill-btn" id="smartFillBtn" onclick="smartVoiceFill()" style="background:var(--adim);border-color:var(--accent);">
             <span class="mic-icon">✨</span>
             <span class="mic-lbl" style="color:var(--accent)">Smart Fill</span>
           </button>
@@ -1113,7 +1266,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
       <div class="card" id="st-bestrun"></div>
 
       <!-- Achievements -->
-      <div class="card">
+      <div class="card setting-card">
         <div class="card-title">🏅 ACHIEVEMENTS</div>
         <div class="ach-count-row" id="achCountRow"><span id="achUnlocked">0</span> / <span id="achTotal">0</span> unlocked</div>
         <div class="ach-grid" id="achGrid"></div>
@@ -1152,15 +1305,19 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 
     <!-- SETTINGS PAGE -->
     <div class="page" id="page-settings">
-      <div class="sec-title" style="margin-bottom:14px">⚙️ SETTINGS</div>
-
-      <!-- Themes -->
-      <div class="card">
-        <div class="card-title">🎨 THEME</div>
+      <div class="sec-title" style="margin-bottom:14px">⚙️ SETTINGS</div>      <!-- Themes -->
+      <div class="card setting-card">
+        <div class="setting-head">
+          <div class="setting-icon">Theme</div>
+          <div class="setting-copy">
+            <div class="card-title">THEME</div>
+            <div class="setting-desc">Tune CarSpotter''s look with bold palettes, then add carbon fiber texture for extra depth.</div>
+          </div>
+        </div>
         <div class="theme-bar" id="themeBar"></div>
         <div style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;margin-top:8px;" id="themeName">Default</div>
-        <div style="font-size:0.6rem;color:var(--muted);margin-top:4px;line-height:1.5;">Dark: Default · Carbon · Stealth · Inferno · Cobalt · Acid<br>Light: ☀️ Light &nbsp;|&nbsp; Special: 💜 Cyberpunk · 🌸 Retro 80s</div>
-        <div class="carbon-toggle-row">
+        <div style="font-size:0.6rem;color:var(--muted);margin-top:4px;line-height:1.5;">Dark: Default   Carbon   Stealth   Inferno   Cobalt   Acid<br>Light: Light &nbsp;|&nbsp; Special: Cyberpunk   Retro 80s</div>
+        <div class="setting-row" style="border-top:none;padding-top:10px;">
           <div class="carbon-preview"></div>
           <span style="font-size:0.78rem;color:var(--text2);flex:1;">Carbon fiber texture on surfaces</span>
           <button class="toggle-pill" id="carbonToggle" onclick="toggleCarbon()"><div class="toggle-knob"></div></button>
@@ -1168,37 +1325,65 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
       </div>
 
       <!-- Offline Status -->
-      <div class="card">
-        <div class="card-title">✈ OFFLINE MODE</div>
-        <div style="font-size:0.72rem;color:var(--text2);margin-bottom:10px;line-height:1.5;">CarSpotter always saves locally — you can log spots with no internet. Changes sync automatically when you reconnect.</div>
-        <div style="display:flex;align-items:center;gap:10px;">
+      <div class="card setting-card">
+        <div class="setting-head">
+          <div class="setting-icon">Sync</div>
+          <div class="setting-copy">
+            <div class="card-title">SYNC & OFFLINE</div>
+            <div class="setting-desc">Every run saves on-device first, then syncs to the cloud when you are back online.</div>
+          </div>
+        </div>
+        <div class="setting-row" style="border-top:none;padding-top:0;margin-top:0;">
           <div id="offlineStatusDot" style="width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0;"></div>
-          <span id="offlineStatusText" style="font-size:0.78rem;color:var(--text2);flex:1;">Online — syncing to cloud</span>
+          <span id="offlineStatusText" style="font-size:0.78rem;color:var(--text2);flex:1;">Online - syncing to cloud</span>
         </div>
         <div id="offlineQueueInfo" style="display:none;font-size:0.65rem;color:var(--accent2);margin-top:6px;letter-spacing:1px;"></div>
       </div>
 
       <!-- Sound FX -->
-      <div class="card">
-        <div class="card-title">🔊 SOUND EFFECTS</div>
-        <div class="sound-toggle">
+      <div class="card setting-card">
+        <div class="setting-head">
+          <div class="setting-icon">Audio</div>
+          <div class="setting-copy">
+            <div class="card-title">SOUND EFFECTS</div>
+            <div class="setting-desc">Keep the app quiet or add feedback when you log cars and finish runs.</div>
+          </div>
+        </div>
+        <div class="setting-row sound-toggle" style="border-top:none;padding-top:0;margin-top:0;">
           <span style="font-size:0.78rem;color:var(--text2);flex:1;">Play sounds when logging cars</span>
           <button class="toggle-pill" id="soundToggle" onclick="toggleSound()"><div class="toggle-knob"></div></button>
         </div>
       </div>
 
       <!-- Aliases -->
-      <div class="card">
-        <div class="card-title">🏷️ CAR NICKNAMES</div>
-        <div style="font-size:0.7rem;color:var(--text2);margin-bottom:12px;line-height:1.5;">Map abbreviations to full names so your stats group correctly. E.g. "GT3 RS" → "Porsche 911 GT3 RS"</div>
-        <button onclick="openAliasModal()" style="width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:0.82rem;padding:11px;cursor:pointer;font-family:inherit;transition:border-color 0.15s;text-align:left;display:flex;align-items:center;justify-content:space-between;">
+      <div class="card setting-card">
+        <div class="setting-head">
+          <div class="setting-icon">Names</div>
+          <div class="setting-copy">
+            <div class="card-title">CAR NICKNAMES</div>
+            <div class="setting-desc">Map abbreviations to full names so your stats and garage stay tidy. Example: GT3 RS -> Porsche 911 GT3 RS.</div>
+          </div>
+        </div>
+        <button class="setting-link" onclick="openAliasModal()">
           <span>Manage nicknames</span>
           <span id="aliasCount" style="font-family:'Bebas Neue',cursive;font-size:0.9rem;color:var(--accent);letter-spacing:1px;">0 saved</span>
         </button>
       </div>
-    </div>
 
-    <!-- NEWS PAGE -->
+      <div class="card setting-card">
+        <div class="setting-head">
+          <div class="setting-icon">Guide</div>
+          <div class="setting-copy">
+            <div class="card-title">HELP & ONBOARDING</div>
+            <div class="setting-desc">Replay the quick 3-step intro any time to show how runs, Smart Fill, and syncing work.</div>
+          </div>
+        </div>
+        <button class="setting-link" onclick="openTutorial(true)">
+          <span>Show onboarding tutorial</span>
+          <span>Open</span>
+        </button>
+      </div>
+    </div><!-- NEWS PAGE -->
     <div class="page" id="page-news">
       <div class="sec-row" style="margin-bottom:10px">
         <div class="sec-title">🗞️ CAR NEWS</div>
@@ -3349,6 +3534,311 @@ async function loadNews() {
 }
 
 
+
+(function(){
+  var pageOrder = ['spot','garage','voice','history','stats','settings','news'];
+  var currentSpotLocation = JSON.parse(localStorage.getItem('cs_pending_loc') || 'null');
+  var currentPage = 'spot';
+  var runTotalAnimated = 0;
+  var tutorialStep = 0;
+  var tutorialTimer = null;
+
+  ACHIEVEMENTS.splice(0, ACHIEVEMENTS.length,
+    { id:'first_car', icon:'1', name:'First Spot', desc:'Log your first car', check:(c,r)=>c.length>=1 },
+    { id:'fifty_cars', icon:'50', name:'Half Century', desc:'Log 50 cars total', check:(c,r)=>c.length>=50 },
+    { id:'hundred_cars', icon:'100', name:'Hundred Club', desc:'Log 100 cars total', check:(c,r)=>c.length>=100 },
+    { id:'garage_250', icon:'250', name:'Collector Spec', desc:'Log 250 cars total', check:(c,r)=>c.length>=250 },
+    { id:'first_run', icon:'R1', name:'First Run', desc:'Complete your first run', check:(c,r)=>r.filter(x=>!x.spotted).length>=1 },
+    { id:'ten_runs', icon:'R10', name:'Regular', desc:'Complete 10 runs', check:(c,r)=>r.filter(x=>!x.spotted).length>=10 },
+    { id:'twentyfive_runs', icon:'R25', name:'Street Veteran', desc:'Complete 25 runs', check:(c,r)=>r.filter(x=>!x.spotted).length>=25 },
+    { id:'marathon_run', icon:'8X', name:'Marathon Run', desc:'Log 8 cars in a single run', check:(c,r)=>r.some(x=>!x.spotted&&(x.cars||[]).length>=8) },
+    { id:'five_makes', icon:'M5', name:'Make Explorer', desc:'Spot 5 different makes', check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=5 },
+    { id:'fifteen_makes', icon:'M15', name:'Globe Trotter', desc:'Spot 15 different makes', check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=15 },
+    { id:'twentyfive_makes', icon:'M25', name:'World Garage', desc:'Spot 25 different makes', check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=25 },
+    { id:'ev_collector', icon:'EV', name:'Electric Dreams', desc:'Log 10 EVs', check:(c,r)=>c.filter(x=>(x.name||'').toLowerCase().includes('tesla') || (x.name||'').toLowerCase().includes('taycan') || (x.name||'').toLowerCase().includes('rimac') || (x.name||'').toLowerCase().includes('lucid') || (x.name||'').toLowerCase().includes('rivian')).length>=10 },
+    { id:'muscle_master', icon:'MU', name:'Muscle Master', desc:'Log 10 muscle cars', check:(c,r)=>c.filter(x=>(x.name||'').toLowerCase().includes('mustang') || (x.name||'').toLowerCase().includes('charger') || (x.name||'').toLowerCase().includes('challenger') || (x.name||'').toLowerCase().includes('camaro')).length>=10 },
+    { id:'supercar_stack', icon:'SC', name:'Supercar Stack', desc:'Log 20 supercars or exotics', check:(c,r)=>c.filter(x=>x.value>=150000).length>=20 },
+    { id:'photo_five', icon:'P5', name:'Photographer', desc:'Log 5 cars with photos', check:(c,r)=>c.filter(x=>x.photo).length>=5 },
+    { id:'photo_twenty', icon:'P20', name:'Rolling Gallery', desc:'Log 20 cars with photos', check:(c,r)=>c.filter(x=>x.photo).length>=20 },
+    { id:'hyper_fleet', icon:'H8', name:'Hyper Fleet', desc:'Spot 8 hypercars ($500K+)', check:(c,r)=>c.filter(x=>x.value>=500000).length>=8 },
+    { id:'legend_trio', icon:'L3', name:'Legend Trio', desc:'Spot 3 legend cars ($1M+)', check:(c,r)=>c.filter(x=>x.value>=1000000).length>=3 },
+    { id:'two_mil_run', icon:'2M', name:'Two Million Club', desc:'Complete a run over $2M', check:(c,r)=>r.some(x=>!x.spotted&&x.total>=2000000) },
+    { id:'three_mil_run', icon:'3M', name:'Unicorn Run', desc:'Complete a run over $3M', check:(c,r)=>r.some(x=>!x.spotted&&x.total>=3000000) },
+    { id:'double_legend_run', icon:'2L', name:'Royal Convoy', desc:'Log 2 legend cars in one run', check:(c,r)=>r.some(x=>!x.spotted&&(x.cars||[]).filter(car=>car.value>=1000000).length>=2) }
+  );
+  _prevAchievements = (_prevAchievements || []).filter(id => ACHIEVEMENTS.some(a => a.id === id));
+  localStorage.setItem('cs_ach', JSON.stringify(_prevAchievements));
+
+  function escapeHtml(v){ return String(v || '').replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
+  function locLabel(loc){ return !loc ? '' : (loc.label || [loc.city, loc.region].filter(Boolean).join(', ') || 'Pinned location'); }
+  function persistPendingLocation(){ if (currentSpotLocation) localStorage.setItem('cs_pending_loc', JSON.stringify(currentSpotLocation)); else localStorage.removeItem('cs_pending_loc'); }
+  function renderPendingLocation(){
+    var row = document.getElementById('locationChipRow');
+    var btn = document.getElementById('geoBtn');
+    if (!row || !btn) return;
+    if (!currentSpotLocation) {
+      row.style.display = 'none';
+      row.innerHTML = '';
+      btn.classList.remove('locating');
+      btn.textContent = 'Save current location for this spot (optional)';
+      return;
+    }
+    row.style.display = 'flex';
+    row.innerHTML = '<div class="location-chip">PIN ' + escapeHtml(locLabel(currentSpotLocation)) + '<button onclick="clearPendingLocation()">x</button></div>';
+    btn.classList.remove('locating');
+    btn.textContent = 'Update saved location';
+  }
+  window.clearPendingLocation = function(){ currentSpotLocation = null; persistPendingLocation(); renderPendingLocation(); };
+  window.captureLocation = function(){
+    var btn = document.getElementById('geoBtn');
+    if (!navigator.geolocation) { showToast('Location is not supported here'); return; }
+    if (btn) { btn.classList.add('locating'); btn.textContent = 'Locating...'; }
+    navigator.geolocation.getCurrentPosition(function(pos){
+      currentSpotLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude, label: 'Live pin', capturedAt: Date.now() };
+      persistPendingLocation();
+      renderPendingLocation();
+      showToast('Location saved for this log');
+    }, function(){
+      if (btn) { btn.classList.remove('locating'); btn.textContent = 'Save current location for this spot (optional)'; }
+      showToast('Could not get location');
+    }, { enableHighAccuracy:true, timeout:10000, maximumAge:120000 });
+  };
+  function attachPendingLocation(car){
+    if (!currentSpotLocation) return car;
+    car.location = Object.assign({}, currentSpotLocation, { label: locLabel(currentSpotLocation) });
+    currentSpotLocation = null;
+    persistPendingLocation();
+    setTimeout(renderPendingLocation, 0);
+    return car;
+  }
+  function animateValue(el, from, to, formatter, duration){
+    if (!el) return;
+    var start = performance.now();
+    var delta = to - from;
+    function frame(now){
+      var pct = Math.min(1, (now - start) / duration);
+      var eased = 1 - Math.pow(1 - pct, 3);
+      el.textContent = formatter(from + delta * eased);
+      if (pct < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+  function updatePageTransition(page){
+    var target = document.getElementById('page-' + page);
+    if (!target) return;
+    target.classList.remove('page-enter-forward', 'page-enter-back');
+    var dir = pageOrder.indexOf(page) >= pageOrder.indexOf(currentPage) ? 'page-enter-forward' : 'page-enter-back';
+    requestAnimationFrame(function(){ target.classList.add(dir); });
+    setTimeout(function(){ target.classList.remove(dir); }, 260);
+    currentPage = page;
+  }
+
+  var baseGoTo = window.goTo;
+  window.goTo = function(page){ if (typeof baseGoTo === 'function') baseGoTo(page); updatePageTransition(page); };
+  var baseGoToMore = window.goToMore;
+  window.goToMore = function(page){ if (typeof baseGoToMore === 'function') baseGoToMore(page); updatePageTransition(page); };
+
+  window.setGarageView = function(v){
+    garageView = v;
+    var map = { list:'gvList', grid:'gvGrid', map:'gvMap' };
+    ['gvList','gvGrid','gvMap'].forEach(function(id){ var el = document.getElementById(id); if (el) el.classList.toggle('active', id === map[v]); });
+    renderGarage();
+  };
+
+  window.renderSpot = function(){
+    var total = currentRun.reduce(function(s,c){ return s + c.value; }, 0);
+    var best = getBest();
+    animateValue(document.getElementById('runTotal'), runTotalAnimated || 0, total, fmtFull, 420);
+    runTotalAnimated = total;
+    document.getElementById('runCount').textContent = currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '');
+    if (best > 0) {
+      document.getElementById('bestTotal').textContent = fmtFull(best);
+      document.getElementById('headerBest').textContent = fmt(best);
+      var dskBest = document.getElementById('dskBest');
+      if (dskBest) dskBest.textContent = fmt(best);
+      var diff = total - best;
+      var msg = document.getElementById('beatMsg');
+      if (diff > 0) { msg.textContent = '? ' + fmtFull(diff) + ' ahead!'; msg.className = 'beat beating'; }
+      else if (diff < 0) { msg.textContent = '? ' + fmtFull(Math.abs(diff)) + ' to beat'; msg.className = 'beat behind'; }
+      else { msg.textContent = 'Tied!'; msg.className = 'beat tied'; }
+    } else {
+      document.getElementById('bestTotal').textContent = ' ';
+      document.getElementById('headerBest').textContent = ' ';
+      document.getElementById('beatMsg').textContent = 'No record yet';
+      document.getElementById('beatMsg').className = 'beat tied';
+    }
+    var list = document.getElementById('runList');
+    if (!currentRun.length) {
+      list.innerHTML = '<div class="empty-run"><span class="ei">RUN</span>Add cars to your run</div>';
+    } else {
+      list.innerHTML = '';
+      currentRun.slice().reverse().forEach(function(car, ri){
+        var i = currentRun.length - 1 - ri;
+        var isHL = headlinerIdx === i;
+        var rarity = getRarity(car.value);
+        var row = document.createElement('div');
+        row.className = 'run-item';
+        row.style.animation = (ri === 0 ? 'driveIn 0.34s ease both' : 'fadeUp 0.25s ease both');
+        row.style.animationDelay = (ri * 0.03) + 's';
+        if (isHL) row.style.borderColor = 'var(--accent)';
+        row.innerHTML = (car.photo ? '<img class="run-item-photo" src="' + car.photo + '" alt="car">' : '<div class="re">' + escapeHtml(car.type) + '</div>') +
+          '<div class="ri"><div class="rn">' + escapeHtml(car.name) + '</div>' +
+          ((car.color || (car.location && car.location.label)) ? '<div class="rc">' + escapeHtml([car.color, car.location && car.location.label].filter(Boolean).join('   ')) + '</div>' : '') +
+          '<span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' +
+          (isHL ? '<div class="headliner-badge">HEADLINER</div>' : '') + '</div>' +
+          '<div class="rv">' + fmtFull(car.value) + '</div>' +
+          '<button class="star-btn ' + (isHL ? 'starred' : '') + '" onclick="toggleHeadliner(' + i + ')" title="Set as headliner">*</button>' +
+          '<button class="del-btn" onclick="removeCar(' + i + ')">x</button>';
+        list.appendChild(row);
+      });
+    }
+    document.getElementById('endWrap').style.display = currentRun.length ? 'block' : 'none';
+  };
+
+  window.renderGarage = function(){
+    var allCars = getAllCars();
+    var filtered = applyGarageFilters(sorted(allCars));
+    var total = allCars.reduce(function(x,c){ return x + c.value; }, 0);
+    document.getElementById('gCars').textContent = allCars.length;
+    document.getElementById('gTotal').textContent = fmt(total);
+    document.getElementById('gAvg').textContent = allCars.length ? fmt(total / allCars.length) : ' ';
+    var el = document.getElementById('garageList');
+    if (!filtered.length) {
+      el.className = '';
+      el.innerHTML = '<div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">SEARCH</span>' + (allCars.length ? 'No matches' : 'No cars yet!') + '</div>';
+      return;
+    }
+    if (garageView === 'map') {
+      el.className = '';
+      var mapped = filtered.filter(function(car){ return car.location && isFinite(car.location.lat) && isFinite(car.location.lng); });
+      if (!mapped.length) {
+        el.innerHTML = '<div class="garage-map"><div class="map-grid"></div><div class="map-empty"><span style="font-size:1.5rem;display:block;margin-bottom:8px;">MAP</span>Add location with the new location button and your spots will appear here.</div></div>';
+        return;
+      }
+      var lats = mapped.map(function(c){ return c.location.lat; });
+      var lngs = mapped.map(function(c){ return c.location.lng; });
+      var minLat = Math.min.apply(null, lats), maxLat = Math.max.apply(null, lats), minLng = Math.min.apply(null, lngs), maxLng = Math.max.apply(null, lngs);
+      var latSpan = Math.max(0.02, maxLat - minLat), lngSpan = Math.max(0.02, maxLng - minLng);
+      var pins = mapped.map(function(car, idx){
+        var left = 12 + ((car.location.lng - minLng) / lngSpan) * 76;
+        var top = 88 - ((car.location.lat - minLat) / latSpan) * 70;
+        var payload = encodeURIComponent(JSON.stringify(car)).replace(/'/g, '%27'); return '<div class="map-pin" style="left:' + left + '%;top:' + top + '%;animation-delay:' + (idx * 0.04) + 's"><button class="map-pin-btn' + (car.value >= 500000 ? ' hot' : '') + '" data-payload="' + payload + '" onclick="openMapCar(this.dataset.payload)">o</button><div class="map-pin-label">' + escapeHtml(car.name) + '</div></div>';
+      }).join('');
+      el.innerHTML = '<div class="garage-map"><div class="map-grid"></div><div class="map-hud"><div class="map-badge">' + mapped.length + ' mapped spots</div><div class="map-badge">Optional view</div></div>' + pins + '</div><div class="garage-map-list">' + mapped.slice(0,6).map(function(car){ return '<div class="garage-map-row"><strong>' + escapeHtml(car.name) + '</strong><span>' + escapeHtml(locLabel(car.location)) + '   ' + fmtFull(car.value) + '</span></div>'; }).join('') + '</div>';
+      return;
+    }
+    if (garageView === 'grid') {
+      el.className = 'garage-grid';
+      el.innerHTML = filtered.map(function(car, idx){
+        var rarity = getRarity(car.value);
+        return '<a class="garage-card" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' : '<div class="gc-img-ph">' + escapeHtml(car.type) + '</div>') + '</div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Color</div><div class="gc-meta-val">' + escapeHtml(car.color || 'Unknown') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + escapeHtml(car.type || 'Car') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + escapeHtml(car.runDate || 'Saved') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Place</div><div class="gc-meta-val">' + escapeHtml((car.location && car.location.label) || 'No pin') + '</div></div></div></div></a>';
+      }).join('');
+      return;
+    }
+    el.className = '';
+    el.innerHTML = filtered.map(function(car, idx){
+      var rarity = getRarity(car.value);
+      return '<a class="garage-row" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(car.type) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('   ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.value >= 50000 && car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-arrow">?</div><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="' + escapeHtml(car.name) + '">x</button></a>';
+    }).join('');
+  };
+
+  window.openMapCar = function(payload){ try { showSpecsCard(JSON.parse(decodeURIComponent(String(payload)))); } catch (e) {} };
+
+  window.logRun = function(){
+    var input = getInputs();
+    if (!input.name) { showToast('Enter a car name!'); return; }
+    if (isNaN(input.value) || input.value < 0) { showToast('Enter a valid value!'); return; }
+    var name = resolveAlias(input.name);
+    var prevRun = JSON.parse(JSON.stringify(currentRun));
+    var prevHL = headlinerIdx;
+    var photo = getPhotoAndClear();
+    var car = attachPendingLocation({ name:name, value:input.value, color:input.color, type:input.type, ts:Date.now(), ...(photo ? {photo} : {}) });
+    currentRun.push(car);
+    saveToQP(car);
+    saveCurrentRun();
+    clearInputs();
+    renderQPTrigger();
+    renderSpot();
+    if (garageView === 'map') renderGarage();
+    playSound('log');
+    pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, input.type + ' ' + name + ' removed');
+    showToast(input.type + ' ' + name + ' added to run!');
+    showSpecsCard({ name:name, value:input.value, color:input.color, type:input.type, photo:photo, location:car.location });
+    setTimeout(checkNewAchievements, 400);
+  };
+
+  window.logSpotted = function(){
+    var input = getInputs();
+    if (!input.name) { showToast('Enter a car name!'); return; }
+    if (isNaN(input.value) || input.value < 0) { showToast('Enter a valid value!'); return; }
+    var name = resolveAlias(input.name);
+    var photo = getPhotoAndClear();
+    var car = attachPendingLocation({ name:name, value:input.value, color:input.color, type:input.type, ts:Date.now(), ...(photo ? {photo} : {}) });
+    saveToQP(car);
+    var prevRuns = JSON.parse(JSON.stringify(allRuns));
+    var entry = { id:Date.now(), date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), total:input.value, spotted:true, cars:[car] };
+    allRuns.unshift(entry);
+    localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+    saveToCloud();
+    playSound('log');
+    pushUndo('history', prevRuns, input.type + ' ' + name + ' removed');
+    clearInputs();
+    renderQPTrigger();
+    renderGarage();
+    showToast(input.type + ' ' + name + ' spotted & saved to garage!');
+    showSpecsCard({ name:name, value:input.value, color:input.color, type:input.type, photo:photo, location:car.location });
+    setTimeout(checkNewAchievements, 400);
+  };
+
+  function tutorialData(){
+    return [
+      { eyebrow:'Step 1 of 3', title:'Runs are your live scorecard', desc:'Use + TO RUN while you are spotting. Each car stacks into the current run, the value counter climbs, and END RUN saves the whole session into history.', visual:'<div class="tutorial-mini-run"><div class="tutorial-mini-row"><strong>Ferrari 488</strong><span>$280,000</span></div><div class="tutorial-mini-row"><strong>Porsche 911 GT3</strong><span>$170,000</span></div><div class="tutorial-mini-row"><strong>McLaren 720S</strong><span>$300,000</span></div></div>' },
+      { eyebrow:'Step 2 of 3', title:'Smart Fill turns notes into logs', desc:'Type or dictate rough notes like "red Ferrari 488 worth 280 thousand", then tap Smart Fill to auto-populate the form so you can log faster.', visual:'<div class="tutorial-smart"><div class="tutorial-smart-badge">Smart Fill</div><div class="setting-desc" style="margin:0;">Works best from the Notes tab. It reads your latest note, guesses the make, value, color, and type, then fills the spot form for review.</div></div>' },
+      { eyebrow:'Step 3 of 3', title:'Sync keeps your garage in one place', desc:'Everything saves locally first. If you go offline, CarSpotter keeps logging. When you reconnect, runs, garage, notes, and spots sync back up.', visual:'<div class="tutorial-map"></div><div class="tutorial-mini-sync" style="margin-top:10px;"><strong>Offline capture</strong><span>Saved instantly</span></div><div class="tutorial-mini-sync"><strong>Back online</strong><span>Auto-syncs in the background</span></div>' }
+    ];
+  }
+  function renderTutorial(){
+    var overlay = document.getElementById('tutorialOverlay');
+    if (!overlay) return;
+    var steps = tutorialData();
+    var step = steps[tutorialStep];
+    overlay.innerHTML = '<div class="tutorial-card" onclick="event.stopPropagation()"><button class="tutorial-close" onclick="closeTutorial()">x</button><div class="tutorial-steps">' + steps.map(function(_, i){ return '<div class="tutorial-step-dot ' + (i === tutorialStep ? 'active' : '') + '"></div>'; }).join('') + '</div><div class="tutorial-eyebrow">' + step.eyebrow + '</div><div class="tutorial-title">' + step.title + '</div><div class="tutorial-desc">' + step.desc + '</div><div class="tutorial-visual">' + step.visual + '</div><div class="tutorial-actions"><button class="tutorial-skip" onclick="closeTutorial()">Skip</button><button class="tutorial-next" onclick="nextTutorialStep()">' + (tutorialStep === steps.length - 1 ? 'Start Spotting' : 'Next') + '</button></div></div>';
+  }
+  window.openTutorial = function(force){
+    if (!force && localStorage.getItem('cs_tutorial_done')) return;
+    var overlay = document.getElementById('tutorialOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'tutorialOverlay';
+      overlay.className = 'tutorial-overlay';
+      overlay.onclick = function(){ closeTutorial(); };
+      document.body.appendChild(overlay);
+    }
+    tutorialStep = 0;
+    renderTutorial();
+  };
+  window.nextTutorialStep = function(){ tutorialStep += 1; if (tutorialStep >= tutorialData().length) closeTutorial(); else renderTutorial(); };
+  window.closeTutorial = function(){ localStorage.setItem('cs_tutorial_done', '1'); var overlay = document.getElementById('tutorialOverlay'); if (overlay) overlay.remove(); if (tutorialTimer) { clearInterval(tutorialTimer); tutorialTimer = null; } };
+
+  Array.prototype.forEach.call(document.querySelectorAll('.setting-icon'), function(el, i){ el.innerHTML = ['&#9728;','&#8635;','&#9835;','&#9998;','&#9432;'][i] || '?'; });
+  var settingsPage = document.getElementById('page-settings');
+  if (settingsPage) settingsPage.innerHTML = settingsPage.innerHTML.replace("CarSpotter''s", "CarSpotter's");
+  Array.prototype.forEach.call(document.querySelectorAll('.setting-icon'), function(el, i){ el.innerHTML = ['&#9728;','&#8635;','&#9835;','&#9998;','&#9432;'][i] || '?'; });
+  renderPendingLocation();
+  renderSpot();
+  renderGarage();
+  renderAchievements();
+  refreshOfflineStatus();
+  tutorialTimer = setInterval(function(){
+    if (currentUser && !localStorage.getItem('cs_tutorial_done') && !document.getElementById('tutorialOverlay')) openTutorial(false);
+    if (localStorage.getItem('cs_tutorial_done')) { clearInterval(tutorialTimer); tutorialTimer = null; }
+  }, 2500);
+})();
 </script>
 </body>
 </html>
+
+
+
+
+
