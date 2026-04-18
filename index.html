@@ -224,6 +224,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
 }
 .btn-spot:hover{border-color:var(--accent2);color:var(--accent2);}
 .btn-spot:active{transform:scale(0.97);}
+.btn-hint-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:-6px;margin-bottom:6px;}
+.btn-hint-row span{font-size:0.58rem;color:var(--muted);text-align:center;letter-spacing:0.5px;}
 .btn-end{
   width:100%;background:var(--accent2);color:#fff;border:none;border-radius:9px;
   font-family:'Bebas Neue',cursive;font-size:1.05rem;letter-spacing:3px;
@@ -591,9 +593,11 @@ body.carbon-on .run-item {
 .offline-banner{
   position:fixed;top:0;left:50%;transform:translateX(-50%);
   background:var(--red);color:#fff;font-family:'Bebas Neue',cursive;
-  font-size:0.8rem;letter-spacing:2px;padding:5px 18px;
-  border-radius:0 0 8px 8px;z-index:9999;
+  font-size:0.8rem;letter-spacing:2px;padding:7px 22px;
+  border-radius:0 0 10px 10px;z-index:9999;
   opacity:0;pointer-events:none;transition:opacity 0.3s;
+  display:flex;align-items:center;gap:8px;
+  box-shadow:0 4px 16px rgba(248,113,113,0.4);
 }
 .offline-banner.show{opacity:1;}
 .offline-queue-badge{
@@ -1142,11 +1146,12 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 
             <!-- Two action buttons: run vs spotted -->
             <div class="btn-row">
-              <button class="btn-run" onclick="logRun()">+ TO RUN</button>
-              <button class="btn-spot" onclick="logSpotted()">👁 SPOTTED</button>
+              <button class="btn-run" onclick="logRun()" title="Add to current session — tally builds until you tap End Run">+ ADD TO RUN</button>
+              <button class="btn-spot" onclick="logSpotted()" title="Save this one car immediately, no active run needed">SAVE SOLO</button>
             </div>
-            <div style="font-size:0.6rem;color:var(--muted);text-align:center;letter-spacing:1px;margin-top:-4px;">
-              SPOTTED → goes straight to garage &amp; history
+            <div class="btn-hint-row">
+              <span>📋 Builds session total</span>
+              <span>💾 Saves instantly</span>
             </div>
           </div>
 
@@ -1459,7 +1464,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 <div class="road-deco"><div class="rdl"></div><div class="rdl"></div><div class="rdl"></div></div>
 <div class="scooter-deco">🛵</div>
 <div class="toast" id="toast"></div>
-<div class="offline-banner" id="offlineBanner">✈ OFFLINE — Changes saved locally</div>
+<div class="offline-banner" id="offlineBanner"><span>✈</span><span>OFFLINE — Saves locally, syncs when back</span></div>
 
 <script>
 // ══════════════════════════════════════════
@@ -1987,6 +1992,9 @@ window.addEventListener('resize', injectDesktopLogo);
 // ── INSTALL ──
 function showInstall() {
   if (localStorage.getItem('cs_install_dismissed')) return;
+  // Only show after user has logged at least one car (has seen value)
+  const hasData = allRuns.length > 0 || currentRun.length > 0;
+  if (!hasData) return;
   const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
   if (!standalone) document.getElementById('installBanner').style.display = 'flex';
 }
@@ -1994,7 +2002,8 @@ function dismissInstall() {
   document.getElementById('installBanner').style.display = 'none';
   localStorage.setItem('cs_install_dismissed','1');
 }
-setTimeout(showInstall, 1500);
+// Check after a delay — will fire after auth + data loads
+setTimeout(showInstall, 4000);
 
 // ── NAV ──
 function goTo(page) {
