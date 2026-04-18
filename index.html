@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#0a0a0a">
 <title>CarSpotter</title>
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='55%25' font-size='110' text-anchor='middle' dominant-baseline='middle'%3E%F0%9F%9B%B5%3C/text%3E%3C/svg%3E">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js">
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js">
@@ -61,7 +61,7 @@ body.theme-retro80s{
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);}
-body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:flex;flex-direction:column;}
+body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;}
 
 /* ── ANIMATIONS ── */
 @keyframes fadeUp   {from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
@@ -170,8 +170,8 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
   content:'';position:absolute;top:0;left:20%;right:20%;
   height:2px;background:var(--accent);border-radius:0 0 3px 3px;animation:fadeIn 0.2s ease;
 }
-.nav-icon{font-size:1.25rem;line-height:1;transition:transform 0.2s;}
-.nav-btn.active .nav-icon{transform:scale(1.15);}
+.nav-icon{width:22px;height:22px;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;}
+.nav-btn.active .nav-icon{transform:scale(1.12);}
 .nav-label{font-size:0.55rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;}
 
 /* ── ROAD DECO ── */
@@ -185,23 +185,25 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
 /* ── SCORE BANNER ── */
 .score-banner{
   background:var(--surf);border:1px solid var(--border);border-radius:13px;
-  padding:14px 16px;margin-bottom:12px;
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:16px 18px;margin-bottom:12px;
+  display:flex;align-items:stretch;
   animation:fadeUp 0.3s ease;
 }
-.s-lbl{font-size:0.58rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;}
+.score-half{flex:1;display:flex;flex-direction:column;gap:2px;}
+.score-half--right{text-align:right;}
+.score-divider{width:1px;background:var(--border);margin:0 16px;flex-shrink:0;}
+.s-lbl{font-size:0.6rem;font-weight:600;color:var(--muted);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:2px;}
 .s-num{font-family:'Bebas Neue',cursive;font-size:2rem;color:var(--accent);letter-spacing:1px;line-height:1;}
 .s-sub{font-size:0.65rem;color:var(--muted);margin-top:2px;}
-.vs{font-family:'Bebas Neue',cursive;font-size:0.85rem;color:var(--muted);padding:4px 8px;border:1px solid var(--border);border-radius:6px;letter-spacing:2px;flex-shrink:0;}
 .b-num{font-family:'Bebas Neue',cursive;font-size:2rem;letter-spacing:1px;line-height:1;color:var(--text);}
-.beat{font-size:0.58rem;letter-spacing:1px;margin-top:2px;}
-.beat.beating{color:var(--green);animation:pulse 1.5s ease infinite;}
+.beat{font-size:0.6rem;letter-spacing:0.5px;margin-top:2px;font-weight:500;}
+.beat.beating{color:var(--green);}
 .beat.behind{color:var(--red);}
 .beat.tied{color:var(--muted);}
 
 /* ── CARD ── */
 .card{background:var(--surf);border:1px solid var(--border);border-radius:13px;padding:14px;margin-bottom:12px;animation:fadeUp 0.3s ease both;overflow:visible;box-shadow:0 10px 24px rgba(0,0,0,0.12);}
-.card-title{font-family:'Bebas Neue',cursive;font-size:0.88rem;letter-spacing:2.5px;color:var(--muted);margin-bottom:12px;}
+.card-title{font-size:0.65rem;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:12px;text-transform:uppercase;}
 
 /* ── FORM ── */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
@@ -274,7 +276,7 @@ body{font-family:'DM Sans',-apple-system,sans-serif;color:var(--text);display:fl
 
 /* ── RUN LIST ── */
 .sec-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.sec-title{font-family:'Bebas Neue',cursive;font-size:0.88rem;letter-spacing:2.5px;color:var(--muted);}
+.sec-title{font-size:0.7rem;font-weight:700;letter-spacing:1px;color:var(--text);text-transform:uppercase;}
 .txt-btn{font-size:0.62rem;color:var(--muted);background:none;border:1px solid var(--border);border-radius:5px;padding:3px 8px;cursor:pointer;letter-spacing:1px;font-family:inherit;transition:all 0.12s;}
 .txt-btn:hover{color:var(--red);border-color:var(--red);}
 
@@ -1083,21 +1085,21 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
         <div class="dsk-col">
 
           <div class="score-banner">
-            <div>
+            <div class="score-half">
               <div class="s-lbl">This Run</div>
               <div class="s-num" id="runTotal">$0</div>
               <div class="s-sub" id="runCount">0 cars</div>
             </div>
-            <div class="vs">VS</div>
-            <div style="text-align:right">
-              <div class="s-lbl">Best</div>
+            <div class="score-divider"></div>
+            <div class="score-half score-half--right">
+              <div class="s-lbl">Best Run</div>
               <div class="b-num" id="bestTotal">—</div>
               <div class="beat tied" id="beatMsg">No record yet</div>
             </div>
           </div>
 
           <div class="card">
-            <div class="card-title">🚗 LOG A CAR</div>
+            <div class="card-title">Log a Car</div>
             <div class="form-grid">
               <div class="ff">
                 <label>Make / Model</label>
@@ -1138,17 +1140,17 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
             <!-- Photo attach -->
             <div id="photoPreviewWrap" style="display:none"></div>
             <label class="photo-btn">
-              📷 <span>Attach photo (optional)</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> <span>Attach photo</span>
               <input type="file" accept="image/*" capture="environment" style="display:none" id="photoInput" onchange="handlePhotoInput(this)">
             </label>
 
-            <button class="geo-btn" id="geoBtn" onclick="captureLocation()">Save current location for this spot (optional)</button>
+            <button class="geo-btn" id="geoBtn" onclick="captureLocation()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:5px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Pin location</button>
             <div class="location-chip-row" id="locationChipRow" style="display:none"></div>
 
             <!-- Quick Picks -->
             <div class="qp-wrap" id="qpWrap" style="display:none">
               <button class="qp-trigger" onclick="toggleQP()">
-                <span>⚡ QUICK PICKS</span>
+                <span>Quick Picks</span>
                 <span class="qp-arrow" id="qpArrow">▼</span>
               </button>
               <div class="qp-dropdown">
@@ -1165,8 +1167,8 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
               <button class="btn-spot" onclick="logSpotted()" title="Save this one car immediately, no active run needed">SAVE SOLO</button>
             </div>
             <div class="btn-hint-row">
-              <span>📋 Builds session total</span>
-              <span>💾 Saves instantly</span>
+              <span>Adds to current session</span>
+              <span>Saves immediately</span>
             </div>
           </div>
 
@@ -1178,10 +1180,10 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
             <button class="txt-btn" onclick="clearRun()">Clear</button>
           </div>
           <div id="runList">
-            <div class="empty-run"><span class="ei">🛣️</span>Add cars to your run</div>
+            <div class="empty-run"><span class="ei" style="font-size:1.4rem;display:block;margin-bottom:6px;opacity:0.3">&#8594;</span>Add cars to start a run</div>
           </div>
           <div id="endWrap" style="display:none">
-            <button class="btn-end" onclick="endRun()">🏁 END RUN & SAVE</button>
+            <button class="btn-end" onclick="endRun()">End Run &amp; Save</button>
           </div>
         </div><!-- /dsk-col right -->
 
@@ -1229,7 +1231,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
     <!-- HISTORY PAGE -->
     <div class="page" id="page-history">
       <div id="recordWrap" style="display:none" class="record-card">
-        <div class="rec-lbl">🏆 ALL-TIME BEST RUN</div>
+        <div class="rec-lbl">All-time Best Run</div>
         <div class="rec-val" id="recordVal">—</div>
         <div class="rec-sub" id="recordSub"></div>
       </div>
@@ -1263,13 +1265,13 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
     <div class="page" id="page-voice">
       <div class="notes-header">
         <div>
-          <div class="sec-title">📝 NOTES</div>
+          <div class="sec-title">Notes</div>
           <div class="notes-sub">Type or speak — saves automatically</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
           <button class="mic-btn smart-fill-btn" id="smartFillBtn" onclick="smartVoiceFill()" style="background:var(--adim);border-color:var(--accent);">
             <span class="mic-icon">✨</span>
-            <span class="mic-lbl" style="color:var(--accent)">Smart Fill</span>
+            <span class="mic-lbl" style="color:var(--accent);font-weight:600">Smart Fill</span>
           </button>
           <button class="mic-btn" id="micBtn" onclick="toggleMic()">
             <span class="mic-icon">🎤</span>
@@ -1292,7 +1294,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 
     <!-- STATS PAGE -->
     <div class="page" id="page-stats">
-      <div class="sec-title" style="margin-bottom:12px">📊 YOUR STATS</div>
+      <div class="sec-title" style="margin-bottom:12px">Your Stats</div>
 
       <!-- Summary row -->
       <div class="stats-row" id="st-summary"></div>
@@ -1302,45 +1304,45 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 
       <!-- Achievements -->
       <div class="card setting-card">
-        <div class="card-title">🏅 ACHIEVEMENTS</div>
+        <div class="card-title">Achievements</div>
         <div class="ach-count-row" id="achCountRow"><span id="achUnlocked">0</span> / <span id="achTotal">0</span> unlocked</div>
         <div class="ach-grid" id="achGrid"></div>
       </div>
 
       <!-- Top cars by value -->
       <div class="card">
-        <div class="card-title">💰 TOP CARS BY VALUE</div>
+        <div class="card-title">Top Cars by Value</div>
         <div id="st-topcars"></div>
       </div>
 
       <!-- Most spotted makes -->
       <div class="card">
-        <div class="card-title">🔢 MOST SPOTTED MAKES</div>
+        <div class="card-title">Most Spotted Makes</div>
         <div id="st-makes"></div>
       </div>
 
       <!-- Most spotted types -->
       <div class="card">
-        <div class="card-title">🏷️ BY TYPE</div>
+        <div class="card-title">By Type</div>
         <div id="st-types"></div>
       </div>
 
       <!-- Run history chart -->
       <div class="card">
-        <div class="card-title">📈 RUN VALUES OVER TIME</div>
+        <div class="card-title">Run Values Over Time</div>
         <div id="st-chart" style="padding-top:8px"></div>
       </div>
 
       <!-- Best day of week -->
       <div class="card">
-        <div class="card-title">📅 BEST DAY TO SPOT</div>
+        <div class="card-title">Best Day to Spot</div>
         <div id="st-days"></div>
       </div>
     </div>
 
     <!-- SETTINGS PAGE -->
     <div class="page" id="page-settings">
-      <div class="sec-title" style="margin-bottom:14px">⚙️ SETTINGS</div>      <!-- Themes -->
+      <div class="sec-title" style="margin-bottom:14px">Settings</div>      <!-- Themes -->
       <div class="card setting-card">
         <div class="setting-head">
           <div class="setting-icon">Theme</div>
@@ -1421,7 +1423,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
     </div><!-- NEWS PAGE -->
     <div class="page" id="page-leaderboard">
       <div class="leaderboard-topbar">
-        <div class="sec-title">LEADERBOARD</div>
+        <div class="sec-title">Leaderboard</div>
         <button class="txt-btn" onclick="loadLeaderboard(true)">Refresh</button>
       </div>
       <div class="leaderboard-sub">All completed runs across CarSpotter, ranked by total dollar amount.</div>
@@ -1430,7 +1432,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 
     <div class="page" id="page-news">
       <div class="sec-row" style="margin-bottom:10px">
-        <div class="sec-title">🗞️ CAR NEWS</div>
+        <div class="sec-title">Car News</div>
         <button class="txt-btn" onclick="loadNews()">Refresh</button>
       </div>
       <div id="newsSources" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;"></div>
@@ -1448,30 +1450,30 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
   <nav class="bottom-nav" id="bottomNav">
     <!-- desktop logo injected by JS -->
     <button class="nav-btn active" onclick="goTo('spot')" id="nav-spot">
-      <span class="nav-icon">🛵</span>
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg></span>
       <span class="nav-label">Spot</span>
     </button>
     <button class="nav-btn" onclick="goTo('garage')" id="nav-garage">
-      <span class="nav-icon">🏎️</span>
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></span>
       <span class="nav-label">Garage</span>
     </button>
     <button class="nav-btn" onclick="goTo('voice')" id="nav-voice">
-      <span class="nav-icon">📝</span>
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span>
       <span class="nav-label">Notes</span>
     </button>
     <button class="nav-btn" onclick="toggleMoreMenu()" id="nav-more">
-      <span class="nav-icon">•••</span>
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.3" fill="currentColor" stroke="none"/></svg></span>
       <span class="nav-label">More</span>
     </button>
   </nav>
 
   <!-- More dropdown menu -->
   <div id="moreMenu" class="more-menu" style="display:none">
-    <button class="more-item" onclick="goToMore('history')">📋 <span>History</span></button>
-    <button class="more-item" onclick="goToMore('leaderboard')">🏆 <span>Leaderboard</span></button>
-    <button class="more-item" onclick="goToMore('news')">🗞️ <span>News</span></button>
-    <button class="more-item" onclick="goToMore('stats')">📊 <span>Stats</span></button>
-    <button class="more-item" onclick="goToMore('settings')">⚙️ <span>Settings</span></button>
+    <button class="more-item" onclick="goToMore('history')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg> <span>History</span></button>
+    <button class="more-item" onclick="goToMore('leaderboard')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> <span>Leaderboard</span></button>
+    <button class="more-item" onclick="goToMore('news')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg> <span>News</span></button>
+    <button class="more-item" onclick="goToMore('stats')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> <span>Stats</span></button>
+    <button class="more-item" onclick="goToMore('settings')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> <span>Settings</span></button>
   </div>
 
 </div><!-- /app-shell -->
@@ -2357,7 +2359,7 @@ function showRecap({ total, cars, headliner, isRec, prevBest }) {
               <span class="recap-car-val">${fmtFull(c.value)}</span>
             </div>`).join('')}
         </div>` : ''}
-      <button class="recap-btn" onclick="document.getElementById('recapOverlay').remove()">NICE 🤙</button>
+      <button class="recap-btn" onclick="document.getElementById('recapOverlay').remove()">Done</button>
     </div>`;
   overlay.onclick = () => overlay.remove();
   document.body.appendChild(overlay);
@@ -2820,7 +2822,7 @@ async function showSpecsCard(car) {
           <div class="specs-cell-unit">lbs</div>
         </div>` : ''}
       </div>
-      <button class="specs-close-btn" onclick="document.getElementById('specsOverlay').remove()">NICE 🤙</button>
+      <button class="specs-close-btn" onclick="document.getElementById('specsOverlay').remove()">Got it</button>
     </div>`;
 }
 
@@ -3608,11 +3610,11 @@ function renderStats() {
   // ── Best run ──
   const br = document.getElementById('st-bestrun');
   if (bestRun) {
-    br.innerHTML = `<div class="card-title">🏆 BEST RUN</div>
+    br.innerHTML = `<div class="card-title">Best Run</div>
       <div style="font-family:'Bebas Neue',cursive;font-size:2rem;color:var(--accent);letter-spacing:1px;">${fmt(bestRun.total)}</div>
       <div style="font-size:0.65rem;color:var(--text2);margin-top:4px;">${bestRun.cars.length} cars · ${bestRun.date}</div>`;
   } else {
-    br.innerHTML = `<div class="card-title">🏆 BEST RUN</div><div class="st-empty">No runs yet</div>`;
+    br.innerHTML = `<div class="card-title">Best Run</div><div class="st-empty">No runs yet</div>`;
   }
 
   // ── Top cars by value ──
@@ -3623,7 +3625,7 @@ function renderStats() {
         <div class="st-bar-label"><span class="st-bar-name">${c.type} ${c.name}</span><span class="st-bar-val">${fmt(c.value)}</span></div>
         <div class="st-bar-track"><div class="st-bar-fill" style="width:${Math.round(c.value/maxVal*100)}%"></div></div>
       </div>`).join('')
-    : '<div class="st-empty">No cars yet</div>';
+    : '<div class="st-empty">Log some cars to see your top spots here</div>';
 
   // ── Most spotted makes ──
   const makeCounts = {};
@@ -3638,7 +3640,7 @@ function renderStats() {
         <div class="st-bar-label"><span class="st-bar-name">${make}</span><span class="st-bar-val">${count}x</span></div>
         <div class="st-bar-track"><div class="st-bar-fill" style="width:${Math.round(count/maxMake*100)}%"></div></div>
       </div>`).join('')
-    : '<div class="st-empty">No cars yet</div>';
+    : '<div class="st-empty">No data yet — start spotting</div>';
 
   // ── By type ──
   const typeMap = {'🏎️':'Supercar','🚗':'Sports Car','🐎':'Muscle Car','🏁':'Track Car','🔥':'Exotic','⚡':'EV'};
@@ -3651,7 +3653,7 @@ function renderStats() {
         <div class="st-bar-label"><span class="st-bar-name">${type}</span><span class="st-bar-val">${count}x</span></div>
         <div class="st-bar-track"><div class="st-bar-fill" style="width:${Math.round(count/maxType*100)}%"></div></div>
       </div>`).join('')
-    : '<div class="st-empty">No cars yet</div>';
+    : '<div class="st-empty">No data yet</div>';
 
   // ── Run chart (last 10 runs) ──
   const chartRuns = runs.slice(0,10).reverse();
@@ -3663,7 +3665,7 @@ function renderStats() {
       <div class="st-chart-labels">${chartRuns.map(r =>
         `<div class="st-chart-lbl">${r.date.split(',')[0]}</div>`
       ).join('')}</div>`
-    : '<div class="st-empty">Need 2+ runs to show chart</div>';
+    : '<div class="st-empty">Complete 2+ runs to see your trend</div>';
 
   // ── Best day of week ──
   const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -3726,14 +3728,13 @@ function renderLeaderboard() {
     const who = run.isMe ? run.name + ' (You)' : run.name;
     return `
       <div class="lb-row" style="animation-delay:${idx * 0.03}s">
-        <div class="lb-rank ${top}">#${idx + 1}</div>
+        <div class="lb-rank ${top}">${idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':'#'+(idx+1)}</div>
         <div class="lb-main">
           <div class="lb-name">${who}</div>
           <div class="lb-meta">${fmtLeaderboardDate(run.date)}   ${run.headliner ? run.headliner + '   ' : ''}${run.cars} cars</div>
         </div>
         <div class="lb-score">
           <div class="lb-total">${fmtFull(run.total)}</div>
-          <div class="lb-cars">Run total</div>
         </div>
       </div>`;
   }).join('');
