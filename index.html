@@ -17,6 +17,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js">
 </script>
 <script>
+// ── FIREBASE CONFIG ──
+// This key is intentionally client-side (Firebase design). Protect your data by:
+// 1. Firebase Console → App Check (enable reCAPTCHA enforcement)
+// 2. Firebase Console → Authentication → Authorized Domains (restrict to your GitHub Pages domain)
+// 3. Firestore Security Rules: require auth for all writes, rate-limit with request.time checks
+// The key itself cannot be hidden in a single-file web app — security comes from rules, not key secrecy.
 firebase.initializeApp({
   apiKey: "AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug",
   authDomain: "carspotter-d5d82.firebaseapp.com",
@@ -1022,6 +1028,15 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 .lb-cars{font-size:0.62rem;color:var(--muted);margin-top:3px;}
 .lb-empty,.lb-loading{text-align:center;padding:36px 12px;color:var(--muted);font-size:0.74rem;letter-spacing:1px;border:1px dashed var(--border);border-radius:12px;}
 @media(min-width:800px){#page-leaderboard{overflow-y:auto;padding:28px 36px;}}
+
+/* ── LOAD MORE ── */
+.load-more-btn{
+  width:100%;margin-top:10px;padding:11px;
+  background:var(--surf2);border:1px dashed var(--border);border-radius:10px;
+  color:var(--muted);font-size:0.72rem;letter-spacing:1.5px;text-transform:uppercase;
+  cursor:pointer;font-family:inherit;transition:all 0.15s;
+}
+.load-more-btn:hover{border-color:var(--accent);color:var(--accent);}
 </style>
 </head>
 <body>
@@ -1707,6 +1722,13 @@ function saveToCloud() {
 
 async function publishRunToLeaderboard(run) {
   if (!currentUser || !run || run.spotted) return;
+  // Rate-limit: only publish once per 10 minutes to prevent quota abuse
+  const lastPub = parseInt(localStorage.getItem('cs_lb_last') || '0');
+  const now = Date.now();
+  if (now - lastPub < 10 * 60 * 1000) {
+    console.log('Leaderboard publish throttled — wait', Math.ceil((10*60*1000-(now-lastPub))/1000), 's');
+    return;
+  }
   try {
     await db.collection('leaderboardRuns').doc(String(run.id)).set({
       runId: String(run.id),
@@ -1720,6 +1742,7 @@ async function publishRunToLeaderboard(run) {
       createdAt: run.id || Date.now(),
       updatedAt: Date.now()
     }, { merge: true });
+    localStorage.setItem('cs_lb_last', String(now));
     leaderboardLoaded = false;
   } catch (e) {
     console.error('Leaderboard publish failed', e);
@@ -2020,12 +2043,34 @@ function goTo(page) {
 }
 
 // ── FORMAT ──
+// Use Intl.NumberFormat so currency symbol and separators match user's locale
+const _currencyFmt = (() => {
+  try {
+    // Compact: $280K / $1.4M
+    const compact = new Intl.NumberFormat(navigator.language || 'en-US', {
+      style: 'currency', currency: 'USD', notation: 'compact', maximumFractionDigits: 1
+    });
+    // Full: $280,000
+    const full = new Intl.NumberFormat(navigator.language || 'en-US', {
+      style: 'currency', currency: 'USD', maximumFractionDigits: 0
+    });
+    return { compact, full };
+  } catch(e) {
+    // Fallback for very old browsers
+    return null;
+  }
+})();
+
 function fmt(n) {
+  if (_currencyFmt) return _currencyFmt.compact.format(Math.round(n));
   if (n>=1000000) return '$'+(n/1000000).toFixed(1)+'M';
   if (n>=1000)    return '$'+Math.round(n/1000)+'K';
   return '$'+Math.round(n).toLocaleString();
 }
-function fmtFull(n) { return '$'+Math.round(n).toLocaleString(); }
+function fmtFull(n) {
+  if (_currencyFmt) return _currencyFmt.full.format(Math.round(n));
+  return '$'+Math.round(n).toLocaleString();
+}
 function carUrl(name) { return 'https://www.google.com/search?q='+encodeURIComponent(name+' car specs price'); }
 
 // ── QUICK PICKS ──
@@ -2076,13 +2121,18 @@ document.addEventListener('click', e => {
   if (qpOpen && !document.getElementById('qpWrap').contains(e.target)) closeQP();
 });
 
+// ── SANITIZE ── strip tags/script from free-text fields
+function sanitizeText(str) {
+  return String(str || '').replace(/[<>]/g, '').trim().slice(0, 120);
+}
+
 // ── GET INPUTS ──
 function getInputs() {
   return {
-    name:  document.getElementById('carName').value.trim(),
+    name:  sanitizeText(document.getElementById('carName').value),
     value: parseFloat(document.getElementById('carValue').value),
-    color: document.getElementById('carColor').value.trim(),
-    type:  document.getElementById('carType').value,
+    color: sanitizeText(document.getElementById('carColor').value),
+    type:  document.getElementById('carType').value, // select value, safe
   };
 }
 function clearInputs() {
@@ -2410,13 +2460,6 @@ function getAllCars() {
   return Array.from(seen.values());
 }
 
-function cycleSort() {
-  const modes  = ['desc','asc','alpha'];
-  const labels = {desc:'Value ↓',asc:'Value ↑',alpha:'A–Z'};
-  sortMode = modes[(modes.indexOf(sortMode)+1)%modes.length];
-  document.getElementById('sortBtn').textContent = labels[sortMode];
-  renderGarage();
-}
 function sorted(cars) {
   const c = [...cars];
   if (sortMode==='desc')  return c.sort((a,b)=>b.value-a.value);
@@ -2428,15 +2471,23 @@ function sorted(cars) {
 function deleteCarEverywhere(name) {
   if (!confirm('Remove "'+name+'" from everything?')) return;
   const key = name.toLowerCase();
-  allRuns = allRuns.map(run => ({
-    ...run,
-    cars:  run.cars.filter(c=>c.name.toLowerCase()!==key),
-    total: run.cars.filter(c=>c.name.toLowerCase()!==key).reduce((s,c)=>s+c.value,0)
-  })).filter(run=>run.cars.length>0);
+  allRuns = allRuns.map(run => {
+    const remaining = run.cars.filter(c=>c.name.toLowerCase()!==key);
+    const newTotal  = remaining.reduce((s,c)=>s+c.value,0);
+    // Clean up headliner if it was the deleted car
+    const headliner = (run.headliner && run.headliner.name.toLowerCase()===key) ? null : run.headliner;
+    return { ...run, cars: remaining, total: newTotal, headliner };
+  }).filter(run=>run.cars.length>0);
   localStorage.setItem('cs_runs', JSON.stringify(allRuns));
   quickPicks = quickPicks.filter(q=>q.name.toLowerCase()!==key);
   localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
   currentRun = currentRun.filter(c=>c.name.toLowerCase()!==key);
+  // Fix headlinerIdx if it pointed at the deleted car
+  if (headlinerIdx >= 0) {
+    const deletedAt = currentRun.findIndex(c=>c.name.toLowerCase()===key);
+    if (deletedAt < 0) headlinerIdx = -1; // was deleted
+    else if (deletedAt < headlinerIdx) headlinerIdx--;
+  }
   saveCurrentRun(); // also calls saveToCloud
   renderQPTrigger();
   renderSpot();
@@ -2446,41 +2497,48 @@ function deleteCarEverywhere(name) {
 
 // ── GARAGE FILTER & VIEW STATE ──
 
-function setGarageFilter(f, btn) {
-  garageFilter = f;
-  document.querySelectorAll('.gf-pill').forEach(p => p.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  renderGarage();
-}
 function setGarageView(v) {
   garageView = v;
   document.getElementById('gvList').classList.toggle('active', v==='list');
   document.getElementById('gvGrid').classList.toggle('active', v==='grid');
   renderGarage();
 }
-function onGarageSearch() {
-  const q = document.getElementById('garageSearch').value;
-  document.getElementById('garageSearchClear').style.display = q ? 'block' : 'none';
-  renderGarage();
-}
 function clearGarageSearch() {
+  garagePage = 0;
   document.getElementById('garageSearch').value = '';
   document.getElementById('garageSearchClear').style.display = 'none';
   renderGarage();
 }
 
+// ── CAR TYPE LOOKUP ── central source of truth for type↔emoji mapping
+const CAR_TYPE_MAP = {
+  supercar: '🏎️',
+  sports:   '🚗',
+  muscle:   '🐎',
+  track:    '🏁',
+  exotic:   '🔥',
+  ev:       '⚡',
+};
+// Reverse map: emoji → filter key (handles variant sequences safely)
+const CAR_TYPE_REVERSE = Object.fromEntries(Object.entries(CAR_TYPE_MAP).map(([k,v])=>[v,k]));
+
 function applyGarageFilters(cars) {
   const q = (document.getElementById('garageSearch')?.value || '').toLowerCase().trim();
-  const typeMap = { supercar:'🏎️', sports:'🚗', muscle:'🐎', track:'🏁', exotic:'🔥', ev:'⚡' };
   return cars.filter(car => {
     if (q && !car.name.toLowerCase().includes(q) && !(car.color||'').toLowerCase().includes(q)) return false;
     if (garageFilter === 'all') return true;
     if (garageFilter === 'legend')   return car.value >= 1000000;
     if (garageFilter === 'hypercar') return car.value >= 500000;
-    if (typeMap[garageFilter]) return car.type === typeMap[garageFilter];
+    // Compare by normalizing the car type through our map to avoid emoji encoding edge cases
+    const carTypeKey = CAR_TYPE_REVERSE[car.type] || '';
+    if (CAR_TYPE_MAP[garageFilter]) return carTypeKey === garageFilter;
     return true;
   });
 }
+
+// ── GARAGE PAGINATION ──
+const GARAGE_PAGE_SIZE = 40;
+let garagePage = 0;
 
 function renderGarage() {
   const allCars = getAllCars();
@@ -2492,14 +2550,18 @@ function renderGarage() {
 
   const el = document.getElementById('garageList');
   if (!filtered.length) {
+    el.className = '';
     el.innerHTML='<div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">🔍</span>'+(allCars.length?'No matches':'No cars yet!')+'</div>';
     return;
   }
 
+  const pageCars = filtered.slice(0, (garagePage + 1) * GARAGE_PAGE_SIZE);
+  const hasMore  = filtered.length > pageCars.length;
+
   if (garageView === 'grid') {
     el.className = 'garage-grid';
     el.innerHTML = '';
-    filtered.forEach((car, idx) => {
+    pageCars.forEach((car, idx) => {
       const a = document.createElement('a');
       a.className = 'garage-card';
       a.href = carUrl(car.name); a.target = '_blank'; a.rel = 'noopener noreferrer';
@@ -2507,32 +2569,33 @@ function renderGarage() {
       const rarity = getRarity(car.value);
       a.innerHTML = `
         <div class="gc-img-wrap">
-          ${car.photo ? `<img class="gc-img" src="${car.photo}" alt="${car.name}">` : `<div class="gc-img-ph">${car.type}</div>`}
+          ${car.photo ? `<img class="gc-img" src="${car.photo}" alt="${escapeHtml(car.name)}">` : `<div class="gc-img-ph">${escapeHtml(car.type)}</div>`}
         </div>
         <div class="gc-body">
-          <div class="gc-name">${car.name}</div>
+          <div class="gc-name">${escapeHtml(car.name)}</div>
           <div class="gc-val">${fmtFull(car.value)}</div>
           <span class="gc-rarity" style="color:${rarity.color}">${rarity.label}</span>
         </div>`;
       el.appendChild(a);
     });
+    if (hasMore) appendLoadMoreBtn(el, () => { garagePage++; renderGarage(); }, filtered.length - pageCars.length);
     return;
   }
 
-  // List view (original)
+  // List view
   el.className = '';
   el.innerHTML = '';
-  filtered.forEach((car,idx)=>{
+  pageCars.forEach((car,idx)=>{
     const a = document.createElement('a');
     a.className='garage-row';
     a.href=carUrl(car.name);a.target='_blank';a.rel='noopener noreferrer';
     a.style.animationDelay=(idx*0.03)+'s';
     const rarity = getRarity(car.value);
     a.innerHTML=`<div class="g-rank">${sortMode!=='alpha'?'#'+(idx+1):''}</div>
-      ${car.photo ? `<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="${car.photo}" alt="car">` : `<div class="g-emoji">${car.type}</div>`}
+      ${car.photo ? `<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="${car.photo}" alt="car">` : `<div class="g-emoji">${escapeHtml(car.type)}</div>`}
       <div class="g-info">
-        <div class="g-name">${car.name}</div>
-        <div class="g-meta">${[car.color,car.runDate].filter(Boolean).join(' · ')}</div>
+        <div class="g-name">${escapeHtml(car.name)}</div>
+        <div class="g-meta">${escapeHtml([car.color,car.runDate].filter(Boolean).join(' · '))}</div>
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span class="rarity-pill" style="color:${rarity.color};background:${rarity.bg};border-color:${rarity.color}33">${rarity.label}</span>
           ${car.value>=50000 && car.spotCount>1 ? `<span class="g-spotted-count">👁 ${car.spotCount}x</span>` : ''}
@@ -2540,9 +2603,42 @@ function renderGarage() {
       </div>
       <div class="g-val">${fmtFull(car.value)}</div>
       <div class="g-arrow">↗</div>
-      <button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="${car.name.replace(/"/g,'&quot;')}">✕</button>`;
+      <button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="${escapeHtml(car.name)}">✕</button>`;
     el.appendChild(a);
   });
+  if (hasMore) appendLoadMoreBtn(el, () => { garagePage++; renderGarage(); }, filtered.length - pageCars.length);
+}
+
+// Reset garage page on filter/sort/search changes
+const _origSetGarageFilter = window.setGarageFilter;
+function setGarageFilter(f, btn) {
+  garagePage = 0;
+  garageFilter = f;
+  document.querySelectorAll('.gf-pill').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderGarage();
+}
+function cycleSort() {
+  garagePage = 0;
+  const modes  = ['desc','asc','alpha'];
+  const labels = {desc:'Value ↓',asc:'Value ↑',alpha:'A–Z'};
+  sortMode = modes[(modes.indexOf(sortMode)+1)%modes.length];
+  document.getElementById('sortBtn').textContent = labels[sortMode];
+  renderGarage();
+}
+function onGarageSearch() {
+  garagePage = 0;
+  const q = document.getElementById('garageSearch').value;
+  document.getElementById('garageSearchClear').style.display = q ? 'block' : 'none';
+  renderGarage();
+}
+
+function appendLoadMoreBtn(container, handler, remaining) {
+  const btn = document.createElement('button');
+  btn.className = 'load-more-btn';
+  btn.textContent = `Load more (${remaining} remaining)`;
+  btn.onclick = handler;
+  container.appendChild(btn);
 }
 
 // ── HISTORY ──
@@ -2559,6 +2655,10 @@ function deleteRun(id) {
   renderGarage();
 }
 
+// ── HISTORY PAGINATION ──
+const HIST_PAGE_SIZE = 30;
+let histPage = 0;
+
 function renderHistory() {
   const best = getBest();
   const rw   = document.getElementById('recordWrap');
@@ -2572,11 +2672,13 @@ function renderHistory() {
   const el = document.getElementById('histList');
   if (!allRuns.length) { el.innerHTML='<div class="no-history"><span style="font-size:1.8rem;display:block;margin-bottom:8px">📋</span>Nothing saved yet</div>'; return; }
 
-  // count only actual runs for numbering
+  const pageRuns = allRuns.slice(0, (histPage + 1) * HIST_PAGE_SIZE);
+  const hasMore  = allRuns.length > pageRuns.length;
+
   let runCounter = allRuns.filter(r=>!r.spotted).length;
 
   el.innerHTML='';
-  allRuns.forEach((entry,idx)=>{
+  pageRuns.forEach((entry,idx)=>{
     const isSpot = entry.spotted;
     const isRec  = !isSpot && entry.total===best;
     const div = document.createElement('div');
@@ -2588,21 +2690,21 @@ function renderHistory() {
     const carsHTML = [...entry.cars].sort((a,b)=>b.value-a.value).map(car=>`
       <a class="hc-row" href="${carUrl(car.name)}" target="_blank" rel="noopener noreferrer">
         ${car.photo ? `<img class="hc-photo" src="${car.photo}" alt="car">` : `<span class="hc-emoji">${car.type}</span>`}
-        <span class="hc-name">${car.name}${car.color?' <span style="font-weight:400;color:var(--text2)">· '+car.color+'</span>':''}</span>
+        <span class="hc-name">${escapeHtml(car.name)}${car.color?' <span style="font-weight:400;color:var(--text2)">· '+escapeHtml(car.color)+'</span>':''}</span>
         <span class="hc-val">${fmtFull(car.value)}</span>
         <span class="hc-arrow">↗</span>
       </a>`).join('');
 
     const headlinerHTML = (!isSpot && entry.headliner)
-      ? `<div class="hist-headliner">⭐ ${entry.headliner.type} ${entry.headliner.name}</div>`
+      ? `<div class="hist-headliner">⭐ ${escapeHtml(entry.headliner.type)} ${escapeHtml(entry.headliner.name)}</div>`
       : '';
 
     div.innerHTML=`
       <div class="hist-hdr" onclick="${bulkMode ? `toggleBulkSelect(${entry.id})` : `this.parentElement.classList.toggle('open')`}">
         ${bulkMode ? `<input type="checkbox" class="hist-check" data-id="${entry.id}" ${bulkSelected.has(entry.id)?'checked':''} onclick="event.stopPropagation();toggleBulkSelect(${entry.id})">` : ''}
-        <div class="hist-num${isSpot?' spot-num':''}">${label}</div>
+        <div class="hist-num${isSpot?' spot-num':''}">${escapeHtml(label)}</div>
         <div class="hist-info">
-          <div class="hist-date">${entry.date}</div>
+          <div class="hist-date">${escapeHtml(entry.date)}</div>
           <div class="hist-total">${fmtFull(entry.total)}</div>
           <div class="hist-count">${entry.cars.length} car${entry.cars.length!==1?'s':''}${entry.total>=1000000?' 🦄':''}</div>
           ${headlinerHTML}
@@ -2614,6 +2716,15 @@ function renderHistory() {
       <div class="hist-cars">${carsHTML}</div>`;
     el.appendChild(div);
   });
+
+  // Load more button
+  if (hasMore) {
+    const btn = document.createElement('button');
+    btn.className = 'load-more-btn';
+    btn.textContent = `Load more (${allRuns.length - pageRuns.length} remaining)`;
+    btn.onclick = () => { histPage++; renderHistory(); };
+    el.appendChild(btn);
+  }
 }
 
 // ── SPECS CARD ──
@@ -2655,7 +2766,10 @@ async function showSpecsCard(car) {
       <div class="specs-img-wrap">${imgHTML}</div>
       <div class="specs-body">
         <div class="specs-name">${car.name}</div>
-        <div class="specs-error">Couldn't load specs right now.<br>Tap anywhere to dismiss.</div>
+        <div class="specs-error">
+          Specs lookup unavailable right now — check your connection.<br><br>
+          <a href="${carUrl(car.name)}" target="_blank" rel="noopener" style="color:var(--accent);font-size:0.75rem;letter-spacing:1px;">Search Google for full specs ↗</a>
+        </div>
         <button class="specs-close-btn" onclick="document.getElementById('specsOverlay').remove()">GOT IT</button>
       </div>`;
     return;
@@ -2884,7 +2998,11 @@ function updateOfflineBanner() {
   if (!b) return;
   isOffline = !navigator.onLine;
   b.classList.toggle('show', isOffline);
-  if (b) b.textContent = isOffline ? '✈ OFFLINE — Changes saved locally' : '✅ Back online — Syncing...';
+  if (isOffline) {
+    b.innerHTML = '<span>✈</span><span>OFFLINE — Saves locally, syncs when back</span>';
+  } else {
+    b.classList.remove('show');
+  }
   if (!isOffline && offlineQueue.length) flushOfflineQueue();
 }
 window.addEventListener('online',  updateOfflineBanner);
@@ -2936,8 +3054,20 @@ function initNotes() {
   // Set up speech recognition
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) {
+    // Show a visible, friendly message instead of silently dimming the button
     const btn = document.getElementById('micBtn');
-    if (btn) { btn.title = 'Voice not supported in this browser — use Chrome or Safari'; btn.style.opacity = '0.4'; }
+    if (btn) {
+      btn.disabled = true;
+      btn.style.opacity = '0.4';
+      btn.title = 'Voice input not supported in this browser';
+      btn.querySelector('.mic-lbl').textContent = 'Not supported';
+    }
+    // Insert a one-line notice below the notes header
+    const hint = document.createElement('div');
+    hint.style.cssText = 'font-size:0.65rem;color:var(--muted);background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:10px;line-height:1.5;';
+    hint.innerHTML = '🎤 Voice input requires Chrome on desktop/Android or Safari on iOS. Smart Fill and manual typing work in any browser.';
+    const area = document.getElementById('notesArea');
+    if (area && area.parentNode) area.parentNode.insertBefore(hint, area);
     return;
   }
 
