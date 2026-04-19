@@ -1120,22 +1120,18 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
               </div>
             </div>
 
-            <!-- Voice Smart Fill -->
-            <div class="voice-fill-bar" id="voiceFillBar">
-              <span class="vf-icon">✨</span>
-              <span class="vf-text" id="voiceFillText">Detected a car — tap to fill form</span>
-              <button class="vf-accept" id="voiceFillAccept" onclick="acceptVoiceFill()">FILL</button>
-              <button class="vf-dismiss" onclick="dismissVoiceFill()">✕</button>
-            </div>
-
-            <!-- Photo attach -->
+            <!-- Photo + Location row -->
             <div id="photoPreviewWrap" style="display:none"></div>
-            <label class="photo-btn">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> <span>Attach photo</span>
-              <input type="file" accept="image/*" capture="environment" style="display:none" id="photoInput" onchange="handlePhotoInput(this)">
-            </label>
-
-            <button class="geo-btn" id="geoBtn" onclick="captureLocation()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:5px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Pin location</button>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+              <label class="photo-btn" style="margin-bottom:0">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <span>Photo</span>
+                <input type="file" accept="image/*" capture="environment" style="display:none" id="photoInput" onchange="handlePhotoInput(this)">
+              </label>
+              <button class="geo-btn" id="geoBtn" onclick="captureLocation()" style="margin:0">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Pin
+              </button>
+            </div>
             <div class="location-chip-row" id="locationChipRow" style="display:none"></div>
 
             <!-- Quick Picks -->
@@ -1260,27 +1256,13 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
           <div class="notes-sub">Type or speak — saves automatically</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
-          <button class="mic-btn smart-fill-btn" id="smartFillBtn" onclick="smartVoiceFill()" style="background:var(--adim);border-color:var(--accent);">
-            <span class="mic-icon">✨</span>
-            <span class="mic-lbl" style="color:var(--accent);font-weight:600">Smart Fill</span>
-          </button>
           <button class="mic-btn" id="micBtn" onclick="toggleMic()">
             <span class="mic-icon">🎤</span>
             <span class="mic-lbl" id="micLbl">Tap to speak</span>
           </button>
         </div>
       </div>
-      <!-- Smart Command Bar -->
-      <div class="smart-cmd-wrap">
-        <span class="scmd-icon">🤖</span>
-        <input class="scmd-input" id="smartCmdInput" placeholder='Try: "log a 911 GT3", "start new run", "show my stats"' autocomplete="off" onkeydown="if(event.key==='Enter')runSmartCmd()">
-        <button class="scmd-send" id="smartCmdBtn" onclick="runSmartCmd()">GO</button>
-      </div>
-      <div class="scmd-hint" style="font-size:0.5rem;color:var(--muted);letter-spacing:0.5px;text-align:center;margin:-6px 0 8px;">AI-powered command bar — type anything</div>
-      <div style="font-size:0.62rem;color:var(--muted);letter-spacing:1px;margin-bottom:8px;line-height:1.6;">
-        💡 Say <em style="color:var(--accent2)">"Log a red Ferrari 488 worth 280 thousand"</em> then tap ✨ Smart Fill to auto-fill the form
-      </div>
-      <textarea id="notesArea" class="notes-area" placeholder="Ferrari 488 red&#10;Yellow Lambo&#10;Blue Porsche GT3 992&#10;&#10;Just type or hit the mic — nothing happens until you&#39;re ready..."></textarea>
+      <textarea id="notesArea" class="notes-area" placeholder="Ferrari 488 red&#10;Yellow Lambo&#10;Blue Porsche GT3 992&#10;&#10;Jot notes here — switch to Spot tab to log them."></textarea>
     </div>
 
     <!-- STATS PAGE -->
@@ -1291,16 +1273,6 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
       <div class="stats-row" id="st-summary"></div>
 
       <!-- Best run -->
-      <div class="card" id="st-bestrun"></div>
-
-      <!-- Achievements -->
-      <div class="card setting-card">
-        <div class="card-title">Achievements</div>
-        <div class="ach-count-row" id="achCountRow"><span id="achUnlocked">0</span> / <span id="achTotal">0</span> unlocked</div>
-        <div class="ach-grid" id="achGrid"></div>
-      </div>
-
-      <!-- Top cars by value -->
       <div class="card">
         <div class="card-title">Top Cars by Value</div>
         <div id="st-topcars"></div>
@@ -1329,6 +1301,13 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
         <div class="card-title">Best Day to Spot</div>
         <div id="st-days"></div>
       </div>
+    </div>
+
+    <!-- ACHIEVEMENTS PAGE -->
+    <div class="page" id="page-achievements">
+      <div class="sec-title" style="margin-bottom:6px">Achievements</div>
+      <div class="ach-count-row" id="achCountRow" style="margin-bottom:14px"><span id="achUnlocked">0</span> / <span id="achTotal">0</span> unlocked</div>
+      <div class="ach-grid" id="achGrid"></div>
     </div>
 
     <!-- SETTINGS PAGE -->
@@ -1464,6 +1443,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
     <button class="more-item" onclick="goToMore('leaderboard')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> <span>Leaderboard</span></button>
     <button class="more-item" onclick="goToMore('news')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg> <span>News</span></button>
     <button class="more-item" onclick="goToMore('stats')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> <span>Stats</span></button>
+    <button class="more-item" onclick="goToMore('achievements')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg> <span>Achievements</span></button>
     <button class="more-item" onclick="goToMore('settings')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> <span>Settings</span></button>
   </div>
 
@@ -2025,14 +2005,17 @@ setTimeout(showInstall, 4000);
 function goTo(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-'+page).classList.add('active');
-  document.getElementById('nav-'+page).classList.add('active');
+  const pageEl = document.getElementById('page-'+page);
+  if (pageEl) pageEl.classList.add('active');
+  const navEl = document.getElementById('nav-'+page);
+  if (navEl) navEl.classList.add('active');
   closeQP();
-  if (page==='garage')  renderGarage();
-  if (page==='history') renderHistory();
-  if (page==='stats')   renderStats();
+  if (page==='garage')       renderGarage();
+  if (page==='history')      renderHistory();
+  if (page==='stats')        renderStats();
+  if (page==='achievements') renderAchievements();
   if (page==='news' && !newsLoaded) { newsLoaded=true; renderNewsSources(); loadNews(); }
-  if (page==='leaderboard') loadLeaderboard(true);
+  if (page==='leaderboard')  loadLeaderboard(true);
 }
 
 // ── FORMAT ──
@@ -3796,7 +3779,7 @@ async function loadNews() {
 
 
 (function(){
-  var pageOrder = ['spot','garage','voice','history','stats','settings','news'];
+  var pageOrder = ['spot','garage','voice','history','stats','achievements','settings','news','leaderboard'];
   var currentSpotLocation = JSON.parse(localStorage.getItem('cs_pending_loc') || 'null');
   var currentPage = 'spot';
   var runTotalAnimated = 0;
@@ -3931,7 +3914,7 @@ async function loadNews() {
     }
     var list = document.getElementById('runList');
     if (!currentRun.length) {
-      list.innerHTML = '<div class="empty-run"><span class="ei">\xf0\x9f\x9b\xa3\xef\xb8\x8f</span>Add cars to your run</div>';
+      list.innerHTML = '<div class="empty-run"><span class="ei">🛣️</span>Add cars to your run</div>';
     } else {
       list.innerHTML = '';
       currentRun.slice().reverse().forEach(function(car, ri){
