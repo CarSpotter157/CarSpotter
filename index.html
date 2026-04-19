@@ -10,6 +10,8 @@
 <title>CarSpotter</title>
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='55%25' font-size='110' text-anchor='middle' dominant-baseline='middle'%3E%F0%9F%9B%B5%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js">
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js">
@@ -343,6 +345,11 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
 .hist-item.open .hist-chev{transform:rotate(180deg);}
 .hist-cars{display:none;border-top:1px solid var(--border);}
 .hist-item.open .hist-cars{display:block;animation:slideDown 0.2s ease;}
+.hc-row-wrap{display:flex;align-items:center;gap:4px;}
+.hc-row-wrap .hc-row{flex:1;}
+.hc-star-btn{background:none;border:none;font-size:0.9rem;cursor:pointer;opacity:0.3;padding:4px 6px;flex-shrink:0;transition:opacity 0.15s,transform 0.15s;border-radius:6px;line-height:1;}
+.hc-star-btn:hover{opacity:0.7;transform:scale(1.15);}
+.hc-star-btn.active{opacity:1;}
 .hc-row{display:flex;align-items:center;padding:9px 14px;border-bottom:1px solid var(--border);cursor:pointer;text-decoration:none;color:inherit;transition:background 0.12s;}
 .hc-row:last-child{border-bottom:none;}
 .hc-row:hover{background:var(--adim);}
@@ -949,52 +956,36 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 .gc-meta-label{font-size:0.5rem;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:2px;}
 .gc-meta-val{font-size:0.65rem;color:var(--text2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
-.garage-map{
-  position:relative;min-height:320px;border-radius:16px;border:1px solid var(--border);
-  background:
-    radial-gradient(circle at 20% 20%, rgba(245,200,66,0.12), transparent 28%),
-    radial-gradient(circle at 75% 25%, rgba(96,165,250,0.10), transparent 26%),
-    linear-gradient(180deg,var(--surf),var(--surf2));
-  overflow:hidden;box-shadow:0 14px 28px rgba(0,0,0,0.16);
-}
-.map-grid{
-  position:absolute;inset:0;opacity:0.2;
-  background-image:
-    linear-gradient(to right, var(--border) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
-  background-size:42px 42px;
-}
+.garage-map-wrap{border-radius:16px;overflow:hidden;border:1px solid var(--border);box-shadow:0 14px 28px rgba(0,0,0,0.16);margin-bottom:10px;}
+#leafletMap{width:100%;height:380px;background:var(--surf2);}
 .map-hud{
-  position:absolute;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;gap:8px;z-index:2;
+  position:absolute;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;gap:8px;z-index:1000;pointer-events:none;
 }
 .map-badge{
-  background:rgba(0,0,0,0.35);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);
-  border-radius:999px;padding:7px 12px;font-size:0.62rem;color:var(--text2);letter-spacing:1px;text-transform:uppercase;
-}
-.map-pin{
-  position:absolute;transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;gap:4px;z-index:1;
-  animation:fadeUp 0.3s ease both;
-}
-.map-pin-btn{
-  width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,0.18);
-  background:var(--accent);color:#0a0a0a;display:flex;align-items:center;justify-content:center;
-  font-size:0.95rem;cursor:pointer;box-shadow:0 10px 22px rgba(0,0,0,0.22);
-}
-.map-pin-btn.hot{background:var(--accent2);color:#fff;}
-.map-pin-label{
-  background:rgba(0,0,0,0.5);color:#fff;border-radius:999px;padding:4px 8px;font-size:0.56rem;max-width:110px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  background:rgba(0,0,0,0.55);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.12);
+  border-radius:999px;padding:7px 14px;font-size:0.62rem;color:#fff;letter-spacing:1px;text-transform:uppercase;
+  pointer-events:none;
 }
 .map-empty{
-  position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;color:var(--muted);font-size:0.72rem;letter-spacing:1px;padding:22px;
+  height:320px;border-radius:16px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;color:var(--muted);font-size:0.72rem;letter-spacing:1px;padding:22px;background:var(--surf);
 }
-.garage-map-list{margin-top:10px;display:grid;gap:8px;}
+.garage-map-list{display:grid;gap:8px;}
 .garage-map-row{
   display:flex;align-items:center;gap:10px;background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:10px 12px;
 }
 .garage-map-row strong{font-size:0.82rem;}
 .garage-map-row span{font-size:0.66rem;color:var(--text2);}
+/* Leaflet popup tweaks */
+.leaflet-popup-content-wrapper{background:var(--surf);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.4);color:var(--text);font-family:'Inter',-apple-system,sans-serif;}
+.leaflet-popup-tip{background:var(--surf);}
+.leaflet-popup-content{margin:12px 14px;font-size:0.78rem;line-height:1.5;}
+.map-popup-name{font-weight:700;font-size:0.88rem;margin-bottom:3px;}
+.map-popup-val{color:var(--accent);font-family:'Bebas Neue',cursive;font-size:1rem;letter-spacing:1px;}
+.map-popup-meta{color:var(--text2);font-size:0.65rem;margin-top:2px;}
+.map-popup-btn{display:inline-block;margin-top:8px;background:var(--accent);color:#0a0a0a;border:none;border-radius:7px;padding:5px 12px;font-family:'Bebas Neue',cursive;font-size:0.75rem;letter-spacing:1.5px;cursor:pointer;}
+.leaflet-control-zoom a{background:var(--surf)!important;color:var(--text)!important;border-color:var(--border)!important;}
+.leaflet-control-zoom a:hover{background:var(--surf2)!important;}
 
 /* ── SMART COMMAND BAR ── */
 .smart-cmd-wrap{
@@ -2643,6 +2634,18 @@ function appendLoadMoreBtn(container, handler, remaining) {
   container.appendChild(btn);
 }
 
+// ── TOGGLE HEADLINER IN HISTORY ──
+function toggleHistoryHeadliner(runId, carName, carType, carValue) {
+  const run = allRuns.find(r => r.id === runId);
+  if (!run || run.spotted) return;
+  const isAlready = run.headliner && run.headliner.name === carName;
+  run.headliner = isAlready ? null : { name: carName, type: carType, value: carValue };
+  localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+  saveToCloud();
+  renderHistory();
+  showToast(isAlready ? 'Headliner removed' : '⭐ ' + carName + ' set as headliner!');
+}
+
 // ── HISTORY ──
 // ── DELETE RUN ──
 function deleteRun(id) {
@@ -2689,13 +2692,19 @@ function renderHistory() {
 
     const label = isSpot ? 'SPOT' : 'RUN '+(runCounter--);
 
-    const carsHTML = [...entry.cars].sort((a,b)=>b.value-a.value).map(car=>`
-      <a class="hc-row" href="${carUrl(car.name)}" target="_blank" rel="noopener noreferrer">
-        ${car.photo ? `<img class="hc-photo" src="${car.photo}" alt="car">` : `<span class="hc-emoji">${car.type}</span>`}
-        <span class="hc-name">${escapeHtml(car.name)}${car.color?' <span style="font-weight:400;color:var(--text2)">· '+escapeHtml(car.color)+'</span>':''}</span>
-        <span class="hc-val">${fmtFull(car.value)}</span>
-        <span class="hc-arrow">↗</span>
-      </a>`).join('');
+    const carsHTML = [...entry.cars].sort((a,b)=>b.value-a.value).map(car=>{
+      const isCarHL = !isSpot && entry.headliner && entry.headliner.name === car.name;
+      return `
+      <div class="hc-row-wrap">
+        <a class="hc-row" href="${carUrl(car.name)}" target="_blank" rel="noopener noreferrer">
+          ${car.photo ? `<img class="hc-photo" src="${car.photo}" alt="car">` : `<span class="hc-emoji">${car.type}</span>`}
+          <span class="hc-name">${escapeHtml(car.name)}${car.color?' <span style="font-weight:400;color:var(--text2)">· '+escapeHtml(car.color)+'</span>':''}${isCarHL?' <span style="color:var(--accent);font-size:0.6rem;letter-spacing:1px;font-weight:700">HEADLINER</span>':''}</span>
+          <span class="hc-val">${fmtFull(car.value)}</span>
+          <span class="hc-arrow">↗</span>
+        </a>
+        ${!isSpot ? `<button class="hc-star-btn${isCarHL?' active':''}" onclick="event.stopPropagation();toggleHistoryHeadliner(${entry.id},'${escapeHtml(car.name).replace(/'/g,"\\'")}','${escapeHtml(car.type).replace(/'/g,"\\'")}',${car.value})" title="${isCarHL?'Remove headliner':'Set as headliner'}">⭐</button>` : ''}
+      </div>`;
+    }).join('');
 
     const headlinerHTML = (!isSpot && entry.headliner)
       ? `<div class="hist-headliner">⭐ ${escapeHtml(entry.headliner.type)} ${escapeHtml(entry.headliner.name)}</div>`
@@ -3911,8 +3920,8 @@ async function loadNews() {
       if (dskBest) dskBest.textContent = fmt(best);
       var diff = total - best;
       var msg = document.getElementById('beatMsg');
-      if (diff > 0) { msg.textContent = '? ' + fmtFull(diff) + ' ahead!'; msg.className = 'beat beating'; }
-      else if (diff < 0) { msg.textContent = '? ' + fmtFull(Math.abs(diff)) + ' to beat'; msg.className = 'beat behind'; }
+      if (diff > 0) { msg.textContent = '▲ ' + fmtFull(diff) + ' ahead!'; msg.className = 'beat beating'; }
+      else if (diff < 0) { msg.textContent = '▼ ' + fmtFull(Math.abs(diff)) + ' to beat'; msg.className = 'beat behind'; }
       else { msg.textContent = 'Tied!'; msg.className = 'beat tied'; }
     } else {
       document.getElementById('bestTotal').textContent = ' ';
@@ -3922,7 +3931,7 @@ async function loadNews() {
     }
     var list = document.getElementById('runList');
     if (!currentRun.length) {
-      list.innerHTML = '<div class="empty-run"><span class="ei">RUN</span>Add cars to your run</div>';
+      list.innerHTML = '<div class="empty-run"><span class="ei">\xf0\x9f\x9b\xa3\xef\xb8\x8f</span>Add cars to your run</div>';
     } else {
       list.innerHTML = '';
       currentRun.slice().reverse().forEach(function(car, ri){
@@ -3938,10 +3947,10 @@ async function loadNews() {
           '<div class="ri"><div class="rn">' + escapeHtml(car.name) + '</div>' +
           ((car.color || (car.location && car.location.label)) ? '<div class="rc">' + escapeHtml([car.color, car.location && car.location.label].filter(Boolean).join('   ')) + '</div>' : '') +
           '<span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' +
-          (isHL ? '<div class="headliner-badge">HEADLINER</div>' : '') + '</div>' +
+          (isHL ? '<div class="headliner-badge">\xe2\xad\x90 HEADLINER</div>' : '') + '</div>' +
           '<div class="rv">' + fmtFull(car.value) + '</div>' +
-          '<button class="star-btn ' + (isHL ? 'starred' : '') + '" onclick="toggleHeadliner(' + i + ')" title="Set as headliner">*</button>' +
-          '<button class="del-btn" onclick="removeCar(' + i + ')">x</button>';
+          '<button class="star-btn ' + (isHL ? 'starred' : '') + '" onclick="toggleHeadliner(' + i + ')" title="Set as headliner">⭐</button>' +
+          '<button class="del-btn" onclick="removeCar(' + i + ')">✕</button>';
         list.appendChild(row);
       });
     }
@@ -3958,26 +3967,60 @@ async function loadNews() {
     var el = document.getElementById('garageList');
     if (!filtered.length) {
       el.className = '';
-      el.innerHTML = '<div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">SEARCH</span>' + (allCars.length ? 'No matches' : 'No cars yet!') + '</div>';
+      el.innerHTML='<div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">\xf0\x9f\x94\x8d</span>'+(allCars.length?'No matches':'No cars yet!')+'</div>';
       return;
     }
     if (garageView === 'map') {
       el.className = '';
       var mapped = filtered.filter(function(car){ return car.location && isFinite(car.location.lat) && isFinite(car.location.lng); });
       if (!mapped.length) {
-        el.innerHTML = '<div class="garage-map"><div class="map-grid"></div><div class="map-empty"><span style="font-size:1.5rem;display:block;margin-bottom:8px;">MAP</span>Add location with the new location button and your spots will appear here.</div></div>';
+        el.innerHTML = '<div class="map-empty"><span style="font-size:2rem;display:block;margin-bottom:10px">🗺</span><strong style="display:block;margin-bottom:6px;color:var(--text)">No mapped spots yet</strong>Use the location button when logging a car and it will appear here.</div>';
         return;
       }
-      var lats = mapped.map(function(c){ return c.location.lat; });
-      var lngs = mapped.map(function(c){ return c.location.lng; });
-      var minLat = Math.min.apply(null, lats), maxLat = Math.max.apply(null, lats), minLng = Math.min.apply(null, lngs), maxLng = Math.max.apply(null, lngs);
-      var latSpan = Math.max(0.02, maxLat - minLat), lngSpan = Math.max(0.02, maxLng - minLng);
-      var pins = mapped.map(function(car, idx){
-        var left = 12 + ((car.location.lng - minLng) / lngSpan) * 76;
-        var top = 88 - ((car.location.lat - minLat) / latSpan) * 70;
-        var payload = encodeURIComponent(JSON.stringify(car)).replace(/'/g, '%27'); return '<div class="map-pin" style="left:' + left + '%;top:' + top + '%;animation-delay:' + (idx * 0.04) + 's"><button class="map-pin-btn' + (car.value >= 500000 ? ' hot' : '') + '" data-payload="' + payload + '" onclick="openMapCar(this.dataset.payload)">o</button><div class="map-pin-label">' + escapeHtml(car.name) + '</div></div>';
+      el.innerHTML = '<div class="garage-map-wrap" style="position:relative"><div id="leafletMap"></div><div class="map-hud"><div class="map-badge">' + mapped.length + ' mapped spot' + (mapped.length !== 1 ? 's' : '') + '</div></div></div><div class="garage-map-list" id="mapCarList"></div>';
+      var listEl = document.getElementById('mapCarList');
+      listEl.innerHTML = mapped.slice(0,8).map(function(car){
+        return '<div class="garage-map-row"><strong>' + escapeHtml(car.name) + '</strong><span>' + escapeHtml(locLabel(car.location)) + '   ' + fmtFull(car.value) + '</span></div>';
       }).join('');
-      el.innerHTML = '<div class="garage-map"><div class="map-grid"></div><div class="map-hud"><div class="map-badge">' + mapped.length + ' mapped spots</div><div class="map-badge">Optional view</div></div>' + pins + '</div><div class="garage-map-list">' + mapped.slice(0,6).map(function(car){ return '<div class="garage-map-row"><strong>' + escapeHtml(car.name) + '</strong><span>' + escapeHtml(locLabel(car.location)) + '   ' + fmtFull(car.value) + '</span></div>'; }).join('') + '</div>';
+      setTimeout(function(){
+        var mapEl = document.getElementById('leafletMap');
+        if (!mapEl || !window.L) return;
+        if (window._csLeafletMap) { try { window._csLeafletMap.remove(); } catch(e){} window._csLeafletMap = null; }
+        var lats = mapped.map(function(c){ return c.location.lat; });
+        var lngs = mapped.map(function(c){ return c.location.lng; });
+        var centerLat = (Math.min.apply(null,lats) + Math.max.apply(null,lats)) / 2;
+        var centerLng = (Math.min.apply(null,lngs) + Math.max.apply(null,lngs)) / 2;
+        var map = L.map('leafletMap', { zoomControl: true, attributionControl: true }).setView([centerLat, centerLng], 13);
+        window._csLeafletMap = map;
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '  <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+          maxZoom: 19
+        }).addTo(map);
+        var bounds = [];
+        mapped.forEach(function(car){
+          bounds.push([car.location.lat, car.location.lng]);
+          var isHot = car.value >= 500000;
+          var pinColor = isHot ? '#ff5733' : '#f5c842';
+          var icon = L.divIcon({
+            className: '',
+            html: '<div style="width:36px;height:36px;border-radius:50%;background:' + pinColor + ';border:3px solid rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 4px 14px rgba(0,0,0,0.5);cursor:pointer">' + escapeHtml(car.type) + '</div>',
+            iconSize: [36, 36],
+            iconAnchor: [18, 36],
+            popupAnchor: [0, -38]
+          });
+          var safeJson = JSON.stringify(car).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+          var popupHtml = '<div class="map-popup-name">' + escapeHtml(car.name) + '</div>' +
+            '<div class="map-popup-val">' + fmtFull(car.value) + '</div>' +
+            '<div class="map-popup-meta">' + escapeHtml(locLabel(car.location)) + '</div>' +
+            '<button class="map-popup-btn" onclick="openMapCar(decodeURIComponent(\'' + encodeURIComponent(JSON.stringify(car)).replace(/'/g,'%27') + '\'))">↗ View Specs</button>';
+          L.marker([car.location.lat, car.location.lng], { icon: icon })
+            .addTo(map)
+            .bindPopup(popupHtml, { maxWidth: 240 });
+        });
+        if (bounds.length > 1) {
+          map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+        }
+      }, 100);
       return;
     }
     if (garageView === 'grid') {
@@ -3991,7 +4034,7 @@ async function loadNews() {
     el.className = '';
     el.innerHTML = filtered.map(function(car, idx){
       var rarity = getRarity(car.value);
-      return '<a class="garage-row" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(car.type) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('   ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.value >= 50000 && car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-arrow">?</div><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="' + escapeHtml(car.name) + '">x</button></a>';
+      return '<a class="garage-row" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(car.type) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('   ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.value >= 50000 && car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-arrow">↗</div><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="' + escapeHtml(car.name) + '">✕</button></a>';
     }).join('');
   };
 
