@@ -19,7 +19,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js">
 </script>
 <script>
-// ── FIREBASE CONFIG ──
+//  FIREBASE CONFIG 
 // This key is intentionally client-side (Firebase design). Protect your data by:
 // 1. Firebase Console → App Check (enable reCAPTCHA enforcement)
 // 2. Firebase Console → Authentication → Authorized Domains (restrict to your GitHub Pages domain)
@@ -65,7 +65,7 @@ body.theme-retro80s{
 html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);}
 body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;}
 
-/* ── ANIMATIONS ── */
+/*  ANIMATIONS  */
 @keyframes fadeUp   {from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn   {from{opacity:0}to{opacity:1}}
 @keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
@@ -82,14 +82,14 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
 @keyframes slideLeftFade{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
 @keyframes badgeBlink{0%,100%{opacity:1}50%{opacity:0.6}}
 
-/* ── MOBILE SHELL ── */
+/*  MOBILE SHELL  */
 .app-shell{
   width:100%;max-width:430px;margin:0 auto;
   height:100%;display:flex;flex-direction:column;
   background:var(--bg);position:relative;
 }
 
-/* ── DESKTOP OVERRIDES ── */
+/*  DESKTOP OVERRIDES  */
 @media(min-width:800px){
   html,body{overflow:hidden;}
   body{flex-direction:row;}
@@ -133,7 +133,7 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
   .scooter-deco{display:block;}
 }
 
-/* ── HEADER ── */
+/*  HEADER  */
 .app-header{
   flex-shrink:0;background:var(--surf);border-bottom:1px solid var(--border);
   padding:11px 16px 9px;display:flex;align-items:center;justify-content:space-between;
@@ -145,7 +145,7 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
 .hdr-lbl{font-size:0.55rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
 .hdr-val{font-family:'Bebas Neue',cursive;font-size:1.3rem;color:var(--accent);letter-spacing:1px;line-height:1;}
 
-/* ── PAGES ── */
+/*  PAGES  */
 .pages{flex:1;overflow:hidden;position:relative;}
 .page{
   position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
@@ -157,7 +157,7 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
 .page.page-enter-forward{animation:slideLeftFade 0.24s ease;}
 .page.page-enter-back{animation:slideIn 0.24s ease;}
 
-/* ── BOTTOM NAV ── */
+/*  BOTTOM NAV  */
 .bottom-nav{
   flex-shrink:0;background:var(--surf);border-top:1px solid var(--border);
   display:flex;height:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));
@@ -176,15 +176,15 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
 .nav-btn.active .nav-icon{transform:scale(1.12);}
 .nav-label{font-size:0.55rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;}
 
-/* ── ROAD DECO ── */
+/*  ROAD DECO  */
 .road-deco{position:fixed;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));left:0;right:0;height:2px;overflow:hidden;z-index:5;pointer-events:none;}
 .rdl{position:absolute;top:0;height:2px;width:48px;background:var(--accent);opacity:0.2;animation:roadmove 1.5s linear infinite;}
 .rdl:nth-child(1){animation-delay:0s;}.rdl:nth-child(2){animation-delay:0.5s;}.rdl:nth-child(3){animation-delay:1s;}
 
-/* ── SCOOTER ── */
+/*  SCOOTER  */
 .scooter-deco{display:none;position:fixed;bottom:16px;right:20px;font-size:1.5rem;animation:scoot 1s ease-in-out infinite;filter:drop-shadow(0 0 6px rgba(245,200,66,0.3));z-index:5;}
 
-/* ── SCORE BANNER ── */
+/*  SCORE BANNER  */
 .score-banner{
   background:var(--surf);border:1px solid var(--border);border-radius:13px;
   padding:16px 18px;margin-bottom:12px;
@@ -203,11 +203,11 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
 .beat.behind{color:var(--red);}
 .beat.tied{color:var(--muted);}
 
-/* ── CARD ── */
+/*  CARD  */
 .card{background:var(--surf);border:1px solid var(--border);border-radius:13px;padding:14px;margin-bottom:12px;animation:fadeUp 0.3s ease both;overflow:visible;box-shadow:0 10px 24px rgba(0,0,0,0.12);}
 .card-title{font-size:0.65rem;font-weight:700;letter-spacing:1px;color:var(--muted);margin-bottom:12px;text-transform:uppercase;}
 
-/* ── FORM ── */
+/*  FORM  */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
 .ff label{font-size:0.58rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;display:block;margin-bottom:4px;font-weight:600;}
 .ff input,.ff select{
@@ -218,7 +218,7 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
 .ff input:focus,.ff select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(245,200,66,0.08);}
 .ff input::placeholder{color:var(--muted);}
 
-/* ── BUTTONS ── */
+/*  BUTTONS  */
 .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
 .btn-run{
   background:var(--accent);color:#0a0a0a;border:none;border-radius:9px;
@@ -245,7 +245,7 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
 .btn-end:hover{background:#e04020;}
 .btn-end:active{transform:scale(0.98);}
 
-/* ── QUICK PICKS DROPDOWN ── */
+/*  QUICK PICKS DROPDOWN  */
 .qp-wrap{position:relative;margin-bottom:10px;}
 .qp-trigger{
   width:100%;display:flex;align-items:center;justify-content:space-between;
@@ -276,7 +276,7 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
 .qp-item-val{font-family:'Bebas Neue',cursive;font-size:0.95rem;color:var(--accent);flex-shrink:0;}
 .qp-empty{padding:16px;text-align:center;color:var(--muted);font-size:0.75rem;letter-spacing:1px;}
 
-/* ── RUN LIST ── */
+/*  RUN LIST  */
 .sec-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
 .sec-title{font-size:0.7rem;font-weight:700;letter-spacing:1px;color:var(--text);text-transform:uppercase;}
 .txt-btn{font-size:0.62rem;color:var(--muted);background:none;border:1px solid var(--border);border-radius:5px;padding:3px 8px;cursor:pointer;letter-spacing:1px;font-family:inherit;transition:all 0.12s;}
@@ -298,7 +298,7 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
 .empty-run{text-align:center;padding:26px 12px;color:var(--muted);font-size:0.72rem;letter-spacing:1px;border:1px dashed var(--border);border-radius:10px;animation:fadeIn 0.3s ease;}
 .ei{font-size:1.8rem;display:block;margin-bottom:6px;}
 
-/* ── GARAGE ── */
+/*  GARAGE  */
 .stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
 .stat-box{background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;animation:fadeUp 0.3s ease both;}
 .stat-v{font-family:'Bebas Neue',cursive;font-size:1.5rem;color:var(--accent);line-height:1;}
@@ -323,7 +323,7 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
 .g-spotted-count{font-size:0.58rem;color:var(--accent2);letter-spacing:1px;margin-top:2px;font-weight:600;}
 .empty-garage{text-align:center;padding:40px 12px;color:var(--muted);font-size:0.72rem;letter-spacing:1px;border:1px dashed var(--border);border-radius:10px;}
 
-/* ── HISTORY ── */
+/*  HISTORY  */
 .record-card{background:var(--surf);border:1px solid var(--accent);border-radius:13px;padding:14px 16px;margin-bottom:12px;animation:glow 3s ease infinite,fadeUp 0.3s ease both;}
 .rec-lbl{font-size:0.6rem;color:var(--accent);letter-spacing:2px;margin-bottom:4px;font-weight:600;}
 .rec-val{font-family:'Bebas Neue',cursive;font-size:2.6rem;color:var(--accent);letter-spacing:2px;line-height:1;}
@@ -359,14 +359,14 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
 .hc-arrow{font-size:0.6rem;color:var(--muted);flex-shrink:0;}
 .no-history{text-align:center;padding:40px 12px;color:var(--muted);font-size:0.72rem;letter-spacing:1px;border:1px dashed var(--border);border-radius:10px;}
 
-/* ── HEADLINER ── */
+/*  HEADLINER  */
 .star-btn{background:none;border:none;cursor:pointer;font-size:1.1rem;padding:4px;line-height:1;flex-shrink:0;opacity:0.3;transition:opacity 0.15s,transform 0.15s;filter:grayscale(1);}
 .star-btn.starred{opacity:1;filter:none;transform:scale(1.2);}
 .star-btn:active{transform:scale(0.9);}
 .headliner-badge{font-size:0.58rem;color:var(--accent);letter-spacing:1.5px;font-weight:700;margin-top:2px;}
 .hist-headliner{display:flex;align-items:center;gap:6px;font-size:0.72rem;color:var(--accent);font-weight:600;margin-top:3px;}
 
-/* ── UNICORN OVERLAY ── */
+/*  UNICORN OVERLAY  */
 .unicorn-overlay{
   position:fixed;inset:0;z-index:99999;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -381,10 +381,10 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
 @keyframes confettiFall{from{transform:translateY(-10px) rotate(0deg);opacity:1}to{transform:translateY(100vh) rotate(720deg);opacity:0}}
 .confetti-piece{position:absolute;top:0;width:8px;height:8px;border-radius:2px;animation:confettiFall linear forwards;}
 
-/* ── RARITY PILL ── */
+/*  RARITY PILL  */
 .rarity-pill{display:inline-block;font-size:0.52rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:2px 7px;border-radius:20px;margin-top:3px;border:1px solid transparent;}
 
-/* ── RUN RECAP OVERLAY ── */
+/*  RUN RECAP OVERLAY  */
 .recap-overlay{
   position:fixed;inset:0;z-index:99999;
   display:flex;align-items:flex-end;justify-content:center;
@@ -418,13 +418,13 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
 .recap-btn{width:100%;background:var(--accent);color:#0a0a0a;border:none;border-radius:10px;font-family:'Bebas Neue',cursive;font-size:1.1rem;letter-spacing:3px;padding:14px;cursor:pointer;transition:all 0.15s;margin-top:4px;}
 .recap-btn:active{transform:scale(0.98);}
 
-/* ── INSTALL BANNER ── */
+/*  INSTALL BANNER  */
 .install-banner{background:var(--adim);border:1px solid var(--accent);border-radius:10px;padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;animation:fadeUp 0.4s ease;}
 .install-text{flex:1;font-size:0.72rem;color:var(--text2);line-height:1.45;}
 .install-text strong{color:var(--text);}
 .install-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:2px;line-height:1;}
 
-/* ── TOAST ── */
+/*  TOAST  */
 .toast{
   position:fixed;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 12px);
   left:50%;transform:translateX(-50%) translateY(8px);
@@ -438,7 +438,7 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
   .toast{bottom:20px;left:calc(88px + 50%);}
 }
 
-/* ── NOTES PAGE ── */
+/*  NOTES PAGE  */
 .notes-header {
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 12px; gap: 12px;
@@ -482,13 +482,13 @@ body{font-family:'Inter',-apple-system,sans-serif;color:var(--text);display:flex
   #page-voice { overflow-y: hidden; padding: 28px 36px; display: flex; flex-direction: column; }
   .notes-area { flex: 1; height: auto; }
 }
-/* ── THEME SELECTOR ── */
+/*  THEME SELECTOR  */
 .theme-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
 .theme-swatch{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform 0.15s,border-color 0.15s;flex-shrink:0;}
 .theme-swatch:hover{transform:scale(1.15);}
 .theme-swatch.active{border-color:#fff;transform:scale(1.1);}
 
-/* ── CARBON FIBER TEXTURE ── */
+/*  CARBON FIBER TEXTURE  */
 /* Real twill weave: each 'tow' is a parallelogram highlight on dark base */
 body.carbon-on .card,
 body.carbon-on .hist-item,
@@ -520,7 +520,7 @@ body.carbon-on .run-item {
   background-size: 16px 16px;
 }
 
-/* ── SPECS CARD ── */
+/*  SPECS CARD  */
 .specs-overlay{
   position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:99995;
   display:flex;align-items:flex-end;justify-content:center;
@@ -578,7 +578,7 @@ body.carbon-on .run-item {
 .specs-loading-text{font-size:0.68rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
 .specs-error{text-align:center;padding:32px 20px;color:var(--muted);font-size:0.75rem;line-height:1.6;}
 
-/* ── PHOTO SUPPORT ── */
+/*  PHOTO SUPPORT  */
 .photo-btn{
   display:flex;align-items:center;justify-content:center;gap:6px;
   width:100%;background:var(--surf2);border:1px dashed var(--border);
@@ -592,7 +592,7 @@ body.carbon-on .run-item {
 .run-item-photo{width:44px;height:44px;border-radius:7px;object-fit:cover;margin-right:8px;flex-shrink:0;border:1px solid var(--border);}
 .hc-photo{width:36px;height:36px;border-radius:6px;object-fit:cover;margin-right:8px;flex-shrink:0;border:1px solid var(--border);}
 
-/* ── SMART VOICE FILL ── */
+/*  SMART VOICE FILL  */
 .voice-fill-bar{
   display:none;background:var(--adim);border:1px solid var(--accent);
   border-radius:10px;padding:10px 12px;margin-bottom:10px;
@@ -604,7 +604,7 @@ body.carbon-on .run-item {
 .vf-accept{background:var(--accent);color:#0a0a0a;border:none;border-radius:6px;font-family:'Bebas Neue',cursive;font-size:0.75rem;letter-spacing:1.5px;padding:5px 10px;cursor:pointer;flex-shrink:0;}
 .vf-dismiss{background:none;border:none;color:var(--muted);font-size:0.85rem;cursor:pointer;flex-shrink:0;padding:2px;}
 
-/* ── OFFLINE BANNER ── */
+/*  OFFLINE BANNER  */
 .offline-banner{
   position:fixed;top:0;left:50%;transform:translateX(-50%);
   background:var(--red);color:#fff;font-family:'Bebas Neue',cursive;
@@ -621,7 +621,7 @@ body.carbon-on .run-item {
   display:flex;align-items:center;justify-content:center;border:2px solid var(--bg);
 }
 
-/* ── THEME LABEL PILLS for light mode contrast ── */
+/*  THEME LABEL PILLS for light mode contrast  */
 body.theme-light .toast{color:#fff;}
 body.theme-light .btn-run{background:var(--accent);color:#fff;}
 body.theme-light .hdr-val{color:var(--accent);}
@@ -639,7 +639,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 .toggle-knob{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform 0.2s;}
 .toggle-pill.on .toggle-knob{transform:translateX(18px);}
 
-/* ── UNDO BAR ── */
+/*  UNDO BAR  */
 .undo-bar{
   position:fixed;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 14px);
   left:50%;transform:translateX(-50%);
@@ -656,7 +656,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 .undo-btn:hover{opacity:0.8;}
 @media(min-width:800px){.undo-bar{bottom:20px;left:calc(88px + 50%);}}
 
-/* ── BULK DELETE ── */
+/*  BULK DELETE  */
 .bulk-bar{display:none;background:var(--surf);border-bottom:1px solid var(--border);padding:10px 16px;position:sticky;top:0;z-index:10;gap:10px;align-items:center;}
 .bulk-bar.active{display:flex;}
 .bulk-count{font-size:0.7rem;color:var(--text2);flex:1;}
@@ -666,7 +666,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 .hist-check:checked{background:var(--accent2);border-color:var(--accent2);}
 .bulk-mode .hist-hdr{padding-left:8px;}
 
-/* ── ALIAS MODAL ── */
+/*  ALIAS MODAL  */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:99990;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.2s ease;}
 .modal-card{width:100%;max-width:480px;background:var(--surf);border-top:1px solid var(--border);border-radius:20px 20px 0 0;padding:24px 20px 36px;animation:slideUpRecap 0.3s cubic-bezier(0.34,1.56,0.64,1);max-height:85vh;overflow-y:auto;}
 .modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px;}
@@ -685,7 +685,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 .modal-save-btn{width:100%;background:var(--accent);color:#0a0a0a;border:none;border-radius:10px;font-family:'Bebas Neue',cursive;font-size:1rem;letter-spacing:3px;padding:13px;cursor:pointer;margin-top:14px;transition:all 0.15s;}
 .modal-save-btn:active{transform:scale(0.98);}
 
-/* ── AUTH OVERLAY ── */
+/*  AUTH OVERLAY  */
 .auth-overlay{
   position:fixed;inset:0;z-index:9999;background:var(--bg);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -719,7 +719,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 .sync-dot.ok{background:var(--green);}
 .sync-dot.syncing{background:var(--accent);animation:pulse 1s ease infinite;}
 
-/* ── MORE MENU ── */
+/*  MORE MENU  */
 .more-menu{
   position:fixed;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 6px);
   right:8px;background:var(--surf);border:1px solid var(--border);
@@ -857,7 +857,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
   #page-news{overflow-y:auto;padding:28px 36px;}
 }
 
-/* ── ACHIEVEMENTS ── */
+/*  ACHIEVEMENTS  */
 .achievement-toast{
   position:fixed;left:50%;transform:translateX(-50%);
   bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 60px);
@@ -886,14 +886,19 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
   animation:fadeUp 0.3s ease both;
 }
 .ach-badge.unlocked{border-color:var(--accent);background:var(--adim);}
-.ach-badge.locked{opacity:0.4;filter:grayscale(1);}
-.ach-icon{font-size:1.7rem;display:block;margin-bottom:4px;line-height:1;}
+.ach-badge.locked{opacity:0.38;}
+.ach-icon{
+  font-family:'Bebas Neue',cursive;font-size:1.1rem;letter-spacing:2px;
+  display:block;margin-bottom:6px;line-height:1;
+  color:var(--muted);
+}
+.ach-badge.unlocked .ach-icon{color:var(--accent);}
 .ach-name{font-size:0.58rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;line-height:1.2;color:var(--text);}
 .ach-req{font-size:0.5rem;color:var(--muted);letter-spacing:0.5px;margin-top:2px;line-height:1.3;}
 .ach-count-row{font-size:0.62rem;color:var(--text2);text-align:center;margin-top:2px;margin-bottom:12px;}
 .ach-count-row span{color:var(--accent);font-family:'Bebas Neue',cursive;font-size:0.9rem;letter-spacing:1px;}
 
-/* ── CAR AUTOCOMPLETE ── */
+/*  CAR AUTOCOMPLETE  */
 .car-ac-wrap{position:relative;}
 .car-ac-dropdown{
   display:none;position:absolute;top:100%;left:0;right:0;z-index:9990;
@@ -913,7 +918,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 .ac-item-name{flex:1;font-weight:600;}
 .ac-item-val{font-family:'Bebas Neue',cursive;font-size:0.88rem;color:var(--accent);flex-shrink:0;}
 
-/* ── GARAGE FILTER BAR ── */
+/*  GARAGE FILTER BAR  */
 .garage-filter-row{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .garage-filter-row::-webkit-scrollbar{display:none;}
 .gf-pill{
@@ -933,7 +938,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 .garage-search-wrap input::placeholder{color:var(--muted);}
 .garage-search-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.8rem;padding:2px;line-height:1;}
 
-/* ── GARAGE GRID VIEW ── */
+/*  GARAGE GRID VIEW  */
 .garage-view-toggle{display:flex;gap:4px;align-items:center;}
 .gv-btn{background:none;border:1px solid var(--border);border-radius:6px;padding:3px 7px;cursor:pointer;color:var(--muted);font-size:0.8rem;transition:all 0.12s;}
 .gv-btn.active{border-color:var(--accent);color:var(--accent);background:var(--adim);}
@@ -987,7 +992,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 .leaflet-control-zoom a{background:var(--surf)!important;color:var(--text)!important;border-color:var(--border)!important;}
 .leaflet-control-zoom a:hover{background:var(--surf2)!important;}
 
-/* ── SMART COMMAND BAR ── */
+/*  SMART COMMAND BAR  */
 .smart-cmd-wrap{
   background:var(--adim);border:1px solid var(--accent);border-radius:10px;
   padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;gap:8px;
@@ -1022,7 +1027,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 .lb-empty,.lb-loading{text-align:center;padding:36px 12px;color:var(--muted);font-size:0.74rem;letter-spacing:1px;border:1px dashed var(--border);border-radius:12px;}
 @media(min-width:800px){#page-leaderboard{overflow-y:auto;padding:28px 36px;}}
 
-/* ── LOAD MORE ── */
+/*  LOAD MORE  */
 .load-more-btn{
   width:100%;margin-top:10px;padding:11px;
   background:var(--surf2);border:1px dashed var(--border);border-radius:10px;
@@ -1068,7 +1073,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
     <div class="page active" id="page-spot">
       <div id="installBanner" style="display:none" class="install-banner">
         <div class="install-text"><strong>Install as app:</strong> Share → Add to Home Screen (iPhone) · Install icon in Chrome (PC)</div>
-        <button class="install-close" onclick="dismissInstall()">✕</button>
+        <button class="install-close" onclick="dismissInstall()"></button>
       </div>
 
       <!-- desktop two cols wrapper -->
@@ -1110,12 +1115,12 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
               <div class="ff">
                 <label>Type</label>
                 <select id="carType">
-                  <option value="🏎️">🏎️ Supercar</option>
-                  <option value="🚗">🚗 Sports Car</option>
-                  <option value="🐎">🐎 Muscle Car</option>
-                  <option value="🏁">🏁 Track Car</option>
-                  <option value="🔥">🔥 Exotic</option>
-                  <option value="⚡">⚡ EV</option>
+                  <option value="supercar">Supercar</option>
+                  <option value="sports">Sports Car</option>
+                  <option value="muscle">Muscle Car</option>
+                  <option value="track">Track Car</option>
+                  <option value="exotic">Exotic</option>
+                  <option value="ev">EV</option>
                 </select>
               </div>
             </div>
@@ -1138,7 +1143,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
             <div class="qp-wrap" id="qpWrap" style="display:none">
               <button class="qp-trigger" onclick="toggleQP()">
                 <span>Quick Picks</span>
-                <span class="qp-arrow" id="qpArrow">▼</span>
+                <span class="qp-arrow" id="qpArrow"></span>
               </button>
               <div class="qp-dropdown">
                 <div class="qp-search">
@@ -1197,7 +1202,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
       </div>
       <div class="garage-search-wrap">
         <input type="text" id="garageSearch" placeholder="Search cars..." oninput="onGarageSearch()" autocomplete="off">
-        <button class="garage-search-clear" onclick="clearGarageSearch()" id="garageSearchClear" style="display:none">x</button>
+        <button class="garage-search-clear" onclick="clearGarageSearch()" id="garageSearchClear" style="display:none">&#10005;</button>
       </div>
       <div class="garage-filter-row" id="garageFilterRow">
         <button class="gf-pill active" data-filter="all" onclick="setGarageFilter('all',this)">All</button>
@@ -1223,11 +1228,11 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
         <div class="rec-sub" id="recordSub"></div>
       </div>
       <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
-        <div style="font-size:0.7rem;color:var(--text2);line-height:1.5;"><strong style="color:var(--text)">💾 Export backup</strong><br>Download all your data as a .json file</div>
+        <div style="font-size:0.7rem;color:var(--text2);line-height:1.5;"><strong style="color:var(--text)"> Export backup</strong><br>Download all your data as a .json file</div>
         <button onclick="exportLocalData()" style="background:var(--accent);color:#0a0a0a;border:none;border-radius:7px;font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:1.5px;padding:8px 13px;cursor:pointer;flex-shrink:0;">EXPORT</button>
       </div>
       <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
-        <div style="font-size:0.7rem;color:var(--text2);line-height:1.5;"><strong style="color:var(--text)">📂 Import backup</strong><br>Restore from a carspotter-backup.json file</div>
+        <div style="font-size:0.7rem;color:var(--text2);line-height:1.5;"><strong style="color:var(--text)"> Import backup</strong><br>Restore from a carspotter-backup.json file</div>
         <label style="background:var(--accent);color:#0a0a0a;border:none;border-radius:7px;font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:1.5px;padding:8px 13px;cursor:pointer;flex-shrink:0;">
           IMPORT
           <input type="file" accept=".json" style="display:none" onchange="importFromFile(this)">
@@ -1240,10 +1245,10 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
       <div class="bulk-bar" id="bulkBar">
         <span class="bulk-count" id="bulkCount">0 selected</span>
         <button class="bulk-cancel-btn" onclick="toggleBulkMode()">Cancel</button>
-        <button class="bulk-del-btn" onclick="bulkDelete()">🗑 Delete</button>
+        <button class="bulk-del-btn" onclick="bulkDelete()"> Delete</button>
       </div>
       <div id="histList">
-        <div class="no-history"><span style="font-size:1.8rem;display:block;margin-bottom:8px">📋</span>Nothing saved yet</div>
+        <div class="no-history"><span style="font-size:1.8rem;display:block;margin-bottom:8px"></span>Nothing saved yet</div>
       </div>
     </div>
 
@@ -1257,7 +1262,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
           <button class="mic-btn" id="micBtn" onclick="toggleMic()">
-            <span class="mic-icon">🎤</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
             <span class="mic-lbl" id="micLbl">Tap to speak</span>
           </button>
         </div>
@@ -1323,7 +1328,7 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
         </div>
         <div class="theme-bar" id="themeBar"></div>
         <div style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;margin-top:8px;" id="themeName">Default</div>
-        <div style="font-size:0.6rem;color:var(--muted);margin-top:4px;line-height:1.5;">Dark: Default   Carbon   Stealth   Inferno   Cobalt   Acid<br>Light: Light &nbsp;|&nbsp; Special: Cyberpunk   Retro 80s</div>
+        <div style="font-size:0.6rem;color:var(--muted);margin-top:4px;line-height:1.5;">Dark: Default  Carbon  Stealth  Inferno  Cobalt  Acid<br>Light: Light &nbsp;|&nbsp; Special: Cyberpunk  Retro 80s</div>
         <div class="setting-row" style="border-top:none;padding-top:10px;">
           <div class="carbon-preview"></div>
           <span style="font-size:0.78rem;color:var(--text2);flex:1;">Carbon fiber texture on surfaces</span>
@@ -1450,14 +1455,14 @@ body.theme-light .specs-card,.body.theme-light .recap-card,.body.theme-light .mo
 </div><!-- /app-shell -->
 
 <div class="road-deco"><div class="rdl"></div><div class="rdl"></div><div class="rdl"></div></div>
-<div class="scooter-deco">🛵</div>
+
 <div class="toast" id="toast"></div>
-<div class="offline-banner" id="offlineBanner"><span>✈</span><span>OFFLINE — Saves locally, syncs when back</span></div>
+<div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
 
 <script>
-// ══════════════════════════════════════════
-// ── ALL STATE (must be declared first) ──
-// ══════════════════════════════════════════
+// 
+//  ALL STATE (must be declared first) 
+// 
 let currentUser  = null;
 let syncUnsub    = null;
 let syncTimer    = null;
@@ -1485,26 +1490,26 @@ let garageView   = 'list';
 
 // Achievements — declared here so getUnlockedAchievements() works at any point
 const ACHIEVEMENTS = [
-  { id:'first_car',    icon:'🚗', name:'First Spot',      desc:'Log your first car',           check:(c,r)=>c.length>=1 },
-  { id:'ten_cars',     icon:'🔟', name:'Decade',           desc:'Log 10 cars total',            check:(c,r)=>c.length>=10 },
-  { id:'fifty_cars',   icon:'💯', name:'Century Half',     desc:'Log 50 cars total',            check:(c,r)=>c.length>=50 },
-  { id:'first_run',    icon:'🏁', name:'First Run',        desc:'Complete your first run',      check:(c,r)=>r.filter(x=>!x.spotted).length>=1 },
-  { id:'five_runs',    icon:'🎯', name:'Regular',          desc:'Complete 5 runs',              check:(c,r)=>r.filter(x=>!x.spotted).length>=5 },
-  { id:'supercar',     icon:'🏎️', name:'Supercar Spotter', desc:'Log a Supercar (🏎️)',         check:(c,r)=>c.some(x=>x.type==='🏎️') },
-  { id:'ev_spotter',   icon:'⚡', name:'Electric Dreams',  desc:'Log 5 EVs',                   check:(c,r)=>c.filter(x=>x.type==='⚡').length>=5 },
-  { id:'muscle_fan',   icon:'🐎', name:'Muscle Head',      desc:'Log 5 Muscle Cars',            check:(c,r)=>c.filter(x=>x.type==='🐎').length>=5 },
-  { id:'half_mil',     icon:'💰', name:'Half a Milly',     desc:'Single run over $500K',        check:(c,r)=>r.some(x=>!x.spotted&&x.total>=500000) },
-  { id:'millionaire',  icon:'🦄', name:'Millionaire Run',  desc:'Single run over $1M',         check:(c,r)=>r.some(x=>!x.spotted&&x.total>=1000000) },
-  { id:'legend_spot',  icon:'👑', name:'Legend Spotter',   desc:'Spot a Legend ($1M+) car',    check:(c,r)=>c.some(x=>x.value>=1000000) },
-  { id:'hypercar',     icon:'🔴', name:'Hypercar Hunter',  desc:'Spot a Hypercar ($500K+)',    check:(c,r)=>c.some(x=>x.value>=500000) },
-  { id:'five_makes',   icon:'🌍', name:'Make Explorer',    desc:'Spot 5 different makes',      check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=5 },
-  { id:'ten_makes',    icon:'🗺️', name:'Globe Trotter',    desc:'Spot 10 different makes',     check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=10 },
-  { id:'photographer', icon:'📷', name:'Photographer',     desc:'Log 5 cars with photos',      check:(c,r)=>c.filter(x=>x.photo).length>=5 },
-  { id:'triple_run',   icon:'🔥', name:'Hat Trick',        desc:'Log 3 cars in one run',       check:(c,r)=>r.some(x=>!x.spotted&&(x.cars||[]).length>=3) },
+  { id:'first_car',    icon:'01', name:'First Spot',      desc:'Log your first car',           check:(c,r)=>c.length>=1 },
+  { id:'ten_cars',     icon:'10', name:'Decade',           desc:'Log 10 cars total',            check:(c,r)=>c.length>=10 },
+  { id:'fifty_cars',   icon:'50', name:'Century Half',     desc:'Log 50 cars total',            check:(c,r)=>c.length>=50 },
+  { id:'first_run',    icon:'R1', name:'First Run',        desc:'Complete your first run',      check:(c,r)=>r.filter(x=>!x.spotted).length>=1 },
+  { id:'five_runs',    icon:'R5', name:'Regular',          desc:'Complete 5 runs',              check:(c,r)=>r.filter(x=>!x.spotted).length>=5 },
+  { id:'supercar',     icon:'SC', name:'Supercar Spotter', desc:'Log a Supercar',               check:(c,r)=>c.some(x=>x.type==='supercar'||x.type==='') },
+  { id:'ev_spotter',   icon:'EV', name:'Electric Dreams',  desc:'Log 5 EVs',                   check:(c,r)=>c.filter(x=>x.type==='ev'||x.type==='').length>=5 },
+  { id:'muscle_fan',   icon:'V8', name:'Muscle Head',      desc:'Log 5 Muscle Cars',            check:(c,r)=>c.filter(x=>x.type==='muscle'||x.type==='').length>=5 },
+  { id:'half_mil',     icon:'½M', name:'Half a Milly',     desc:'Single run over $500K',        check:(c,r)=>r.some(x=>!x.spotted&&x.total>=500000) },
+  { id:'millionaire',  icon:'1M', name:'Millionaire Run',  desc:'Single run over $1M',          check:(c,r)=>r.some(x=>!x.spotted&&x.total>=1000000) },
+  { id:'legend_spot',  icon:'LG', name:'Legend Spotter',   desc:'Spot a Legend ($1M+) car',    check:(c,r)=>c.some(x=>x.value>=1000000) },
+  { id:'hypercar',     icon:'HC', name:'Hypercar Hunter',  desc:'Spot a Hypercar ($500K+)',     check:(c,r)=>c.some(x=>x.value>=500000) },
+  { id:'five_makes',   icon:'5M', name:'Make Explorer',    desc:'Spot 5 different makes',       check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=5 },
+  { id:'ten_makes',    icon:'10M',name:'Globe Trotter',    desc:'Spot 10 different makes',      check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=10 },
+  { id:'photographer', icon:'CAM',name:'Photographer',     desc:'Log 5 cars with photos',       check:(c,r)=>c.filter(x=>x.photo).length>=5 },
+  { id:'triple_run',   icon:'x3', name:'Hat Trick',        desc:'Log 3 cars in one run',        check:(c,r)=>r.some(x=>!x.spotted&&(x.cars||[]).length>=3) },
 ];
 let _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
 
-// ── FIREBASE AUTH & SYNC ──
+//  FIREBASE AUTH & SYNC 
 
 function signInGoogle() {
   auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
@@ -1552,7 +1557,7 @@ function importLocalData() {
   saveToCloud();
   renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
   document.getElementById('importBtn')?.remove();
-  showToast('✅ Imported ' + newRuns.length + ' runs from this device!');
+  showToast(' Imported ' + newRuns.length + ' runs from this device!');
 }
 
 auth.onAuthStateChanged(async user => {
@@ -1581,11 +1586,11 @@ function showImportBanner(count) {
   div.style.cssText = 'background:var(--adim);border:1px solid var(--accent);border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;animation:fadeUp 0.3s ease;';
   div.innerHTML = `
     <div style="font-size:0.72rem;color:var(--text2);line-height:1.45;">
-      <strong style="color:var(--text)">📦 Found ${count} runs on this device</strong><br>Import to sync them to your account?
+      <strong style="color:var(--text)"> Found ${count} runs on this device</strong><br>Import to sync them to your account?
     </div>
     <div style="display:flex;gap:6px;flex-shrink:0;">
       <button onclick="importLocalData()" style="background:var(--accent);color:#0a0a0a;border:none;border-radius:7px;font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:1.5px;padding:7px 12px;cursor:pointer;">IMPORT</button>
-      <button onclick="document.getElementById('importBtn').remove()" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:7px;font-size:0.75rem;padding:7px 10px;cursor:pointer;">✕</button>
+      <button onclick="document.getElementById('importBtn').remove()" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:7px;font-size:0.75rem;padding:7px 10px;cursor:pointer;"></button>
     </div>`;
   // Insert at top of spot page
   const spotPage = document.getElementById('page-spot');
@@ -1635,7 +1640,7 @@ async function loadFromCloud() {
   } catch(e) { setSyncDot(''); console.error(e); }
   renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
   if (currentRun.length > 0)
-    setTimeout(() => showToast('▶ Run resumed — ' + currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '') + ' restored!'), 700);
+    setTimeout(() => showToast(' Run resumed — ' + currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '') + ' restored!'), 700);
 }
 
 function subscribeCloud() {
@@ -1691,7 +1696,7 @@ function saveToCloud() {
   }, 1500);
 }
 
-// ── THEMES ──
+//  THEMES 
 
 async function publishRunToLeaderboard(run) {
   if (!currentUser || !run || run.spotted) return;
@@ -1736,7 +1741,7 @@ const THEMES = [
 let activeTheme = parseInt(localStorage.getItem('cs_theme') || '0');
 let carbonOn    = localStorage.getItem('cs_carbon') === 'on';
 
-// ── THEMES ──
+//  THEMES 
 function applyTheme(idx) {
   const t = THEMES[idx];
   const r = document.documentElement.style;
@@ -1781,7 +1786,7 @@ function toggleCarbon() {
   applyCarbon();
   const btn = document.getElementById('carbonToggle');
   if (btn) btn.classList.toggle('on', carbonOn);
-  showToast(carbonOn ? '🏁 Carbon fiber on' : 'Carbon fiber off');
+  showToast(carbonOn ? ' Carbon fiber on' : 'Carbon fiber off');
 }
 function applyCarbon() {
   document.body.classList.toggle('carbon-on', carbonOn);
@@ -1792,7 +1797,7 @@ function initCarbonToggle() {
   if (btn) btn.classList.toggle('on', carbonOn);
 }
 
-// ── SOUND ──
+//  SOUND 
 let _audioCtx = null;
 function getAudioCtx() {
   if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1837,14 +1842,14 @@ function toggleSound() {
   localStorage.setItem('cs_sound', soundEnabled ? 'on' : 'off');
   const btn = document.getElementById('soundToggle');
   if (btn) btn.classList.toggle('on', soundEnabled);
-  showToast(soundEnabled ? '🔊 Sounds on' : '🔇 Sounds off');
+  showToast(soundEnabled ? ' Sounds on' : ' Sounds off');
 }
 function initSoundToggle() {
   const btn = document.getElementById('soundToggle');
   if (btn) btn.classList.toggle('on', soundEnabled);
 }
 
-// ── UNDO ──
+//  UNDO 
 function pushUndo(type, data, msg) {
   undoStack = { type, data };
   clearTimeout(undoTimer);
@@ -1874,7 +1879,7 @@ function doUndo() {
   showToast('↩ Undone!');
 }
 
-// ── BULK DELETE ──
+//  BULK DELETE 
 function toggleBulkMode() {
   bulkMode = !bulkMode;
   bulkSelected.clear();
@@ -1904,11 +1909,11 @@ function bulkDelete() {
   bulkSelected.clear();
   toggleBulkMode();
   renderGarage();
-  showToast('🗑 Deleted ' + count + ' ' + (count===1?'entry':'entries'));
+  showToast(' Deleted ' + count + ' ' + (count===1?'entry':'entries'));
   playSound('delete');
 }
 
-// ── ALIASES ──
+//  ALIASES 
 function resolveAlias(name) {
   const key = name.toLowerCase().trim();
   for (const [abbr, full] of Object.entries(aliases)) {
@@ -1931,7 +1936,7 @@ function openAliasModal() {
       <input class="alias-abbr" placeholder="GT3 RS" value="${a.replace(/"/g,'&quot;')}">
       <span class="alias-arrow">→</span>
       <input class="alias-full" placeholder="Porsche 911 GT3 RS" value="${f.replace(/"/g,'&quot;')}">
-      <button class="alias-del" onclick="this.closest('.alias-row').remove()">✕</button>
+      <button class="alias-del" onclick="this.closest('.alias-row').remove()"></button>
     </div>`).join('');
 
   const overlay = document.createElement('div');
@@ -1940,7 +1945,7 @@ function openAliasModal() {
   overlay.innerHTML = `
     <div class="modal-card" onclick="event.stopPropagation()">
       <div class="modal-handle"></div>
-      <div class="modal-title">🏷️ CAR NICKNAMES</div>
+      <div class="modal-title"> CAR NICKNAMES</div>
       <div class="alias-hint">Abbreviation on the left → Full name on the right.<br>Stats will group entries with matching full names together.</div>
       <div id="aliasRows">${rows}</div>
       <button class="alias-add-btn" onclick="addAliasRow()">+ Add nickname</button>
@@ -1956,7 +1961,7 @@ function addAliasRow() {
     <input class="alias-abbr" placeholder="GT3 RS">
     <span class="alias-arrow">→</span>
     <input class="alias-full" placeholder="Porsche 911 GT3 RS">
-    <button class="alias-del" onclick="this.closest('.alias-row').remove()">✕</button>`;
+    <button class="alias-del" onclick="this.closest('.alias-row').remove()"></button>`;
   document.getElementById('aliasRows').appendChild(d);
   d.querySelector('.alias-abbr').focus();
 }
@@ -1969,10 +1974,10 @@ function saveAliasModal() {
   });
   saveAliases();
   document.getElementById('aliasModal')?.remove();
-  showToast('✅ Nicknames saved!');
+  showToast(' Nicknames saved!');
 }
 
-// ── DESKTOP SIDEBAR LOGO ──
+//  DESKTOP SIDEBAR LOGO 
 function injectDesktopLogo() {
   if (window.innerWidth < 800) return;
   const nav = document.getElementById('bottomNav');
@@ -1985,7 +1990,7 @@ function injectDesktopLogo() {
 injectDesktopLogo();
 window.addEventListener('resize', injectDesktopLogo);
 
-// ── INSTALL ──
+//  INSTALL 
 function showInstall() {
   if (localStorage.getItem('cs_install_dismissed')) return;
   // Only show after user has logged at least one car (has seen value)
@@ -2001,7 +2006,7 @@ function dismissInstall() {
 // Check after a delay — will fire after auth + data loads
 setTimeout(showInstall, 4000);
 
-// ── NAV ──
+//  NAV 
 function goTo(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -2018,7 +2023,7 @@ function goTo(page) {
   if (page==='leaderboard')  loadLeaderboard(true);
 }
 
-// ── FORMAT ──
+//  FORMAT 
 // Use Intl.NumberFormat so currency symbol and separators match user's locale
 const _currencyFmt = (() => {
   try {
@@ -2049,7 +2054,7 @@ function fmtFull(n) {
 }
 function carUrl(name) { return 'https://www.google.com/search?q='+encodeURIComponent(name+' car specs price'); }
 
-// ── QUICK PICKS ──
+//  QUICK PICKS 
 function saveToQP(car) {
   quickPicks = quickPicks.filter(q => q.name.toLowerCase() !== car.name.toLowerCase());
   quickPicks.unshift({ name:car.name, value:car.value, color:car.color, type:car.type });
@@ -2078,7 +2083,7 @@ function renderQPList(query) {
   list.forEach(c => {
     const d = document.createElement('div');
     d.className = 'qp-item';
-    d.innerHTML = `<span class="qp-item-emoji">${c.type}</span><span class="qp-item-name">${c.name}</span><span class="qp-item-val">${fmtFull(c.value)}</span>`;
+    d.innerHTML = `<span class="qp-item-type" style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:36px;text-align:right">${carTypeLabel(c.type)}</span><span class="qp-item-name">${c.name}</span><span class="qp-item-val">${fmtFull(c.value)}</span>`;
     d.onclick = () => {
       document.getElementById('carName').value  = c.name;
       document.getElementById('carValue').value = c.value;
@@ -2097,12 +2102,12 @@ document.addEventListener('click', e => {
   if (qpOpen && !document.getElementById('qpWrap').contains(e.target)) closeQP();
 });
 
-// ── SANITIZE ── strip tags/script from free-text fields
+//  SANITIZE  strip tags/script from free-text fields
 function sanitizeText(str) {
   return String(str || '').replace(/[<>]/g, '').trim().slice(0, 120);
 }
 
-// ── GET INPUTS ──
+//  GET INPUTS 
 function getInputs() {
   return {
     name:  sanitizeText(document.getElementById('carName').value),
@@ -2117,7 +2122,7 @@ function clearInputs() {
   document.getElementById('carColor').value = '';
 }
 
-// ── LOG TO RUN ──
+//  LOG TO RUN 
 // Adds to current run list only. Does NOT go to history until you End Run.
 function logRun() {
   const { name: rawName, value, color, type } = getInputs();
@@ -2146,7 +2151,7 @@ function logRun() {
   setTimeout(checkNewAchievements, 400);
 }
 
-// ── LOG AS SPOTTED ──
+//  LOG AS SPOTTED 
 // Saves DIRECTLY to garage & history as a standalone entry. Never touches run list.
 function logSpotted() {
   const { name: rawName, value, color, type } = getInputs();
@@ -2180,7 +2185,7 @@ function logSpotted() {
   setTimeout(checkNewAchievements, 400);
 }
 
-// ── REMOVE FROM RUN ──
+//  REMOVE FROM RUN 
 function removeCar(i) {
   const prevRun = JSON.parse(JSON.stringify(currentRun));
   const prevHL  = headlinerIdx;
@@ -2203,13 +2208,13 @@ function clearRun() {
   renderSpot();
 }
 
-// ── HEADLINER ──
+//  HEADLINER 
 function toggleHeadliner(i) {
   headlinerIdx = (headlinerIdx === i) ? -1 : i;
   renderSpot();
 }
 
-// ── UNICORN ALERT ──
+//  UNICORN ALERT 
 function showUnicornAlert(total) {
   const overlay = document.createElement('div');
   overlay.className = 'unicorn-overlay';
@@ -2227,7 +2232,7 @@ function showUnicornAlert(total) {
   }
 
   overlay.innerHTML += `
-    <div class="unicorn-emoji">🦄</div>
+    <div class="unicorn-emoji" style="font-family:'Bebas Neue',cursive;font-size:4rem;letter-spacing:4px;color:var(--accent)">$1M</div>
     <div class="unicorn-title">UNICORN RUN</div>
     <div class="unicorn-sub">You just crossed $1,000,000</div>
     <div class="unicorn-total">${fmtFull(total)}</div>
@@ -2241,7 +2246,7 @@ function saveCurrentRun() {
   saveToCloud();
 }
 
-// ── END RUN ──
+//  END RUN 
 function endRun() {
   if (!currentRun.length) { showToast('No cars in run!'); return; }
   const total = currentRun.reduce((s,c)=>s+c.value,0);
@@ -2273,7 +2278,7 @@ function endRun() {
   setTimeout(checkNewAchievements, 1200);
 }
 
-// ── RUN RECAP ──
+//  RUN RECAP 
 function showRecap({ total, cars, headliner, isRec, prevBest }) {
   // Build top 3 cars (excluding headliner if set)
   const sorted = [...cars].sort((a,b) => b.value - a.value);
@@ -2283,7 +2288,7 @@ function showRecap({ total, cars, headliner, isRec, prevBest }) {
   let vsHTML = '';
   if (prevBest > 0 && !isRec) {
     const diff = total - prevBest;
-    vsHTML = `<div class="recap-vs">${diff >= 0 ? '▲' : '▼'} <span>${fmtFull(Math.abs(diff))}</span> ${diff >= 0 ? 'above' : 'below'} your best run of ${fmtFull(prevBest)}</div>`;
+    vsHTML = `<div class="recap-vs">${diff >= 0 ? '' : ''} <span>${fmtFull(Math.abs(diff))}</span> ${diff >= 0 ? 'above' : 'below'} your best run of ${fmtFull(prevBest)}</div>`;
   }
 
   const isLegend = total >= 1000000;
@@ -2310,14 +2315,14 @@ function showRecap({ total, cars, headliner, isRec, prevBest }) {
     ${confettiHTML}
     <div class="recap-card" onclick="event.stopPropagation()">
       <div class="recap-handle"></div>
-      <div class="recap-label">${isLegend ? '👑 LEGEND RUN' : '🏁 RUN COMPLETE'}</div>
+      <div class="recap-label">${isLegend ? 'LEGEND RUN' : 'RUN COMPLETE'}</div>
       <div class="recap-total">${fmtFull(total)}</div>
-      ${isRec ? '<div class="recap-record-tag">🏆 NEW RECORD</div>' : `<div class="recap-meta">${cars.length} car${cars.length!==1?'s':''} · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>`}
+      ${isRec ? '<div class="recap-record-tag">NEW RECORD</div>' : `<div class="recap-meta">${cars.length} car${cars.length!==1?'s':''} · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>`}
       ${vsHTML}
       ${headliner ? `
-        <div class="recap-section-lbl">⭐ Headliner</div>
+        <div class="recap-section-lbl"> Headliner</div>
         <div class="recap-headliner">
-          <div class="recap-hl-emoji">${headliner.type}</div>
+          <div class="recap-hl-type" style="font-family:'Bebas Neue',cursive;font-size:0.7rem;letter-spacing:2px;color:var(--muted);margin-bottom:2px">${carTypeLabel(headliner.type)}</div>
           <div class="recap-hl-info">
             <div class="recap-hl-name">${headliner.name}</div>
             <div class="recap-hl-val">${fmtFull(headliner.value)}</div>
@@ -2328,7 +2333,7 @@ function showRecap({ total, cars, headliner, isRec, prevBest }) {
         <div class="recap-top-list">
           ${top3.map(c => `
             <div class="recap-car-row">
-              <span class="recap-car-emoji">${c.type}</span>
+              <span class="recap-car-type" style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:44px">${carTypeLabel(c.type)}</span>
               <span class="recap-car-name">${c.name}</span>
               <span class="recap-car-val">${fmtFull(c.value)}</span>
             </div>`).join('')}
@@ -2339,7 +2344,7 @@ function showRecap({ total, cars, headliner, isRec, prevBest }) {
   document.body.appendChild(overlay);
 }
 
-// ── RARITY ──
+//  RARITY 
 function getRarity(value) {
   if (value >= 1000000) return { label: 'Legend',    color: '#f5c842', bg: 'rgba(245,200,66,0.12)' };
   if (value >= 500000)  return { label: 'Hypercar',  color: '#ff5733', bg: 'rgba(255,87,51,0.12)'  };
@@ -2348,14 +2353,14 @@ function getRarity(value) {
   return                       { label: 'Daily',     color: '#6b7280', bg: 'rgba(107,114,128,0.12)' };
 }
 
-// ── BEST (runs only, not spotted) ──
+//  BEST (runs only, not spotted) 
 function getBest() {
   const runs = allRuns.filter(r => !r.spotted);
   if (!runs.length) return 0;
   return Math.max(...runs.map(r=>r.total));
 }
 
-// ── RENDER SPOT PAGE ──
+//  RENDER SPOT PAGE 
 function renderSpot() {
   const total = currentRun.reduce((s,c)=>s+c.value,0);
   const best  = getBest();
@@ -2370,9 +2375,9 @@ function renderSpot() {
     if (db) db.textContent = fmt(best);
     const diff = total-best;
     const m = document.getElementById('beatMsg');
-    if (diff>0)      { m.textContent='▲ '+fmtFull(diff)+' ahead!'; m.className='beat beating'; }
-    else if (diff<0) { m.textContent='▼ '+fmtFull(Math.abs(diff))+' to beat'; m.className='beat behind'; }
-    else             { m.textContent='⚡ Tied!'; m.className='beat tied'; }
+    if (diff>0)      { m.textContent=' '+fmtFull(diff)+' ahead!'; m.className='beat beating'; }
+    else if (diff<0) { m.textContent=' '+fmtFull(Math.abs(diff))+' to beat'; m.className='beat behind'; }
+    else             { m.textContent=' Tied!'; m.className='beat tied'; }
   } else {
     document.getElementById('bestTotal').textContent='—';
     document.getElementById('headerBest').textContent='—';
@@ -2382,7 +2387,7 @@ function renderSpot() {
 
   const el = document.getElementById('runList');
   if (!currentRun.length) {
-    el.innerHTML='<div class="empty-run"><span class="ei">🛣️</span>Add cars to your run</div>';
+    el.innerHTML='<div class="empty-run"><span class="ei"></span>Add cars to your run</div>';
   } else {
     el.innerHTML='';
     [...currentRun].reverse().forEach((car,ri) => {
@@ -2393,23 +2398,23 @@ function renderSpot() {
       d.className = 'run-item';
       d.style.animationDelay = (ri*0.04)+'s';
       if (isHL) d.style.borderColor = 'var(--accent)';
-      d.innerHTML = `${car.photo ? `<img class="run-item-photo" src="${car.photo}" alt="car">` : `<div class="re">${car.type}</div>`}
+      d.innerHTML = `${car.photo ? `<img class="run-item-photo" src="${car.photo}" alt="car">` : `<div class="re">${carTypeLabel(car.type)}</div>`}
         <div class="ri">
           <div class="rn">${car.name}</div>
           ${car.color?`<div class="rc">${car.color}</div>`:''}
           <span class="rarity-pill" style="color:${rarity.color};background:${rarity.bg};border-color:${rarity.color}33">${rarity.label}</span>
-          ${isHL?'<div class="headliner-badge">⭐ HEADLINER</div>':''}
+          ${isHL?'<div class="headliner-badge">HEADLINER</div>':''}
         </div>
         <div class="rv">${fmtFull(car.value)}</div>
-        <button class="star-btn ${isHL?'starred':''}" onclick="toggleHeadliner(${i})" title="Set as headliner">⭐</button>
-        <button class="del-btn" onclick="removeCar(${i})">✕</button>`;
+        <button class="star-btn ${isHL?'starred':''}" onclick="toggleHeadliner(${i})" title="Set as headliner">&#9733;</button>
+        <button class="del-btn" onclick="removeCar(${i})"></button>`;
       el.appendChild(d);
     });
   }
   document.getElementById('endWrap').style.display = currentRun.length ? 'block' : 'none';
 }
 
-// ── GARAGE ──
+//  GARAGE 
 function getAllCars() {
   const seen = new Map();
   [...allRuns].reverse().forEach(run => {
@@ -2471,7 +2476,7 @@ function deleteCarEverywhere(name) {
   showToast(name+' removed');
 }
 
-// ── GARAGE FILTER & VIEW STATE ──
+//  GARAGE FILTER & VIEW STATE 
 
 function setGarageView(v) {
   garageView = v;
@@ -2486,17 +2491,21 @@ function clearGarageSearch() {
   renderGarage();
 }
 
-// ── CAR TYPE LOOKUP ── central source of truth for type↔emoji mapping
+//  CAR TYPE LOOKUP  central source of truth for type↔emoji mapping
 const CAR_TYPE_MAP = {
-  supercar: '🏎️',
-  sports:   '🚗',
-  muscle:   '🐎',
-  track:    '🏁',
-  exotic:   '🔥',
-  ev:       '⚡',
+  supercar: 'Supercar',
+  sports:   'Sports',
+  muscle:   'Muscle',
+  track:    'Track',
+  exotic:   'Exotic',
+  ev:       'EV',
 };
-// Reverse map: emoji → filter key (handles variant sequences safely)
-const CAR_TYPE_REVERSE = Object.fromEntries(Object.entries(CAR_TYPE_MAP).map(([k,v])=>[v,k]));
+// Label lookup by type key
+function carTypeLabel(type) {
+  // Support legacy emoji-stored types from old data
+  const legacyMap = {'':'Supercar','':'Sports','':'Muscle','':'Track','':'Exotic','':'EV'};
+  return CAR_TYPE_MAP[type] || legacyMap[type] || type || 'Car';
+}
 
 function applyGarageFilters(cars) {
   const q = (document.getElementById('garageSearch')?.value || '').toLowerCase().trim();
@@ -2505,14 +2514,15 @@ function applyGarageFilters(cars) {
     if (garageFilter === 'all') return true;
     if (garageFilter === 'legend')   return car.value >= 1000000;
     if (garageFilter === 'hypercar') return car.value >= 500000;
-    // Compare by normalizing the car type through our map to avoid emoji encoding edge cases
-    const carTypeKey = CAR_TYPE_REVERSE[car.type] || '';
-    if (CAR_TYPE_MAP[garageFilter]) return carTypeKey === garageFilter;
+    // Normalize legacy emoji types to text keys
+    const legacyRev = {'':'supercar','':'sports','':'muscle','':'track','':'exotic','':'ev'};
+    const typeKey = legacyRev[car.type] || car.type || '';
+    if (CAR_TYPE_MAP[garageFilter]) return typeKey === garageFilter;
     return true;
   });
 }
 
-// ── GARAGE PAGINATION ──
+//  GARAGE PAGINATION 
 const GARAGE_PAGE_SIZE = 40;
 let garagePage = 0;
 
@@ -2527,7 +2537,7 @@ function renderGarage() {
   const el = document.getElementById('garageList');
   if (!filtered.length) {
     el.className = '';
-    el.innerHTML='<div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">🔍</span>'+(allCars.length?'No matches':'No cars yet!')+'</div>';
+    el.innerHTML='<div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px"></span>'+(allCars.length?'No matches':'No cars yet!')+'</div>';
     return;
   }
 
@@ -2545,7 +2555,7 @@ function renderGarage() {
       const rarity = getRarity(car.value);
       a.innerHTML = `
         <div class="gc-img-wrap">
-          ${car.photo ? `<img class="gc-img" src="${car.photo}" alt="${escapeHtml(car.name)}">` : `<div class="gc-img-ph">${escapeHtml(car.type)}</div>`}
+          ${car.photo ? `<img class="gc-img" src="${car.photo}" alt="${escapeHtml(car.name)}">` : `<div class="gc-img-ph">${escapeHtml(carTypeLabel(car.type))}</div>`}
         </div>
         <div class="gc-body">
           <div class="gc-name">${escapeHtml(car.name)}</div>
@@ -2568,18 +2578,18 @@ function renderGarage() {
     a.style.animationDelay=(idx*0.03)+'s';
     const rarity = getRarity(car.value);
     a.innerHTML=`<div class="g-rank">${sortMode!=='alpha'?'#'+(idx+1):''}</div>
-      ${car.photo ? `<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="${car.photo}" alt="car">` : `<div class="g-emoji">${escapeHtml(car.type)}</div>`}
+      ${car.photo ? `<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="${car.photo}" alt="car">` : `<div class="g-emoji">${escapeHtml(carTypeLabel(car.type))}</div>`}
       <div class="g-info">
         <div class="g-name">${escapeHtml(car.name)}</div>
         <div class="g-meta">${escapeHtml([car.color,car.runDate].filter(Boolean).join(' · '))}</div>
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span class="rarity-pill" style="color:${rarity.color};background:${rarity.bg};border-color:${rarity.color}33">${rarity.label}</span>
-          ${car.value>=50000 && car.spotCount>1 ? `<span class="g-spotted-count">👁 ${car.spotCount}x</span>` : ''}
+          ${car.value>=50000 && car.spotCount>1 ? `<span class="g-spotted-count"> ${car.spotCount}x</span>` : ''}
         </div>
       </div>
       <div class="g-val">${fmtFull(car.value)}</div>
       <div class="g-arrow">↗</div>
-      <button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="${escapeHtml(car.name)}">✕</button>`;
+      <button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="${escapeHtml(car.name)}"></button>`;
     el.appendChild(a);
   });
   if (hasMore) appendLoadMoreBtn(el, () => { garagePage++; renderGarage(); }, filtered.length - pageCars.length);
@@ -2617,7 +2627,7 @@ function appendLoadMoreBtn(container, handler, remaining) {
   container.appendChild(btn);
 }
 
-// ── TOGGLE HEADLINER IN HISTORY ──
+//  TOGGLE HEADLINER IN HISTORY 
 function toggleHistoryHeadliner(runId, carName, carType, carValue) {
   const run = allRuns.find(r => r.id === runId);
   if (!run || run.spotted) return;
@@ -2626,11 +2636,11 @@ function toggleHistoryHeadliner(runId, carName, carType, carValue) {
   localStorage.setItem('cs_runs', JSON.stringify(allRuns));
   saveToCloud();
   renderHistory();
-  showToast(isAlready ? 'Headliner removed' : '⭐ ' + carName + ' set as headliner!');
+  showToast(isAlready ? 'Headliner removed' : ' ' + carName + ' set as headliner!');
 }
 
-// ── HISTORY ──
-// ── DELETE RUN ──
+//  HISTORY 
+//  DELETE RUN 
 function deleteRun(id) {
   const prev = JSON.parse(JSON.stringify(allRuns));
   const entry = allRuns.find(r => r.id === id);
@@ -2643,7 +2653,7 @@ function deleteRun(id) {
   renderGarage();
 }
 
-// ── HISTORY PAGINATION ──
+//  HISTORY PAGINATION 
 const HIST_PAGE_SIZE = 30;
 let histPage = 0;
 
@@ -2658,7 +2668,7 @@ function renderHistory() {
   }
 
   const el = document.getElementById('histList');
-  if (!allRuns.length) { el.innerHTML='<div class="no-history"><span style="font-size:1.8rem;display:block;margin-bottom:8px">📋</span>Nothing saved yet</div>'; return; }
+  if (!allRuns.length) { el.innerHTML='<div class="no-history"><span style="font-size:1.8rem;display:block;margin-bottom:8px"></span>Nothing saved yet</div>'; return; }
 
   const pageRuns = allRuns.slice(0, (histPage + 1) * HIST_PAGE_SIZE);
   const hasMore  = allRuns.length > pageRuns.length;
@@ -2680,17 +2690,17 @@ function renderHistory() {
       return `
       <div class="hc-row-wrap">
         <a class="hc-row" href="${carUrl(car.name)}" target="_blank" rel="noopener noreferrer">
-          ${car.photo ? `<img class="hc-photo" src="${car.photo}" alt="car">` : `<span class="hc-emoji">${car.type}</span>`}
+          ${car.photo ? `<img class="hc-photo" src="${car.photo}" alt="car">` : `<span class="hc-emoji">${carTypeLabel(car.type)}</span>`}
           <span class="hc-name">${escapeHtml(car.name)}${car.color?' <span style="font-weight:400;color:var(--text2)">· '+escapeHtml(car.color)+'</span>':''}${isCarHL?' <span style="color:var(--accent);font-size:0.6rem;letter-spacing:1px;font-weight:700">HEADLINER</span>':''}</span>
           <span class="hc-val">${fmtFull(car.value)}</span>
           <span class="hc-arrow">↗</span>
         </a>
-        ${!isSpot ? `<button class="hc-star-btn${isCarHL?' active':''}" onclick="event.stopPropagation();toggleHistoryHeadliner(${entry.id},'${escapeHtml(car.name).replace(/'/g,"\\'")}','${escapeHtml(car.type).replace(/'/g,"\\'")}',${car.value})" title="${isCarHL?'Remove headliner':'Set as headliner'}">⭐</button>` : ''}
+        ${!isSpot ? `<button class="hc-star-btn${isCarHL?' active':''}" onclick="event.stopPropagation();toggleHistoryHeadliner(${entry.id},'${escapeHtml(car.name).replace(/'/g,"\\'")}','${escapeHtml(car.type).replace(/'/g,"\\'")}',${car.value})" title="${isCarHL?'Remove headliner':'Set as headliner'}">&#9733;</button>` : ''}
       </div>`;
     }).join('');
 
     const headlinerHTML = (!isSpot && entry.headliner)
-      ? `<div class="hist-headliner">⭐ ${escapeHtml(entry.headliner.type)} ${escapeHtml(entry.headliner.name)}</div>`
+      ? `<div class="hist-headliner">HEADLINER · ${escapeHtml(entry.headliner.name)}</div>`
       : '';
 
     div.innerHTML=`
@@ -2700,12 +2710,12 @@ function renderHistory() {
         <div class="hist-info">
           <div class="hist-date">${escapeHtml(entry.date)}</div>
           <div class="hist-total">${fmtFull(entry.total)}</div>
-          <div class="hist-count">${entry.cars.length} car${entry.cars.length!==1?'s':''}${entry.total>=1000000?' 🦄':''}</div>
+          <div class="hist-count">${entry.cars.length} car${entry.cars.length!==1?'s':''}${entry.total>=1000000?' ':''}</div>
           ${headlinerHTML}
         </div>
-        ${isRec?'<div class="hist-rec">🏆 RECORD</div>':''}
-        ${!bulkMode ? `<button class="del-btn" onclick="event.stopPropagation();deleteRun(${entry.id})" style="margin-right:4px">✕</button>` : ''}
-        ${!bulkMode ? `<div class="hist-chev">▼</div>` : ''}
+        ${isRec?'<div class="hist-rec">RECORD</div>':''}
+        ${!bulkMode ? `<button class="del-btn" onclick="event.stopPropagation();deleteRun(${entry.id})" style="margin-right:4px"></button>` : ''}
+        ${!bulkMode ? `<div class="hist-chev"></div>` : ''}
       </div>
       <div class="hist-cars">${carsHTML}</div>`;
     el.appendChild(div);
@@ -2721,7 +2731,7 @@ function renderHistory() {
   }
 }
 
-// ── SPECS CARD ──
+//  SPECS CARD 
 async function showSpecsCard(car) {
   // Build overlay immediately with loading state
   const overlay = document.createElement('div');
@@ -2752,8 +2762,8 @@ async function showSpecsCard(car) {
 
   const rarity = getRarity(car.value);
   const imgHTML = imgUrl
-    ? `<img class="specs-img" src="${imgUrl}" alt="${car.name}" onerror="this.parentElement.innerHTML='<div class=specs-img-placeholder>${car.type}</div>'">`
-    : `<div class="specs-img-placeholder">${car.type}</div>`;
+    ? `<img class="specs-img" src="${imgUrl}" alt="${car.name}" onerror="this.parentElement.innerHTML='<div class=specs-img-placeholder>' + carTypeLabel(car.type) + '</div>'">`
+    : `<div class="specs-img-placeholder">${carTypeLabel(car.type)}</div>`;
 
   if (!specsData) {
     card.innerHTML = `
@@ -2904,7 +2914,7 @@ async function fetchCarImage(carName) {
   return null;
 }
 
-// ── TOAST ──
+//  TOAST 
 function showToast(msg) {
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
@@ -2957,7 +2967,7 @@ function importFromFile(input) {
 
       saveToCloud();
       renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
-      showToast('✅ Restored ' + newRuns.length + ' runs from backup!');
+      showToast(' Restored ' + newRuns.length + ' runs from backup!');
     } catch(err) {
       alert('Could not read backup file. Make sure it\'s a valid carspotter-backup.json');
     }
@@ -2965,11 +2975,11 @@ function importFromFile(input) {
   reader.readAsText(file);
 }
 
-// ── ENTER KEYS ──
+//  ENTER KEYS 
 document.getElementById('carName').addEventListener('keydown',  e=>{ if(e.key==='Enter') document.getElementById('carValue').focus(); });
 document.getElementById('carValue').addEventListener('keydown', e=>{ if(e.key==='Enter') logRun(); });
 
-// ── INIT ──
+//  INIT 
 // Auth state change handles data load — just bootstrap UI
 renderQPTrigger();
 renderSpot();
@@ -2977,13 +2987,13 @@ applyTheme(activeTheme);
 applyCarbon();
 initSoundToggle();
 
-// ── SERVICE WORKER ──
+//  SERVICE WORKER 
 if ('serviceWorker' in navigator) {
   const sw=`const C='cs-v4';const CACHE_URLS=['.'];self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(CACHE_URLS)));self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==C).map(k=>caches.delete(k)))));});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('.'))));});`;
   navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'})));
 }
 
-// ── OFFLINE MODE ──
+//  OFFLINE MODE 
 let isOffline = !navigator.onLine;
 let offlineQueue = JSON.parse(localStorage.getItem('cs_offline_queue') || '[]'); // queued saves
 
@@ -2993,7 +3003,7 @@ function updateOfflineBanner() {
   isOffline = !navigator.onLine;
   b.classList.toggle('show', isOffline);
   if (isOffline) {
-    b.innerHTML = '<span>✈</span><span>OFFLINE — Saves locally, syncs when back</span>';
+    b.innerHTML = '<span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span>';
   } else {
     b.classList.remove('show');
   }
@@ -3009,7 +3019,7 @@ function flushOfflineQueue() {
   offlineQueue = [];
   localStorage.removeItem('cs_offline_queue');
   saveToCloud();
-  showToast('☁ Synced ' + offlineQueue.length + ' offline saves!');
+  showToast(' Synced ' + offlineQueue.length + ' offline saves!');
 }
 
 function refreshOfflineStatus() {
@@ -3031,7 +3041,7 @@ function refreshOfflineStatus() {
   }
 }
 
-// ── NOTES (autosave notepad + voice) ──
+//  NOTES (autosave notepad + voice) 
 let micRecog    = null;
 let micActive   = false;
 let micInterim  = '';
@@ -3059,7 +3069,7 @@ function initNotes() {
     // Insert a one-line notice below the notes header
     const hint = document.createElement('div');
     hint.style.cssText = 'font-size:0.65rem;color:var(--muted);background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin-bottom:10px;line-height:1.5;';
-    hint.innerHTML = '🎤 Voice input requires Chrome on desktop/Android or Safari on iOS. Smart Fill and manual typing work in any browser.';
+    hint.innerHTML = ' Voice input requires Chrome on desktop/Android or Safari on iOS. Smart Fill and manual typing work in any browser.';
     const area = document.getElementById('notesArea');
     if (area && area.parentNode) area.parentNode.insertBefore(hint, area);
     return;
@@ -3142,11 +3152,11 @@ function stopMic() {
   const val = area.value.trim();
   const carKeywords = /\b(log|spotted|ferrari|lamborghini|porsche|bmw|mercedes|mclaren|bugatti|ford|chevy|dodge|mustang|camaro|corvette|charger|challenger|tesla|gt3|amg|supercar|hypercar)\b/i;
   if (val && carKeywords.test(val)) {
-    setTimeout(() => showToast('✨ Tap Smart Fill to auto-log from notes!'), 600);
+    setTimeout(() => showToast(' Tap Smart Fill to auto-log from notes!'), 600);
   }
 }
 
-// ── PHOTO SUPPORT ──
+//  PHOTO SUPPORT 
 let pendingPhotoDataUrl = null; // base64 of attached photo for current log
 
 function handlePhotoInput(input) {
@@ -3159,9 +3169,9 @@ function handlePhotoInput(input) {
     wrap.style.display = 'block';
     wrap.innerHTML = `<div class="photo-preview-wrap">
       <img class="photo-preview-img" src="${pendingPhotoDataUrl}" alt="Car photo">
-      <button class="photo-remove" onclick="removePhoto()">✕</button>
+      <button class="photo-remove" onclick="removePhoto()"></button>
     </div>`;
-    showToast('📷 Photo attached!');
+    showToast(' Photo attached!');
   };
   reader.readAsDataURL(file);
   input.value = '';
@@ -3192,7 +3202,7 @@ function photoThumbSmall(dataUrl) {
   return `<img class="hc-photo" src="${dataUrl}" alt="car">`;
 }
 
-// ── SMART VOICE FILL (AI-powered) ──
+//  SMART VOICE FILL (AI-powered) 
 let voiceFillPending = null; // { name, value, color, type }
 
 async function smartVoiceFill() {
@@ -3211,7 +3221,7 @@ async function smartVoiceFill() {
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 300,
-        system: `You are a car spotting assistant. Extract ONE car from the user's notes text to fill a log form. Return ONLY valid JSON with these exact keys: {"name":"Make Model (string)","value":NUMBER,"color":"color string or empty string","type":"one of: 🏎️ 🚗 🐎 🏁 🔥 ⚡"}. For type pick the best emoji: 🏎️=supercar/ferrari/lambo/mclaren, 🚗=sports/bmw/porsche/mustang/generic, 🐎=muscle/camaro/challenger/charger, 🏁=track/race, 🔥=exotic/rare, ⚡=electric/tesla/ev. For value: if user says "250k" use 250000, "1.2m" use 1200000, if no value given make a best guess based on typical market price. Return ONLY the JSON, no other text.`,
+        system: `You are a car spotting assistant. Extract ONE car from the user's notes text to fill a log form. Return ONLY valid JSON with these exact keys: {"name":"Make Model (string)","value":NUMBER,"color":"color string or empty string","type":"one of:      "}. For type pick the best emoji: =supercar/ferrari/lambo/mclaren, =sports/bmw/porsche/mustang/generic, =muscle/camaro/challenger/charger, =track/race, =exotic/rare, =electric/tesla/ev. For value: if user says "250k" use 250000, "1.2m" use 1200000, if no value given make a best guess based on typical market price. Return ONLY the JSON, no other text.`,
         messages: [{ role: 'user', content: notes }]
       })
     });
@@ -3228,7 +3238,7 @@ async function smartVoiceFill() {
     bar.classList.add('show');
     // Switch to spot tab so user can see the fill bar
     goTo('spot');
-    showToast('✨ Car detected — tap FILL!');
+    showToast(' Car detected — tap FILL!');
   } catch(e) {
     showToast('Could not parse a car from notes');
   } finally {
@@ -3245,7 +3255,7 @@ function acceptVoiceFill() {
   document.getElementById('carColor').value = p.color || '';
   if (p.type) document.getElementById('carType').value = p.type;
   dismissVoiceFill();
-  showToast('✅ Form filled!');
+  showToast(' Form filled!');
 }
 
 function dismissVoiceFill() {
@@ -3255,9 +3265,9 @@ function dismissVoiceFill() {
 
 initNotes();
 
-// ══════════════════════════════════════════
-// ── ACHIEVEMENTS ENGINE ──
-// ══════════════════════════════════════════
+// 
+//  ACHIEVEMENTS ENGINE 
+// 
 // (ACHIEVEMENTS array and _prevAchievements declared early in state block above)
 
 // Seed existing achievements silently so returning users don't get toasted on first load
@@ -3323,121 +3333,121 @@ function renderAchievements() {
 const _origEndRun = endRun;
 // (achievements are checked in logRun/logSpotted after save — patched below)
 
-// ══════════════════════════════════════════
-// ── CAR AUTOCOMPLETE DATABASE ──
-// ══════════════════════════════════════════
+// 
+//  CAR AUTOCOMPLETE DATABASE 
+// 
 const CAR_AC_DB = [
   // Ferrari
-  {name:'Ferrari 488 GTB',      type:'🏎️', val:280000},
-  {name:'Ferrari 488 Pista',    type:'🏎️', val:350000},
-  {name:'Ferrari F8 Tributo',   type:'🏎️', val:300000},
-  {name:'Ferrari Roma',         type:'🏎️', val:222000},
-  {name:'Ferrari Portofino',    type:'🏎️', val:215000},
-  {name:'Ferrari SF90 Stradale',type:'🏎️', val:625000},
-  {name:'Ferrari 812 Superfast',type:'🏎️', val:340000},
-  {name:'Ferrari LaFerrari',    type:'🔥', val:1400000},
-  {name:'Ferrari F40',          type:'🔥', val:1300000},
-  {name:'Ferrari Enzo',         type:'🔥', val:3500000},
+  {name:'Ferrari 488 GTB',      type:'', val:280000},
+  {name:'Ferrari 488 Pista',    type:'', val:350000},
+  {name:'Ferrari F8 Tributo',   type:'', val:300000},
+  {name:'Ferrari Roma',         type:'', val:222000},
+  {name:'Ferrari Portofino',    type:'', val:215000},
+  {name:'Ferrari SF90 Stradale',type:'', val:625000},
+  {name:'Ferrari 812 Superfast',type:'', val:340000},
+  {name:'Ferrari LaFerrari',    type:'', val:1400000},
+  {name:'Ferrari F40',          type:'', val:1300000},
+  {name:'Ferrari Enzo',         type:'', val:3500000},
   // Lamborghini
-  {name:'Lamborghini Huracan',  type:'🏎️', val:220000},
-  {name:'Lamborghini Huracan STO', type:'🏎️', val:330000},
-  {name:'Lamborghini Aventador',type:'🏎️', val:400000},
-  {name:'Lamborghini Urus',     type:'🚗', val:230000},
-  {name:'Lamborghini Revuelto', type:'🏎️', val:600000},
-  {name:'Lamborghini Sian',     type:'🔥', val:3600000},
+  {name:'Lamborghini Huracan',  type:'', val:220000},
+  {name:'Lamborghini Huracan STO', type:'', val:330000},
+  {name:'Lamborghini Aventador',type:'', val:400000},
+  {name:'Lamborghini Urus',     type:'', val:230000},
+  {name:'Lamborghini Revuelto', type:'', val:600000},
+  {name:'Lamborghini Sian',     type:'', val:3600000},
   // Porsche
-  {name:'Porsche 911 GT3',      type:'🏁', val:170000},
-  {name:'Porsche 911 GT3 RS',   type:'🏁', val:225000},
-  {name:'Porsche 911 Turbo S',  type:'🏎️', val:210000},
-  {name:'Porsche 911 Carrera',  type:'🚗', val:110000},
-  {name:'Porsche 718 Cayman GT4',type:'🏁', val:95000},
-  {name:'Porsche Taycan Turbo S',type:'⚡', val:190000},
-  {name:'Porsche Panamera',     type:'🚗', val:95000},
+  {name:'Porsche 911 GT3',      type:'', val:170000},
+  {name:'Porsche 911 GT3 RS',   type:'', val:225000},
+  {name:'Porsche 911 Turbo S',  type:'', val:210000},
+  {name:'Porsche 911 Carrera',  type:'', val:110000},
+  {name:'Porsche 718 Cayman GT4',type:'', val:95000},
+  {name:'Porsche Taycan Turbo S',type:'', val:190000},
+  {name:'Porsche Panamera',     type:'', val:95000},
   // McLaren
-  {name:'McLaren 720S',         type:'🏎️', val:300000},
-  {name:'McLaren 765LT',        type:'🏎️', val:380000},
-  {name:'McLaren Senna',        type:'🔥', val:750000},
-  {name:'McLaren P1',           type:'🔥', val:1400000},
-  {name:'McLaren Artura',       type:'🏎️', val:230000},
-  {name:'McLaren 570S',         type:'🏎️', val:190000},
+  {name:'McLaren 720S',         type:'', val:300000},
+  {name:'McLaren 765LT',        type:'', val:380000},
+  {name:'McLaren Senna',        type:'', val:750000},
+  {name:'McLaren P1',           type:'', val:1400000},
+  {name:'McLaren Artura',       type:'', val:230000},
+  {name:'McLaren 570S',         type:'', val:190000},
   // Bugatti
-  {name:'Bugatti Chiron',       type:'🔥', val:3000000},
-  {name:'Bugatti Veyron',       type:'🔥', val:1800000},
-  {name:'Bugatti Divo',         type:'🔥', val:5800000},
+  {name:'Bugatti Chiron',       type:'', val:3000000},
+  {name:'Bugatti Veyron',       type:'', val:1800000},
+  {name:'Bugatti Divo',         type:'', val:5800000},
   // Koenigsegg
-  {name:'Koenigsegg Jesko',     type:'🔥', val:3000000},
-  {name:'Koenigsegg Regera',    type:'🔥', val:2000000},
-  {name:'Koenigsegg Agera RS',  type:'🔥', val:2500000},
+  {name:'Koenigsegg Jesko',     type:'', val:3000000},
+  {name:'Koenigsegg Regera',    type:'', val:2000000},
+  {name:'Koenigsegg Agera RS',  type:'', val:2500000},
   // American Muscle
-  {name:'Dodge Charger R/T',    type:'🐎', val:45000},
-  {name:'Dodge Charger Hellcat',type:'🐎', val:72000},
-  {name:'Dodge Challenger R/T', type:'🐎', val:42000},
-  {name:'Dodge Challenger Hellcat',type:'🐎', val:68000},
-  {name:'Dodge Challenger SRT Demon',type:'🐎', val:85000},
-  {name:'Dodge Viper ACR',      type:'🏁', val:120000},
-  {name:'Ford Mustang GT',      type:'🐎', val:38000},
-  {name:'Ford Mustang GT500',   type:'🐎', val:82000},
-  {name:'Ford Mustang Mach 1',  type:'🐎', val:55000},
-  {name:'Ford Mustang Dark Horse',type:'🐎', val:60000},
-  {name:'Ford GT',              type:'🔥', val:500000},
-  {name:'Chevrolet Camaro SS',  type:'🐎', val:42000},
-  {name:'Chevrolet Camaro ZL1', type:'🐎', val:70000},
-  {name:'Chevrolet Corvette C8',type:'🚗', val:65000},
-  {name:'Chevrolet Corvette Z06',type:'🏎️',val:110000},
-  {name:'Chevrolet Corvette ZR1',type:'🏎️',val:130000},
+  {name:'Dodge Charger R/T',    type:'', val:45000},
+  {name:'Dodge Charger Hellcat',type:'', val:72000},
+  {name:'Dodge Challenger R/T', type:'', val:42000},
+  {name:'Dodge Challenger Hellcat',type:'', val:68000},
+  {name:'Dodge Challenger SRT Demon',type:'', val:85000},
+  {name:'Dodge Viper ACR',      type:'', val:120000},
+  {name:'Ford Mustang GT',      type:'', val:38000},
+  {name:'Ford Mustang GT500',   type:'', val:82000},
+  {name:'Ford Mustang Mach 1',  type:'', val:55000},
+  {name:'Ford Mustang Dark Horse',type:'', val:60000},
+  {name:'Ford GT',              type:'', val:500000},
+  {name:'Chevrolet Camaro SS',  type:'', val:42000},
+  {name:'Chevrolet Camaro ZL1', type:'', val:70000},
+  {name:'Chevrolet Corvette C8',type:'', val:65000},
+  {name:'Chevrolet Corvette Z06',type:'',val:110000},
+  {name:'Chevrolet Corvette ZR1',type:'',val:130000},
   // BMW
-  {name:'BMW M2',               type:'🚗', val:65000},
-  {name:'BMW M3 Competition',   type:'🚗', val:80000},
-  {name:'BMW M4 Competition',   type:'🚗', val:82000},
-  {name:'BMW M5 CS',            type:'🚗', val:142000},
-  {name:'BMW M8 Competition',   type:'🚗', val:135000},
-  {name:'BMW i8',               type:'⚡', val:150000},
+  {name:'BMW M2',               type:'', val:65000},
+  {name:'BMW M3 Competition',   type:'', val:80000},
+  {name:'BMW M4 Competition',   type:'', val:82000},
+  {name:'BMW M5 CS',            type:'', val:142000},
+  {name:'BMW M8 Competition',   type:'', val:135000},
+  {name:'BMW i8',               type:'', val:150000},
   // Mercedes
-  {name:'Mercedes AMG GT R',    type:'🏎️', val:165000},
-  {name:'Mercedes AMG GT 63 S', type:'🚗', val:170000},
-  {name:'Mercedes SLS AMG',     type:'🏎️', val:180000},
-  {name:'Mercedes AMG One',     type:'🔥', val:2700000},
-  {name:'Mercedes C63 AMG',     type:'🚗', val:77000},
+  {name:'Mercedes AMG GT R',    type:'', val:165000},
+  {name:'Mercedes AMG GT 63 S', type:'', val:170000},
+  {name:'Mercedes SLS AMG',     type:'', val:180000},
+  {name:'Mercedes AMG One',     type:'', val:2700000},
+  {name:'Mercedes C63 AMG',     type:'', val:77000},
   // Audi
-  {name:'Audi R8 V10',          type:'🏎️', val:145000},
-  {name:'Audi RS7',             type:'🚗', val:120000},
-  {name:'Audi RS6 Avant',       type:'🚗', val:115000},
-  {name:'Audi e-tron GT RS',    type:'⚡', val:145000},
+  {name:'Audi R8 V10',          type:'', val:145000},
+  {name:'Audi RS7',             type:'', val:120000},
+  {name:'Audi RS6 Avant',       type:'', val:115000},
+  {name:'Audi e-tron GT RS',    type:'', val:145000},
   // Other Sports
-  {name:'Nissan GT-R',          type:'🚗', val:115000},
-  {name:'Toyota Supra GR',      type:'🚗', val:55000},
-  {name:'Honda NSX',            type:'🏎️', val:190000},
-  {name:'Acura NSX',            type:'🏎️', val:165000},
-  {name:'Subaru BRZ',           type:'🚗', val:32000},
-  {name:'Mazda MX-5 Miata',     type:'🚗', val:30000},
-  {name:'Genesis Coupe 3.8',    type:'🚗', val:18000},
+  {name:'Nissan GT-R',          type:'', val:115000},
+  {name:'Toyota Supra GR',      type:'', val:55000},
+  {name:'Honda NSX',            type:'', val:190000},
+  {name:'Acura NSX',            type:'', val:165000},
+  {name:'Subaru BRZ',           type:'', val:32000},
+  {name:'Mazda MX-5 Miata',     type:'', val:30000},
+  {name:'Genesis Coupe 3.8',    type:'', val:18000},
   // Luxury
-  {name:'Rolls-Royce Ghost',    type:'🚗', val:360000},
-  {name:'Rolls-Royce Wraith',   type:'🚗', val:340000},
-  {name:'Rolls-Royce Cullinan', type:'🚗', val:340000},
-  {name:'Rolls-Royce Phantom',  type:'🚗', val:460000},
-  {name:'Bentley Continental GT',type:'🚗', val:220000},
-  {name:'Bentley Bentayga',     type:'🚗', val:200000},
-  {name:'Bentley Mulsanne',     type:'🚗', val:310000},
-  {name:'Aston Martin Vantage', type:'🚗', val:145000},
-  {name:'Aston Martin DB11',    type:'🚗', val:205000},
-  {name:'Aston Martin DBS',     type:'🚗', val:305000},
-  {name:'Aston Martin Valkyrie',type:'🔥', val:3000000},
-  {name:'Maserati MC20',        type:'🏎️', val:215000},
-  {name:'Alfa Romeo 4C',        type:'🏎️', val:65000},
+  {name:'Rolls-Royce Ghost',    type:'', val:360000},
+  {name:'Rolls-Royce Wraith',   type:'', val:340000},
+  {name:'Rolls-Royce Cullinan', type:'', val:340000},
+  {name:'Rolls-Royce Phantom',  type:'', val:460000},
+  {name:'Bentley Continental GT',type:'', val:220000},
+  {name:'Bentley Bentayga',     type:'', val:200000},
+  {name:'Bentley Mulsanne',     type:'', val:310000},
+  {name:'Aston Martin Vantage', type:'', val:145000},
+  {name:'Aston Martin DB11',    type:'', val:205000},
+  {name:'Aston Martin DBS',     type:'', val:305000},
+  {name:'Aston Martin Valkyrie',type:'', val:3000000},
+  {name:'Maserati MC20',        type:'', val:215000},
+  {name:'Alfa Romeo 4C',        type:'', val:65000},
   // EVs
-  {name:'Tesla Model S Plaid',  type:'⚡', val:90000},
-  {name:'Tesla Model 3',        type:'⚡', val:42000},
-  {name:'Tesla Roadster',       type:'⚡', val:200000},
-  {name:'Rimac Nevera',         type:'⚡', val:2400000},
-  {name:'Lotus Evija',          type:'⚡', val:2000000},
-  {name:'Lucid Air',            type:'⚡', val:80000},
-  {name:'Rivian R1T',           type:'⚡', val:70000},
+  {name:'Tesla Model S Plaid',  type:'', val:90000},
+  {name:'Tesla Model 3',        type:'', val:42000},
+  {name:'Tesla Roadster',       type:'', val:200000},
+  {name:'Rimac Nevera',         type:'', val:2400000},
+  {name:'Lotus Evija',          type:'', val:2000000},
+  {name:'Lucid Air',            type:'', val:80000},
+  {name:'Rivian R1T',           type:'', val:70000},
   // Pagani / Others
-  {name:'Pagani Huayra',        type:'🔥', val:2400000},
-  {name:'Pagani Zonda',         type:'🔥', val:1800000},
-  {name:'Hennessey Venom F5',   type:'🔥', val:2100000},
-  {name:'SSC Tuatara',          type:'🔥', val:1900000},
+  {name:'Pagani Huayra',        type:'', val:2400000},
+  {name:'Pagani Zonda',         type:'', val:1800000},
+  {name:'Hennessey Venom F5',   type:'', val:2100000},
+  {name:'SSC Tuatara',          type:'', val:1900000},
 ];
 
 let acIdx = -1;
@@ -3483,9 +3493,9 @@ document.getElementById('carName').addEventListener('keydown', e => {
   else if (e.key === 'Escape') closeCarAc();
 });
 
-// ══════════════════════════════════════════
-// ── SMART COMMAND BAR ──
-// ══════════════════════════════════════════
+// 
+//  SMART COMMAND BAR 
+// 
 async function runSmartCmd() {
   const input = document.getElementById('smartCmdInput');
   const btn   = document.getElementById('smartCmdBtn');
@@ -3503,11 +3513,11 @@ async function runSmartCmd() {
         model: 'claude-sonnet-4-20250514',
         max_tokens: 300,
         system: `You are CarSpotter's AI assistant. Parse the user's command and return ONLY a JSON object with one of these actions:
-{"action":"log","name":"Make Model","value":NUMBER,"color":"color or ''","type":"🏎️|🚗|🐎|🏁|🔥|⚡"}  — to fill the log form
+{"action":"log","name":"Make Model","value":NUMBER,"color":"color or ''","type":"|||||"}  — to fill the log form
 {"action":"nav","page":"spot|garage|history|stats|news|voice"}  — to navigate
 {"action":"toast","msg":"short message"}  — for commands like "how many cars" (answer in msg, max 60 chars)
 {"action":"start_run"}  — to clear and start a fresh run
-Use type emoji: 🏎️=supercar/ferrari/lambo/mclaren, 🚗=sports/bmw/porsche/generic, 🐎=muscle/camaro/challenger/charger/mustang, 🏁=track/race, 🔥=exotic/rare, ⚡=electric/ev. For value, guess market price if not given. Return ONLY the JSON object, no extra text.`,
+Use type emoji: =supercar/ferrari/lambo/mclaren, =sports/bmw/porsche/generic, =muscle/camaro/challenger/charger/mustang, =track/race, =exotic/rare, =electric/ev. For value, guess market price if not given. Return ONLY the JSON object, no extra text.`,
         messages: [{ role: 'user', content: cmd }]
       })
     });
@@ -3522,7 +3532,7 @@ Use type emoji: 🏎️=supercar/ferrari/lambo/mclaren, 🚗=sports/bmw/porsche/
       document.getElementById('carColor').value = parsed.color || '';
       if (parsed.type) document.getElementById('carType').value = parsed.type;
       goTo('spot');
-      showToast('✨ Form filled — review & tap "+ TO RUN"');
+      showToast(' Form filled — review & tap "+ TO RUN"');
       input.value = '';
     } else if (parsed.action === 'nav') {
       const pg = parsed.page;
@@ -3537,7 +3547,7 @@ Use type emoji: 🏎️=supercar/ferrari/lambo/mclaren, 🚗=sports/bmw/porsche/
       currentRun = []; headlinerIdx = -1;
       saveCurrentRun(); renderSpot();
       goTo('spot');
-      showToast('🏁 New run started!');
+      showToast(' New run started!');
       input.value = '';
     }
   } catch(e) {
@@ -3548,7 +3558,7 @@ Use type emoji: 🏎️=supercar/ferrari/lambo/mclaren, 🚗=sports/bmw/porsche/
   }
 }
 
-// ── MORE MENU ──
+//  MORE MENU 
 function toggleMoreMenu() {
   const m = document.getElementById('moreMenu');
   const btn = document.getElementById('nav-more');
@@ -3581,14 +3591,14 @@ document.addEventListener('click', e => {
   }
 });
 
-// ── STATS ──
+//  STATS 
 function renderStats() {
   // Gather all cars from all runs + spots
   const allCars = allRuns.flatMap(r => r.cars || []);
   const runs = allRuns.filter(r => !r.spotted);
   const spots = allRuns.filter(r => r.spotted);
 
-  // ── Summary boxes ──
+  //  Summary boxes 
   const totalValue = allCars.reduce((s,c) => s + (c.value||0), 0);
   const bestRun = runs.length ? runs.reduce((a,b) => a.total>b.total?a:b) : null;
   document.getElementById('st-summary').innerHTML = `
@@ -3596,10 +3606,10 @@ function renderStats() {
     <div class="stat-box"><div class="stat-v">${fmt(totalValue)}</div><div class="stat-l">Total Value</div></div>
     <div class="stat-box"><div class="stat-v">${runs.length}</div><div class="stat-l">Runs</div></div>`;
 
-  // ── Achievements ──
+  //  Achievements 
   renderAchievements();
 
-  // ── Best run ──
+  //  Best run 
   const br = document.getElementById('st-bestrun');
   if (bestRun) {
     br.innerHTML = `<div class="card-title">Best Run</div>
@@ -3609,7 +3619,7 @@ function renderStats() {
     br.innerHTML = `<div class="card-title">Best Run</div><div class="st-empty">No runs yet</div>`;
   }
 
-  // ── Top cars by value ──
+  //  Top cars by value 
   const topCars = [...allCars].sort((a,b) => b.value-a.value).slice(0,5);
   const maxVal = topCars[0]?.value || 1;
   document.getElementById('st-topcars').innerHTML = topCars.length
@@ -3619,7 +3629,7 @@ function renderStats() {
       </div>`).join('')
     : '<div class="st-empty">Log some cars to see your top spots here</div>';
 
-  // ── Most spotted makes ──
+  //  Most spotted makes 
   const makeCounts = {};
   allCars.forEach(c => {
     const make = c.name.trim().split(' ')[0];
@@ -3634,8 +3644,8 @@ function renderStats() {
       </div>`).join('')
     : '<div class="st-empty">No data yet — start spotting</div>';
 
-  // ── By type ──
-  const typeMap = {'🏎️':'Supercar','🚗':'Sports Car','🐎':'Muscle Car','🏁':'Track Car','🔥':'Exotic','⚡':'EV'};
+  //  By type 
+  const typeMap = {'':'Supercar','':'Sports Car','':'Muscle Car','':'Track Car','':'Exotic','':'EV'};
   const typeCounts = {};
   allCars.forEach(c => { const t=typeMap[c.type]||c.type; typeCounts[t]=(typeCounts[t]||0)+1; });
   const topTypes = Object.entries(typeCounts).sort((a,b)=>b[1]-a[1]);
@@ -3647,7 +3657,7 @@ function renderStats() {
       </div>`).join('')
     : '<div class="st-empty">No data yet</div>';
 
-  // ── Run chart (last 10 runs) ──
+  //  Run chart (last 10 runs) 
   const chartRuns = runs.slice(0,10).reverse();
   const maxChart = Math.max(...chartRuns.map(r=>r.total), 1);
   document.getElementById('st-chart').innerHTML = chartRuns.length >= 2
@@ -3659,7 +3669,7 @@ function renderStats() {
       ).join('')}</div>`
     : '<div class="st-empty">Complete 2+ runs to see your trend</div>';
 
-  // ── Best day of week ──
+  //  Best day of week 
   const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const dayCounts = {Sun:0,Mon:0,Tue:0,Wed:0,Thu:0,Fri:0,Sat:0};
   allRuns.forEach(r => {
@@ -3675,7 +3685,7 @@ function renderStats() {
     ).join('')}</div>`;
 }
 
-// ── NEWS ──
+//  NEWS 
 
 function fmtLeaderboardDate(v) {
   return v || 'Unknown date';
@@ -3720,10 +3730,10 @@ function renderLeaderboard() {
     const who = run.isMe ? run.name + ' (You)' : run.name;
     return `
       <div class="lb-row" style="animation-delay:${idx * 0.03}s">
-        <div class="lb-rank ${top}">${idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':'#'+(idx+1)}</div>
+        <div class="lb-rank ${top}">${idx===0?'':idx===1?'':idx===2?'':'#'+(idx+1)}</div>
         <div class="lb-main">
           <div class="lb-name">${who}</div>
-          <div class="lb-meta">${fmtLeaderboardDate(run.date)}   ${run.headliner ? run.headliner + '   ' : ''}${run.cars} cars</div>
+          <div class="lb-meta">${fmtLeaderboardDate(run.date)}  ${run.headliner ? run.headliner + '  ' : ''}${run.cars} cars</div>
         </div>
         <div class="lb-score">
           <div class="lb-total">${fmtFull(run.total)}</div>
@@ -3772,7 +3782,7 @@ async function loadNews() {
       </a>`;
     }).join('');
   } catch(e) {
-    el.innerHTML = '<div class="news-error">⚠️ Could not load news. Check your connection and try refreshing.</div>';
+    el.innerHTML = '<div class="news-error"> Could not load news. Check your connection and try refreshing.</div>';
   }
 }
 
@@ -3903,18 +3913,18 @@ async function loadNews() {
       if (dskBest) dskBest.textContent = fmt(best);
       var diff = total - best;
       var msg = document.getElementById('beatMsg');
-      if (diff > 0) { msg.textContent = '▲ ' + fmtFull(diff) + ' ahead!'; msg.className = 'beat beating'; }
-      else if (diff < 0) { msg.textContent = '▼ ' + fmtFull(Math.abs(diff)) + ' to beat'; msg.className = 'beat behind'; }
+      if (diff > 0) { msg.textContent = ' ' + fmtFull(diff) + ' ahead!'; msg.className = 'beat beating'; }
+      else if (diff < 0) { msg.textContent = ' ' + fmtFull(Math.abs(diff)) + ' to beat'; msg.className = 'beat behind'; }
       else { msg.textContent = 'Tied!'; msg.className = 'beat tied'; }
     } else {
-      document.getElementById('bestTotal').textContent = ' ';
-      document.getElementById('headerBest').textContent = ' ';
+      document.getElementById('bestTotal').textContent = '';
+      document.getElementById('headerBest').textContent = '';
       document.getElementById('beatMsg').textContent = 'No record yet';
       document.getElementById('beatMsg').className = 'beat tied';
     }
     var list = document.getElementById('runList');
     if (!currentRun.length) {
-      list.innerHTML = '<div class="empty-run"><span class="ei">🛣️</span>Add cars to your run</div>';
+      list.innerHTML = '<div class="empty-run"><span class="ei"></span>Add cars to your run</div>';
     } else {
       list.innerHTML = '';
       currentRun.slice().reverse().forEach(function(car, ri){
@@ -3926,14 +3936,14 @@ async function loadNews() {
         row.style.animation = (ri === 0 ? 'driveIn 0.34s ease both' : 'fadeUp 0.25s ease both');
         row.style.animationDelay = (ri * 0.03) + 's';
         if (isHL) row.style.borderColor = 'var(--accent)';
-        row.innerHTML = (car.photo ? '<img class="run-item-photo" src="' + car.photo + '" alt="car">' : '<div class="re">' + escapeHtml(car.type) + '</div>') +
+        row.innerHTML = (car.photo ? '<img class="run-item-photo" src="' + car.photo + '" alt="car">' : '<div class="re">' + escapeHtml(carTypeLabel(car.type)) + '</div>') +
           '<div class="ri"><div class="rn">' + escapeHtml(car.name) + '</div>' +
-          ((car.color || (car.location && car.location.label)) ? '<div class="rc">' + escapeHtml([car.color, car.location && car.location.label].filter(Boolean).join('   ')) + '</div>' : '') +
+          ((car.color || (car.location && car.location.label)) ? '<div class="rc">' + escapeHtml([car.color, car.location && car.location.label].filter(Boolean).join('  ')) + '</div>' : '') +
           '<span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' +
           (isHL ? '<div class="headliner-badge">\xe2\xad\x90 HEADLINER</div>' : '') + '</div>' +
           '<div class="rv">' + fmtFull(car.value) + '</div>' +
-          '<button class="star-btn ' + (isHL ? 'starred' : '') + '" onclick="toggleHeadliner(' + i + ')" title="Set as headliner">⭐</button>' +
-          '<button class="del-btn" onclick="removeCar(' + i + ')">✕</button>';
+          '<button class="star-btn ' + (isHL ? 'starred' : '') + '" onclick="toggleHeadliner(' + i + ')" title="Set as headliner">&#9733;</button>' +
+          '<button class="del-btn" onclick="removeCar(' + i + ')"></button>';
         list.appendChild(row);
       });
     }
@@ -3946,7 +3956,7 @@ async function loadNews() {
     var total = allCars.reduce(function(x,c){ return x + c.value; }, 0);
     document.getElementById('gCars').textContent = allCars.length;
     document.getElementById('gTotal').textContent = fmt(total);
-    document.getElementById('gAvg').textContent = allCars.length ? fmt(total / allCars.length) : ' ';
+    document.getElementById('gAvg').textContent = allCars.length ? fmt(total / allCars.length) : '';
     var el = document.getElementById('garageList');
     if (!filtered.length) {
       el.className = '';
@@ -3957,13 +3967,13 @@ async function loadNews() {
       el.className = '';
       var mapped = filtered.filter(function(car){ return car.location && isFinite(car.location.lat) && isFinite(car.location.lng); });
       if (!mapped.length) {
-        el.innerHTML = '<div class="map-empty"><span style="font-size:2rem;display:block;margin-bottom:10px">🗺</span><strong style="display:block;margin-bottom:6px;color:var(--text)">No mapped spots yet</strong>Use the location button when logging a car and it will appear here.</div>';
+        el.innerHTML = '<div class="map-empty"><span style="font-size:2rem;display:block;margin-bottom:10px"></span><strong style="display:block;margin-bottom:6px;color:var(--text)">No mapped spots yet</strong>Use the location button when logging a car and it will appear here.</div>';
         return;
       }
       el.innerHTML = '<div class="garage-map-wrap" style="position:relative"><div id="leafletMap"></div><div class="map-hud"><div class="map-badge">' + mapped.length + ' mapped spot' + (mapped.length !== 1 ? 's' : '') + '</div></div></div><div class="garage-map-list" id="mapCarList"></div>';
       var listEl = document.getElementById('mapCarList');
       listEl.innerHTML = mapped.slice(0,8).map(function(car){
-        return '<div class="garage-map-row"><strong>' + escapeHtml(car.name) + '</strong><span>' + escapeHtml(locLabel(car.location)) + '   ' + fmtFull(car.value) + '</span></div>';
+        return '<div class="garage-map-row"><strong>' + escapeHtml(car.name) + '</strong><span>' + escapeHtml(locLabel(car.location)) + '  ' + fmtFull(car.value) + '</span></div>';
       }).join('');
       setTimeout(function(){
         var mapEl = document.getElementById('leafletMap');
@@ -3976,7 +3986,7 @@ async function loadNews() {
         var map = L.map('leafletMap', { zoomControl: true, attributionControl: true }).setView([centerLat, centerLng], 13);
         window._csLeafletMap = map;
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '  <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+          attribution: ' <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
           maxZoom: 19
         }).addTo(map);
         var bounds = [];
@@ -3986,7 +3996,7 @@ async function loadNews() {
           var pinColor = isHot ? '#ff5733' : '#f5c842';
           var icon = L.divIcon({
             className: '',
-            html: '<div style="width:36px;height:36px;border-radius:50%;background:' + pinColor + ';border:3px solid rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 4px 14px rgba(0,0,0,0.5);cursor:pointer">' + escapeHtml(car.type) + '</div>',
+            html: '<div style="width:36px;height:36px;border-radius:50%;background:' + pinColor + ';border:3px solid rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 4px 14px rgba(0,0,0,0.5);cursor:pointer">' + escapeHtml(carTypeLabel(car.type)) + '</div>',
             iconSize: [36, 36],
             iconAnchor: [18, 36],
             popupAnchor: [0, -38]
@@ -4010,14 +4020,14 @@ async function loadNews() {
       el.className = 'garage-grid';
       el.innerHTML = filtered.map(function(car, idx){
         var rarity = getRarity(car.value);
-        return '<a class="garage-card" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' : '<div class="gc-img-ph">' + escapeHtml(car.type) + '</div>') + '</div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Color</div><div class="gc-meta-val">' + escapeHtml(car.color || 'Unknown') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + escapeHtml(car.type || 'Car') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + escapeHtml(car.runDate || 'Saved') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Place</div><div class="gc-meta-val">' + escapeHtml((car.location && car.location.label) || 'No pin') + '</div></div></div></div></a>';
+        return '<a class="garage-card" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' : '<div class="gc-img-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '</div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Color</div><div class="gc-meta-val">' + escapeHtml(car.color || 'Unknown') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + escapeHtml(carTypeLabel(car.type)) + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + escapeHtml(car.runDate || 'Saved') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Place</div><div class="gc-meta-val">' + escapeHtml((car.location && car.location.label) || 'No pin') + '</div></div></div></div></a>';
       }).join('');
       return;
     }
     el.className = '';
     el.innerHTML = filtered.map(function(car, idx){
       var rarity = getRarity(car.value);
-      return '<a class="garage-row" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(car.type) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('   ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.value >= 50000 && car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-arrow">↗</div><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="' + escapeHtml(car.name) + '">✕</button></a>';
+      return '<a class="garage-row" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.value >= 50000 && car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-arrow">↗</div><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="' + escapeHtml(car.name) + '"></button></a>';
     }).join('');
   };
 
