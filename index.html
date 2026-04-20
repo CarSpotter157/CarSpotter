@@ -281,6 +281,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:var(-
 .star-btn.starred{opacity:1;color:var(--accent);}
 .star-btn:active{transform:scale(0.85);}
 .del-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.8rem;padding:4px 6px;line-height:1;flex-shrink:0;transition:color 0.15s;border-radius:4px;}
+.del-btn::after{content:'✕';}
 .del-btn:hover{color:var(--red);}
 .headliner-badge{font-size:0.5rem;color:var(--accent);letter-spacing:1.5px;font-weight:700;margin-top:2px;text-transform:uppercase;}
 .empty-run{text-align:center;padding:28px 12px;color:var(--muted);font-size:0.72rem;letter-spacing:1px;border:1px dashed var(--border);border-radius:var(--radius);}
@@ -344,7 +345,10 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:var(-
 .g-val{font-family:'Bebas Neue',cursive;font-size:1rem;color:var(--accent);letter-spacing:1px;flex-shrink:0;}
 .g-arrow{font-size:0.65rem;color:var(--muted);flex-shrink:0;margin-left:2px;}
 .g-del{background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.75rem;padding:4px 6px;line-height:1;flex-shrink:0;transition:color 0.15s;border-radius:4px;}
+.g-del::after{content:'✕';}
 .g-del:hover{color:var(--red);}
+.g-edit{background:none;border:none;cursor:pointer;color:var(--muted);font-size:0.82rem;padding:4px 5px;line-height:1;flex-shrink:0;transition:color 0.15s;border-radius:4px;}
+.g-edit:hover{color:var(--accent);}
 .g-spotted-count{font-size:0.5rem;font-weight:700;letter-spacing:1px;color:var(--text2);background:var(--surf2);border:1px solid var(--border2);border-radius:20px;padding:2px 6px;}
 .garage-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
 .garage-card{
@@ -539,6 +543,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;color:var(-
 .alias-abbr:focus,.alias-full:focus{border-color:var(--accent);}
 .alias-arrow{color:var(--muted);font-size:0.75rem;flex-shrink:0;}
 .alias-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.85rem;padding:4px;flex-shrink:0;transition:color 0.12s;}
+.alias-del::after{content:'✕';}
 .alias-del:hover{color:var(--red);}
 .alias-add-btn{width:100%;background:transparent;border:1px dashed var(--border2);border-radius:var(--radius-sm);color:var(--muted);font-size:0.75rem;letter-spacing:0.5px;padding:9px;cursor:pointer;font-family:inherit;transition:all 0.15s;margin-top:4px;}
 .alias-add-btn:hover{border-color:var(--accent);color:var(--accent);}
@@ -696,12 +701,59 @@ body.theme-light .more-menu{background:#fff;}
 body.theme-light .qp-dropdown{background:#f9f9f5;}
 body.theme-light .auth-overlay{background:var(--bg);}
 
-/* ── STATS HELPERS ── */
-.st-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:0.78rem;}
-.st-bar-label{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
-.st-bar-track{flex:2;height:4px;background:var(--surf2);border-radius:2px;overflow:hidden;}
-.st-bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width 0.4s ease;}
-.st-bar-val{font-family:'Bebas Neue',cursive;font-size:0.82rem;color:var(--accent);letter-spacing:1px;flex-shrink:0;text-align:right;min-width:44px;}
+/* ── ST BAR HELPERS ── */
+.st-bar-wrap{margin-bottom:8px;}
+.st-bar-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+.st-bar-name{font-size:0.75rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%;}
+.st-bar-val{font-family:'Bebas Neue',cursive;font-size:0.82rem;color:var(--accent);letter-spacing:1px;flex-shrink:0;}
+.st-empty{font-size:0.72rem;color:var(--muted);text-align:center;padding:16px 0;letter-spacing:0.5px;}
+.st-chart-bar-wrap{display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:4px;}
+.st-chart-bar{flex:1;background:var(--accent);border-radius:3px 3px 0 0;opacity:0.8;min-height:4px;transition:height 0.4s ease;}
+.st-chart-labels{display:flex;gap:4px;}
+.st-chart-lbl{flex:1;font-size:0.44rem;color:var(--muted);text-align:center;letter-spacing:0.3px;}
+
+/* ── EDIT CAR MODAL ── */
+.edit-car-modal .modal-card{padding-bottom:24px;}
+.edit-field-group{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.edit-field{display:flex;flex-direction:column;gap:4px;}
+.edit-field label{font-size:0.52rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:600;}
+.edit-field input,.edit-field select{width:100%;background:var(--surf2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-size:0.88rem;padding:9px 10px;outline:none;transition:border-color 0.15s;font-family:inherit;appearance:none;-webkit-appearance:none;}
+.edit-field input:focus,.edit-field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--adim);}
+.edit-field-full{grid-column:1/-1;}
+
+/* ── CAR SEARCH ── */
+.car-search-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:99992;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.18s ease;}
+.car-search-card{width:100%;max-width:480px;background:var(--surf);border-top:1px solid var(--border);border-radius:20px 20px 0 0;padding:20px 18px 32px;animation:slideUpRecap 0.28s cubic-bezier(0.34,1.56,0.64,1);max-height:88vh;overflow-y:auto;}
+.car-search-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.car-search-title{font-family:'Bebas Neue',cursive;font-size:1.1rem;letter-spacing:3px;color:var(--text);}
+.car-search-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:4px;line-height:1;transition:color 0.15s;}
+.car-search-close:hover{color:var(--red);}
+.car-search-input-row{display:flex;gap:8px;margin-bottom:14px;}
+.car-search-input{flex:1;background:var(--surf2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text);font-size:0.9rem;padding:10px 12px;outline:none;font-family:inherit;transition:border-color 0.15s;}
+.car-search-input:focus{border-color:var(--accent);}
+.car-search-btn{background:var(--accent);color:#0a0a0a;border:none;border-radius:var(--radius-sm);font-family:'Bebas Neue',cursive;font-size:0.88rem;letter-spacing:2px;padding:10px 16px;cursor:pointer;white-space:nowrap;transition:all 0.15s;}
+.car-search-btn:active{transform:scale(0.97);}
+.car-search-result{animation:fadeUp 0.22s ease both;}
+.csr-img-wrap{width:100%;height:160px;background:var(--surf2);border-radius:var(--radius);overflow:hidden;margin-bottom:12px;border:1px solid var(--border);}
+.csr-img{width:100%;height:100%;object-fit:cover;display:block;}
+.csr-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;}
+.csr-name{font-family:'Bebas Neue',cursive;font-size:1.5rem;letter-spacing:2px;line-height:1.05;margin-bottom:3px;}
+.csr-tagline{font-size:0.7rem;color:var(--text2);margin-bottom:12px;line-height:1.4;}
+.csr-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px;}
+.csr-cell{background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;}
+.csr-cell-lbl{font-size:0.46rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:2px;font-weight:600;}
+.csr-cell-val{font-family:'Bebas Neue',cursive;font-size:1.1rem;color:var(--text);letter-spacing:1px;line-height:1;}
+.csr-cell-unit{font-size:0.54rem;color:var(--text2);margin-top:1px;}
+.csr-highlight{grid-column:1/-1;background:var(--adim);border-color:var(--accent);}
+.csr-highlight .csr-cell-val{color:var(--accent);font-size:1.3rem;}
+.csr-fill-btn{width:100%;background:var(--accent);color:#0a0a0a;border:none;border-radius:var(--radius-sm);font-family:'Bebas Neue',cursive;font-size:0.95rem;letter-spacing:3px;padding:13px;cursor:pointer;transition:all 0.15s;margin-bottom:8px;}
+.csr-fill-btn:active{transform:scale(0.98);}
+.csr-empty{text-align:center;padding:32px 12px;color:var(--muted);font-size:0.72rem;letter-spacing:1px;}
+.csr-loading{display:flex;flex-direction:column;align-items:center;gap:10px;padding:32px 12px;}
+.csr-spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+.csr-suggestions{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.csr-sug-chip{background:var(--surf2);border:1px solid var(--border2);border-radius:20px;color:var(--text2);font-size:0.62rem;padding:4px 10px;cursor:pointer;transition:all 0.15s;font-family:inherit;}
+.csr-sug-chip:hover{border-color:var(--accent);color:var(--accent);}
 </style>
 
 </head>
@@ -861,6 +913,7 @@ body.theme-light .auth-overlay{background:var(--bg);}
             <button class="gv-btn" id="gvMap" onclick="setGarageView('map')" title="Map view">Map</button>
           </div>
           <button class="txt-btn" id="sortBtn" onclick="cycleSort()">Value &#8595;</button>
+          <button class="txt-btn" onclick="openCarSearch()" title="Search car specs">🔍 Search</button>
         </div>
       </div>
       <div class="stats-row">
@@ -1117,6 +1170,7 @@ body.theme-light .auth-overlay{background:var(--bg);}
     <button class="more-item" onclick="goToMore('news')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg> <span>News</span></button>
     <button class="more-item" onclick="goToMore('stats')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> <span>Stats</span></button>
     <button class="more-item" onclick="goToMore('achievements')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg> <span>Achievements</span></button>
+    <button class="more-item" onclick="toggleMoreMenu();openCarSearch()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> <span>Car Search</span></button>
     <button class="more-item" onclick="goToMore('settings')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> <span>Settings</span></button>
   </div>
 
@@ -2161,18 +2215,18 @@ function clearGarageSearch() {
 
 //  CAR TYPE LOOKUP  central source of truth for type↔emoji mapping
 const CAR_TYPE_MAP = {
-  supercar: 'Supercar',
-  sports:   'Sports',
-  muscle:   'Muscle',
-  track:    'Track',
-  exotic:   'Exotic',
-  ev:       'EV',
+  supercar: '🏎️',
+  sports:   '🚗',
+  muscle:   '🐎',
+  track:    '🏁',
+  exotic:   '🔥',
+  ev:       '⚡',
 };
 // Label lookup by type key
 function carTypeLabel(type) {
   // Support legacy emoji-stored types from old data
-  const legacyMap = {'':'Supercar','':'Sports','':'Muscle','':'Track','':'Exotic','':'EV'};
-  return CAR_TYPE_MAP[type] || legacyMap[type] || type || 'Car';
+  const legacyMap = {'🏎':'🏎️','🚗':'🚗','🐎':'🐎','🏁':'🏁','🔥':'🔥','⚡':'⚡'};
+  return CAR_TYPE_MAP[type] || legacyMap[type] || type || '🚘';
 }
 
 function applyGarageFilters(cars) {
@@ -2183,7 +2237,7 @@ function applyGarageFilters(cars) {
     if (garageFilter === 'legend')   return car.value >= 1000000;
     if (garageFilter === 'hypercar') return car.value >= 500000;
     // Normalize legacy emoji types to text keys
-    const legacyRev = {'':'supercar','':'sports','':'muscle','':'track','':'exotic','':'ev'};
+    const legacyRev = {'🏎':'supercar','🚗':'sports','🐎':'muscle','🏁':'track','🔥':'exotic','⚡':'ev'};
     const typeKey = legacyRev[car.type] || car.type || '';
     if (CAR_TYPE_MAP[garageFilter]) return typeKey === garageFilter;
     return true;
@@ -2252,11 +2306,12 @@ function renderGarage() {
         <div class="g-meta">${escapeHtml([car.color,car.runDate].filter(Boolean).join(' · '))}</div>
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span class="rarity-pill" style="color:${rarity.color};background:${rarity.bg};border-color:${rarity.color}33">${rarity.label}</span>
-          ${car.value>=50000 && car.spotCount>1 ? `<span class="g-spotted-count"> ${car.spotCount}x</span>` : ''}
+          ${car.value>=50000 && car.spotCount>1 ? `<span class="g-spotted-count">👀 ${car.spotCount}x</span>` : ''}
         </div>
       </div>
       <div class="g-val">${fmtFull(car.value)}</div>
       <div class="g-arrow">↗</div>
+      <button class="g-edit" onclick="event.preventDefault();event.stopPropagation();openEditCarModal('${encodeURIComponent(JSON.stringify(car))}')" title="Edit car">✏️</button>
       <button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="${escapeHtml(car.name)}"></button>`;
     el.appendChild(a);
   });
@@ -2304,7 +2359,7 @@ function toggleHistoryHeadliner(runId, carName, carType, carValue) {
   localStorage.setItem('cs_runs', JSON.stringify(allRuns));
   saveToCloud();
   renderHistory();
-  showToast(isAlready ? 'Headliner removed' : ' ' + carName + ' set as headliner!');
+  showToast(isAlready ? 'Headliner removed' : '⭐ ' + carName + ' set as headliner!');
 }
 
 //  HISTORY 
@@ -2368,7 +2423,7 @@ function renderHistory() {
     }).join('');
 
     const headlinerHTML = (!isSpot && entry.headliner)
-      ? `<div class="hist-headliner">HEADLINER · ${escapeHtml(entry.headliner.name)}</div>`
+      ? `<div class="hist-headliner">⭐ HEADLINER · ${escapeHtml(entry.headliner.name)}</div>`
       : '';
 
     div.innerHTML=`
@@ -2933,6 +2988,203 @@ function dismissVoiceFill() {
 
 initNotes();
 
+// ─────────────────────────────────────────────
+//  EDIT CAR MODAL
+// ─────────────────────────────────────────────
+window.openEditCarModal = function(encodedCar) {
+  let car;
+  try { car = JSON.parse(decodeURIComponent(encodedCar)); } catch(e) { return; }
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay edit-car-modal';
+  overlay.id = 'editCarModal';
+  overlay.innerHTML = `
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div class="modal-title">✏️ EDIT CAR</div>
+        <button class="car-search-close" onclick="document.getElementById('editCarModal').remove()">✕</button>
+      </div>
+      <div class="edit-field-group">
+        <div class="edit-field edit-field-full">
+          <label>Make / Model</label>
+          <input id="editCarName" value="${escapeHtml(car.name)}" placeholder="Ferrari 488">
+        </div>
+        <div class="edit-field">
+          <label>Value ($)</label>
+          <input id="editCarValue" type="number" value="${car.value||0}" min="0" inputmode="numeric">
+        </div>
+        <div class="edit-field">
+          <label>Color</label>
+          <input id="editCarColor" value="${escapeHtml(car.color||'')}" placeholder="Rosso Corsa">
+        </div>
+        <div class="edit-field edit-field-full">
+          <label>Type</label>
+          <select id="editCarType">
+            <option value="supercar" ${car.type==='supercar'?'selected':''}>🏎️  Supercar</option>
+            <option value="sports"   ${car.type==='sports'?'selected':''}>🚗  Sports Car</option>
+            <option value="muscle"   ${car.type==='muscle'?'selected':''}>🐎  Muscle Car</option>
+            <option value="track"    ${car.type==='track'?'selected':''}>🏁  Track Car</option>
+            <option value="exotic"   ${car.type==='exotic'?'selected':''}>🔥  Exotic</option>
+            <option value="ev"       ${car.type==='ev'?'selected':''}>⚡  EV</option>
+          </select>
+        </div>
+      </div>
+      <button class="modal-save-btn" onclick="saveEditCar('${escapeHtml(car.name).replace(/'/g,"\\'")}')">SAVE CHANGES</button>
+    </div>`;
+  overlay.onclick = () => overlay.remove();
+  document.body.appendChild(overlay);
+  setTimeout(() => document.getElementById('editCarName')?.focus(), 80);
+};
+
+window.saveEditCar = function(originalName) {
+  const newName  = sanitizeText(document.getElementById('editCarName')?.value || '');
+  const newValue = parseFloat(document.getElementById('editCarValue')?.value || '0');
+  const newColor = sanitizeText(document.getElementById('editCarColor')?.value || '');
+  const newType  = document.getElementById('editCarType')?.value || 'sports';
+
+  if (!newName) { showToast('Name can\'t be empty!'); return; }
+  if (isNaN(newValue) || newValue < 0) { showToast('Enter a valid value!'); return; }
+
+  const origKey = originalName.toLowerCase();
+
+  // Update in allRuns
+  allRuns = allRuns.map(run => ({
+    ...run,
+    cars: (run.cars || []).map(c => {
+      if (c.name.toLowerCase() !== origKey) return c;
+      return { ...c, name: newName, value: newValue, color: newColor, type: newType };
+    }),
+    total: (run.cars || []).map(c => {
+      if (c.name.toLowerCase() !== origKey) return c.value;
+      return newValue;
+    }).reduce((a,b) => a+b, 0),
+    headliner: run.headliner && run.headliner.name.toLowerCase() === origKey
+      ? { ...run.headliner, name: newName, type: newType, value: newValue }
+      : run.headliner
+  }));
+
+  // Update in currentRun
+  currentRun = currentRun.map(c => {
+    if (c.name.toLowerCase() !== origKey) return c;
+    return { ...c, name: newName, value: newValue, color: newColor, type: newType };
+  });
+
+  // Update in quickPicks
+  quickPicks = quickPicks.map(c => {
+    if (c.name.toLowerCase() !== origKey) return c;
+    return { ...c, name: newName, value: newValue, color: newColor, type: newType };
+  });
+
+  localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+  localStorage.setItem('cs_qp',   JSON.stringify(quickPicks));
+  saveCurrentRun();
+  document.getElementById('editCarModal')?.remove();
+  renderGarage(); renderSpot(); renderQPTrigger();
+  showToast('✅ ' + newName + ' updated!');
+};
+
+// ─────────────────────────────────────────────
+//  CAR SEARCH (built-in, no redirect)
+// ─────────────────────────────────────────────
+window.openCarSearch = function(prefill) {
+  if (document.getElementById('carSearchOverlay')) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'car-search-overlay';
+  overlay.id = 'carSearchOverlay';
+  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+
+  const suggestions = ['Ferrari 488','Lamborghini Huracan','Porsche 911 GT3','McLaren 720S','Dodge Charger R/T','Ford Mustang GT','Chevrolet Corvette C8','Bugatti Chiron','Tesla Model S Plaid','BMW M3'];
+  const sugHTML = suggestions.map(s => `<button class="csr-sug-chip" onclick="runCarSearch('${escapeHtml(s)}')">${s}</button>`).join('');
+
+  overlay.innerHTML = `
+    <div class="car-search-card" onclick="event.stopPropagation()">
+      <div class="car-search-header">
+        <div class="car-search-title">🔍 CAR SEARCH</div>
+        <button class="car-search-close" onclick="document.getElementById('carSearchOverlay').remove()">✕</button>
+      </div>
+      <div class="car-search-input-row">
+        <input class="car-search-input" id="carSearchQ" placeholder="Ferrari 488, Dodge Charger…" 
+          value="${prefill||''}"
+          onkeydown="if(event.key==='Enter')runCarSearch(this.value)">
+        <button class="car-search-btn" onclick="runCarSearch(document.getElementById('carSearchQ').value)">SEARCH</button>
+      </div>
+      <div class="csr-suggestions">${sugHTML}</div>
+      <div id="carSearchResults"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(() => {
+    document.getElementById('carSearchQ')?.focus();
+    if (prefill) runCarSearch(prefill);
+  }, 80);
+};
+
+window.runCarSearch = async function(query) {
+  query = (query||'').trim();
+  if (!query) return;
+  document.getElementById('carSearchQ').value = query;
+  const el = document.getElementById('carSearchResults');
+  if (!el) return;
+  el.innerHTML = `<div class="csr-loading"><div class="csr-spinner"></div><div style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;">Looking up ${escapeHtml(query)}…</div></div>`;
+
+  // Match against local specs DB
+  const specsData = await fetchCarSpecs(query);
+  const imgUrl    = await fetchCarImage(query);
+
+  if (!el || !document.getElementById('carSearchOverlay')) return;
+
+  // Also try to find value from autocomplete DB
+  const acMatch = CAR_AC_DB.find(c => c.name.toLowerCase().includes(query.toLowerCase()) || query.toLowerCase().includes(c.name.toLowerCase().split(' ').slice(0,2).join(' ')));
+  const guessVal = acMatch ? acMatch.val : (specsData ? 80000 : 0);
+  const guessType = acMatch ? (acMatch.type || 'supercar') : 'supercar';
+
+  const rarity = getRarity(guessVal);
+  const imgHTML = imgUrl
+    ? `<img class="csr-img" src="${imgUrl}" alt="${escapeHtml(query)}" onerror="this.parentElement.innerHTML='<div class=csr-img-ph>🚘</div>'">`
+    : `<div class="csr-img-ph">🚘</div>`;
+
+  if (!specsData) {
+    el.innerHTML = `<div class="car-search-result">
+      <div class="csr-img-wrap">${imgHTML}</div>
+      <div class="csr-name">${escapeHtml(query)}</div>
+      <div class="csr-tagline" style="color:var(--muted)">No detailed specs found — try a more specific name (e.g. "Ferrari 488 GTB")</div>
+      ${guessVal ? `<button class="csr-fill-btn" onclick="fillFromSearch('${escapeHtml(query).replace(/'/g,"\\'")}',${guessVal},'','${guessType}')">➕ LOG THIS CAR</button>` : ''}
+    </div>`;
+    return;
+  }
+
+  const s = specsData;
+  el.innerHTML = `<div class="car-search-result">
+    <div class="csr-img-wrap">${imgHTML}</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+      <span class="specs-type-badge" style="color:${rarity.color};background:${rarity.bg};border-color:${rarity.color}44">${rarity.label}</span>
+      ${s.year ? `<span style="font-size:0.6rem;color:var(--muted);letter-spacing:1px">${s.year}</span>` : ''}
+    </div>
+    <div class="csr-name">${escapeHtml(query)}</div>
+    ${s.tagline ? `<div class="csr-tagline">${s.tagline}</div>` : ''}
+    <div class="csr-grid">
+      ${s.horsepower ? `<div class="csr-cell csr-highlight"><div class="csr-cell-lbl">Power</div><div class="csr-cell-val">${s.horsepower}</div><div class="csr-cell-unit">horsepower</div></div>` : ''}
+      ${s.torque     ? `<div class="csr-cell"><div class="csr-cell-lbl">Torque</div><div class="csr-cell-val">${s.torque}</div><div class="csr-cell-unit">lb-ft</div></div>` : ''}
+      ${s.zeroToSixty? `<div class="csr-cell"><div class="csr-cell-lbl">0–60 mph</div><div class="csr-cell-val">${s.zeroToSixty}</div><div class="csr-cell-unit">seconds</div></div>` : ''}
+      ${s.topSpeed   ? `<div class="csr-cell"><div class="csr-cell-lbl">Top Speed</div><div class="csr-cell-val">${s.topSpeed}</div><div class="csr-cell-unit">mph</div></div>` : ''}
+      ${s.engine     ? `<div class="csr-cell" style="grid-column:1/-1"><div class="csr-cell-lbl">Engine</div><div class="csr-cell-val" style="font-size:0.95rem;font-family:inherit;font-weight:600;letter-spacing:0">${s.engine}</div></div>` : ''}
+      ${s.drivetrain ? `<div class="csr-cell"><div class="csr-cell-lbl">Drivetrain</div><div class="csr-cell-val" style="font-size:1rem">${s.drivetrain}</div></div>` : ''}
+      ${s.weight     ? `<div class="csr-cell"><div class="csr-cell-lbl">Weight</div><div class="csr-cell-val">${s.weight}</div><div class="csr-cell-unit">lbs</div></div>` : ''}
+    </div>
+    <button class="csr-fill-btn" onclick="fillFromSearch('${escapeHtml(query).replace(/'/g,"\\'")}',${guessVal},'','${guessType}')">➕ LOG THIS CAR</button>
+  </div>`;
+};
+
+window.fillFromSearch = function(name, value, color, type) {
+  document.getElementById('carSearchOverlay')?.remove();
+  document.getElementById('carName').value  = name;
+  document.getElementById('carValue').value = value;
+  document.getElementById('carColor').value = color || '';
+  document.getElementById('carType').value  = type || 'supercar';
+  goTo('spot');
+  showToast('✅ Form filled — review and log!');
+};
+
 // 
 //  ACHIEVEMENTS ENGINE 
 // 
@@ -3277,22 +3529,12 @@ function renderStats() {
   //  Achievements 
   renderAchievements();
 
-  //  Best run 
-  const br = document.getElementById('st-bestrun');
-  if (bestRun) {
-    br.innerHTML = `<div class="card-title">Best Run</div>
-      <div style="font-family:'Bebas Neue',cursive;font-size:2rem;color:var(--accent);letter-spacing:1px;">${fmt(bestRun.total)}</div>
-      <div style="font-size:0.65rem;color:var(--text2);margin-top:4px;">${bestRun.cars.length} cars · ${bestRun.date}</div>`;
-  } else {
-    br.innerHTML = `<div class="card-title">Best Run</div><div class="st-empty">No runs yet</div>`;
-  }
-
   //  Top cars by value 
   const topCars = [...allCars].sort((a,b) => b.value-a.value).slice(0,5);
   const maxVal = topCars[0]?.value || 1;
   document.getElementById('st-topcars').innerHTML = topCars.length
     ? topCars.map(c => `<div class="st-bar-wrap">
-        <div class="st-bar-label"><span class="st-bar-name">${c.type} ${c.name}</span><span class="st-bar-val">${fmt(c.value)}</span></div>
+        <div class="st-bar-label"><span class="st-bar-name">${carTypeLabel(c.type)} ${c.name}</span><span class="st-bar-val">${fmt(c.value)}</span></div>
         <div class="st-bar-track"><div class="st-bar-fill" style="width:${Math.round(c.value/maxVal*100)}%"></div></div>
       </div>`).join('')
     : '<div class="st-empty">Log some cars to see your top spots here</div>';
@@ -3313,9 +3555,9 @@ function renderStats() {
     : '<div class="st-empty">No data yet — start spotting</div>';
 
   //  By type 
-  const typeMap = {'':'Supercar','':'Sports Car','':'Muscle Car','':'Track Car','':'Exotic','':'EV'};
+  const typeMap = {'supercar':'🏎️ Supercar','sports':'🚗 Sports','muscle':'🐎 Muscle','track':'🏁 Track','exotic':'🔥 Exotic','ev':'⚡ EV'};
   const typeCounts = {};
-  allCars.forEach(c => { const t=typeMap[c.type]||c.type; typeCounts[t]=(typeCounts[t]||0)+1; });
+  allCars.forEach(c => { const t=typeMap[c.type]||c.type||'🚘 Other'; typeCounts[t]=(typeCounts[t]||0)+1; });
   const topTypes = Object.entries(typeCounts).sort((a,b)=>b[1]-a[1]);
   const maxType = topTypes[0]?.[1] || 1;
   document.getElementById('st-types').innerHTML = topTypes.length
@@ -3377,11 +3619,48 @@ async function loadLeaderboard(force) {
         isMe: !!currentUser && currentUser.uid === data.userId
       };
     });
+    // If no global entries, seed with current user's best runs
+    if (!leaderboardRuns.length) {
+      const myRuns = allRuns.filter(r => !r.spotted && r.total > 0)
+        .sort((a,b) => b.total - a.total).slice(0, 5);
+      leaderboardRuns = myRuns.map(r => ({
+        userId: currentUser?.uid || '',
+        name: currentUser?.displayName || 'You',
+        total: r.total,
+        date: r.date,
+        cars: (r.cars||[]).length,
+        headliner: r.headliner?.name || '',
+        isMe: true
+      }));
+    }
     leaderboardLoaded = true;
     renderLeaderboard();
   } catch (e) {
     console.error(e);
-    if (el) el.innerHTML = '<div class="lb-empty">Could not load leaderboard right now.</div>';
+    // Permission error — show own runs instead
+    const myRuns = allRuns.filter(r => !r.spotted && r.total > 0)
+      .sort((a,b) => b.total - a.total).slice(0, 10);
+    if (myRuns.length) {
+      leaderboardRuns = myRuns.map(r => ({
+        userId: currentUser?.uid || '',
+        name: (currentUser?.displayName || 'You') + ' (local)',
+        total: r.total,
+        date: r.date,
+        cars: (r.cars||[]).length,
+        headliner: r.headliner?.name || '',
+        isMe: true
+      }));
+      leaderboardLoaded = true;
+      renderLeaderboard();
+      if (el) {
+        const note = document.createElement('div');
+        note.style.cssText = 'font-size:0.62rem;color:var(--muted);text-align:center;padding:8px;letter-spacing:0.5px;';
+        note.textContent = '📡 Showing your local runs — global leaderboard requires Firestore rules to be updated.';
+        el.prepend(note);
+      }
+    } else {
+      if (el) el.innerHTML = '<div class="lb-empty">No runs yet — complete a run to appear here!</div>';
+    }
   }
 }
 
@@ -3396,12 +3675,13 @@ function renderLeaderboard() {
   el.innerHTML = leaderboardRuns.map((run, idx) => {
     const top = idx < 3 ? 'top' : '';
     const who = run.isMe ? run.name + ' (You)' : run.name;
+    const medal = idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':'#'+(idx+1);
     return `
       <div class="lb-row" style="animation-delay:${idx * 0.03}s">
-        <div class="lb-rank ${top}">${idx===0?'':idx===1?'':idx===2?'':'#'+(idx+1)}</div>
+        <div class="lb-rank ${top}">${medal}</div>
         <div class="lb-main">
           <div class="lb-name">${who}</div>
-          <div class="lb-meta">${fmtLeaderboardDate(run.date)}  ${run.headliner ? run.headliner + '  ' : ''}${run.cars} cars</div>
+          <div class="lb-meta">${fmtLeaderboardDate(run.date)}${run.headliner ? '  ⭐ ' + run.headliner : ''}  🚘 ${run.cars} cars</div>
         </div>
         <div class="lb-score">
           <div class="lb-total">${fmtFull(run.total)}</div>
@@ -3608,9 +3888,9 @@ async function loadNews() {
           '<div class="ri"><div class="rn">' + escapeHtml(car.name) + '</div>' +
           ((car.color || (car.location && car.location.label)) ? '<div class="rc">' + escapeHtml([car.color, car.location && car.location.label].filter(Boolean).join('  ')) + '</div>' : '') +
           '<span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' +
-          (isHL ? '<div class="headliner-badge">\xe2\xad\x90 HEADLINER</div>' : '') + '</div>' +
+          (isHL ? '<div class="headliner-badge">⭐ HEADLINER</div>' : '') + '</div>' +
           '<div class="rv">' + fmtFull(car.value) + '</div>' +
-          '<button class="star-btn ' + (isHL ? 'starred' : '') + '" onclick="toggleHeadliner(' + i + ')" title="Set as headliner">&#9733;</button>' +
+          '<button class="star-btn ' + (isHL ? 'starred' : '') + '" onclick="toggleHeadliner(' + i + ')" title="Set as headliner">★</button>' +
           '<button class="del-btn" onclick="removeCar(' + i + ')"></button>';
         list.appendChild(row);
       });
@@ -3695,7 +3975,7 @@ async function loadNews() {
     el.className = '';
     el.innerHTML = filtered.map(function(car, idx){
       var rarity = getRarity(car.value);
-      return '<a class="garage-row" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.value >= 50000 && car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-arrow">↗</div><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="' + escapeHtml(car.name) + '"></button></a>';
+      return '<a class="garage-row" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.value >= 50000 && car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-arrow">↗</div><button class="g-edit" onclick="event.preventDefault();event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit car">✏️</button><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="' + escapeHtml(car.name) + '"></button></a>';
     }).join('');
   };
 
