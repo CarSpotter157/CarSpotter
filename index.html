@@ -688,6 +688,48 @@ body.carbon-on .card,body.carbon-on .hist-item,body.carbon-on .garage-row,body.c
 .news-source-btn{background:transparent;border:1px solid var(--border2);border-radius:20px;color:var(--text2);font-size:0.6rem;font-weight:600;letter-spacing:0.5px;padding:4px 10px;cursor:pointer;font-family:inherit;transition:all 0.15s;}
 .news-source-btn.active,.news-source-btn:hover{border-color:var(--accent);color:var(--accent);}
 
+/* ── MORE PAGE TILES ── */
+.more-page-tile {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; background: var(--surf); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 22px 12px; cursor: pointer;
+  transition: border-color 0.15s, background 0.15s; color: var(--text);
+  font-family: inherit; animation: fadeUp 0.22s ease both;
+}
+.more-page-tile:hover, .more-page-tile:active { border-color: var(--accent); background: var(--adim); }
+.more-tile-icon { color: var(--accent); display: flex; align-items: center; justify-content: center; }
+.more-tile-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text2); }
+
+/* ── NEWS IMPROVED ── */
+.news-card {
+  background: var(--surf); border: 1px solid var(--border); border-radius: var(--radius);
+  margin-bottom: 10px; text-decoration: none; color: inherit; display: flex;
+  gap: 12px; align-items: flex-start; padding: 12px 14px;
+  transition: border-color 0.15s; animation: fadeUp 0.22s ease both;
+}
+.news-card:hover { border-color: var(--accent); }
+.news-card-img { width: 72px; height: 72px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--surf2); border: 1px solid var(--border); }
+.news-card-img-ph { width: 72px; height: 72px; border-radius: 8px; flex-shrink: 0; background: var(--surf2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; }
+.news-card-body { flex: 1; min-width: 0; }
+.news-source { font-size: 0.46rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 3px; }
+.news-title { font-size: 0.82rem; font-weight: 600; line-height: 1.4; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.news-date { font-size: 0.56rem; color: var(--muted); }
+.news-source-btn { background: transparent; border: 1px solid var(--border2); border-radius: 20px; color: var(--text2); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.5px; padding: 5px 12px; cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
+.news-source-btn.active, .news-source-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--adim); }
+.news-loading { text-align: center; padding: 40px 12px; color: var(--muted); font-size: 0.72rem; letter-spacing: 1px; }
+.news-error { text-align: center; padding: 24px 12px; color: var(--muted); font-size: 0.72rem; border: 1px dashed var(--border); border-radius: var(--radius); }
+
+/* ── MAP DOT MARKERS ── */
+.cs-dot-icon { background: transparent !important; border: none !important; }
+.cs-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  transition: width 0.18s ease, height 0.18s ease, margin 0.18s ease, font-size 0.18s ease;
+  cursor: pointer; position: relative;
+}
+.cs-dot.cs-dot-open {
+  width: 32px; height: 32px; margin: -10px 0 0 -10px;
+}
+
 /* ── VOICE FILL BAR (keep hidden, JS references it) ── */
 .vf-icon,.vf-text,.vf-accept,.vf-dismiss{display:none;}
 
@@ -927,14 +969,14 @@ body.theme-light .auth-overlay{background:var(--bg);}
       </div>
       <div class="garage-filter-row" id="garageFilterRow">
         <button class="gf-pill active" data-filter="all" onclick="setGarageFilter('all',this)">All</button>
-        <button class="gf-pill" data-filter="supercar" onclick="setGarageFilter('supercar',this)">Supercar</button>
-        <button class="gf-pill" data-filter="sports" onclick="setGarageFilter('sports',this)">Sports</button>
-        <button class="gf-pill" data-filter="muscle" onclick="setGarageFilter('muscle',this)">Muscle</button>
-        <button class="gf-pill" data-filter="track" onclick="setGarageFilter('track',this)">Track</button>
-        <button class="gf-pill" data-filter="exotic" onclick="setGarageFilter('exotic',this)">Exotic</button>
-        <button class="gf-pill" data-filter="ev" onclick="setGarageFilter('ev',this)">EV</button>
-        <button class="gf-pill" data-filter="legend" onclick="setGarageFilter('legend',this)">Legend+</button>
-        <button class="gf-pill" data-filter="hypercar" onclick="setGarageFilter('hypercar',this)">Hypercar+</button>
+        <button class="gf-pill" data-filter="supercar" onclick="setGarageFilter('supercar',this)">🏎 Super</button>
+        <button class="gf-pill" data-filter="sports" onclick="setGarageFilter('sports',this)">🚗 Sports</button>
+        <button class="gf-pill" data-filter="muscle" onclick="setGarageFilter('muscle',this)">🐎 Muscle</button>
+        <button class="gf-pill" data-filter="track" onclick="setGarageFilter('track',this)">🏁 Track</button>
+        <button class="gf-pill" data-filter="exotic" onclick="setGarageFilter('exotic',this)">🔥 Exotic</button>
+        <button class="gf-pill" data-filter="ev" onclick="setGarageFilter('ev',this)">⚡ EV</button>
+        <button class="gf-pill" data-filter="legend" onclick="setGarageFilter('legend',this)">👑 Legend+</button>
+        <button class="gf-pill" data-filter="hypercar" onclick="setGarageFilter('hypercar',this)">🚀 Hyper+</button>
       </div>
       <div id="garageList">
         <div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">&#127950;</span>No cars yet!</div>
@@ -991,43 +1033,6 @@ body.theme-light .auth-overlay{background:var(--bg);}
       <textarea id="notesArea" class="notes-area" placeholder="Ferrari 488 red&#10;Yellow Lambo&#10;Blue Porsche GT3 992&#10;&#10;Jot notes here — switch to Spot tab to log them."></textarea>
     </div>
 
-    <!-- STATS PAGE -->
-    <div class="page" id="page-stats">
-      <div class="sec-title" style="margin-bottom:12px">Your Stats</div>
-
-      <!-- Summary row -->
-      <div class="stats-row" id="st-summary"></div>
-
-      <!-- Best run -->
-      <div class="card">
-        <div class="card-title">Top Cars by Value</div>
-        <div id="st-topcars"></div>
-      </div>
-
-      <!-- Most spotted makes -->
-      <div class="card">
-        <div class="card-title">Most Spotted Makes</div>
-        <div id="st-makes"></div>
-      </div>
-
-      <!-- Most spotted types -->
-      <div class="card">
-        <div class="card-title">By Type</div>
-        <div id="st-types"></div>
-      </div>
-
-      <!-- Run history chart -->
-      <div class="card">
-        <div class="card-title">Run Values Over Time</div>
-        <div id="st-chart" style="padding-top:8px"></div>
-      </div>
-
-      <!-- Best day of week -->
-      <div class="card">
-        <div class="card-title">Best Day to Spot</div>
-        <div id="st-days"></div>
-      </div>
-    </div>
 
     <!-- ACHIEVEMENTS PAGE -->
     <div class="page" id="page-achievements">
@@ -1127,12 +1132,40 @@ body.theme-light .auth-overlay{background:var(--bg);}
     </div>
 
     <div class="page" id="page-news">
-      <div class="sec-row" style="margin-bottom:10px">
-        <div class="sec-title">Car News</div>
-        <button class="txt-btn" onclick="loadNews()">Refresh</button>
-      </div>
-      <div id="newsSources" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;"></div>
+      <div class="sec-title" style="margin-bottom:10px">Car News</div>
+      <div id="newsSources" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;overflow-x:auto;padding-bottom:2px;"></div>
       <div id="newsList"></div>
+    </div>
+
+    <!-- MORE PAGE (full page instead of dropdown) -->
+    <div class="page" id="page-more">
+      <div class="sec-title" style="margin-bottom:16px">More</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <button class="more-page-tile" onclick="goTo('history')">
+          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg></span>
+          <span class="more-tile-label">History</span>
+        </button>
+        <button class="more-page-tile" onclick="goTo('leaderboard')">
+          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+          <span class="more-tile-label">Leaderboard</span>
+        </button>
+        <button class="more-page-tile" onclick="goTo('achievements')">
+          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
+          <span class="more-tile-label">Achievements</span>
+        </button>
+        <button class="more-page-tile" onclick="goTo('news')">
+          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg></span>
+          <span class="more-tile-label">Car News</span>
+        </button>
+        <button class="more-page-tile" onclick="goTo('settings')">
+          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+          <span class="more-tile-label">Settings</span>
+        </button>
+        <button class="more-page-tile" onclick="openCarSearch()">
+          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+          <span class="more-tile-label">Car Search</span>
+        </button>
+      </div>
     </div>
 
   </div><!-- /pages -->
@@ -1157,21 +1190,13 @@ body.theme-light .auth-overlay{background:var(--bg);}
       <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span>
       <span class="nav-label">Notes</span>
     </button>
-    <button class="nav-btn" onclick="toggleMoreMenu()" id="nav-more">
-      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.3" fill="currentColor" stroke="none"/></svg></span>
+    <button class="nav-btn" onclick="goTo('more')" id="nav-more">
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.3" fill="currentColor" stroke="none"/></svg></span>
       <span class="nav-label">More</span>
     </button>
   </nav>
 
-  <!-- More dropdown menu -->
-  <div id="moreMenu" class="more-menu" style="display:none">
-    <button class="more-item" onclick="goToMore('history')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg> <span>History</span></button>
-    <button class="more-item" onclick="goToMore('leaderboard')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> <span>Leaderboard</span></button>
-    <button class="more-item" onclick="goToMore('stats')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> <span>Stats</span></button>
-    <button class="more-item" onclick="goToMore('achievements')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg> <span>Achievements</span></button>
-    <button class="more-item" onclick="toggleMoreMenu();openCarSearch()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> <span>Car Search</span></button>
-    <button class="more-item" onclick="goToMore('settings')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> <span>Settings</span></button>
-  </div>
+  <!-- More dropdown removed — now a full page (page-more) -->
 
 </div><!-- /app-shell -->
 
@@ -1738,7 +1763,6 @@ function goTo(page) {
   closeQP();
   if (page==='garage')       renderGarage();
   if (page==='history')      renderHistory();
-  if (page==='stats')        renderStats();
   if (page==='achievements') renderAchievements();
   if (page==='news' && !newsLoaded) { newsLoaded=true; renderNewsSources(); loadNews(); }
   if (page==='leaderboard')  loadLeaderboard(true);
@@ -3479,25 +3503,13 @@ Use type emoji: =supercar/ferrari/lambo/mclaren, =sports/bmw/porsche/generic, =m
 
 //  MORE MENU 
 function toggleMoreMenu() {
-  const m = document.getElementById('moreMenu');
-  const btn = document.getElementById('nav-more');
-  const isOpen = m.style.display !== 'none';
-  m.style.display = isOpen ? 'none' : 'block';
-  btn.classList.toggle('active', !isOpen);
+  // More is now a full page — navigate to it
+  goTo('more');
 }
 
 function goToMore(page) {
-  document.getElementById('moreMenu').style.display = 'none';
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('nav-more').classList.add('active');
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-'+page).classList.add('active');
-  closeQP();
-  if (page==='stats') renderStats();
-  if (page==='history') renderHistory();
-  if (page==='settings') { renderThemeBar(); initSoundToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); }
-  if (page==='news' && !newsLoaded) { newsLoaded=true; renderNewsSources(); loadNews(); }
-  if (page==='leaderboard') loadLeaderboard(true);
+  // Legacy — just use goTo now
+  goTo(page);
 }
 
 // Close more menu when clicking outside
@@ -3712,31 +3724,48 @@ function switchSource(i) {
 
 async function loadNews() {
   const el = document.getElementById('newsList');
-  el.innerHTML = '<div class="news-loading">⏳ Loading latest news...</div>';
+  el.innerHTML = '<div class="news-loading">Loading latest news...</div>';
   const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(NEWS_SOURCES[activeSource].rss)}&api_key=kkv1zj5yfbnz1ldwxehfesg358e3ttagbc8wzxiq&count=20`;
   try {
     const res  = await fetch(url);
     const data = await res.json();
     if (!data.items || !data.items.length) throw new Error('No items');
-    el.innerHTML = data.items.map(item => {
+    el.innerHTML = data.items.map((item, idx) => {
       const date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
       const title = item.title || 'No title';
       const link  = item.link  || '#';
-      return `<a class="news-card" href="${link}" target="_blank" rel="noopener">
-        <div class="news-source-tag">${NEWS_SOURCES[activeSource].name}</div>
-        <div class="news-title">${title}</div>
-        <div class="news-date">${date}</div>
+      // Try to extract thumbnail from enclosure or content
+      let imgSrc = '';
+      if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.startsWith('image')) {
+        imgSrc = item.enclosure.link;
+      } else if (item.thumbnail) {
+        imgSrc = item.thumbnail;
+      } else {
+        // Try extract from description html
+        const m = (item.description || '').match(/<img[^>]+src=["']([^"']+)["']/i);
+        if (m) imgSrc = m[1];
+      }
+      const imgHTML = imgSrc
+        ? `<img class="news-card-img" src="${imgSrc}" alt="" onerror="this.outerHTML='<div class=news-card-img-ph>🚘</div>'">`
+        : `<div class="news-card-img-ph">🚘</div>`;
+      return `<a class="news-card" href="${link}" target="_blank" rel="noopener" style="animation-delay:${idx*0.03}s">
+        ${imgHTML}
+        <div class="news-card-body">
+          <div class="news-source">${NEWS_SOURCES[activeSource].name}</div>
+          <div class="news-title">${title}</div>
+          <div class="news-date">${date}</div>
+        </div>
       </a>`;
     }).join('');
   } catch(e) {
-    el.innerHTML = '<div class="news-error"> Could not load news. Check your connection and try refreshing.</div>';
+    el.innerHTML = '<div class="news-error">Could not load news — check your connection.</div>';
   }
 }
 
 
 
 (function(){
-  var pageOrder = ['spot','garage','voice','history','stats','achievements','settings','news','leaderboard'];
+  var pageOrder = ['spot','garage','voice','history','achievements','settings','news','leaderboard','more'];
   var currentSpotLocation = JSON.parse(localStorage.getItem('cs_pending_loc') || 'null');
   var currentPage = 'spot';
   var runTotalAnimated = 0;
@@ -3912,15 +3941,18 @@ async function loadNews() {
     }
     if (garageView === 'map') {
       el.className = '';
-      var mapped = filtered.filter(function(car){ return car.location && isFinite(car.location.lat) && isFinite(car.location.lng); });
+      // Use ALL cars with locations — ignore active type/rarity filter for map
+      var allCarsForMap = getAllCars();
+      var mapped = allCarsForMap.filter(function(car){ return car.location && isFinite(car.location.lat) && isFinite(car.location.lng); });
       if (!mapped.length) {
-        el.innerHTML = '<div class="map-empty"><span style="font-size:2rem;display:block;margin-bottom:10px"></span><strong style="display:block;margin-bottom:6px;color:var(--text)">No mapped spots yet</strong>Use the location button when logging a car and it will appear here.</div>';
+        el.innerHTML = '<div class="map-empty"><span style="font-size:2rem;display:block;margin-bottom:10px">📍</span><strong style="display:block;margin-bottom:6px;color:var(--text)">No mapped spots yet</strong>Use the Pin button when logging a car and it will appear here.</div>';
         return;
       }
       el.innerHTML = '<div class="garage-map-wrap" style="position:relative"><div id="leafletMap"></div><div class="map-hud"><div class="map-badge">' + mapped.length + ' mapped spot' + (mapped.length !== 1 ? 's' : '') + '</div></div></div><div class="garage-map-list" id="mapCarList"></div>';
       var listEl = document.getElementById('mapCarList');
       listEl.innerHTML = mapped.map(function(car){
-        return '<div class="garage-map-row"><strong>' + escapeHtml(car.name) + '</strong><span>' + escapeHtml(locLabel(car.location)) + '  ' + fmtFull(car.value) + '</span></div>';
+        var rarity = getRarity(car.value);
+        return '<div class="garage-map-row" style="border-left:3px solid ' + rarity.color + '"><strong>' + escapeHtml(car.name) + '</strong><span>' + escapeHtml(locLabel(car.location)) + ' · ' + fmtFull(car.value) + '</span></div>';
       }).join('');
       setTimeout(function(){
         var mapEl = document.getElementById('leafletMap');
@@ -3928,34 +3960,39 @@ async function loadNews() {
         if (window._csLeafletMap) { try { window._csLeafletMap.remove(); } catch(e){} window._csLeafletMap = null; }
         var lats = mapped.map(function(c){ return c.location.lat; });
         var lngs = mapped.map(function(c){ return c.location.lng; });
-        var centerLat = (Math.min.apply(null,lats) + Math.max.apply(null,lats)) / 2;
-        var centerLng = (Math.min.apply(null,lngs) + Math.max.apply(null,lngs)) / 2;
-        var map = L.map('leafletMap', { zoomControl: true, attributionControl: true }).setView([centerLat, centerLng], 13);
+        var map = L.map('leafletMap', { zoomControl: true, attributionControl: true }).setView([lats[0], lngs[0]], 13);
         window._csLeafletMap = map;
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: ' <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+          attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
           maxZoom: 19
         }).addTo(map);
         var bounds = [];
         mapped.forEach(function(car){
           bounds.push([car.location.lat, car.location.lng]);
-          var isHot = car.value >= 500000;
-          var pinColor = isHot ? '#ff5733' : '#f5c842';
-          var icon = L.divIcon({
-            className: '',
-            html: '<div style="width:36px;height:36px;border-radius:50%;background:' + pinColor + ';border:3px solid rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 4px 14px rgba(0,0,0,0.5);cursor:pointer">' + escapeHtml(carTypeLabel(car.type)) + '</div>',
-            iconSize: [36, 36],
-            iconAnchor: [18, 36],
-            popupAnchor: [0, -38]
+          var rarity = getRarity(car.value);
+          // Small dot icon — expands via CSS when popup opens
+          var dotIcon = L.divIcon({
+            className: 'cs-dot-icon',
+            html: '<div class="cs-dot" style="background:' + rarity.color + ';box-shadow:0 0 0 3px ' + rarity.color + '44"></div>',
+            iconSize: [14, 14],
+            iconAnchor: [7, 7],
+            popupAnchor: [0, -10]
           });
-          var safeJson = JSON.stringify(car).replace(/\\/g,'\\\\').replace(/'/g,"\\'");
           var popupHtml = '<div class="map-popup-name">' + escapeHtml(car.name) + '</div>' +
-            '<div class="map-popup-val">' + fmtFull(car.value) + '</div>' +
+            '<div class="map-popup-val" style="color:' + rarity.color + '">' + fmtFull(car.value) + '</div>' +
             '<div class="map-popup-meta">' + escapeHtml(locLabel(car.location)) + '</div>' +
             '<button class="map-popup-btn" onclick="openMapCar(decodeURIComponent(\'' + encodeURIComponent(JSON.stringify(car)).replace(/'/g,'%27') + '\'))">↗ View Specs</button>';
-          L.marker([car.location.lat, car.location.lng], { icon: icon })
+          var marker = L.marker([car.location.lat, car.location.lng], { icon: dotIcon })
             .addTo(map)
-            .bindPopup(popupHtml, { maxWidth: 240 });
+            .bindPopup(popupHtml, { maxWidth: 220 });
+          marker.on('popupopen', function(){
+            var el = marker.getElement();
+            if (el) { var d = el.querySelector('.cs-dot'); if (d) d.classList.add('cs-dot-open'); }
+          });
+          marker.on('popupclose', function(){
+            var el = marker.getElement();
+            if (el) { var d = el.querySelector('.cs-dot'); if (d) d.classList.remove('cs-dot-open'); }
+          });
         });
         if (bounds.length > 1) {
           map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
