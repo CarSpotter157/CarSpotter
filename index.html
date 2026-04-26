@@ -835,12 +835,12 @@ body.theme-light .auth-overlay{background:var(--bg);}
               <div class="ff">
                 <label>Type</label>
                 <select id="carType">
-                  <option value="supercar">🏎  Supercar</option>
-                  <option value="sports">🚗  Sports Car</option>
-                  <option value="muscle">🐎  Muscle Car</option>
-                  <option value="track">🏁  Track Car</option>
-                  <option value="exotic">🔥  Exotic</option>
-                  <option value="ev">⚡  EV</option>
+                  <option value="supercar">Supercar</option>
+                  <option value="sports">Sports Car</option>
+                  <option value="muscle">Muscle Car</option>
+                  <option value="track">Track Car</option>
+                  <option value="exotic">Exotic</option>
+                  <option value="ev">EV</option>
                 </select>
               </div>
             </div>
@@ -1167,7 +1167,6 @@ body.theme-light .auth-overlay{background:var(--bg);}
   <div id="moreMenu" class="more-menu" style="display:none">
     <button class="more-item" onclick="goToMore('history')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg> <span>History</span></button>
     <button class="more-item" onclick="goToMore('leaderboard')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> <span>Leaderboard</span></button>
-    <button class="more-item" onclick="goToMore('news')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg> <span>News</span></button>
     <button class="more-item" onclick="goToMore('stats')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> <span>Stats</span></button>
     <button class="more-item" onclick="goToMore('achievements')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg> <span>Achievements</span></button>
     <button class="more-item" onclick="toggleMoreMenu();openCarSearch()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> <span>Car Search</span></button>
@@ -2306,7 +2305,7 @@ function renderGarage() {
         <div class="g-meta">${escapeHtml([car.color,car.runDate].filter(Boolean).join(' · '))}</div>
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span class="rarity-pill" style="color:${rarity.color};background:${rarity.bg};border-color:${rarity.color}33">${rarity.label}</span>
-          ${car.value>=50000 && car.spotCount>1 ? `<span class="g-spotted-count">👀 ${car.spotCount}x</span>` : ''}
+          ${car.spotCount > 1 ? `<span class="g-spotted-count">👀 ${car.spotCount}x</span>` : ''}
         </div>
       </div>
       <div class="g-val">${fmtFull(car.value)}</div>
@@ -3908,7 +3907,7 @@ async function loadNews() {
     var el = document.getElementById('garageList');
     if (!filtered.length) {
       el.className = '';
-      el.innerHTML='<div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">\xf0\x9f\x94\x8d</span>'+(allCars.length?'No matches':'No cars yet!')+'</div>';
+      el.innerHTML='<div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">&#128270;</span>'+(allCars.length?'No matches':'No cars yet!')+'</div>';
       return;
     }
     if (garageView === 'map') {
@@ -3920,7 +3919,7 @@ async function loadNews() {
       }
       el.innerHTML = '<div class="garage-map-wrap" style="position:relative"><div id="leafletMap"></div><div class="map-hud"><div class="map-badge">' + mapped.length + ' mapped spot' + (mapped.length !== 1 ? 's' : '') + '</div></div></div><div class="garage-map-list" id="mapCarList"></div>';
       var listEl = document.getElementById('mapCarList');
-      listEl.innerHTML = mapped.slice(0,8).map(function(car){
+      listEl.innerHTML = mapped.map(function(car){
         return '<div class="garage-map-row"><strong>' + escapeHtml(car.name) + '</strong><span>' + escapeHtml(locLabel(car.location)) + '  ' + fmtFull(car.value) + '</span></div>';
       }).join('');
       setTimeout(function(){
@@ -3975,7 +3974,7 @@ async function loadNews() {
     el.className = '';
     el.innerHTML = filtered.map(function(car, idx){
       var rarity = getRarity(car.value);
-      return '<a class="garage-row" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.value >= 50000 && car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-arrow">↗</div><button class="g-edit" onclick="event.preventDefault();event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit car">✏️</button><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="' + escapeHtml(car.name) + '"></button></a>';
+      return '<a class="garage-row" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-arrow">↗</div><button class="g-edit" onclick="event.preventDefault();event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit car">✏️</button><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="' + escapeHtml(car.name) + '"></button></a>';
     }).join('');
   };
 
@@ -4057,10 +4056,8 @@ async function loadNews() {
   window.nextTutorialStep = function(){ tutorialStep += 1; if (tutorialStep >= tutorialData().length) closeTutorial(); else renderTutorial(); };
   window.closeTutorial = function(){ localStorage.setItem('cs_tutorial_done', '1'); var overlay = document.getElementById('tutorialOverlay'); if (overlay) overlay.remove(); if (tutorialTimer) { clearInterval(tutorialTimer); tutorialTimer = null; } };
 
-  Array.prototype.forEach.call(document.querySelectorAll('.setting-icon'), function(el, i){ el.innerHTML = ['&#9728;','&#8635;','&#9835;','&#9998;','&#9432;'][i] || '?'; });
   var settingsPage = document.getElementById('page-settings');
   if (settingsPage) settingsPage.innerHTML = settingsPage.innerHTML.replace("CarSpotter''s", "CarSpotter's");
-  Array.prototype.forEach.call(document.querySelectorAll('.setting-icon'), function(el, i){ el.innerHTML = ['&#9728;','&#8635;','&#9835;','&#9998;','&#9432;'][i] || '?'; });
   renderPendingLocation();
   renderSpot();
   renderGarage();
