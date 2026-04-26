@@ -1336,7 +1336,7 @@ function showImportBanner(count) {
     </div>
     <div style="display:flex;gap:6px;flex-shrink:0;">
       <button onclick="importLocalData()" style="background:var(--accent);color:#0a0a0a;border:none;border-radius:7px;font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:1.5px;padding:7px 12px;cursor:pointer;">IMPORT</button>
-      <button onclick="document.getElementById('importBtn').remove()" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:7px;font-size:0.75rem;padding:7px 10px;cursor:pointer;"></button>
+      <button onclick="document.getElementById('importBtn').remove()" style="background:none;border:1px solid var(--border);color:var(--muted);border-radius:7px;font-size:0.85rem;padding:7px 10px;cursor:pointer;line-height:1;">✕</button>
     </div>`;
   // Insert at top of spot page
   const spotPage = document.getElementById('page-spot');
@@ -1764,7 +1764,8 @@ function goTo(page) {
   if (page==='garage')       renderGarage();
   if (page==='history')      renderHistory();
   if (page==='achievements') renderAchievements();
-  if (page==='news' && !newsLoaded) { newsLoaded=true; renderNewsSources(); loadNews(); }
+  if (page==='settings')     { renderThemeBar(); initSoundToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); }
+  if (page==='news')         { if (!newsLoaded) { newsLoaded=true; renderNewsSources(); } loadNews(); }
   if (page==='leaderboard')  loadLeaderboard(true);
 }
 
@@ -2162,13 +2163,19 @@ function renderSpot() {
 //  GARAGE 
 function getAllCars() {
   const seen = new Map();
+  // Iterate oldest-first so most recent data wins on update
   [...allRuns].reverse().forEach(run => {
     run.cars.forEach(car => {
       const key = car.name.toLowerCase();
       const label = run.spotted ? 'Spotted · '+run.date : 'Run · '+run.date;
       if (seen.has(key)) {
-        seen.get(key).spotCount++;
-        seen.get(key).runDate = label; // update to most recent
+        const existing = seen.get(key);
+        existing.spotCount++;
+        existing.runDate = label; // update to most recent label
+        // Upgrade location: if this entry has a location and existing doesn't, take it
+        if (car.location && car.location.lat && !existing.location) {
+          existing.location = car.location;
+        }
       } else {
         seen.set(key, {...car, runDate: label, spotCount: 1});
       }
@@ -2177,8 +2184,13 @@ function getAllCars() {
   currentRun.forEach(car => {
     const key = car.name.toLowerCase();
     if (seen.has(key)) {
-      seen.get(key).spotCount++;
-      seen.get(key).runDate = 'Current Run';
+      const existing = seen.get(key);
+      existing.spotCount++;
+      existing.runDate = 'Current Run';
+      // Current run location always wins — it's the newest
+      if (car.location && car.location.lat) {
+        existing.location = car.location;
+      }
     } else {
       seen.set(key, {...car, runDate:'Current Run', spotCount: 1});
     }
@@ -3044,12 +3056,12 @@ window.openEditCarModal = function(encodedCar) {
         <div class="edit-field edit-field-full">
           <label>Type</label>
           <select id="editCarType">
-            <option value="supercar" ${car.type==='supercar'?'selected':''}>🏎️  Supercar</option>
-            <option value="sports"   ${car.type==='sports'?'selected':''}>🚗  Sports Car</option>
-            <option value="muscle"   ${car.type==='muscle'?'selected':''}>🐎  Muscle Car</option>
-            <option value="track"    ${car.type==='track'?'selected':''}>🏁  Track Car</option>
-            <option value="exotic"   ${car.type==='exotic'?'selected':''}>🔥  Exotic</option>
-            <option value="ev"       ${car.type==='ev'?'selected':''}>⚡  EV</option>
+            <option value="supercar" ${car.type==='supercar'?'selected':''}>Supercar</option>
+            <option value="sports"   ${car.type==='sports'?'selected':''}>Sports Car</option>
+            <option value="muscle"   ${car.type==='muscle'?'selected':''}>Muscle Car</option>
+            <option value="track"    ${car.type==='track'?'selected':''}>Track Car</option>
+            <option value="exotic"   ${car.type==='exotic'?'selected':''}>Exotic</option>
+            <option value="ev"       ${car.type==='ev'?'selected':''}>EV</option>
           </select>
         </div>
       </div>
