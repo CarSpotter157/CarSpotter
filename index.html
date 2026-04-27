@@ -12,12 +12,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js">
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js">
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js">
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
 <script>
 //  FIREBASE CONFIG 
 // This key is intentionally client-side (Firebase design). Protect your data by:
@@ -3296,6 +3293,9 @@ function clearAllData() {
   renderGarage(); renderHistory(); renderSpot(); renderQPTrigger();
   showToast('All local data cleared.');
 }
+
+// ─────────────────────────────────────────────
+window.openCarSearch = function(prefill) {
   if (document.getElementById('carSearchOverlay')) return;
   const overlay = document.createElement('div');
   overlay.className = 'car-search-overlay';
@@ -3365,6 +3365,8 @@ window.openLensWithPhoto = function(input) {
   };
   reader.readAsDataURL(file);
 };
+
+window.runCarSearch = async function(query) {
   query = (query||'').trim();
   if (!query) return;
   document.getElementById('carSearchQ').value = query;
