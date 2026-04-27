@@ -775,7 +775,22 @@ body.theme-light .auth-overlay{background:var(--bg);}
 .car-search-input:focus{border-color:var(--accent);}
 .car-search-btn{background:var(--accent);color:#0a0a0a;border:none;border-radius:var(--radius-sm);font-family:'Bebas Neue',cursive;font-size:0.88rem;letter-spacing:2px;padding:10px 16px;cursor:pointer;white-space:nowrap;transition:all 0.15s;}
 .car-search-btn:active{transform:scale(0.97);}
-.car-search-result{animation:fadeUp 0.22s ease both;}
+.sort-pref-btn { background:var(--surf2); border:1px solid var(--border2); border-radius:var(--radius-sm); color:var(--text2); font-size:0.65rem; font-weight:700; letter-spacing:0.5px; padding:8px 4px; cursor:pointer; font-family:inherit; transition:all 0.15s; }
+.sort-pref-btn.active { border-color:var(--accent); color:var(--accent); background:var(--adim); }
+body.compact-mode .garage-row { padding: 6px 10px; min-height: 0; }
+body.compact-mode .g-emoji { font-size: 0.9rem; width: 26px; height: 26px; }
+body.compact-mode .g-name { font-size: 0.75rem; }
+body.compact-mode .g-meta { display: none; }
+body.compact-mode .rarity-pill { display: none; }
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  background: var(--surf2); border: 1px dashed var(--border2);
+  border-radius: var(--radius-sm); color: var(--text2); font-size: 0.72rem;
+  font-family: inherit; letter-spacing: 0.5px; font-weight: 600;
+  padding: 9px 12px; cursor: pointer; margin-bottom: 12px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.lens-btn:hover { border-color: var(--accent); color: var(--accent); }
+.lens-btn svg { flex-shrink: 0; }
 .csr-img-wrap{width:100%;height:160px;background:var(--surf2);border-radius:var(--radius);overflow:hidden;margin-bottom:12px;border:1px solid var(--border);}
 .csr-img{width:100%;height:100%;object-fit:cover;display:block;}
 .csr-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;}
@@ -877,6 +892,7 @@ body.theme-light .auth-overlay{background:var(--bg);}
               <div class="ff">
                 <label>Type</label>
                 <select id="carType">
+                  <option value="" disabled selected>— Select Type —</option>
                   <option value="supercar">Supercar</option>
                   <option value="sports">Sports Car</option>
                   <option value="muscle">Muscle Car</option>
@@ -893,7 +909,7 @@ body.theme-light .auth-overlay{background:var(--bg);}
               <label class="photo-btn" style="margin-bottom:0">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                 <span>Photo</span>
-                <input type="file" accept="image/*" capture="environment" style="display:none" id="photoInput" onchange="handlePhotoInput(this)">
+                <input type="file" accept="image/*" style="display:none" id="photoInput" onchange="handlePhotoInput(this)">
               </label>
               <button class="geo-btn" id="geoBtn" onclick="captureLocation()" style="margin:0">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Pin
@@ -1119,6 +1135,67 @@ body.theme-light .auth-overlay{background:var(--bg);}
         <button class="setting-link" onclick="openTutorial(true)">
           <span>Show onboarding tutorial</span>
           <span>Open</span>
+        </button>
+      </div>
+
+      <!-- Default Sort -->
+      <div class="card setting-card">
+        <div class="setting-head">
+          <div class="setting-icon">Sort</div>
+          <div class="setting-copy">
+            <div class="card-title">DEFAULT GARAGE SORT</div>
+            <div class="setting-desc">Choose how your garage is ordered when you open it.</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px;">
+          <button class="sort-pref-btn" id="spb-desc" onclick="setSortPref('desc')">$ High–Low</button>
+          <button class="sort-pref-btn" id="spb-asc"  onclick="setSortPref('asc')">$ Low–High</button>
+          <button class="sort-pref-btn" id="spb-alpha" onclick="setSortPref('alpha')">A–Z</button>
+        </div>
+      </div>
+
+      <!-- Compact mode -->
+      <div class="card setting-card">
+        <div class="setting-head">
+          <div class="setting-icon">View</div>
+          <div class="setting-copy">
+            <div class="card-title">COMPACT GARAGE</div>
+            <div class="setting-desc">Shrink garage rows to fit more cars on screen at once.</div>
+          </div>
+        </div>
+        <div class="setting-row" style="border-top:none;padding-top:0;margin-top:10px;">
+          <span style="font-size:0.78rem;color:var(--text2);flex:1;">Compact list rows</span>
+          <button class="toggle-pill" id="compactToggle" onclick="toggleCompactMode()"><div class="toggle-knob"></div></button>
+        </div>
+      </div>
+
+      <!-- Data -->
+      <div class="card setting-card">
+        <div class="setting-head">
+          <div class="setting-icon">Data</div>
+          <div class="setting-copy">
+            <div class="card-title">EXPORT & BACKUP</div>
+            <div class="setting-desc">Download all your runs and garage data as a JSON file you can import later.</div>
+          </div>
+        </div>
+        <button class="setting-link" onclick="exportAllData()">
+          <span>Export all data</span>
+          <span style="color:var(--accent)">↓ JSON</span>
+        </button>
+      </div>
+
+      <!-- Danger zone -->
+      <div class="card setting-card" style="border-color:#ff444433;">
+        <div class="setting-head">
+          <div class="setting-icon" style="color:#ff4444">⚠️</div>
+          <div class="setting-copy">
+            <div class="card-title" style="color:#ff4444">DANGER ZONE</div>
+            <div class="setting-desc">Permanently delete all local data. This cannot be undone.</div>
+          </div>
+        </div>
+        <button class="setting-link" style="color:#ff4444" onclick="clearAllData()">
+          <span>Clear all local data</span>
+          <span>Delete</span>
         </button>
       </div>
     </div><!-- NEWS PAGE -->
@@ -1764,7 +1841,7 @@ function goTo(page) {
   if (page==='garage')       renderGarage();
   if (page==='history')      renderHistory();
   if (page==='achievements') renderAchievements();
-  if (page==='settings')     { renderThemeBar(); initSoundToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); }
+  if (page==='settings')     { renderThemeBar(); initSoundToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); initSortPrefBtns(); applyCompactMode(); }
   if (page==='news')         { if (!newsLoaded) { newsLoaded=true; renderNewsSources(); } loadNews(); }
   if (page==='leaderboard')  loadLeaderboard(true);
 }
@@ -2745,10 +2822,56 @@ applyTheme(activeTheme);
 applyCarbon();
 initSoundToggle();
 
-//  SERVICE WORKER 
+//  SERVICE WORKER — cache-first for offline support
 if ('serviceWorker' in navigator) {
-  const sw=`const C='cs-v4';const CACHE_URLS=['.'];self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(CACHE_URLS)));self.skipWaiting();});self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==C).map(k=>caches.delete(k)))));});self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('.'))));});`;
-  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'})));
+  const swCode = `
+const CACHE = 'cs-v5';
+const URLS = ['.', location.pathname, location.href];
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => {
+      return Promise.allSettled(URLS.map(u => c.add(u).catch(()=>{})));
+    }).then(() => self.skipWaiting())
+  );
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+self.addEventListener('fetch', e => {
+  // For navigation requests, serve cached app shell
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request).catch(() =>
+        caches.match('.') || caches.match(location.pathname)
+      )
+    );
+    return;
+  }
+  // For everything else: network first, fall back to cache
+  e.respondWith(
+    fetch(e.request)
+      .then(res => {
+        if (res && res.status === 200 && res.type !== 'opaque') {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+        }
+        return res;
+      })
+      .catch(() => caches.match(e.request))
+  );
+});`;
+  try {
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).then(reg => {
+      // Force update check
+      reg.update();
+    });
+  } catch(e) {}
 }
 
 //  OFFLINE MODE 
@@ -3121,8 +3244,58 @@ window.saveEditCar = function(originalName) {
 
 // ─────────────────────────────────────────────
 //  CAR SEARCH (built-in, no redirect)
-// ─────────────────────────────────────────────
-window.openCarSearch = function(prefill) {
+// ── COMPACT MODE ──
+let compactMode = localStorage.getItem('cs_compact') === 'on';
+function applyCompactMode() {
+  document.body.classList.toggle('compact-mode', compactMode);
+  const btn = document.getElementById('compactToggle');
+  if (btn) btn.classList.toggle('on', compactMode);
+}
+function toggleCompactMode() {
+  compactMode = !compactMode;
+  localStorage.setItem('cs_compact', compactMode ? 'on' : 'off');
+  applyCompactMode();
+  showToast(compactMode ? 'Compact mode on' : 'Compact mode off');
+}
+applyCompactMode();
+
+// ── SORT PREFERENCE ──
+function setSortPref(mode) {
+  sortMode = mode;
+  localStorage.setItem('cs_sort', mode);
+  document.querySelectorAll('.sort-pref-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('spb-' + mode);
+  if (btn) btn.classList.add('active');
+  renderGarage();
+  showToast('Sort: ' + (mode === 'desc' ? 'High–Low' : mode === 'asc' ? 'Low–High' : 'A–Z'));
+}
+function initSortPrefBtns() {
+  document.querySelectorAll('.sort-pref-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('spb-' + (sortMode || 'desc'));
+  if (btn) btn.classList.add('active');
+}
+
+// ── EXPORT ALL DATA ──
+function exportAllData() {
+  const data = { runs: allRuns, quickPicks, exportedAt: new Date().toISOString(), version: 20 };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'CarSpotter_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('📥 Backup downloaded!');
+}
+
+// ── CLEAR ALL DATA ──
+function clearAllData() {
+  if (!confirm('Delete ALL local runs, garage, and settings? This cannot be undone.')) return;
+  if (!confirm('Are you sure? Everything will be wiped locally.')) return;
+  const keys = Object.keys(localStorage).filter(k => k.startsWith('cs_'));
+  keys.forEach(k => localStorage.removeItem(k));
+  allRuns = []; currentRun = []; quickPicks = [];
+  renderGarage(); renderHistory(); renderSpot(); renderQPTrigger();
+  showToast('All local data cleared.');
+}
   if (document.getElementById('carSearchOverlay')) return;
   const overlay = document.createElement('div');
   overlay.className = 'car-search-overlay';
@@ -3144,6 +3317,11 @@ window.openCarSearch = function(prefill) {
           onkeydown="if(event.key==='Enter')runCarSearch(this.value)">
         <button class="car-search-btn" onclick="runCarSearch(document.getElementById('carSearchQ').value)">SEARCH</button>
       </div>
+      <label class="lens-btn" title="Upload a photo to identify with Google Lens">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg>
+        Identify Car with Google Lens
+        <input type="file" accept="image/*" style="display:none" onchange="openLensWithPhoto(this)">
+      </label>
       <div class="csr-suggestions">${sugHTML}</div>
       <div id="carSearchResults"></div>
     </div>`;
@@ -3154,7 +3332,39 @@ window.openCarSearch = function(prefill) {
   }, 80);
 };
 
-window.runCarSearch = async function(query) {
+window.openLensWithPhoto = function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  // Convert to data URL then submit to Google Lens via form POST
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    // Google Lens upload URL — works without an API key
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = 'https://lens.google.com/upload';
+    form.target = '_blank';
+    form.enctype = 'multipart/form-data';
+    form.style.display = 'none';
+    // Build a fake file input with the actual file
+    const fi = document.createElement('input');
+    fi.type = 'file';
+    fi.name = 'encoded_image';
+    // DataTransfer lets us set files on a file input programmatically
+    try {
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      fi.files = dt.files;
+      form.appendChild(fi);
+      document.body.appendChild(form);
+      form.submit();
+      setTimeout(() => form.remove(), 1000);
+    } catch(err) {
+      // Fallback: just open Lens and let the user paste
+      window.open('https://lens.google.com', '_blank');
+    }
+  };
+  reader.readAsDataURL(file);
+};
   query = (query||'').trim();
   if (!query) return;
   document.getElementById('carSearchQ').value = query;
@@ -3746,15 +3956,16 @@ async function loadNews() {
       const date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
       const title = item.title || 'No title';
       const link  = item.link  || '#';
-      // Try to extract thumbnail from enclosure or content
+      // Try all possible thumbnail fields from rss2json
       let imgSrc = '';
-      if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.startsWith('image')) {
-        imgSrc = item.enclosure.link;
-      } else if (item.thumbnail) {
+      if (item.thumbnail && item.thumbnail.length > 4) {
         imgSrc = item.thumbnail;
+      } else if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.startsWith('image')) {
+        imgSrc = item.enclosure.link;
       } else {
-        // Try extract from description html
-        const m = (item.description || '').match(/<img[^>]+src=["']([^"']+)["']/i);
+        // Parse from description or content HTML
+        const html = item.description || item.content || '';
+        const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
         if (m) imgSrc = m[1];
       }
       const imgHTML = imgSrc
