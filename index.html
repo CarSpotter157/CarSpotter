@@ -780,14 +780,16 @@ body.compact-mode .g-name { font-size: 0.75rem; }
 body.compact-mode .g-meta { display: none; }
 body.compact-mode .rarity-pill { display: none; }
   display: flex; align-items: center; gap: 8px; width: 100%;
-  background: var(--surf2); border: 1px dashed var(--border2);
+  background: var(--surf2); border: 1px solid var(--border2);
   border-radius: var(--radius-sm); color: var(--text2); font-size: 0.72rem;
   font-family: inherit; letter-spacing: 0.5px; font-weight: 600;
   padding: 9px 12px; cursor: pointer; margin-bottom: 12px;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color 0.15s, color 0.15s; text-align: left;
 }
 .lens-btn:hover { border-color: var(--accent); color: var(--accent); }
 .lens-btn svg { flex-shrink: 0; }
+.csr-wiki-link { display:inline-block; font-size:0.62rem; color:var(--accent); letter-spacing:0.5px; margin-bottom:10px; text-decoration:none; }
+.csr-wiki-link:hover { text-decoration:underline; }
 .csr-img-wrap{width:100%;height:160px;background:var(--surf2);border-radius:var(--radius);overflow:hidden;margin-bottom:12px;border:1px solid var(--border);}
 .csr-img{width:100%;height:100%;object-fit:cover;display:block;}
 .csr-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;}
@@ -3312,17 +3314,15 @@ window.openCarSearch = function(prefill) {
         <button class="car-search-close" onclick="document.getElementById('carSearchOverlay').remove()">✕</button>
       </div>
       <div class="car-search-input-row">
-        <input class="car-search-input" id="carSearchQ" placeholder="Ferrari 488, Dodge Charger…" 
+        <input class="car-search-input" id="carSearchQ" placeholder="Ferrari 488, Dodge Charger…"
           value="${prefill||''}"
           onkeydown="if(event.key==='Enter')runCarSearch(this.value)">
         <button class="car-search-btn" onclick="runCarSearch(document.getElementById('carSearchQ').value)">SEARCH</button>
       </div>
-      <label class="lens-btn" title="Upload a photo to identify with Google Lens">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg>
-        Identify Car with Google Lens
-        <input type="file" accept="image/*" style="display:none" onchange="openLensWithPhoto(this)">
-      </label>
-      <div class="csr-suggestions">${sugHTML}</div>
+      <button class="lens-btn" onclick="window.open('https://lens.google.com','_blank')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Identify with Google Lens ↗
+      </button>
       <div id="carSearchResults"></div>
     </div>`;
   document.body.appendChild(overlay);
@@ -3374,52 +3374,83 @@ window.runCarSearch = async function(query) {
   if (!el) return;
   el.innerHTML = `<div class="csr-loading"><div class="csr-spinner"></div><div style="font-size:0.65rem;color:var(--muted);letter-spacing:1px;">Looking up ${escapeHtml(query)}…</div></div>`;
 
-  // Match against local specs DB
+  // 1. Check static specs DB first (instant, no network)
   const specsData = await fetchCarSpecs(query);
-  const imgUrl    = await fetchCarImage(query);
 
-  if (!el || !document.getElementById('carSearchOverlay')) return;
+  // 2. Try Wikipedia search API for summary + image (free, no key)
+  let wikiSummary = null, wikiImg = null, wikiUrl = null;
+  try {
+    // Search Wikipedia for the query
+    const searchRes = await fetch(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=1&namespace=0&format=json&origin=*`);
+    const searchData = await searchRes.json();
+    const pageTitle = searchData[1]?.[0];
+    if (pageTitle) {
+      const summaryRes = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(pageTitle)}`, { headers: { Accept: 'application/json' } });
+      if (summaryRes.ok) {
+        const s = await summaryRes.json();
+        wikiSummary = s.extract ? s.extract.split('.')[0] + '.' : null;
+        wikiImg     = s.thumbnail?.source || s.originalimage?.source || null;
+        wikiUrl     = s.content_urls?.desktop?.page || null;
+      }
+    }
+  } catch(e) {}
 
-  // Also try to find value from autocomplete DB
-  const acMatch = CAR_AC_DB.find(c => c.name.toLowerCase().includes(query.toLowerCase()) || query.toLowerCase().includes(c.name.toLowerCase().split(' ').slice(0,2).join(' ')));
-  const guessVal = acMatch ? acMatch.val : (specsData ? 80000 : 0);
+  // 3. Match value + type from autocomplete DB
+  const acMatch = CAR_AC_DB.find(c =>
+    c.name.toLowerCase().includes(query.toLowerCase()) ||
+    query.toLowerCase().includes(c.name.toLowerCase().split(' ').slice(0,2).join(' '))
+  );
+  const guessVal  = acMatch ? acMatch.val  : 80000;
   const guessType = acMatch ? (acMatch.type || 'supercar') : 'supercar';
+  const rarity    = getRarity(guessVal);
 
-  const rarity = getRarity(guessVal);
-  const imgHTML = imgUrl
-    ? `<img class="csr-img" src="${imgUrl}" alt="${escapeHtml(query)}" onerror="this.parentElement.innerHTML='<div class=csr-img-ph>🚘</div>'">`
+  if (!document.getElementById('carSearchOverlay')) return;
+
+  const imgHTML = wikiImg
+    ? `<img class="csr-img" src="${wikiImg}" alt="${escapeHtml(query)}" onerror="this.outerHTML='<div class=csr-img-ph>🚘</div>'">`
     : `<div class="csr-img-ph">🚘</div>`;
 
-  if (!specsData) {
+  if (specsData) {
+    // Full static specs card
+    const s = specsData;
     el.innerHTML = `<div class="car-search-result">
       <div class="csr-img-wrap">${imgHTML}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+        <span class="specs-type-badge" style="color:${rarity.color};background:${rarity.bg};border-color:${rarity.color}44">${rarity.label}</span>
+        ${s.year ? `<span style="font-size:0.6rem;color:var(--muted);letter-spacing:1px">${s.year}</span>` : ''}
+      </div>
       <div class="csr-name">${escapeHtml(query)}</div>
-      <div class="csr-tagline" style="color:var(--muted)">No detailed specs found — try a more specific name (e.g. "Ferrari 488 GTB")</div>
-      ${guessVal ? `<button class="csr-fill-btn" onclick="fillFromSearch('${escapeHtml(query).replace(/'/g,"\\'")}',${guessVal},'','${guessType}')">➕ LOG THIS CAR</button>` : ''}
+      ${s.tagline ? `<div class="csr-tagline">${s.tagline}</div>` : (wikiSummary ? `<div class="csr-tagline">${escapeHtml(wikiSummary)}</div>` : '')}
+      <div class="csr-grid">
+        ${s.horsepower ? `<div class="csr-cell csr-highlight"><div class="csr-cell-lbl">Power</div><div class="csr-cell-val">${s.horsepower}</div><div class="csr-cell-unit">hp</div></div>` : ''}
+        ${s.torque     ? `<div class="csr-cell"><div class="csr-cell-lbl">Torque</div><div class="csr-cell-val">${s.torque}</div><div class="csr-cell-unit">lb-ft</div></div>` : ''}
+        ${s.zeroToSixty? `<div class="csr-cell"><div class="csr-cell-lbl">0–60</div><div class="csr-cell-val">${s.zeroToSixty}s</div></div>` : ''}
+        ${s.topSpeed   ? `<div class="csr-cell"><div class="csr-cell-lbl">Top Speed</div><div class="csr-cell-val">${s.topSpeed}</div><div class="csr-cell-unit">mph</div></div>` : ''}
+        ${s.engine     ? `<div class="csr-cell" style="grid-column:1/-1"><div class="csr-cell-lbl">Engine</div><div class="csr-cell-val" style="font-size:0.95rem;font-family:inherit;font-weight:600;letter-spacing:0">${s.engine}</div></div>` : ''}
+        ${s.drivetrain ? `<div class="csr-cell"><div class="csr-cell-lbl">Drivetrain</div><div class="csr-cell-val">${s.drivetrain}</div></div>` : ''}
+        ${s.weight     ? `<div class="csr-cell"><div class="csr-cell-lbl">Weight</div><div class="csr-cell-val">${s.weight}</div><div class="csr-cell-unit">lbs</div></div>` : ''}
+      </div>
+      ${wikiUrl ? `<a href="${wikiUrl}" target="_blank" rel="noopener" class="csr-wiki-link">Wikipedia ↗</a>` : ''}
+      <button class="csr-fill-btn" onclick="fillFromSearch('${escapeHtml(query).replace(/'/g,"\\'")}',${guessVal},'','${guessType}')">➕ LOG THIS CAR</button>
     </div>`;
-    return;
+  } else if (wikiSummary || wikiImg) {
+    // Wikipedia fallback card — still useful
+    el.innerHTML = `<div class="car-search-result">
+      <div class="csr-img-wrap">${imgHTML}</div>
+      <span class="specs-type-badge" style="color:${rarity.color};background:${rarity.bg};border-color:${rarity.color}44;margin-bottom:8px;display:inline-block">${rarity.label}</span>
+      <div class="csr-name">${escapeHtml(query)}</div>
+      ${wikiSummary ? `<div class="csr-tagline">${escapeHtml(wikiSummary)}</div>` : ''}
+      ${wikiUrl ? `<a href="${wikiUrl}" target="_blank" rel="noopener" class="csr-wiki-link">Read more on Wikipedia ↗</a>` : ''}
+      <button class="csr-fill-btn" onclick="fillFromSearch('${escapeHtml(query).replace(/'/g,"\\'")}',${guessVal},'','${guessType}')">➕ LOG THIS CAR</button>
+    </div>`;
+  } else {
+    el.innerHTML = `<div class="car-search-result">
+      <div class="csr-img-ph" style="margin-bottom:10px">🚘</div>
+      <div class="csr-name">${escapeHtml(query)}</div>
+      <div class="csr-tagline" style="color:var(--muted)">Nothing found — check the spelling or try a more specific name like "Porsche 911 GT3 RS".</div>
+      <button class="csr-fill-btn" onclick="fillFromSearch('${escapeHtml(query).replace(/'/g,"\\'")}',${guessVal},'','${guessType}')">➕ LOG ANYWAY</button>
+    </div>`;
   }
-
-  const s = specsData;
-  el.innerHTML = `<div class="car-search-result">
-    <div class="csr-img-wrap">${imgHTML}</div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
-      <span class="specs-type-badge" style="color:${rarity.color};background:${rarity.bg};border-color:${rarity.color}44">${rarity.label}</span>
-      ${s.year ? `<span style="font-size:0.6rem;color:var(--muted);letter-spacing:1px">${s.year}</span>` : ''}
-    </div>
-    <div class="csr-name">${escapeHtml(query)}</div>
-    ${s.tagline ? `<div class="csr-tagline">${s.tagline}</div>` : ''}
-    <div class="csr-grid">
-      ${s.horsepower ? `<div class="csr-cell csr-highlight"><div class="csr-cell-lbl">Power</div><div class="csr-cell-val">${s.horsepower}</div><div class="csr-cell-unit">horsepower</div></div>` : ''}
-      ${s.torque     ? `<div class="csr-cell"><div class="csr-cell-lbl">Torque</div><div class="csr-cell-val">${s.torque}</div><div class="csr-cell-unit">lb-ft</div></div>` : ''}
-      ${s.zeroToSixty? `<div class="csr-cell"><div class="csr-cell-lbl">0–60 mph</div><div class="csr-cell-val">${s.zeroToSixty}</div><div class="csr-cell-unit">seconds</div></div>` : ''}
-      ${s.topSpeed   ? `<div class="csr-cell"><div class="csr-cell-lbl">Top Speed</div><div class="csr-cell-val">${s.topSpeed}</div><div class="csr-cell-unit">mph</div></div>` : ''}
-      ${s.engine     ? `<div class="csr-cell" style="grid-column:1/-1"><div class="csr-cell-lbl">Engine</div><div class="csr-cell-val" style="font-size:0.95rem;font-family:inherit;font-weight:600;letter-spacing:0">${s.engine}</div></div>` : ''}
-      ${s.drivetrain ? `<div class="csr-cell"><div class="csr-cell-lbl">Drivetrain</div><div class="csr-cell-val" style="font-size:1rem">${s.drivetrain}</div></div>` : ''}
-      ${s.weight     ? `<div class="csr-cell"><div class="csr-cell-lbl">Weight</div><div class="csr-cell-val">${s.weight}</div><div class="csr-cell-unit">lbs</div></div>` : ''}
-    </div>
-    <button class="csr-fill-btn" onclick="fillFromSearch('${escapeHtml(query).replace(/'/g,"\\'")}',${guessVal},'','${guessType}')">➕ LOG THIS CAR</button>
-  </div>`;
 };
 
 window.fillFromSearch = function(name, value, color, type) {
