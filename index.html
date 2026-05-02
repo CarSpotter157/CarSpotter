@@ -326,11 +326,11 @@ body{
 
 /* Photo + Geo — side by side, slim */
 .photo-btn,.geo-btn{
-  display:flex;align-items:center;justify-content:center;gap:8px;
+  display:flex;align-items:center;justify-content:center;gap:6px;
   width:100%;background:var(--surf2);
   border:1px solid var(--border2);border-radius:var(--radius-xs);
-  color:var(--text2);font-size:0.72rem;font-weight:600;letter-spacing:0.5px;
-  padding:10px;cursor:pointer;transition:border-color 0.15s,color 0.15s;
+  color:var(--text2);font-size:0.68rem;font-weight:600;letter-spacing:0.3px;
+  padding:7px 10px;cursor:pointer;transition:border-color 0.15s,color 0.15s;
   font-family:'Inter',sans-serif;
 }
 .photo-btn:hover,.geo-btn:hover{border-color:var(--accent);color:var(--accent);}
@@ -606,7 +606,7 @@ body{
   background:var(--surf);border:1px solid var(--border);
   border-radius:var(--radius);color:var(--text);
   font-family:'Inter',sans-serif;font-size:0.9rem;line-height:1.7;
-  padding:16px 18px;outline:none;transition:border-color 0.15s;min-height:200px;
+  padding:16px 18px;outline:none;transition:border-color 0.15s;min-height:420px;
 }
 .notes-area:focus{border-color:var(--accent);}
 .notes-area.listening{border-color:var(--red);animation:micPulse 1.4s ease infinite;}
@@ -691,8 +691,10 @@ body{
   font-family:'Bebas Neue',cursive;font-size:1rem;color:var(--accent);
 }
 .lb-rank.top{background:var(--adim);border-color:var(--accent);}
+.lb-main{flex:1;min-width:0;}
 .lb-name{font-weight:600;font-size:0.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .lb-meta{font-size:0.62rem;color:var(--text2);margin-top:2px;}
+.lb-score{text-align:right;flex-shrink:0;}
 .lb-total{font-family:'Bebas Neue',cursive;font-size:1.3rem;color:var(--accent);line-height:1;}
 .lb-cars{font-size:0.6rem;color:var(--muted);margin-top:2px;}
 .lb-empty,.lb-loading{text-align:center;padding:36px;color:var(--muted);font-size:0.75rem;letter-spacing:1px;border:1px dashed var(--border);border-radius:var(--radius-sm);}
@@ -1229,12 +1231,12 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
             <div id="photoPreviewWrap" style="display:none"></div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
               <label class="photo-btn" style="margin-bottom:0">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                 <span>Photo</span>
                 <input type="file" accept="image/*" style="display:none" id="photoInput" onchange="handlePhotoInput(this)">
               </label>
               <button class="geo-btn" id="geoBtn" onclick="captureLocation()" style="margin:0">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:4px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Pin
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;flex-shrink:0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Save Location
               </button>
             </div>
             <div class="location-chip-row" id="locationChipRow" style="display:none"></div>
