@@ -5569,14 +5569,8 @@ async function loadNews() {
   };
 
   // ── 6. SMOOTHER PAGE TRANSITIONS ──
-  var _origGoTo = window.goTo;
-  if (typeof _origGoTo === 'function') {
-    window.goTo = function(page){
-      var active = document.querySelector('.page.active');
-      if (active) { active.style.transition = 'opacity 0.15s ease, transform 0.15s ease'; active.style.transform = 'translateY(6px) scale(0.98)'; active.style.opacity = '0'; }
-      setTimeout(function(){ _origGoTo(page); }, 80);
-    };
-  }
+  // CSS handles transitions via .page{transition:opacity 0.25s,transform 0.25s}
+  // No JS override needed — avoids inline style conflicts.
 
   // ── 7. PULL TO REFRESH ──
   function initPullToRefresh(){
