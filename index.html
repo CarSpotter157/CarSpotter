@@ -1131,6 +1131,60 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 /* ── DESKTOP SIDEBAR LOGO ── */
 .dsk-logo{display:none;}
 @media(min-width:800px){.dsk-logo{display:flex;}}
+
+/* v27 polish and fixes */
+.g-name,.gc-name,.st-bar-name{white-space:normal;overflow:visible;text-overflow:clip;max-width:none;line-height:1.25;}
+.garage-row{align-items:center;gap:8px;}
+.garage-row,.garage-card,.news-card,.card,.stat-box{box-shadow:0 10px 28px rgba(0,0,0,0.16);}
+.garage-card{cursor:pointer;}
+.gc-img-wrap{position:relative;}
+.photo-badge,.latest-badge{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--accent);background:var(--adim);color:var(--accent);border-radius:999px;padding:3px 8px;font-size:0.55rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+.photo-badge{position:absolute;left:8px;top:8px;backdrop-filter:blur(8px);}
+.g-thumb-wrap{position:relative;width:42px;height:42px;margin-right:9px;flex-shrink:0;}
+.g-thumb-wrap img{width:42px;height:42px;border-radius:8px;object-fit:cover;border:1px solid var(--border);}
+.g-thumb-dot{position:absolute;right:-2px;bottom:-2px;width:13px;height:13px;border-radius:50%;background:var(--accent);border:2px solid var(--surf);}
+.car-detail-photo{width:100%;max-height:270px;object-fit:cover;border-radius:10px;border:1px solid var(--border);background:var(--surf2);}
+.car-detail-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0;}
+.car-detail-cell{background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;}
+.car-detail-label{font-size:0.5rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:3px;font-weight:700;}
+.car-detail-value{font-size:0.82rem;color:var(--text);word-break:break-word;}
+.sighting-list{display:grid;gap:7px;max-height:180px;overflow:auto;margin-top:10px;}
+.sighting-row{display:flex;align-items:center;gap:8px;background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:8px;}
+.sighting-row img{width:36px;height:36px;border-radius:7px;object-fit:cover;flex-shrink:0;}
+.sighting-row button{margin-left:auto;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:7px;padding:6px 8px;cursor:pointer;}
+.location-picker-map,#leafletMap{min-height:320px;height:min(54vh,460px);border-radius:12px;border:1px solid var(--border);overflow:hidden;background:linear-gradient(135deg,var(--surf2),var(--surf));}
+.map-empty{background:var(--surf);border:1px dashed var(--border2);border-radius:12px;padding:28px 18px;text-align:center;color:var(--text2);}
+.garage-map-list{display:grid;gap:7px;margin-top:10px;}
+.garage-map-row{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:9px 10px;display:flex;flex-direction:column;gap:3px;}
+.manual-loc-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.manual-loc-row input{background:var(--surf2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:10px 12px;}
+.map-action-row{display:flex;gap:8px;margin-top:10px;}
+.map-action-row button,.modal-save-btn{min-height:42px;}
+.car-search-overlay{align-items:center;padding:16px;}
+.car-search-card{width:min(960px,100%);max-width:960px;min-height:min(760px,92vh);border:1px solid var(--border);border-radius:18px;padding:22px;box-shadow:0 24px 70px rgba(0,0,0,0.45);}
+.car-search-result{display:grid;grid-template-columns:minmax(220px,0.85fr) minmax(280px,1.15fr);gap:18px;align-items:start;}
+.car-search-result .csr-img-wrap{height:310px;margin:0;}
+.csr-result-body{min-width:0;}
+.news-hero{display:grid;grid-template-columns:1.1fr 0.9fr;gap:16px;align-items:stretch;background:linear-gradient(135deg,var(--surf),var(--surf2));border:1px solid var(--border2);border-radius:14px;overflow:hidden;margin-bottom:14px;min-height:230px;}
+.news-hero-img{width:100%;height:100%;min-height:230px;object-fit:cover;background:var(--surf2);}
+.news-hero-body{padding:18px;display:flex;flex-direction:column;justify-content:flex-end;}
+.news-hero-kicker{font-size:0.55rem;letter-spacing:2px;text-transform:uppercase;color:var(--accent);font-weight:800;margin-bottom:8px;}
+.news-hero-title{font-family:'Bebas Neue',cursive;font-size:2rem;line-height:0.95;letter-spacing:0;color:var(--text);margin-bottom:8px;}
+.news-hero-desc{font-size:0.78rem;color:var(--text2);line-height:1.5;}
+.news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;}
+.news-card{min-height:108px;}
+.setting-mini-toggle{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:12px;}
+.edit-photo-preview{width:100%;height:130px;object-fit:cover;border-radius:8px;border:1px solid var(--border);background:var(--surf2);}
+.leaderboard-health{border:1px solid var(--border);background:var(--surf2);border-radius:10px;padding:10px 12px;color:var(--text2);font-size:0.7rem;line-height:1.45;margin-bottom:12px;}
+body.v27-ready .score-banner{background:radial-gradient(circle at top left,var(--adim),transparent 38%),var(--surf);}
+@media(max-width:720px){
+  .car-search-overlay{align-items:flex-end;padding:0;}
+  .car-search-card{min-height:82vh;border-radius:22px 22px 0 0;border-left:none;border-right:none;border-bottom:none;}
+  .car-search-result{display:block;}
+  .car-search-result .csr-img-wrap{height:220px;margin-bottom:14px;}
+  .news-hero{display:block;}
+  .news-hero-img{height:210px;}
+}
 </style>
 
 </head>
@@ -3188,7 +3242,7 @@ applyCarbon();
 initSoundToggle();
 
 //  SERVICE WORKER — cache-first for offline support
-if ('serviceWorker' in navigator) {
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   const swCode = `
 const CACHE = 'cs-v5';
 const URLS = ['.', location.pathname, location.href];
@@ -4755,6 +4809,619 @@ async function loadNews() {
   window.nextTutorialStep = function(){ tutorialStep += 1; if (tutorialStep >= tutorialData().length) closeTutorial(); else renderTutorial(); };
   window.closeTutorial = function(){ localStorage.setItem('cs_tutorial_done', '1'); var overlay = document.getElementById('tutorialOverlay'); if (overlay) overlay.remove(); if (tutorialTimer) { clearInterval(tutorialTimer); tutorialTimer = null; } };
 
+  /* v27 upgrade layer */
+  document.body.classList.add('v27-ready');
+
+  function spotKey(car, run, idx){
+    if (car && car.spotId) return car.spotId;
+    return [run && run.id || 'current', car && car.ts || 0, car && car.name || '', idx || 0].join('|');
+  }
+  function ensureSpotIds(){
+    var changed = false;
+    allRuns.forEach(function(run){
+      (run.cars || []).forEach(function(car, idx){
+        if (!car.spotId) { car.spotId = spotKey(car, run, idx); changed = true; }
+      });
+    });
+    currentRun.forEach(function(car, idx){
+      if (!car.spotId) { car.spotId = spotKey(car, {id:'current'}, idx); changed = true; }
+    });
+    if (changed) {
+      localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+      localStorage.setItem('cs_current', JSON.stringify(currentRun));
+    }
+  }
+  function normalizedTypeKey(type, name){
+    var t = String(type || '').toLowerCase().trim();
+    var legacy = {'🏎':'supercar','🏎️':'supercar','🚗':'sports','🐎':'muscle','🏁':'track','🔥':'exotic','⚡':'ev'};
+    if (legacy[type]) return legacy[type];
+    if (CAR_TYPE_MAP[t]) return t;
+    var n = String(name || '').toLowerCase();
+    if (/(tesla|taycan|rimac|lucid|rivian|nevera|evija|ioniq|e-tron|etron)/.test(n)) return 'ev';
+    if (/(mustang|camaro|charger|challenger|hellcat|demon|viper)/.test(n)) return 'muscle';
+    if (/(gt3|gt2|rs|sto|pista|acr|z06|zr1|track)/.test(n)) return 'track';
+    if (/(rolls|bentley|maybach|phantom|ghost|wraith|mulsanne|continental)/.test(n)) return 'luxury';
+    if (/(urus|bentayga|range rover|g wagon|g-class|truck|suv|r1t)/.test(n)) return 'suv';
+    if (/(ferrari|lamborghini|mclaren|bugatti|koenigsegg|pagani|aston martin|maserati|supercar|hypercar)/.test(n)) return 'supercar';
+    return t || 'sports';
+  }
+  function canonicalTypeLabel(type, name){
+    var key = normalizedTypeKey(type, name);
+    var labels = {supercar:'Supercar',sports:'Sports',muscle:'Muscle',track:'Track',exotic:'Exotic',ev:'EV',luxury:'Luxury',suv:'SUV',classic:'Classic',hotrod:'Hot Rod'};
+    return labels[key] || 'Other';
+  }
+  function carAge(car){ return Number(car && (car.ts || car.createdAt || car.id)) || 0; }
+  function mergeCarArrays(localArr, remoteArr){
+    var map = new Map();
+    function add(car){
+      if (!car) return;
+      var key = car.spotId || [car.name, car.ts, car.value, car.color].join('|');
+      var prev = map.get(key) || {};
+      map.set(key, Object.assign({}, prev, car, {
+        photo: car.photo || prev.photo,
+        location: car.location || prev.location
+      }));
+    }
+    (remoteArr || []).forEach(add);
+    (localArr || []).forEach(add);
+    return Array.from(map.values()).sort(function(a,b){ return carAge(a) - carAge(b); });
+  }
+  function mergeRuns(localRuns, remoteRuns){
+    var map = new Map();
+    function add(run){
+      if (!run) return;
+      var id = String(run.id || (run.date + '|' + run.total + '|' + (run.cars || []).length));
+      var prev = map.get(id);
+      if (!prev) { map.set(id, Object.assign({}, run, { cars: mergeCarArrays([], run.cars || []) })); return; }
+      var merged = Object.assign({}, prev, run);
+      merged.cars = mergeCarArrays(prev.cars || [], run.cars || []);
+      merged.total = merged.cars.reduce(function(s,c){ return s + (Number(c.value) || 0); }, 0);
+      merged.headliner = run.headliner || prev.headliner || null;
+      map.set(id, merged);
+    }
+    (remoteRuns || []).forEach(add);
+    (localRuns || []).forEach(add);
+    return Array.from(map.values()).sort(function(a,b){ return (Number(b.id)||0) - (Number(a.id)||0); });
+  }
+  function mergeQuickPicks(localQP, remoteQP){
+    var map = new Map();
+    (remoteQP || []).concat(localQP || []).forEach(function(car){
+      if (!car || !car.name) return;
+      var key = car.name.toLowerCase();
+      var prev = map.get(key) || {};
+      map.set(key, Object.assign({}, prev, car, { photo: car.photo || prev.photo, location: car.location || prev.location }));
+    });
+    return Array.from(map.values()).slice(0, 100);
+  }
+  function persistAllLocal(){
+    ensureSpotIds();
+    localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+    localStorage.setItem('cs_current', JSON.stringify(currentRun));
+    localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
+    localStorage.setItem('cs_last_local_save', String(Date.now()));
+  }
+  var originalSaveToCloud = saveToCloud;
+  saveToCloud = function(){
+    persistAllLocal();
+    if (typeof originalSaveToCloud === 'function') originalSaveToCloud();
+  };
+  var originalSaveCurrentRun = saveCurrentRun;
+  saveCurrentRun = function(){
+    persistAllLocal();
+    if (currentUser && navigator.onLine) saveToCloud();
+  };
+  var originalLoadFromCloud = loadFromCloud;
+  loadFromCloud = async function(){
+    if (!currentUser) return;
+    var localRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
+    var localCurrent = JSON.parse(localStorage.getItem('cs_current') || '[]');
+    var localQP = JSON.parse(localStorage.getItem('cs_qp') || '[]');
+    setSyncDot('syncing');
+    try {
+      var snap = await db.collection('users').doc(currentUser.uid).get();
+      if (snap.exists) {
+        var d = snap.data();
+        allRuns = mergeRuns(localRuns, d.allRuns || []);
+        currentRun = mergeCarArrays(localCurrent, d.currentRun || []);
+        quickPicks = mergeQuickPicks(localQP, d.quickPicks || []);
+        if (d.notes != null && !localStorage.getItem('cs_notes')) localStorage.setItem('cs_notes', d.notes);
+      } else {
+        allRuns = localRuns; currentRun = localCurrent; quickPicks = localQP;
+      }
+      persistAllLocal();
+      if (currentUser && navigator.onLine) originalSaveToCloud();
+      setSyncDot('ok');
+    } catch(e) {
+      console.error(e);
+      if (typeof originalLoadFromCloud === 'function') await originalLoadFromCloud();
+    }
+    renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
+  };
+  var originalSubscribeCloud = subscribeCloud;
+  subscribeCloud = function(){
+    if (!currentUser) return;
+    if (syncUnsub) { try { syncUnsub(); } catch(e){} syncUnsub = null; }
+    syncUnsub = db.collection('users').doc(currentUser.uid).onSnapshot(function(snap){
+      if (!snap.exists) return;
+      var d = snap.data();
+      allRuns = mergeRuns(JSON.parse(localStorage.getItem('cs_runs') || '[]'), d.allRuns || []);
+      currentRun = mergeCarArrays(JSON.parse(localStorage.getItem('cs_current') || '[]'), d.currentRun || []);
+      quickPicks = mergeQuickPicks(JSON.parse(localStorage.getItem('cs_qp') || '[]'), d.quickPicks || []);
+      persistAllLocal();
+      renderQPTrigger(); renderSpot();
+      var pg = document.querySelector('.page.active')?.id;
+      if (pg === 'page-garage') renderGarage();
+      if (pg === 'page-history') renderHistory();
+    }, function(){ if (typeof originalSubscribeCloud === 'function') originalSubscribeCloud(); });
+  };
+  window.addEventListener('beforeunload', persistAllLocal);
+  document.addEventListener('visibilitychange', function(){ if (document.hidden) persistAllLocal(); });
+
+  var originalSaveToQP = saveToQP;
+  saveToQP = function(car){
+    if (car && !car.spotId) car.spotId = 'qp|' + Date.now() + '|' + Math.random().toString(36).slice(2);
+    quickPicks = quickPicks.filter(function(q){ return q.name.toLowerCase() !== car.name.toLowerCase(); });
+    quickPicks.unshift({ name:car.name, value:car.value, color:car.color, type:car.type, photo:car.photo, location:car.location, ts:car.ts || Date.now() });
+    persistAllLocal();
+  };
+
+  window.getAllCars = getAllCars = function(){
+    ensureSpotIds();
+    var groups = new Map();
+    function add(car, label, run, idx){
+      if (!car || !car.name) return;
+      var key = car.name.toLowerCase();
+      var copy = Object.assign({}, car, { runDate: label, spotKey: spotKey(car, run, idx), typeKey: normalizedTypeKey(car.type, car.name) });
+      var group = groups.get(key);
+      if (!group) {
+        group = Object.assign({}, copy, { spotCount:0, sightings:[] });
+        groups.set(key, group);
+      }
+      group.spotCount++;
+      group.sightings.push(copy);
+      var newer = carAge(copy) >= carAge(group);
+      if (newer) {
+        Object.assign(group, copy);
+      } else if (!group.photo && copy.photo) {
+        group.photo = copy.photo;
+      }
+      if (!group.location && copy.location) group.location = copy.location;
+    }
+    allRuns.slice().reverse().forEach(function(run){
+      (run.cars || []).forEach(function(car, idx){ add(car, run.spotted ? 'Spotted - ' + run.date : 'Run - ' + run.date, run, idx); });
+    });
+    currentRun.forEach(function(car, idx){ add(car, 'Current Run', {id:'current'}, idx); });
+    return Array.from(groups.values()).map(function(group){
+      group.sightings.sort(function(a,b){ return carAge(b) - carAge(a); });
+      var newestWithPhoto = group.sightings.find(function(c){ return !!c.photo; });
+      if (newestWithPhoto) group.photo = newestWithPhoto.photo;
+      return group;
+    });
+  };
+
+  window.applyGarageFilters = applyGarageFilters = function(cars){
+    var q = (document.getElementById('garageSearch')?.value || '').toLowerCase().trim();
+    return cars.filter(function(car){
+      if (q && ![car.name, car.color, car.runDate, locLabel(car.location)].join(' ').toLowerCase().includes(q)) return false;
+      if (garageFilter === 'all') return true;
+      if (garageFilter === 'legend') return car.value >= 1000000;
+      if (garageFilter === 'hypercar') return car.value >= 500000;
+      return normalizedTypeKey(car.type, car.name) === garageFilter;
+    });
+  };
+
+  window.renderGarage = renderGarage = function(){
+    ensureSpotIds();
+    var allCars = getAllCars();
+    var filtered = applyGarageFilters(sorted(allCars));
+    var total = allCars.reduce(function(x,c){ return x + (Number(c.value)||0); }, 0);
+    document.getElementById('gCars').textContent = allCars.length;
+    document.getElementById('gTotal').textContent = fmt(total);
+    document.getElementById('gAvg').textContent = allCars.length ? fmt(total / allCars.length) : '';
+    var el = document.getElementById('garageList');
+    if (!filtered.length) {
+      el.className = '';
+      el.innerHTML = '<div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">&#128270;</span>' + (allCars.length ? 'No matches' : 'No cars yet!') + '</div>';
+      return;
+    }
+    if (garageView === 'map') return renderGarageMap(el);
+    var pageCars = filtered.slice(0, (garagePage + 1) * GARAGE_PAGE_SIZE);
+    var hasMore = filtered.length > pageCars.length;
+    if (garageView === 'grid') {
+      el.className = 'garage-grid';
+      el.innerHTML = pageCars.map(function(car, idx){
+        var rarity = getRarity(car.value);
+        return '<button class="garage-card" onclick="openCarDetailModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '"><span class="photo-badge">Photo</span>' : '<div class="gc-img-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '</div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + car.spotCount + 'x</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + canonicalTypeLabel(car.type, car.name) + '</div></div></div></div></button>';
+      }).join('');
+      if (hasMore) appendLoadMoreBtn(el, function(){ garagePage++; renderGarage(); }, filtered.length - pageCars.length);
+      return;
+    }
+    el.className = '';
+    el.innerHTML = pageCars.map(function(car, idx){
+      var rarity = getRarity(car.value);
+      var thumb = car.photo ? '<div class="g-thumb-wrap"><img src="' + car.photo + '" alt="car"><span class="g-thumb-dot"></span></div>' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
+      return '<button class="garage-row" onclick="openCarDetailModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + thumb + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + '</div><div class="g-meta">' + escapeHtml([car.color, locLabel(car.location), car.runDate].filter(Boolean).join(' - ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.photo ? '<span class="latest-badge">Photo saved</span>' : '') + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><button class="g-edit" onclick="event.preventDefault();event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit car">Edit</button><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="' + escapeHtml(car.name) + '"></button></button>';
+    }).join('');
+    if (hasMore) appendLoadMoreBtn(el, function(){ garagePage++; renderGarage(); }, filtered.length - pageCars.length);
+  };
+
+  function renderGarageMap(el){
+    el.className = '';
+    var mapped = getAllCars().flatMap(function(group){ return group.sightings || [group]; }).filter(function(car){ return car.location && isFinite(car.location.lat) && isFinite(car.location.lng); });
+    if (!mapped.length) {
+      el.innerHTML = '<div class="map-empty"><strong style="display:block;margin-bottom:6px;color:var(--text)">No mapped spots yet</strong>Tap Save Location while logging, or edit a car and add a pin.</div>';
+      return;
+    }
+    el.innerHTML = '<div class="garage-map-wrap" style="position:relative"><div id="leafletMap"></div><div class="map-hud"><div class="map-badge">' + mapped.length + ' mapped spot' + (mapped.length !== 1 ? 's' : '') + '</div></div></div><div class="garage-map-list" id="mapCarList"></div>';
+    document.getElementById('mapCarList').innerHTML = mapped.slice().sort(function(a,b){ return carAge(b) - carAge(a); }).map(function(car){
+      var rarity = getRarity(car.value);
+      return '<button class="garage-map-row" onclick="openCarDetailModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" style="border-left:3px solid ' + rarity.color + '"><strong>' + escapeHtml(car.name) + '</strong><span>' + escapeHtml(locLabel(car.location)) + ' - ' + fmtFull(car.value) + '</span></button>';
+    }).join('');
+    setTimeout(function(){
+      var mapEl = document.getElementById('leafletMap');
+      if (!mapEl || !window.L) {
+        mapEl.innerHTML = '<div class="map-empty">Map library did not load. Your pinned cars are still listed below.</div>';
+        return;
+      }
+      if (window._csLeafletMap) { try { window._csLeafletMap.remove(); } catch(e){} window._csLeafletMap = null; }
+      var map = L.map('leafletMap', { zoomControl:true, attributionControl:true }).setView([mapped[0].location.lat, mapped[0].location.lng], 13);
+      window._csLeafletMap = map;
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'OpenStreetMap', maxZoom:19 }).addTo(map);
+      var bounds = [];
+      mapped.forEach(function(car){
+        bounds.push([car.location.lat, car.location.lng]);
+        var rarity = getRarity(car.value);
+        L.circleMarker([car.location.lat, car.location.lng], { radius:8, color:rarity.color, fillColor:rarity.color, fillOpacity:0.85 })
+          .addTo(map)
+          .bindPopup('<strong>' + escapeHtml(car.name) + '</strong><br>' + fmtFull(car.value) + '<br>' + escapeHtml(locLabel(car.location)));
+      });
+      if (bounds.length > 1) map.fitBounds(bounds, { padding:[38,38], maxZoom:15 });
+      setTimeout(function(){ map.invalidateSize(); }, 150);
+    }, 80);
+  }
+
+  window.openCarDetailModal = async function(encodedCar){
+    var car;
+    try { car = JSON.parse(decodeURIComponent(encodedCar)); } catch(e) { return; }
+    var overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'carDetailModal';
+    var webImg = car.photo ? '' : await fetchCarImage(car.name);
+    var img = car.photo || webImg || '';
+    overlay.innerHTML = '<div class="modal-card" onclick="event.stopPropagation()"><div class="modal-handle"></div><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div class="modal-title">' + escapeHtml(car.name) + '</div><button class="car-search-close" onclick="document.getElementById(\'carDetailModal\').remove()">x</button></div>' + (img ? '<img class="car-detail-photo" src="' + img + '" alt="' + escapeHtml(car.name) + '">' : '') + '<div class="car-detail-meta"><div class="car-detail-cell"><div class="car-detail-label">Value</div><div class="car-detail-value">' + fmtFull(car.value) + '</div></div><div class="car-detail-cell"><div class="car-detail-label">Seen</div><div class="car-detail-value">' + (car.spotCount || 1) + ' time' + ((car.spotCount || 1) !== 1 ? 's' : '') + '</div></div><div class="car-detail-cell"><div class="car-detail-label">Color</div><div class="car-detail-value">' + escapeHtml(car.color || 'Unknown') + '</div></div><div class="car-detail-cell"><div class="car-detail-label">Location</div><div class="car-detail-value">' + escapeHtml(locLabel(car.location) || 'No pin') + '</div></div></div><button class="modal-save-btn" onclick="openEditCarModal(\'' + encodedCar + '\')">Edit latest spot</button><button class="modal-save-btn" style="margin-top:8px;background:var(--surf2);color:var(--text);border:1px solid var(--border2)" onclick="showSpecsCard(JSON.parse(decodeURIComponent(\'' + encodedCar + '\')))">View specs</button>' + renderSightings(car) + '</div>';
+    overlay.onclick = function(){ overlay.remove(); };
+    document.body.appendChild(overlay);
+  };
+  function renderSightings(car){
+    var sightings = car.sightings || [];
+    if (sightings.length < 2) return '';
+    return '<div class="car-detail-label" style="margin-top:14px;">All sightings</div><div class="sighting-list">' + sightings.map(function(s){
+      return '<div class="sighting-row">' + (s.photo ? '<img src="' + s.photo + '" alt="car">' : '<span class="hc-emoji">' + carTypeLabel(s.type) + '</span>') + '<div style="min-width:0;"><div style="font-size:0.76rem;color:var(--text);font-weight:700;">' + escapeHtml(s.runDate || 'Saved') + '</div><div style="font-size:0.66rem;color:var(--text2);">' + escapeHtml([s.color, locLabel(s.location), fmtFull(s.value)].filter(Boolean).join(' - ')) + '</div></div><button onclick="openEditCarModal(\'' + encodeURIComponent(JSON.stringify(s)) + '\')">Edit</button></div>';
+    }).join('') + '</div>';
+  }
+
+  window.captureLocation = function(){ openLocationPicker(); };
+  window.openLocationPicker = function(existing, onSave){
+    var overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'locationPickerModal';
+    var start = existing || currentSpotLocation || { lat:40.7128, lng:-74.0060, label:'Manual pin' };
+    overlay.innerHTML = '<div class="modal-card" onclick="event.stopPropagation()"><div class="modal-handle"></div><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div class="modal-title">Save Location</div><button class="car-search-close" onclick="document.getElementById(\'locationPickerModal\').remove()">x</button></div><div id="locationPickerMap" class="location-picker-map"></div><div class="manual-loc-row"><input id="manualLat" placeholder="Latitude" value="' + (existing && existing.lat ? existing.lat : '') + '"><input id="manualLng" placeholder="Longitude" value="' + (existing && existing.lng ? existing.lng : '') + '"></div><input id="manualLocLabel" style="width:100%;margin-top:8px;background:var(--surf2);border:1px solid var(--border2);border-radius:8px;color:var(--text);padding:10px 12px;" placeholder="Label, like Main St or cars and coffee" value="' + escapeHtml(existing && existing.label || '') + '"><div class="map-action-row"><button class="modal-save-btn" style="background:var(--surf2);color:var(--text);border:1px solid var(--border2)" onclick="useBrowserLocationForPicker()">Use current</button><button class="modal-save-btn" onclick="savePickedLocation()">Save Location</button></div></div>';
+    overlay.onclick = function(){ overlay.remove(); };
+    document.body.appendChild(overlay);
+    window._csPickedLocation = existing || null;
+    setTimeout(function(){
+      var mapEl = document.getElementById('locationPickerMap');
+      if (!mapEl || !window.L) { mapEl.innerHTML = '<div class="map-empty">Map did not load. Enter latitude and longitude below.</div>'; return; }
+      var map = L.map('locationPickerMap').setView([start.lat, start.lng], existing ? 15 : 11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'OpenStreetMap', maxZoom:19 }).addTo(map);
+      var marker = existing ? L.marker([existing.lat, existing.lng]).addTo(map) : null;
+      function setPick(latlng){
+        window._csPickedLocation = { lat:latlng.lat, lng:latlng.lng, label:document.getElementById('manualLocLabel').value || 'Manual pin', capturedAt:Date.now() };
+        document.getElementById('manualLat').value = latlng.lat.toFixed(6);
+        document.getElementById('manualLng').value = latlng.lng.toFixed(6);
+        if (!marker) marker = L.marker(latlng).addTo(map); else marker.setLatLng(latlng);
+      }
+      map.on('click', function(e){ setPick(e.latlng); });
+      window._csLocationPickerMap = map;
+      window._csLocationPickerSet = setPick;
+      setTimeout(function(){ map.invalidateSize(); }, 150);
+    }, 80);
+    window._csLocationPickerCallback = onSave || function(loc){
+      currentSpotLocation = loc;
+      persistPendingLocation();
+      renderPendingLocation();
+      showToast('Location saved for this log');
+    };
+  };
+  window.useBrowserLocationForPicker = function(){
+    if (!navigator.geolocation) { showToast('Location is not supported here'); return; }
+    navigator.geolocation.getCurrentPosition(function(pos){
+      var loc = { lat:pos.coords.latitude, lng:pos.coords.longitude };
+      if (window._csLocationPickerSet) window._csLocationPickerSet(loc);
+      if (window._csLocationPickerMap) window._csLocationPickerMap.setView([loc.lat, loc.lng], 16);
+    }, function(){ showToast('Could not get current location'); }, { enableHighAccuracy:true, timeout:10000, maximumAge:120000 });
+  };
+  window.savePickedLocation = function(){
+    var lat = parseFloat(document.getElementById('manualLat').value);
+    var lng = parseFloat(document.getElementById('manualLng').value);
+    var picked = window._csPickedLocation || {};
+    if (isFinite(lat) && isFinite(lng)) picked = { lat:lat, lng:lng };
+    if (!isFinite(picked.lat) || !isFinite(picked.lng)) { showToast('Tap the map or enter coordinates'); return; }
+    picked.label = sanitizeText(document.getElementById('manualLocLabel').value) || picked.label || 'Manual pin';
+    picked.capturedAt = Date.now();
+    var cb = window._csLocationPickerCallback;
+    document.getElementById('locationPickerModal')?.remove();
+    if (typeof cb === 'function') cb(picked);
+  };
+
+  var originalRenderPendingLocation = renderPendingLocation;
+  renderPendingLocation = function(){
+    originalRenderPendingLocation();
+    var btn = document.getElementById('geoBtn');
+    if (btn) btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;flex-shrink:0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Save Location';
+  };
+
+  var originalLogRun = window.logRun;
+  window.logRun = logRun = function(){
+    var input = getInputs();
+    if (!input.name) { showToast('Enter a car name!'); return; }
+    if (isNaN(input.value) || input.value < 0) { showToast('Enter a valid value!'); return; }
+    var name = resolveAlias(input.name);
+    var prevRun = JSON.parse(JSON.stringify(currentRun));
+    var prevHL = headlinerIdx;
+    var photo = getPhotoAndClear();
+    var car = attachPendingLocation({ spotId:'spot|' + Date.now() + '|' + Math.random().toString(36).slice(2), name:name, value:input.value, color:input.color, type:normalizedTypeKey(input.type, name), ts:Date.now(), ...(photo ? {photo:photo} : {}) });
+    currentRun.push(car);
+    saveToQP(car);
+    saveCurrentRun();
+    clearInputs(); renderQPTrigger(); renderSpot(); renderGarage();
+    playSound('log');
+    pushUndo('run', { run:prevRun, headlinerIdx:prevHL }, name + ' removed');
+    showToast((photo ? 'Photo saved - ' : '') + name + ' added to run!');
+    showSpecsCard(car);
+    setTimeout(checkNewAchievements, 400);
+  };
+  window.logSpotted = logSpotted = function(){
+    var input = getInputs();
+    if (!input.name) { showToast('Enter a car name!'); return; }
+    if (isNaN(input.value) || input.value < 0) { showToast('Enter a valid value!'); return; }
+    var name = resolveAlias(input.name);
+    var photo = getPhotoAndClear();
+    var car = attachPendingLocation({ spotId:'spot|' + Date.now() + '|' + Math.random().toString(36).slice(2), name:name, value:input.value, color:input.color, type:normalizedTypeKey(input.type, name), ts:Date.now(), ...(photo ? {photo:photo} : {}) });
+    saveToQP(car);
+    var prevRuns = JSON.parse(JSON.stringify(allRuns));
+    allRuns.unshift({ id:Date.now(), date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), total:input.value, spotted:true, cars:[car] });
+    persistAllLocal(); saveToCloud();
+    playSound('log');
+    pushUndo('history', prevRuns, name + ' removed');
+    clearInputs(); renderQPTrigger(); renderGarage();
+    showToast((photo ? 'Photo saved - ' : '') + name + ' saved to garage!');
+    showSpecsCard(car);
+    setTimeout(checkNewAchievements, 400);
+  };
+
+  var originalShowSpecsCard = showSpecsCard;
+  window.showSpecsCard = showSpecsCard = async function(car){
+    if (car && car.photo) {
+      var originalFetch = fetchCarImage;
+      fetchCarImage = async function(){ return car.photo; };
+      await originalShowSpecsCard(car);
+      fetchCarImage = originalFetch;
+      var wrap = document.querySelector('#specsOverlay .specs-img-wrap');
+      if (wrap && !wrap.querySelector('.photo-badge')) wrap.insertAdjacentHTML('beforeend','<span class="photo-badge">Your photo</span>');
+      return;
+    }
+    return originalShowSpecsCard(car);
+  };
+
+  window.fetchCarImage = fetchCarImage = async function(carName){
+    var exact = String(carName || '').trim();
+    var attempts = [exact, exact + ' car', exact + ' vehicle'];
+    for (var i = 0; i < attempts.length; i++) {
+      try {
+        var searchRes = await fetch('https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=' + encodeURIComponent(attempts[i]) + '&gsrlimit=1&prop=pageimages&pithumbsize=900&format=json&origin=*');
+        var searchData = await searchRes.json();
+        var pages = searchData.query && searchData.query.pages ? Object.values(searchData.query.pages) : [];
+        if (pages[0] && pages[0].thumbnail && pages[0].thumbnail.source) return pages[0].thumbnail.source;
+      } catch(e) {}
+    }
+    return 'https://tse.mm.bing.net/th?q=' + encodeURIComponent(exact + ' car') + '&w=900&h=520&c=7&rs=1&p=0';
+  };
+
+  var originalFetchCarSpecs = fetchCarSpecs;
+  window.fetchCarSpecs = fetchCarSpecs = async function(carName){
+    var exact = String(carName || '').trim();
+    var local = await originalFetchCarSpecs(exact);
+    if (local) return local;
+    try {
+      var words = exact.split(/\s+/);
+      var make = words[0] || '';
+      var model = words.slice(1).join(' ');
+      var res = await fetch('https://vpic.nhtsa.dot.gov/api/vehicles/GetModelsForMake/' + encodeURIComponent(make) + '?format=json');
+      var data = await res.json();
+      var found = (data.Results || []).find(function(r){ return (r.Model_Name || '').toLowerCase() === model.toLowerCase() || (r.Model_Name || '').toLowerCase().includes(model.toLowerCase()); });
+      if (found) return { tagline: found.Make_Name + ' ' + found.Model_Name + ' - verified model data.', year:'', engine:'Search result matched to the exact logged words.' };
+    } catch(e) {}
+    return { tagline:'Exact web lookup opened for ' + exact + '.', engine:'Tap the Google link for full specs and trims.' };
+  };
+
+  window.openEditCarModal = function(encodedCar){
+    var car;
+    try { car = JSON.parse(decodeURIComponent(encodedCar)); } catch(e) { return; }
+    var overlay = document.createElement('div');
+    overlay.className = 'modal-overlay edit-car-modal';
+    overlay.id = 'editCarModal';
+    overlay.innerHTML = '<div class="modal-card" onclick="event.stopPropagation()"><div class="modal-handle"></div><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div class="modal-title">Edit Car</div><button class="car-search-close" onclick="document.getElementById(\'editCarModal\').remove()">x</button></div><div class="edit-field-group"><div class="edit-field edit-field-full"><label>Make / Model</label><input id="editCarName" value="' + escapeHtml(car.name) + '"></div><div class="edit-field"><label>Value ($)</label><input id="editCarValue" type="number" value="' + (car.value || 0) + '" min="0"></div><div class="edit-field"><label>Color</label><input id="editCarColor" value="' + escapeHtml(car.color || '') + '"></div><div class="edit-field edit-field-full"><label>Type</label><select id="editCarType">' + ['supercar','sports','muscle','track','exotic','ev','luxury','suv','classic','hotrod'].map(function(t){ return '<option value="' + t + '"' + (normalizedTypeKey(car.type, car.name) === t ? ' selected' : '') + '>' + canonicalTypeLabel(t) + '</option>'; }).join('') + '</select></div></div>' + (car.photo ? '<img class="edit-photo-preview" id="editPhotoPreview" src="' + car.photo + '" alt="car">' : '<div class="edit-photo-preview" id="editPhotoPreview" style="display:flex;align-items:center;justify-content:center;color:var(--muted);">No photo saved</div>') + '<label class="photo-btn" style="margin-top:8px;"><span>Replace Photo</span><input type="file" accept="image/*" style="display:none" id="editPhotoInput" onchange="loadEditPhoto(this)"></label><div class="map-action-row"><button class="modal-save-btn" style="background:var(--surf2);color:var(--text);border:1px solid var(--border2)" onclick="openEditLocationPicker()">Set Location</button><button class="modal-save-btn" onclick="saveEditCarV27(\'' + encodeURIComponent(JSON.stringify(car)) + '\')">Save Changes</button></div></div>';
+    overlay.onclick = function(){ overlay.remove(); };
+    document.body.appendChild(overlay);
+    window._editPhoto = car.photo || '';
+    window._editLocation = car.location || null;
+  };
+  window.openEditLocationPicker = function(){
+    openLocationPicker(window._editLocation || null, function(loc){
+      window._editLocation = loc;
+      showToast('Location ready - save changes');
+    });
+  };
+  window.loadEditPhoto = function(input){
+    var file = input.files[0]; if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e){
+      window._editPhoto = e.target.result;
+      var p = document.getElementById('editPhotoPreview');
+      p.outerHTML = '<img class="edit-photo-preview" id="editPhotoPreview" src="' + window._editPhoto + '" alt="car">';
+    };
+    reader.readAsDataURL(file);
+    input.value = '';
+  };
+  function updateMatchingCar(target, updater){
+    var matched = false;
+    function isMatch(c, run, idx){
+      if (target.spotKey && spotKey(c, run, idx) === target.spotKey) return true;
+      if (target.spotId && c.spotId === target.spotId) return true;
+      return !target.spotId && c.name && target.name && c.name.toLowerCase() === target.name.toLowerCase();
+    }
+    allRuns.forEach(function(run){
+      (run.cars || []).forEach(function(c, idx){ if (isMatch(c, run, idx)) { updater(c); matched = true; } });
+      run.total = (run.cars || []).reduce(function(s,c){ return s + (Number(c.value)||0); }, 0);
+      if (run.headliner && target.name && run.headliner.name.toLowerCase() === target.name.toLowerCase()) {
+        var edited = (run.cars || []).find(function(c){ return c.name && c.name.toLowerCase() === document.getElementById('editCarName').value.toLowerCase(); });
+        if (edited) run.headliner = { name:edited.name, type:edited.type, value:edited.value };
+      }
+    });
+    currentRun.forEach(function(c, idx){ if (isMatch(c, {id:'current'}, idx)) { updater(c); matched = true; } });
+    quickPicks.forEach(function(c){ if (target.name && c.name.toLowerCase() === target.name.toLowerCase()) updater(c); });
+    return matched;
+  }
+  window.saveEditCarV27 = function(encodedTarget){
+    var target = JSON.parse(decodeURIComponent(encodedTarget));
+    var newName = sanitizeText(document.getElementById('editCarName').value);
+    var newValue = parseFloat(document.getElementById('editCarValue').value || '0');
+    var newColor = sanitizeText(document.getElementById('editCarColor').value);
+    var newType = document.getElementById('editCarType').value;
+    if (!newName || isNaN(newValue) || newValue < 0) { showToast('Check the name and value'); return; }
+    updateMatchingCar(target, function(c){
+      c.name = newName; c.value = newValue; c.color = newColor; c.type = newType;
+      if (window._editPhoto) c.photo = window._editPhoto;
+      if (window._editLocation) c.location = window._editLocation;
+      c.editedAt = Date.now();
+    });
+    persistAllLocal(); saveToCloud();
+    document.getElementById('editCarModal')?.remove();
+    document.getElementById('carDetailModal')?.remove();
+    renderGarage(); renderSpot(); renderHistory(); renderQPTrigger();
+    showToast(newName + ' updated');
+  };
+
+  window.renderStats = renderStats = function(){
+    var allCars = allRuns.flatMap(function(r){ return r.cars || []; }).concat(currentRun);
+    var total = allCars.reduce(function(s,c){ return s + (Number(c.value)||0); }, 0);
+    document.getElementById('st-summary').innerHTML = '<div class="stat-box"><div class="stat-v">' + allCars.length + '</div><div class="stat-l">Cars</div></div><div class="stat-box"><div class="stat-v">' + fmt(total) + '</div><div class="stat-l">Value</div></div><div class="stat-box"><div class="stat-v">' + (allCars.length ? fmt(total/allCars.length) : '$0') + '</div><div class="stat-l">Average</div></div>';
+    var topCars = allCars.slice().sort(function(a,b){ return b.value - a.value; }).slice(0,8);
+    var maxVal = Math.max.apply(null, topCars.map(function(c){ return c.value; }).concat([1]));
+    document.getElementById('st-topcars').innerHTML = topCars.length ? topCars.map(function(c){ return '<div class="st-bar-wrap"><div class="st-bar-label"><span class="st-bar-name">' + escapeHtml(c.name) + '</span><span class="st-bar-val">' + fmt(c.value) + '</span></div><div class="st-bar-track"><div class="st-bar-fill" style="width:' + Math.round(c.value/maxVal*100) + '%"></div></div></div>'; }).join('') : '<div class="empty-garage">No cars yet</div>';
+    var makes = {};
+    allCars.forEach(function(c){ var make = (c.name || 'Other').split(' ')[0]; makes[make] = (makes[make] || 0) + 1; });
+    var topMakes = Object.entries(makes).sort(function(a,b){ return b[1]-a[1]; }).slice(0,8);
+    var maxMake = Math.max.apply(null, topMakes.map(function(x){ return x[1]; }).concat([1]));
+    document.getElementById('st-makes').innerHTML = topMakes.map(function(x){ return '<div class="st-bar-wrap"><div class="st-bar-label"><span class="st-bar-name">' + escapeHtml(x[0]) + '</span><span class="st-bar-val">' + x[1] + 'x</span></div><div class="st-bar-track"><div class="st-bar-fill" style="width:' + Math.round(x[1]/maxMake*100) + '%"></div></div></div>'; }).join('');
+    var types = {};
+    allCars.forEach(function(c){ var label = canonicalTypeLabel(c.type, c.name); types[label] = (types[label] || 0) + 1; });
+    var topTypes = Object.entries(types).sort(function(a,b){ return b[1]-a[1]; });
+    var maxType = Math.max.apply(null, topTypes.map(function(x){ return x[1]; }).concat([1]));
+    document.getElementById('st-types').innerHTML = topTypes.map(function(x){ return '<div class="st-bar-wrap"><div class="st-bar-label"><span class="st-bar-name">' + escapeHtml(x[0]) + '</span><span class="st-bar-val">' + x[1] + 'x</span></div><div class="st-bar-track"><div class="st-bar-fill" style="width:' + Math.round(x[1]/maxType*100) + '%"></div></div></div>'; }).join('');
+  };
+
+  var showAdvancedAchievements = localStorage.getItem('cs_show_advanced_ach') === 'on';
+  ACHIEVEMENTS.push(
+    { id:'garage_500', icon:'500', name:'Warehouse', desc:'Log 500 cars total', check:function(c){ return c.length>=500; } },
+    { id:'photo_100', icon:'P100', name:'Full Gallery', desc:'Log 100 cars with photos', check:function(c){ return c.filter(function(x){ return x.photo; }).length>=100; } },
+    { id:'mapped_50', icon:'MAP', name:'Pinned City', desc:'Save locations for 50 cars', check:function(c){ return c.filter(function(x){ return x.location; }).length>=50; } },
+    { id:'ten_mil_run', icon:'10M', name:'Dream Traffic', desc:'Complete a run over $10M', check:function(c,r){ return r.some(function(x){ return !x.spotted && x.total>=10000000; }); } },
+    { id:'brand_loyalist', icon:'B10', name:'Brand Loyalist', desc:'Spot 10 cars from the same make', check:function(c){ var m={}; c.forEach(function(x){ var make=(x.name||'').split(' ')[0].toLowerCase(); m[make]=(m[make]||0)+1; }); return Object.values(m).some(function(n){ return n>=10; }); } }
+  );
+  var originalRenderAchievements = renderAchievements;
+  window.renderAchievements = renderAchievements = function(){
+    var unlocked = new Set(getUnlockedAchievements());
+    var list = showAdvancedAchievements ? ACHIEVEMENTS : ACHIEVEMENTS.filter(function(a){ return unlocked.has(a.id); });
+    document.getElementById('achUnlocked').textContent = unlocked.size;
+    document.getElementById('achTotal').textContent = showAdvancedAchievements ? ACHIEVEMENTS.length : unlocked.size;
+    var grid = document.getElementById('achGrid');
+    grid.innerHTML = (!list.length ? '<div class="empty-garage">No achievements unlocked yet. Turn on challenge preview in Settings to see the full list.</div>' : list.map(function(a,i){ return '<div class="ach-badge ' + (unlocked.has(a.id) ? 'unlocked' : 'locked') + '" style="animation-delay:' + (i*0.04) + 's"><span class="ach-icon">' + a.icon + '</span><div class="ach-name">' + a.name + '</div><div class="ach-req">' + a.desc + '</div></div>'; }).join(''));
+  };
+  function injectAdvancedAchievementSetting(){
+    var settings = document.getElementById('page-settings');
+    if (!settings || document.getElementById('advancedAchToggle')) return;
+    var card = document.createElement('div');
+    card.className = 'card setting-card';
+    card.innerHTML = '<div class="setting-head"><div class="setting-icon">Goals</div><div class="setting-copy"><div class="card-title">ACHIEVEMENT PREVIEW</div><div class="setting-desc">Show locked challenge achievements before you earn them.</div></div></div><div class="setting-row" style="border-top:none;padding-top:0;margin-top:10px;"><span style="font-size:0.78rem;color:var(--text2);flex:1;">Show locked achievements</span><button class="toggle-pill" id="advancedAchToggle" onclick="toggleAdvancedAchievements()"><div class="toggle-knob"></div></button></div>';
+    settings.insertBefore(card, settings.children[1] || null);
+    document.getElementById('advancedAchToggle').classList.toggle('on', showAdvancedAchievements);
+  }
+  window.toggleAdvancedAchievements = function(){
+    showAdvancedAchievements = !showAdvancedAchievements;
+    localStorage.setItem('cs_show_advanced_ach', showAdvancedAchievements ? 'on' : 'off');
+    document.getElementById('advancedAchToggle')?.classList.toggle('on', showAdvancedAchievements);
+    renderAchievements();
+  };
+  injectAdvancedAchievementSetting();
+
+  window.loadLeaderboard = async function(force){
+    var el = document.getElementById('leaderboardList');
+    if (el) el.innerHTML = '<div class="leaderboard-health">Checking global leaderboard...</div>';
+    try {
+      var snap = await db.collection('leaderboardRuns').orderBy('total', 'desc').limit(100).get();
+      leaderboardRuns = snap.docs.map(function(doc){ var d = doc.data(); return { name:d.name || 'Spotter', photo:d.photo || '', total:Number(d.total)||0, date:d.date || '', cars:d.cars || 0, headliner:d.headliner || '' }; });
+      if (!leaderboardRuns.length) throw new Error('empty');
+      leaderboardLoaded = true;
+      renderLeaderboard();
+    } catch(e) {
+      leaderboardRuns = allRuns.filter(function(r){ return !r.spotted; }).sort(function(a,b){ return b.total-a.total; }).slice(0,50).map(function(r){ return { name:'You', photo:currentUser?.photoURL || '', total:r.total, date:r.date, cars:(r.cars || []).length, headliner:r.headliner?.name || (r.cars?.[0]?.name || '') }; });
+      leaderboardLoaded = true;
+      renderLeaderboard();
+      var note = document.createElement('div');
+      note.className = 'leaderboard-health';
+      note.textContent = 'Global leaderboard is reachable when Firestore permissions allow public leaderboard reads. Showing your local runs for now.';
+      document.getElementById('leaderboardList')?.prepend(note);
+    }
+  };
+
+  var originalLoadNews = loadNews;
+  window.loadNews = loadNews = async function(){
+    var el = document.getElementById('newsList');
+    el.innerHTML = '<div class="news-loading">Loading latest news...</div>';
+    var url = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(NEWS_SOURCES[activeSource].rss) + '&api_key=kkv1zj5yfbnz1ldwxehfesg358e3ttagbc8wzxiq&count=20';
+    try {
+      var res = await fetch(url);
+      var data = await res.json();
+      if (!data.items || !data.items.length) throw new Error('No items');
+      function imgOf(item){
+        var html = item.description || item.content || '';
+        var m = html.match(/<img[^>]+(?:src|data-src)=["']([^"']+)["']/i);
+        return item.thumbnail || (item.enclosure && item.enclosure.link) || (m && m[1]) || '';
+      }
+      function clean(v){ var d = document.createElement('div'); d.innerHTML = v || ''; return (d.textContent || d.innerText || '').trim(); }
+      var hero = data.items[0];
+      var heroImg = imgOf(hero);
+      el.innerHTML = '<a class="news-hero" href="' + (hero.link || '#') + '" target="_blank" rel="noopener">' + (heroImg ? '<img class="news-hero-img" src="' + heroImg + '" alt="">' : '<div class="news-hero-img"></div>') + '<div class="news-hero-body"><div class="news-hero-kicker">' + NEWS_SOURCES[activeSource].name + ' top story</div><div class="news-hero-title">' + escapeHtml(clean(hero.title)) + '</div><div class="news-hero-desc">' + escapeHtml(clean(hero.description || '').slice(0, 170)) + '</div></div></a><div class="news-grid">' + data.items.slice(1).map(function(item, idx){
+        var img = imgOf(item);
+        var date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
+        return '<a class="news-card" href="' + (item.link || '#') + '" target="_blank" rel="noopener" style="animation-delay:' + (idx*0.03) + 's">' + (img ? '<img class="news-card-img" src="' + img + '" alt="" onerror="this.outerHTML=\'<div class=news-card-img-ph>CAR</div>\'">' : '<div class="news-card-img-ph">CAR</div>') + '<div class="news-card-body"><div class="news-source">' + NEWS_SOURCES[activeSource].name + '</div><div class="news-title">' + escapeHtml(clean(item.title)) + '</div><div class="news-date">' + date + '</div></div></a>';
+      }).join('') + '</div>';
+    } catch(e) {
+      el.innerHTML = '<div class="news-error">Could not load news - check your connection.</div>';
+    }
+  };
+
+  var originalOpenCarSearch = window.openCarSearch;
+  window.openCarSearch = function(prefill){
+    originalOpenCarSearch(prefill);
+    setTimeout(function(){ document.querySelector('.car-search-card')?.classList.add('v27-search'); }, 0);
+  };
+
+  ensureSpotIds();
+  persistAllLocal();
   var settingsPage = document.getElementById('page-settings');
   if (settingsPage) settingsPage.innerHTML = settingsPage.innerHTML.replace("CarSpotter''s", "CarSpotter's");
   renderPendingLocation();
@@ -4770,10 +5437,6 @@ async function loadNews() {
 </script>
 </body>
 </html>
-
-
-
-
 
 
 
