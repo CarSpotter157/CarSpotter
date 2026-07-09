@@ -1425,6 +1425,7 @@ body.v27-ready .score-banner{background:radial-gradient(circle at top left,var(-
       <div id="garageList">
         <div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">&#127950;</span>No cars yet!</div>
       </div>
+      <div id="garageDebug" style="position:fixed;top:0;left:0;right:0;background:red;color:#fff;padding:8px 12px;font-size:11px;z-index:99999;font-family:monospace;">DEBUG: garage page loaded, renderGarage not yet called</div>
     </div>
 
     <!-- HISTORY PAGE -->
@@ -5084,6 +5085,8 @@ async function loadNews() {
   };
 
   window.renderGarage = renderGarage = function(){
+    var dbg = document.getElementById('garageDebug');
+    if (dbg) dbg.textContent = 'DEBUG: renderGarage called, allRuns=' + allRuns.length + ' currentRun=' + currentRun.length + ' page active=' + document.getElementById('page-garage').classList.contains('active');
     ensureSpotIds();
     var allCars = getAllCars();
     var filtered = applyGarageFilters(sorted(allCars));
@@ -5095,6 +5098,7 @@ async function loadNews() {
     if (!filtered.length) {
       el.className = '';
       el.innerHTML = '<div class="empty-garage empty-watermark"><span style="font-size:1.8rem;display:block;margin-bottom:8px;position:relative;z-index:1;">&#128270;</span><strong>' + (allCars.length ? 'No matches' : 'No cars yet!') + '</strong><div style="position:relative;z-index:1;font-size:0.68rem;color:var(--text2);margin-top:4px;">Start spotting to build your collection</div></div>';
+      if (dbg) dbg.textContent += ' | EMPTY: allCars=' + allCars.length + ' filtered=' + filtered.length;
       return;
     }
     if (garageView === 'map') return renderGarageMap(el);
