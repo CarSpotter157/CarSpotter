@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="CarSpotter">
 <meta name="theme-color" content="#0a0a0a">
@@ -1955,6 +1955,16 @@ function subscribeCloud() {
   });
 }
 
+function stripUndefined(obj) {
+  if (Array.isArray(obj)) return obj.map(stripUndefined).filter(function(v){ return v !== undefined; });
+  if (obj && typeof obj === 'object' && !(obj instanceof Date)) {
+    var clean = {};
+    Object.keys(obj).forEach(function(k){ if (obj[k] !== undefined) clean[k] = stripUndefined(obj[k]); });
+    return clean;
+  }
+  return obj;
+}
+
 function saveToCloud() {
   // Always persist locally first — works offline
   localStorage.setItem('cs_runs',    JSON.stringify(allRuns));
@@ -1973,13 +1983,13 @@ function saveToCloud() {
   clearTimeout(syncTimer);
   syncTimer = setTimeout(() => {
     _lastSave = Date.now();
-    db.collection('users').doc(currentUser.uid).set({
+    db.collection('users').doc(currentUser.uid).set(stripUndefined({
       currentRun, allRuns, quickPicks,
       notes: localStorage.getItem('cs_notes') || '',
       profileName: currentUser?.displayName || 'Spotter',
       profilePhoto: currentUser?.photoURL || '',
       updatedAt: _lastSave
-    }).then(() => { setSyncDot('ok'); leaderboardLoaded = false; }).catch(() => setSyncDot(''));
+    })).then(() => { setSyncDot('ok'); leaderboardLoaded = false; }).catch(() => setSyncDot(''));
   }, 1500);
 }
 
@@ -5077,6 +5087,7 @@ async function loadNews() {
   };
 
   window.renderGarage = renderGarage = function(){
+    try {
     ensureSpotIds();
     var allCars = getAllCars();
     var filtered = applyGarageFilters(sorted(allCars));
@@ -5110,6 +5121,11 @@ async function loadNews() {
       return '<button class="garage-row' + rarityClass + '" draggable="true" data-idx="' + idx + '" data-name="' + escapeHtml(car.name) + '" onclick="openCarDetailModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" ondragstart="onGarageDragStart(event)" ondragover="onGarageDragOver(event)" ondrop="onGarageDrop(event)" ondragend="onGarageDragEnd(event)" style="animation-delay:' + (idx * 0.03) + 's"><div class="drag-handle" onmousedown="event.preventDefault()">⠿</div><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + thumb + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + '</div><div class="g-meta">' + escapeHtml([car.color, locLabel(car.location), car.runDate].filter(Boolean).join(' - ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.photo ? '<span class="latest-badge">Photo saved</span>' : '') + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')" title="Delete car"></button></button>';
     }).join('');
     if (hasMore) appendLoadMoreBtn(el, function(){ garagePage++; renderGarage(); }, filtered.length - pageCars.length);
+    } catch(e) {
+      console.error('renderGarage error:', e);
+      var el = document.getElementById('garageList');
+      if (el) el.innerHTML = '<div style="background:var(--surf2);border:1px solid #f44;border-radius:10px;padding:16px;margin:12px 0;color:var(--text);"><strong style="color:#f44">Garage Error</strong><div style="margin-top:6px;font-size:0.8rem;opacity:0.8;">' + e.message + '</div><div style="margin-top:4px;font-size:0.7rem;opacity:0.5;">' + (e.stack || '').split('\n').slice(0,3).join(' ') + '</div></div>';
+    }
   };
 
   function renderGarageMap(el){
@@ -5691,36 +5707,4 @@ async function loadNews() {
     var targetIdx = parseInt(e.currentTarget.dataset.idx);
     e.currentTarget.classList.remove('drag-over');
     if (_dragIdx === null || _dragIdx === targetIdx) return;
-    var allCars = getAllCars();
-    var filtered = applyGarageFilters(sorted(allCars));
-    var pageCars = filtered.slice(0, (garagePage + 1) * GARAGE_PAGE_SIZE);
-    var movedCar = pageCars[_dragIdx];
-    var targetCar = pageCars[targetIdx];
-    if (!movedCar || !targetCar) return;
-    allRuns.forEach(function(run){
-      (run.cars || []).forEach(function(c){
-        if (c.name && c.name.toLowerCase() === movedCar.name.toLowerCase()) c.sortOrder = targetIdx;
-        else if (c.name && c.name.toLowerCase() === targetCar.name.toLowerCase()) c.sortOrder = _dragIdx;
-      });
-    });
-    persistAllLocal();
-    saveToCloud();
-    renderGarage();
-    haptic(12);
-  };
-  window.onGarageDragEnd = function(e){
-    e.currentTarget.classList.remove('dragging');
-    document.querySelectorAll('.drag-over').forEach(function(el){ el.classList.remove('drag-over'); });
-    _dragIdx = null;
-  };
-
-})();
-</script>
-</body>
-</html>
-
-
-
-
-
-
+    va
