@@ -489,10 +489,10 @@ body{
 .gv-btn.active{background:var(--accent);color:#080808;}
 
 .garage-row{
-  display:flex;align-items:center;gap:12px;
+  display:flex;align-items:center;gap:10px;
   background:var(--surf);border:1px solid var(--border);
-  border-radius:var(--radius-sm);padding:12px 16px;
-  margin-bottom:8px;
+  border-radius:var(--radius-sm);padding:9px 12px;
+  margin-bottom:5px;
   text-decoration:none;color:inherit;
   animation:fadeUp 0.2s ease both;
   transition:border-color 0.15s,background 0.15s;
@@ -1432,6 +1432,11 @@ body.v27-ready .score-banner{background:radial-gradient(circle at top left,var(-
     <div class="page" id="page-achievements">
       <div class="sec-title" style="margin-bottom:6px">Achievements</div>
       <div class="ach-count-row" id="achCountRow" style="margin-bottom:14px"><span id="achUnlocked">0</span> / <span id="achTotal">0</span> unlocked</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button class="toggle-pill" style="flex:1;padding:10px;font-size:0.75rem;border-radius:10px;background:var(--surf);border:1px solid var(--border);" onclick="toggleAdvancedAchievements()">Hard Challenges</button>
+        <button class="toggle-pill" style="flex:1;padding:10px;font-size:0.75rem;border-radius:10px;background:var(--surf);border:1px solid var(--border);" onclick="showRandomSideQuest()">Random Side Quest</button>
+      </div>
+      <div id="achQuest"></div>
       <div class="ach-grid" id="achGrid"></div>
     </div>
 
@@ -4781,9 +4786,10 @@ async function loadNews() {
 
   function tutorialData(){
     return [
-      { eyebrow:'Step 1 of 3', title:'Runs are your live scorecard', desc:'Use + TO RUN while you are spotting. Each car stacks into the current run, the value counter climbs, and END RUN saves the whole session into history.', visual:'<div class="tutorial-mini-run"><div class="tutorial-mini-row"><strong>Ferrari 488</strong><span>$280,000</span></div><div class="tutorial-mini-row"><strong>Porsche 911 GT3</strong><span>$170,000</span></div><div class="tutorial-mini-row"><strong>McLaren 720S</strong><span>$300,000</span></div></div>' },
-      { eyebrow:'Step 2 of 3', title:'Smart Fill turns notes into logs', desc:'Type or dictate rough notes like "red Ferrari 488 worth 280 thousand", then tap Smart Fill to auto-populate the form so you can log faster.', visual:'<div class="tutorial-smart"><div class="tutorial-smart-badge">Smart Fill</div><div class="setting-desc" style="margin:0;">Works best from the Notes tab. It reads your latest note, guesses the make, value, color, and type, then fills the spot form for review.</div></div>' },
-      { eyebrow:'Step 3 of 3', title:'Sync keeps your garage in one place', desc:'Everything saves locally first. If you go offline, CarSpotter keeps logging. When you reconnect, runs, garage, notes, and spots sync back up.', visual:'<div class="tutorial-map"></div><div class="tutorial-mini-sync" style="margin-top:10px;"><strong>Offline capture</strong><span>Saved instantly</span></div><div class="tutorial-mini-sync"><strong>Back online</strong><span>Auto-syncs in the background</span></div>' }
+      { eyebrow:'Welcome', title:'Spot. Log. Build your garage.', desc:'CarSpotter turns every spotting session into a collectible garage. Log cars as you see them, track their value, and build a personal record of every exotic, supercar, and rare ride you encounter.', visual:'<div class="tutorial-mini-run" style="border-color:var(--accent);"><div class="tutorial-mini-row"><strong style="color:var(--accent);">Ferrari 488 Pista</strong><span>$350,000</span></div><div class="tutorial-mini-row"><strong style="color:var(--accent);">Porsche 911 GT3 RS</strong><span>$240,000</span></div><div class="tutorial-mini-row"><strong style="color:var(--accent);">McLaren 765LT</strong><span>$380,000</span></div></div>' },
+      { eyebrow:'Step 1 of 3', title:'Start a run to track value', desc:'Tap the + TO RUN button to start a spotting session. Each car you add stacks into the live run with a running total. When you are done, hit END RUN to save it to your history and garage.', visual:'<div class="tutorial-mini-run"><div class="tutorial-mini-row"><strong>Live Run</strong><span style="color:var(--accent);">$970,000</span></div></div><div style="display:flex;gap:6px;margin-top:8px;"><div style="flex:1;text-align:center;padding:6px;background:var(--adim);border:1px solid var(--accent);border-radius:6px;font-size:0.65rem;color:var(--accent);font-weight:700;">+ TO RUN</div><div style="flex:1;text-align:center;padding:6px;background:var(--surf2);border:1px solid var(--border);border-radius:6px;font-size:0.65rem;color:var(--muted);">END RUN</div></div>' },
+      { eyebrow:'Step 2 of 3', title:'Quick capture from notes', desc:'Jot rough notes like "red Ferrari 488 worth 350k" in the Notes tab, then use Smart Fill to auto-populate the spot form. It guesses the make, model, value, color, and type so you can log faster.', visual:'<div class="tutorial-smart"><div class="tutorial-smart-badge">SMART FILL</div><div style="font-size:0.68rem;color:var(--text2);margin-top:6px;line-height:1.5;">Type: <strong style="color:var(--text);">red Ferrari 488 worth 350k</strong><br>Auto-fills: Name, Value, Color, Type</div></div>' },
+      { eyebrow:'Step 3 of 3', title:'Your garage, always in sync', desc:'Everything saves locally first so you never lose data. When you are online, runs, garage, notes, and photos sync to the cloud automatically. Access your collection from any device.', visual:'<div class="tutorial-mini-sync"><strong>Local save</strong><span style="color:var(--accent);">Instant</span></div><div class="tutorial-mini-sync"><strong>Cloud sync</strong><span>Automatic when online</span></div>' }
     ];
   }
   function renderTutorial(){
@@ -4853,6 +4859,7 @@ async function loadNews() {
   function carAge(car){ return Number(car && (car.ts || car.createdAt || car.id)) || 0; }
   function mergeCarArrays(localArr, remoteArr){
     var map = new Map();
+    var nameMap = new Map();
     function add(car){
       if (!car) return;
       var key = car.spotId || [car.name, car.ts, car.value, car.color].join('|');
@@ -4864,7 +4871,19 @@ async function loadNews() {
     }
     (remoteArr || []).forEach(add);
     (localArr || []).forEach(add);
-    return Array.from(map.values()).sort(function(a,b){ return carAge(a) - carAge(b); });
+    var all = Array.from(map.values());
+    all.forEach(function(c){
+      var nk = (c.name||'').toLowerCase().trim();
+      if (!nk) return;
+      var existing = nameMap.get(nk);
+      if (!existing) { nameMap.set(nk, c); }
+      else {
+        var newer = carAge(c) >= carAge(existing);
+        if (newer) Object.assign(existing, c, { photo: c.photo || existing.photo, location: c.location || existing.location });
+        else if (!existing.photo && c.photo) existing.photo = c.photo;
+      }
+    });
+    return Array.from(nameMap.values()).sort(function(a,b){ return carAge(a) - carAge(b); });
   }
   function mergeRuns(localRuns, remoteRuns){
     var map = new Map();
@@ -5040,7 +5059,7 @@ async function loadNews() {
     el.innerHTML = pageCars.map(function(car, idx){
       var rarity = getRarity(car.value);
       var thumb = car.photo ? '<div class="g-thumb-wrap"><img src="' + car.photo + '" alt="car"><span class="g-thumb-dot"></span></div>' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
-      return '<button class="garage-row" onclick="openCarDetailModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + thumb + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + '</div><div class="g-meta">' + escapeHtml([car.color, locLabel(car.location), car.runDate].filter(Boolean).join(' - ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.photo ? '<span class="latest-badge">Photo saved</span>' : '') + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><button class="g-edit" onclick="event.preventDefault();event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit car">Edit</button><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="' + escapeHtml(car.name) + '"></button></button>';
+      return '<button class="garage-row" onclick="openCarDetailModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + thumb + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + '</div><div class="g-meta">' + escapeHtml([car.color, locLabel(car.location), car.runDate].filter(Boolean).join(' - ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.photo ? '<span class="latest-badge">Photo saved</span>' : '') + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div></button>';
     }).join('');
     if (hasMore) appendLoadMoreBtn(el, function(){ garagePage++; renderGarage(); }, filtered.length - pageCars.length);
   };
@@ -5316,8 +5335,9 @@ async function loadNews() {
 
   window.renderStats = renderStats = function(){
     var allCars = allRuns.flatMap(function(r){ return r.cars || []; }).concat(currentRun);
+    var runs = allRuns.filter(function(r){ return !r.spotted; });
     var total = allCars.reduce(function(s,c){ return s + (Number(c.value)||0); }, 0);
-    document.getElementById('st-summary').innerHTML = '<div class="stat-box"><div class="stat-v">' + allCars.length + '</div><div class="stat-l">Cars</div></div><div class="stat-box"><div class="stat-v">' + fmt(total) + '</div><div class="stat-l">Value</div></div><div class="stat-box"><div class="stat-v">' + (allCars.length ? fmt(total/allCars.length) : '$0') + '</div><div class="stat-l">Average</div></div>';
+    document.getElementById('st-summary').innerHTML = '<div class="stat-box"><div class="stat-v">' + allCars.length + '</div><div class="stat-l">Cars</div></div><div class="stat-box"><div class="stat-v">' + fmt(total) + '</div><div class="stat-l">Value</div></div><div class="stat-box"><div class="stat-v">' + runs.length + '</div><div class="stat-l">Runs</div></div>';
     var topCars = allCars.slice().sort(function(a,b){ return b.value - a.value; }).slice(0,8);
     var maxVal = Math.max.apply(null, topCars.map(function(c){ return c.value; }).concat([1]));
     document.getElementById('st-topcars').innerHTML = topCars.length ? topCars.map(function(c){ return '<div class="st-bar-wrap"><div class="st-bar-label"><span class="st-bar-name">' + escapeHtml(c.name) + '</span><span class="st-bar-val">' + fmt(c.value) + '</span></div><div class="st-bar-track"><div class="st-bar-fill" style="width:' + Math.round(c.value/maxVal*100) + '%"></div></div></div>'; }).join('') : '<div class="empty-garage">No cars yet</div>';
@@ -5331,6 +5351,37 @@ async function loadNews() {
     var topTypes = Object.entries(types).sort(function(a,b){ return b[1]-a[1]; });
     var maxType = Math.max.apply(null, topTypes.map(function(x){ return x[1]; }).concat([1]));
     document.getElementById('st-types').innerHTML = topTypes.map(function(x){ return '<div class="st-bar-wrap"><div class="st-bar-label"><span class="st-bar-name">' + escapeHtml(x[0]) + '</span><span class="st-bar-val">' + x[1] + 'x</span></div><div class="st-bar-track"><div class="st-bar-fill" style="width:' + Math.round(x[1]/maxType*100) + '%"></div></div></div>'; }).join('');
+    var chartRuns = runs.slice(0,10).reverse();
+    var maxChart = Math.max.apply(null, chartRuns.map(function(r){ return r.total||0; }).concat([1]));
+    document.getElementById('st-chart').innerHTML = chartRuns.length >= 2
+      ? '<div class="st-chart-bar-wrap">' + chartRuns.map(function(r){ return '<div class="st-chart-bar" style="height:' + Math.max(8,Math.round((r.total||0)/maxChart*100)) + '%" title="' + fmt(r.total||0) + '"></div>'; }).join('') + '</div><div class="st-chart-labels">' + chartRuns.map(function(r){ return '<div class="st-chart-lbl">' + (r.date||'').split(',')[0] + '</div>'; }).join('') + '</div>'
+      : '<div class="st-empty">Complete 2+ runs to see your trend</div>';
+    var days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    var dayCounts = {Sun:0,Mon:0,Tue:0,Wed:0,Thu:0,Fri:0,Sat:0};
+    allRuns.forEach(function(r){ if (r.id) { var d = new Date(Number(r.id)||0); if (!isNaN(d)) dayCounts[days[d.getDay()]] += r.total||0; } });
+    var maxDay = Math.max.apply(null, Object.values(dayCounts).concat([1]));
+    document.getElementById('st-days').innerHTML = '<div class="st-chart-bar-wrap">' + days.map(function(d){ return '<div class="st-chart-bar" style="height:' + Math.max(4,Math.round(dayCounts[d]/maxDay*100)) + '%;' + (dayCounts[d]===maxDay?'background:var(--accent2)':'') + '" title="' + d + ': ' + fmt(dayCounts[d]) + '"></div>'; }).join('') + '</div><div class="st-chart-labels">' + days.map(function(d){ return '<div class="st-chart-lbl"' + (dayCounts[d]===maxDay?' style="color:var(--accent2)"':'') + '>' + d + '</div>'; }).join('') + '</div>';
+    var rarityBuckets = [{label:'Legend',color:'#d4a843',min:1000000},{label:'Hypercar',color:'#e05240',min:500000},{label:'Supercar',color:'#c084fc',min:150000},{label:'Sports',color:'#60a5fa',min:50000},{label:'Daily',color:'#4b5563',min:0}];
+    var rarityCounts = {};
+    rarityBuckets.forEach(function(b){ rarityCounts[b.label]=0; });
+    allCars.forEach(function(c){ var v=c.value||0; var b=rarityBuckets.find(function(b){return v>=b.min;})||rarityBuckets[rarityBuckets.length-1]; rarityCounts[b.label]++; });
+    var totalForPie = allCars.length || 1;
+    var startAng = -Math.PI/2;
+    var pieR=50,pcx=60,pcy=60;
+    var pieSlices = rarityBuckets.filter(function(b){return rarityCounts[b.label]>0;}).map(function(b){
+      var pct=rarityCounts[b.label]/totalForPie;
+      var sweep=pct*2*Math.PI;
+      var x1=pcx+pieR*Math.cos(startAng),y1=pcy+pieR*Math.sin(startAng);
+      startAng+=sweep;
+      var x2=pcx+pieR*Math.cos(startAng),y2=pcy+pieR*Math.sin(startAng);
+      var large=sweep>Math.PI?1:0;
+      return {path:'M'+pcx+','+pcy+' L'+x1.toFixed(2)+','+y1.toFixed(2)+' A'+pieR+','+pieR+',0,'+large+',1,'+x2.toFixed(2)+','+y2.toFixed(2)+' Z',color:b.color,label:b.label,count:rarityCounts[b.label],pct:Math.round(pct*100)};
+    });
+    var pieSvg='';
+    if (pieSlices.length>1) pieSvg='<svg class="pie-svg" width="120" height="120" viewBox="0 0 120 120">'+pieSlices.map(function(s){return '<path d="'+s.path+'" fill="'+s.color+'" opacity="0.85"/>';}).join('')+'<circle cx="60" cy="60" r="28" fill="var(--surf)"/></svg>';
+    else if (pieSlices.length===1) pieSvg='<svg class="pie-svg" width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" fill="'+pieSlices[0].color+'" opacity="0.85"/><circle cx="60" cy="60" r="28" fill="var(--surf)"/></svg>';
+    var rEl=document.getElementById('st-rarity');
+    if (rEl){ if(!allCars.length){rEl.innerHTML='<div class="st-empty">No data yet</div>';}else{rEl.innerHTML='<div class="pie-wrap">'+pieSvg+'<div class="pie-legend">'+pieSlices.map(function(s){return '<div class="pie-leg-item"><div class="pie-leg-dot" style="background:'+s.color+'"></div><span>'+s.label+'</span><span class="pie-leg-val">'+s.count+' ('+s.pct+'%)</span></div>';}).join('')+'</div></div>';} }
   };
 
   var showAdvancedAchievements = localStorage.getItem('cs_show_advanced_ach') === 'on';
@@ -5344,28 +5395,48 @@ async function loadNews() {
   var originalRenderAchievements = renderAchievements;
   window.renderAchievements = renderAchievements = function(){
     var unlocked = new Set(getUnlockedAchievements());
-    var list = showAdvancedAchievements ? ACHIEVEMENTS : ACHIEVEMENTS.filter(function(a){ return unlocked.has(a.id); });
+    var HARD_ACHIEVEMENTS = [
+      {id:'million_car',icon:'$1M',name:'Big Spender',desc:'Single car worth over $1,000,000',check:function(c){return c.some(function(x){return (x.value||0)>=1000000;});}},
+      {id:'photo_frenzy',icon:'PF',name:'Photo Frenzy',desc:'Save 25 photos in one session',check:function(c){return c.length>=25;}},
+      {id:'speed_spotter',icon:'SS',name:'Speed Spotter',desc:'Log 10 cars in under 2 minutes',check:function(){return false;}}
+    ];
+    var SIDE_QUESTS = [
+      {icon:'🎯',name:'Spot a McLaren',desc:'Log any McLaren model'},
+      {icon:'🔴',name:'Red Only',desc:'Log 3 red cars in one run'},
+      {icon:'📍',name:'Map Master',desc:'Save locations for 10 cars'},
+      {icon:'⚡',name:'EV Hunter',desc:'Spot 5 electric vehicles'}
+    ];
+    var showHard = showAdvancedAchievements;
+    var list = showHard ? ACHIEVEMENTS.concat(HARD_ACHIEVEMENTS) : ACHIEVEMENTS;
+    var aq = document.getElementById('achQuest');
+    if (aq){
+      var sideQuest = SIDE_QUESTS[Math.floor(Math.random()*SIDE_QUESTS.length)];
+      aq.innerHTML = '<div class="card setting-card" style="border:1px solid var(--accent);margin-bottom:12px;"><div class="setting-head"><div class="setting-icon">' + sideQuest.icon + '</div><div class="setting-copy"><div class="card-title">RANDOM SIDE QUEST</div><div class="setting-desc">' + sideQuest.desc + '</div></div></div></div>';
+    }
     document.getElementById('achUnlocked').textContent = unlocked.size;
-    document.getElementById('achTotal').textContent = showAdvancedAchievements ? ACHIEVEMENTS.length : unlocked.size;
+    document.getElementById('achTotal').textContent = showHard ? list.length : unlocked.size;
     var grid = document.getElementById('achGrid');
-    grid.innerHTML = (!list.length ? '<div class="empty-garage">No achievements unlocked yet. Turn on challenge preview in Settings to see the full list.</div>' : list.map(function(a,i){ return '<div class="ach-badge ' + (unlocked.has(a.id) ? 'unlocked' : 'locked') + '" style="animation-delay:' + (i*0.04) + 's"><span class="ach-icon">' + a.icon + '</span><div class="ach-name">' + a.name + '</div><div class="ach-req">' + a.desc + '</div></div>'; }).join(''));
+    grid.innerHTML = (!list.length ? '<div class="empty-garage">No achievements unlocked yet. Tap Hard Challenges to preview locked goals.</div>' : list.map(function(a,i){ return '<div class="ach-badge ' + (unlocked.has(a.id) ? 'unlocked' : 'locked') + '" style="animation-delay:' + (i*0.04) + 's"><span class="ach-icon">' + a.icon + '</span><div class="ach-name">' + a.name + '</div><div class="ach-req">' + a.desc + '</div></div>'; }).join(''));
   };
-  function injectAdvancedAchievementSetting(){
-    var settings = document.getElementById('page-settings');
-    if (!settings || document.getElementById('advancedAchToggle')) return;
-    var card = document.createElement('div');
-    card.className = 'card setting-card';
-    card.innerHTML = '<div class="setting-head"><div class="setting-icon">Goals</div><div class="setting-copy"><div class="card-title">ACHIEVEMENT PREVIEW</div><div class="setting-desc">Show locked challenge achievements before you earn them.</div></div></div><div class="setting-row" style="border-top:none;padding-top:0;margin-top:10px;"><span style="font-size:0.78rem;color:var(--text2);flex:1;">Show locked achievements</span><button class="toggle-pill" id="advancedAchToggle" onclick="toggleAdvancedAchievements()"><div class="toggle-knob"></div></button></div>';
-    settings.insertBefore(card, settings.children[1] || null);
-    document.getElementById('advancedAchToggle').classList.toggle('on', showAdvancedAchievements);
-  }
   window.toggleAdvancedAchievements = function(){
     showAdvancedAchievements = !showAdvancedAchievements;
-    localStorage.setItem('cs_show_advanced_ach', showAdvancedAchievements ? 'on' : 'off');
-    document.getElementById('advancedAchToggle')?.classList.toggle('on', showAdvancedAchievements);
     renderAchievements();
   };
-  injectAdvancedAchievementSetting();
+  var SIDE_QUESTS = [
+    {icon:'🎯',name:'Spot a McLaren',desc:'Log any McLaren model to complete'},
+    {icon:'🔴',name:'Red Only',desc:'Log 3 red cars in a single run'},
+    {icon:'📍',name:'Map Master',desc:'Save GPS locations for 10 different cars'},
+    {icon:'⚡',name:'EV Hunter',desc:'Spot and log 5 electric vehicles'},
+    {icon:'🏆',name:'Value King',desc:'Log a car worth over $500,000'},
+    {icon:'📸',name:'Paparazzi',desc:'Save photos for 10 different cars'},
+    {icon:'🏎',name:'Italian Job',desc:'Spot 3 Italian cars in one session'},
+    {icon:'🔥',name:'Hot Streak',desc:'Log cars on 5 different days in a row'}
+  ];
+  window.showRandomSideQuest = function(){
+    var quest = SIDE_QUESTS[Math.floor(Math.random()*SIDE_QUESTS.length)];
+    var aq = document.getElementById('achQuest');
+    if (aq) aq.innerHTML = '<div class="card setting-card" style="border:1px solid var(--accent);margin-bottom:12px;animation:fadeUp 0.3s ease"><div class="setting-head"><div class="setting-icon" style="font-size:1.4rem;">' + quest.icon + '</div><div class="setting-copy"><div class="card-title">' + quest.name.toUpperCase() + '</div><div class="setting-desc">' + quest.desc + '</div></div></div></div>';
+  };
 
   window.loadLeaderboard = async function(force){
     var el = document.getElementById('leaderboardList');
