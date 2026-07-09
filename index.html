@@ -5707,4 +5707,36 @@ async function loadNews() {
     var targetIdx = parseInt(e.currentTarget.dataset.idx);
     e.currentTarget.classList.remove('drag-over');
     if (_dragIdx === null || _dragIdx === targetIdx) return;
-    va
+    var allCars = getAllCars();
+    var filtered = applyGarageFilters(sorted(allCars));
+    var pageCars = filtered.slice(0, (garagePage + 1) * GARAGE_PAGE_SIZE);
+    var movedCar = pageCars[_dragIdx];
+    var targetCar = pageCars[targetIdx];
+    if (!movedCar || !targetCar) return;
+    allRuns.forEach(function(run){
+      (run.cars || []).forEach(function(c){
+        if (c.name && c.name.toLowerCase() === movedCar.name.toLowerCase()) c.sortOrder = targetIdx;
+        else if (c.name && c.name.toLowerCase() === targetCar.name.toLowerCase()) c.sortOrder = _dragIdx;
+      });
+    });
+    persistAllLocal();
+    saveToCloud();
+    renderGarage();
+    haptic(12);
+  };
+  window.onGarageDragEnd = function(e){
+    e.currentTarget.classList.remove('dragging');
+    document.querySelectorAll('.drag-over').forEach(function(el){ el.classList.remove('drag-over'); });
+    _dragIdx = null;
+  };
+
+})();
+</script>
+</body>
+</html>
+
+
+
+
+
+
