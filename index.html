@@ -217,10 +217,10 @@ body.carbon-on .app-shell{background-image:url("data:image/svg+xml,%3Csvg xmlns=
 .page{
   position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:20px 20px calc(var(--nav-h) + 28px + env(safe-area-inset-bottom,0px));
-  opacity:0;pointer-events:none;transform:translateY(6px) scale(0.99);
-  transition:opacity 0.25s ease,transform 0.25s ease;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.22s ease;
 }
-.page.active{opacity:1;pointer-events:all;transform:translateY(0) scale(1);}
+.page.active{opacity:1;pointer-events:all;}
 
 /* ── BOTTOM NAV ── */
 .bottom-nav{
@@ -4531,7 +4531,7 @@ async function loadNews() {
 
 
 (function(){
-  var pageOrder = ['spot','garage','voice','history','achievements','settings','news','leaderboard','more'];
+  var pageOrder = ['spot','garage','voice','history','stats','achievements','settings','news','leaderboard','more'];
   var currentSpotLocation = JSON.parse(localStorage.getItem('cs_pending_loc') || 'null');
   var currentPage = 'spot';
   var runTotalAnimated = 0;
@@ -4608,17 +4608,19 @@ async function loadNews() {
     setTimeout(renderPendingLocation, 0);
     return car;
   }
+  var _animRafId = null;
   function animateValue(el, from, to, formatter, duration){
     if (!el) return;
+    if (_animRafId) cancelAnimationFrame(_animRafId);
     var start = performance.now();
     var delta = to - from;
     function frame(now){
       var pct = Math.min(1, (now - start) / duration);
       var eased = 1 - Math.pow(1 - pct, 3);
       el.textContent = formatter(from + delta * eased);
-      if (pct < 1) requestAnimationFrame(frame);
+      if (pct < 1) _animRafId = requestAnimationFrame(frame);
     }
-    requestAnimationFrame(frame);
+    _animRafId = requestAnimationFrame(frame);
   }
   function updatePageTransition(page){
     var target = document.getElementById('page-' + page);
@@ -4659,8 +4661,8 @@ async function loadNews() {
       else if (diff < 0) { msg.textContent = ' ' + fmtFull(Math.abs(diff)) + ' to beat'; msg.className = 'beat behind'; }
       else { msg.textContent = 'Tied!'; msg.className = 'beat tied'; }
     } else {
-      document.getElementById('bestTotal').textContent = '';
-      document.getElementById('headerBest').textContent = '';
+      document.getElementById('bestTotal').textContent = '\u2014';
+      document.getElementById('headerBest').textContent = '\u2014';
       document.getElementById('beatMsg').textContent = 'No record yet';
       document.getElementById('beatMsg').className = 'beat tied';
     }
@@ -5542,31 +5544,7 @@ async function loadNews() {
   ══════════════════════════════════════════════ */
 
   // ── 3. ANIMATED COUNTER ──
-  var _lastRunTotal = 0;
-  var _counterInterval = null;
-  function animateCounter(el, from, to, duration){
-    if (_counterInterval) clearInterval(_counterInterval);
-    var start = performance.now();
-    var diff = to - from;
-    function tick(now){
-      var elapsed = now - start;
-      var progress = Math.min(elapsed / (duration || 400), 1);
-      var eased = 1 - Math.pow(1 - progress, 3);
-      el.textContent = fmt(Math.round(from + diff * eased));
-      if (progress < 1) _counterInterval = requestAnimationFrame(tick);
-      else { el.classList.add('counter-pop'); setTimeout(function(){ el.classList.remove('counter-pop'); }, 260); }
-    }
-    _counterInterval = requestAnimationFrame(tick);
-  }
-  var _origRenderSpot = renderSpot;
-  renderSpot = function(){
-    _origRenderSpot();
-    var bannerVal = document.querySelector('.s-num');
-    if (bannerVal) {
-      var newVal = allRuns.reduce(function(s,r){ return s + (r.total||0); }, 0) + currentRun.reduce(function(s,c){ return s + (Number(c.value)||0); }, 0);
-      if (newVal !== _lastRunTotal) { animateCounter(bannerVal, _lastRunTotal, newVal, 450); _lastRunTotal = newVal; }
-    }
-  };
+  // Uses the v27 animateValue() already in renderSpot — no separate wrapper needed.
 
   // ── 6. SMOOTHER PAGE TRANSITIONS ──
   // CSS handles transitions via .page{transition:opacity 0.25s,transform 0.25s}
@@ -5627,18 +5605,19 @@ async function loadNews() {
 
   // ── 9. CAR PHOTO PARALLAX ──
   document.addEventListener('scroll', function(e){
-    var modal = document.getElementById('carDetailModal');
-    if (!modal) return;
-    var img = modal.querySelector('.car-detail-photo');
-    if (!img) return;
-    var card = modal.querySelector('.modal-card');
-    if (!card) return;
-    var scrollY = card.scrollTop;
-    if (scrollY < 200 && scrollY >= 0) {
-      var parallax = scrollY * 0.35;
-      img.style.transform = 'translateY(' + parallax + 'px) scale(' + (1 + scrollY * 0.001) + ')';
+    var target = e.target;
+    if (target && target.classList && target.classList.contains('modal-card')) {
+      var img = target.querySelector('.car-detail-photo');
+      if (!img) return;
+      var scrollY = target.scrollTop;
+      if (scrollY < 200 && scrollY >= 0) {
+        var parallax = scrollY * 0.35;
+        img.style.transform = 'translateY(' + parallax + 'px) scale(' + (1 + scrollY * 0.001) + ')';
+      } else if (scrollY >= 200) {
+        img.style.transform = 'translateY(70px) scale(1.2)';
+      }
     }
-  }, true);
+  }, false);
 
   // ── 10. ACHIEVEMENT UNLOCK PARTICLES ──
   window.achUnlockBurst = function(x, y){
