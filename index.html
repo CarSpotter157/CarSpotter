@@ -1432,11 +1432,6 @@ body.v27-ready .score-banner{background:radial-gradient(circle at top left,var(-
     <div class="page" id="page-achievements">
       <div class="sec-title" style="margin-bottom:6px">Achievements</div>
       <div class="ach-count-row" id="achCountRow" style="margin-bottom:14px"><span id="achUnlocked">0</span> / <span id="achTotal">0</span> unlocked</div>
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <button class="toggle-pill" style="flex:1;padding:10px;font-size:0.75rem;border-radius:10px;background:var(--surf);border:1px solid var(--border);" onclick="toggleAdvancedAchievements()">Hard Challenges</button>
-        <button class="toggle-pill" style="flex:1;padding:10px;font-size:0.75rem;border-radius:10px;background:var(--surf);border:1px solid var(--border);" onclick="showRandomSideQuest()">Random Side Quest</button>
-      </div>
-      <div id="achQuest"></div>
       <div class="ach-grid" id="achGrid"></div>
     </div>
 
@@ -5059,7 +5054,7 @@ async function loadNews() {
     el.innerHTML = pageCars.map(function(car, idx){
       var rarity = getRarity(car.value);
       var thumb = car.photo ? '<div class="g-thumb-wrap"><img src="' + car.photo + '" alt="car"><span class="g-thumb-dot"></span></div>' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
-      return '<button class="garage-row" onclick="openCarDetailModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + thumb + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + '</div><div class="g-meta">' + escapeHtml([car.color, locLabel(car.location), car.runDate].filter(Boolean).join(' - ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.photo ? '<span class="latest-badge">Photo saved</span>' : '') + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div></button>';
+      return '<button class="garage-row" onclick="openCarDetailModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + thumb + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + '</div><div class="g-meta">' + escapeHtml([car.color, locLabel(car.location), car.runDate].filter(Boolean).join(' - ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.photo ? '<span class="latest-badge">Photo saved</span>' : '') + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')" title="Delete car"></button></button>';
     }).join('');
     if (hasMore) appendLoadMoreBtn(el, function(){ garagePage++; renderGarage(); }, filtered.length - pageCars.length);
   };
@@ -5296,10 +5291,16 @@ async function loadNews() {
   };
   function updateMatchingCar(target, updater){
     var matched = false;
+    var targetTs = Number(target.ts) || 0;
+    var targetVal = Number(target.value) || 0;
     function isMatch(c, run, idx){
-      if (target.spotKey && spotKey(c, run, idx) === target.spotKey) return true;
       if (target.spotId && c.spotId === target.spotId) return true;
-      return !target.spotId && c.name && target.name && c.name.toLowerCase() === target.name.toLowerCase();
+      if (c.name && target.name && c.name.toLowerCase() === target.name.toLowerCase()) {
+        if (targetTs && c.ts && Number(c.ts) === targetTs) return true;
+        if (targetVal && c.value && Number(c.value) === targetVal && !c.ts && !targetTs) return true;
+        if (!targetTs && !c.ts && !targetVal && !c.value) return true;
+      }
+      return false;
     }
     allRuns.forEach(function(run){
       (run.cars || []).forEach(function(c, idx){ if (isMatch(c, run, idx)) { updater(c); matched = true; } });
@@ -5395,48 +5396,28 @@ async function loadNews() {
   var originalRenderAchievements = renderAchievements;
   window.renderAchievements = renderAchievements = function(){
     var unlocked = new Set(getUnlockedAchievements());
-    var HARD_ACHIEVEMENTS = [
-      {id:'million_car',icon:'$1M',name:'Big Spender',desc:'Single car worth over $1,000,000',check:function(c){return c.some(function(x){return (x.value||0)>=1000000;});}},
-      {id:'photo_frenzy',icon:'PF',name:'Photo Frenzy',desc:'Save 25 photos in one session',check:function(c){return c.length>=25;}},
-      {id:'speed_spotter',icon:'SS',name:'Speed Spotter',desc:'Log 10 cars in under 2 minutes',check:function(){return false;}}
-    ];
-    var SIDE_QUESTS = [
-      {icon:'🎯',name:'Spot a McLaren',desc:'Log any McLaren model'},
-      {icon:'🔴',name:'Red Only',desc:'Log 3 red cars in one run'},
-      {icon:'📍',name:'Map Master',desc:'Save locations for 10 cars'},
-      {icon:'⚡',name:'EV Hunter',desc:'Spot 5 electric vehicles'}
-    ];
-    var showHard = showAdvancedAchievements;
-    var list = showHard ? ACHIEVEMENTS.concat(HARD_ACHIEVEMENTS) : ACHIEVEMENTS;
-    var aq = document.getElementById('achQuest');
-    if (aq){
-      var sideQuest = SIDE_QUESTS[Math.floor(Math.random()*SIDE_QUESTS.length)];
-      aq.innerHTML = '<div class="card setting-card" style="border:1px solid var(--accent);margin-bottom:12px;"><div class="setting-head"><div class="setting-icon">' + sideQuest.icon + '</div><div class="setting-copy"><div class="card-title">RANDOM SIDE QUEST</div><div class="setting-desc">' + sideQuest.desc + '</div></div></div></div>';
-    }
+    var list = showAdvancedAchievements ? ACHIEVEMENTS : ACHIEVEMENTS.filter(function(a){ return unlocked.has(a.id); });
     document.getElementById('achUnlocked').textContent = unlocked.size;
-    document.getElementById('achTotal').textContent = showHard ? list.length : unlocked.size;
+    document.getElementById('achTotal').textContent = showAdvancedAchievements ? ACHIEVEMENTS.length : unlocked.size;
     var grid = document.getElementById('achGrid');
-    grid.innerHTML = (!list.length ? '<div class="empty-garage">No achievements unlocked yet. Tap Hard Challenges to preview locked goals.</div>' : list.map(function(a,i){ return '<div class="ach-badge ' + (unlocked.has(a.id) ? 'unlocked' : 'locked') + '" style="animation-delay:' + (i*0.04) + 's"><span class="ach-icon">' + a.icon + '</span><div class="ach-name">' + a.name + '</div><div class="ach-req">' + a.desc + '</div></div>'; }).join(''));
+    grid.innerHTML = (!list.length ? '<div class="empty-garage">No achievements unlocked yet. Turn on challenge preview in Settings to see the full list.</div>' : list.map(function(a,i){ return '<div class="ach-badge ' + (unlocked.has(a.id) ? 'unlocked' : 'locked') + '" style="animation-delay:' + (i*0.04) + 's"><span class="ach-icon">' + a.icon + '</span><div class="ach-name">' + a.name + '</div><div class="ach-req">' + a.desc + '</div></div>'; }).join(''));
   };
+  function injectAdvancedAchievementSetting(){
+    var settings = document.getElementById('page-settings');
+    if (!settings || document.getElementById('advancedAchToggle')) return;
+    var card = document.createElement('div');
+    card.className = 'card setting-card';
+    card.innerHTML = '<div class="setting-head"><div class="setting-icon">Goals</div><div class="setting-copy"><div class="card-title">ACHIEVEMENT PREVIEW</div><div class="setting-desc">Show locked challenge achievements before you earn them.</div></div></div><div class="setting-row" style="border-top:none;padding-top:0;margin-top:10px;"><span style="font-size:0.78rem;color:var(--text2);flex:1;">Show locked achievements</span><button class="toggle-pill" id="advancedAchToggle" onclick="toggleAdvancedAchievements()"><div class="toggle-knob"></div></button></div>';
+    settings.insertBefore(card, settings.children[1] || null);
+    document.getElementById('advancedAchToggle').classList.toggle('on', showAdvancedAchievements);
+  }
   window.toggleAdvancedAchievements = function(){
     showAdvancedAchievements = !showAdvancedAchievements;
+    localStorage.setItem('cs_show_advanced_ach', showAdvancedAchievements ? 'on' : 'off');
+    document.getElementById('advancedAchToggle')?.classList.toggle('on', showAdvancedAchievements);
     renderAchievements();
   };
-  var SIDE_QUESTS = [
-    {icon:'🎯',name:'Spot a McLaren',desc:'Log any McLaren model to complete'},
-    {icon:'🔴',name:'Red Only',desc:'Log 3 red cars in a single run'},
-    {icon:'📍',name:'Map Master',desc:'Save GPS locations for 10 different cars'},
-    {icon:'⚡',name:'EV Hunter',desc:'Spot and log 5 electric vehicles'},
-    {icon:'🏆',name:'Value King',desc:'Log a car worth over $500,000'},
-    {icon:'📸',name:'Paparazzi',desc:'Save photos for 10 different cars'},
-    {icon:'🏎',name:'Italian Job',desc:'Spot 3 Italian cars in one session'},
-    {icon:'🔥',name:'Hot Streak',desc:'Log cars on 5 different days in a row'}
-  ];
-  window.showRandomSideQuest = function(){
-    var quest = SIDE_QUESTS[Math.floor(Math.random()*SIDE_QUESTS.length)];
-    var aq = document.getElementById('achQuest');
-    if (aq) aq.innerHTML = '<div class="card setting-card" style="border:1px solid var(--accent);margin-bottom:12px;animation:fadeUp 0.3s ease"><div class="setting-head"><div class="setting-icon" style="font-size:1.4rem;">' + quest.icon + '</div><div class="setting-copy"><div class="card-title">' + quest.name.toUpperCase() + '</div><div class="setting-desc">' + quest.desc + '</div></div></div></div>';
-  };
+  injectAdvancedAchievementSetting();
 
   window.loadLeaderboard = async function(force){
     var el = document.getElementById('leaderboardList');
