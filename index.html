@@ -497,6 +497,8 @@ body{
   animation:fadeUp 0.2s ease both;
   transition:border-color 0.15s,background 0.15s;
 }
+.garage-row .g-info{flex:1;min-width:0;}
+.garage-row .g-val{flex:0 0 auto;text-align:right;}
 .garage-row:hover{border-color:var(--border2);background:var(--surf2);}
 .g-rank{font-family:'Bebas Neue',cursive;font-size:0.7rem;color:var(--muted);min-width:26px;}
 .g-emoji{
@@ -512,7 +514,7 @@ body{
 .garage-row:hover .g-arrow{color:var(--accent);}
 .g-edit,.g-del{background:none;border:none;cursor:pointer;padding:4px;flex-shrink:0;font-size:0.75rem;border-radius:6px;transition:background 0.12s;}
 .g-edit:hover{background:var(--surf3);}
-.g-del{width:24px;height:24px;position:relative;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.g-del{width:28px;height:28px;position:relative;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-left:6px;}
 .g-del::after{content:'✕';color:var(--muted);font-size:0.6rem;}
 .g-del:hover{background:rgba(255,69,58,0.1);}
 .g-del:hover::after{color:var(--red);}
