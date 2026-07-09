@@ -1425,7 +1425,6 @@ body.v27-ready .score-banner{background:radial-gradient(circle at top left,var(-
       <div id="garageList">
         <div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">&#127950;</span>No cars yet!</div>
       </div>
-      <div id="garageDebug" style="position:fixed;top:0;left:0;right:0;background:red;color:#fff;padding:8px 12px;font-size:11px;z-index:99999;font-family:monospace;">DEBUG: garage page loaded, renderGarage not yet called</div>
     </div>
 
     <!-- HISTORY PAGE -->
@@ -4634,14 +4633,7 @@ async function loadNews() {
   }
 
   var baseGoTo = window.goTo;
-  window.goTo = function(page){
-    try { if (typeof baseGoTo === 'function') baseGoTo(page); } catch(e) {
-      console.error('goTo error:', e);
-      var pg = document.getElementById('page-'+page);
-      if (pg) { var el = pg.querySelector('#garageList') || pg.querySelector('#historyList') || pg; el.innerHTML = '<div style="background:var(--surf2);border:1px solid red;border-radius:10px;padding:16px;margin:20px;color:var(--text);"><strong style="color:red">Error:</strong> '+e.message+'</div>'; }
-    }
-    updatePageTransition(page);
-  };
+  window.goTo = function(page){ if (typeof baseGoTo === 'function') baseGoTo(page); updatePageTransition(page); };
   var baseGoToMore = window.goToMore;
   window.goToMore = function(page){ if (typeof baseGoToMore === 'function') baseGoToMore(page); updatePageTransition(page); };
 
@@ -5085,13 +5077,9 @@ async function loadNews() {
   };
 
   window.renderGarage = renderGarage = function(){
-    var dbg = document.getElementById('garageDebug');
-    if (dbg) dbg.textContent = 'DEBUG: renderGarage called, allRuns=' + allRuns.length + ' currentRun=' + currentRun.length + ' page active=' + document.getElementById('page-garage').classList.contains('active');
     ensureSpotIds();
     var allCars = getAllCars();
-    if (dbg) dbg.textContent += ' | allCars=' + allCars.length;
     var filtered = applyGarageFilters(sorted(allCars));
-    if (dbg) dbg.textContent += ' | filtered=' + filtered.length + ' | garageList=' + !!document.getElementById('garageList');
     var total = allCars.reduce(function(x,c){ return x + (Number(c.value)||0); }, 0);
     document.getElementById('gCars').textContent = allCars.length;
     document.getElementById('gTotal').textContent = fmt(total);
@@ -5722,4 +5710,17 @@ async function loadNews() {
   };
   window.onGarageDragEnd = function(e){
     e.currentTarget.classList.remove('dragging');
-    document.querySelectorAll('.drag-over').forEach(function(el){ el.classList.remov
+    document.querySelectorAll('.drag-over').forEach(function(el){ el.classList.remove('drag-over'); });
+    _dragIdx = null;
+  };
+
+})();
+</script>
+</body>
+</html>
+
+
+
+
+
+
