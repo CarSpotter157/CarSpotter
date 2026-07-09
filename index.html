@@ -5089,7 +5089,9 @@ async function loadNews() {
     if (dbg) dbg.textContent = 'DEBUG: renderGarage called, allRuns=' + allRuns.length + ' currentRun=' + currentRun.length + ' page active=' + document.getElementById('page-garage').classList.contains('active');
     ensureSpotIds();
     var allCars = getAllCars();
+    if (dbg) dbg.textContent += ' | allCars=' + allCars.length;
     var filtered = applyGarageFilters(sorted(allCars));
+    if (dbg) dbg.textContent += ' | filtered=' + filtered.length + ' | garageList=' + !!document.getElementById('garageList');
     var total = allCars.reduce(function(x,c){ return x + (Number(c.value)||0); }, 0);
     document.getElementById('gCars').textContent = allCars.length;
     document.getElementById('gTotal').textContent = fmt(total);
@@ -5098,7 +5100,6 @@ async function loadNews() {
     if (!filtered.length) {
       el.className = '';
       el.innerHTML = '<div class="empty-garage empty-watermark"><span style="font-size:1.8rem;display:block;margin-bottom:8px;position:relative;z-index:1;">&#128270;</span><strong>' + (allCars.length ? 'No matches' : 'No cars yet!') + '</strong><div style="position:relative;z-index:1;font-size:0.68rem;color:var(--text2);margin-top:4px;">Start spotting to build your collection</div></div>';
-      if (dbg) dbg.textContent += ' | EMPTY: allCars=' + allCars.length + ' filtered=' + filtered.length;
       return;
     }
     if (garageView === 'map') return renderGarageMap(el);
@@ -5721,17 +5722,4 @@ async function loadNews() {
   };
   window.onGarageDragEnd = function(e){
     e.currentTarget.classList.remove('dragging');
-    document.querySelectorAll('.drag-over').forEach(function(el){ el.classList.remove('drag-over'); });
-    _dragIdx = null;
-  };
-
-})();
-</script>
-</body>
-</html>
-
-
-
-
-
-
+    document.querySelectorAll('.drag-over').forEach(function(el){ el.classList.remov
