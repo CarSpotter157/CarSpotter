@@ -4633,7 +4633,14 @@ async function loadNews() {
   }
 
   var baseGoTo = window.goTo;
-  window.goTo = function(page){ if (typeof baseGoTo === 'function') baseGoTo(page); updatePageTransition(page); };
+  window.goTo = function(page){
+    try { if (typeof baseGoTo === 'function') baseGoTo(page); } catch(e) {
+      console.error('goTo error:', e);
+      var pg = document.getElementById('page-'+page);
+      if (pg) { var el = pg.querySelector('#garageList') || pg.querySelector('#historyList') || pg; el.innerHTML = '<div style="background:var(--surf2);border:1px solid red;border-radius:10px;padding:16px;margin:20px;color:var(--text);"><strong style="color:red">Error:</strong> '+e.message+'</div>'; }
+    }
+    updatePageTransition(page);
+  };
   var baseGoToMore = window.goToMore;
   window.goToMore = function(page){ if (typeof baseGoToMore === 'function') baseGoToMore(page); updatePageTransition(page); };
 
