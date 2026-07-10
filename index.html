@@ -1692,6 +1692,34 @@ const ACHIEVEMENTS = [
 ];
 let _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
 
+//  MERGE HELPERS — prevent data loss when cloud & local diverge 
+function _mergeRunArrays(local, cloud) {
+  const byTs = new Map();
+  for (const c of local)  byTs.set(c.ts, c);
+  for (const c of cloud)  {
+    const existing = byTs.get(c.ts);
+    if (!existing) byTs.set(c.ts, c);
+    else if (c.photo && !existing.photo) byTs.set(c.ts, c); // prefer version with photo
+  }
+  return [...byTs.values()];
+}
+function _mergeRunHistory(local, cloud) {
+  const byId = new Map();
+  for (const r of local) byId.set(r.id, r);
+  for (const r of cloud) {
+    const existing = byId.get(r.id);
+    if (!existing) byId.set(r.id, r);
+    else if ((r.cars||[]).length > (existing.cars||[]).length) byId.set(r.id, r);
+  }
+  return [...byId.values()];
+}
+function _mergeQuickPicks(local, cloud) {
+  const byName = new Map();
+  for (const c of local) byName.set(c.name.toLowerCase(), c);
+  for (const c of cloud) if (!byName.has(c.name.toLowerCase())) byName.set(c.name.toLowerCase(), c);
+  return [...byName.values()];
+}
+
 //  FIREBASE AUTH & SYNC 
 
 function signInGoogle() {
@@ -1749,6 +1777,7 @@ auth.onAuthStateChanged(async user => {
     document.getElementById('authOverlay').style.display = 'none';
     document.getElementById('appShell').style.display    = 'flex';
     renderUserPill();
+    _lastSave = Date.now();
     await loadFromCloud();
     subscribeCloud();
     // Show import button if this device has local data
@@ -1807,9 +1836,10 @@ async function loadFromCloud() {
     const snap = await db.collection('users').doc(currentUser.uid).get();
     if (snap.exists) {
       const d = snap.data();
-      if (d.currentRun) currentRun = d.currentRun;
-      if (d.allRuns)    allRuns    = d.allRuns.filter((r,i,a) => a.findIndex(x=>x.id===r.id)===i);
-      if (d.quickPicks) quickPicks = d.quickPicks;
+      // Merge instead of replace — keeps local-only cars that haven't synced yet
+      if (d.currentRun) currentRun = _mergeRunArrays(currentRun, d.currentRun);
+      if (d.allRuns)    allRuns    = _mergeRunHistory(allRuns, d.allRuns.filter((r,i,a) => a.findIndex(x=>x.id===r.id)===i));
+      if (d.quickPicks) quickPicks = _mergeQuickPicks(quickPicks, d.quickPicks);
       if (d.notes != null) {
         localStorage.setItem('cs_notes', d.notes);
         const a = document.getElementById('notesArea');
@@ -1818,8 +1848,17 @@ async function loadFromCloud() {
       localStorage.setItem('cs_current', JSON.stringify(currentRun));
       localStorage.setItem('cs_runs',    JSON.stringify(allRuns));
       localStorage.setItem('cs_qp',      JSON.stringify(quickPicks));
+      // Save merged result back to cloud so other devices see it
+      _lastSave = Date.now();
+      db.collection('users').doc(currentUser.uid).set({
+        currentRun, allRuns, quickPicks,
+        notes: localStorage.getItem('cs_notes') || '',
+        profileName: currentUser?.displayName || 'Spotter',
+        profilePhoto: currentUser?.photoURL || '',
+        updatedAt: _lastSave
+      }).then(() => setSyncDot('ok')).catch(() => setSyncDot(''));
     }
-    setSyncDot('ok');
+    if (!_lastSave) setSyncDot('ok');
   } catch(e) { setSyncDot(''); console.error(e); }
   renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
   if (currentRun.length > 0)
@@ -1832,9 +1871,9 @@ function subscribeCloud() {
     if (!snap.exists) return;
     const d = snap.data();
     if (d.updatedAt && d.updatedAt > _lastSave) {
-      if (d.currentRun) currentRun = d.currentRun;
-      if (d.allRuns)    allRuns    = d.allRuns.filter((r,i,a) => a.findIndex(x=>x.id===r.id)===i);
-      if (d.quickPicks) quickPicks = d.quickPicks;
+      if (d.currentRun) currentRun = _mergeRunArrays(currentRun, d.currentRun);
+      if (d.allRuns)    allRuns    = _mergeRunHistory(allRuns, d.allRuns.filter((r,i,a) => a.findIndex(x=>x.id===r.id)===i));
+      if (d.quickPicks) quickPicks = _mergeQuickPicks(quickPicks, d.quickPicks);
       if (d.notes != null) {
         localStorage.setItem('cs_notes', d.notes);
         const a = document.getElementById('notesArea');
@@ -1878,6 +1917,25 @@ function saveToCloud() {
     }).then(() => { setSyncDot('ok'); leaderboardLoaded = false; }).catch(() => setSyncDot(''));
   }, 1500);
 }
+
+//  FLUSH ON PAGE UNLOAD — prevent debounced saves from being lost on tab close 
+function _flushPendingSave() {
+  if (!syncTimer) return;
+  clearTimeout(syncTimer);
+  syncTimer = null;
+  if (currentUser && navigator.onLine) {
+    _lastSave = Date.now();
+    db.collection('users').doc(currentUser.uid).set({
+      currentRun, allRuns, quickPicks,
+      notes: localStorage.getItem('cs_notes') || '',
+      profileName: currentUser?.displayName || 'Spotter',
+      profilePhoto: currentUser?.photoURL || '',
+      updatedAt: _lastSave
+    }).catch(()=>{});
+  }
+}
+window.addEventListener('beforeunload', _flushPendingSave);
+window.addEventListener('pagehide',     _flushPendingSave);
 
 //  THEMES 
 
