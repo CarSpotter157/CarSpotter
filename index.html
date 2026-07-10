@@ -1053,9 +1053,37 @@ body.carbon-on .modal-card{
 .more-tile-label{font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);}
 
 /* ── MAP ── */
+.garage-map-wrap{position:relative;border-radius:12px;overflow:hidden;margin-bottom:12px;border:1px solid var(--border);}
+#leafletMap{width:100%;height:340px;z-index:1;}
+.map-hud{position:absolute;top:10px;right:10px;z-index:1000;pointer-events:none;}
+.map-badge{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:0.68rem;font-weight:700;letter-spacing:1px;color:var(--text);pointer-events:auto;backdrop-filter:blur(6px);box-shadow:0 2px 8px rgba(0,0,0,.25);}
+.map-empty{background:var(--surf);border:1px solid var(--border);border-radius:12px;padding:32px 20px;text-align:center;color:var(--text2);font-size:0.78rem;line-height:1.6;}
+.garage-map-list{display:flex;flex-direction:column;gap:6px;}
+.garage-map-row{background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:0.74rem;color:var(--text);cursor:pointer;transition:border-color .15s;}
+.garage-map-row:hover{border-color:var(--accent);}
+.garage-map-row strong{font-size:0.78rem;}
+.garage-map-row span{color:var(--text2);font-size:0.68rem;text-align:right;}
 .cs-dot-icon{background:transparent!important;border:none!important;}
 .cs-dot{width:12px;height:12px;border-radius:50%;transition:all 0.18s;cursor:pointer;}
 .cs-dot.cs-dot-open{width:32px;height:32px;margin:-10px 0 0 -10px;}
+.map-popup-name{font-family:'Bebas Neue',cursive;font-size:1rem;letter-spacing:0.5px;color:var(--text);margin-bottom:2px;}
+.map-popup-val{font-family:'Bebas Neue',cursive;font-size:0.82rem;letter-spacing:1px;margin-bottom:4px;}
+.map-popup-meta{font-size:0.66rem;color:var(--text2);margin-bottom:4px;line-height:1.4;}
+.map-popup-photo{width:100%;height:90px;border-radius:6px;object-fit:cover;margin-bottom:6px;border:1px solid var(--border);}
+.map-popup-run{display:inline-block;font-size:0.58rem;font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:4px;margin-bottom:4px;}
+.map-popup-run.run{background:var(--accent);color:#0a0a0a;}
+.map-popup-run.solo{background:var(--surf2);color:var(--text2);border:1px solid var(--border);}
+.map-popup-btn{display:block;width:100%;background:var(--accent);color:#0a0a0a;border:none;border-radius:6px;padding:6px 0;font-family:'Bebas Neue',cursive;font-size:0.72rem;letter-spacing:1.5px;cursor:pointer;text-align:center;margin-top:4px;transition:opacity .15s;}
+.map-popup-btn:hover{opacity:.85;}
+.map-cluster{background:var(--accent);color:#0a0a0a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:0.78rem;font-weight:700;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:pointer;transition:transform .15s;}
+.map-cluster:hover{transform:scale(1.1);}
+.map-cluster-list{max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;}
+.map-cluster-item{display:flex;gap:8px;align-items:center;padding:6px 8px;background:var(--surf2);border-radius:8px;border:1px solid var(--border);cursor:pointer;transition:border-color .15s;}
+.map-cluster-item:hover{border-color:var(--accent);}
+.map-cluster-item img{width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;}
+.map-cluster-item-info{flex:1;min-width:0;}
+.map-cluster-item-name{font-size:0.72rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.map-cluster-item-meta{font-size:0.62rem;color:var(--text2);}
 
 /* ── STATS ── */
 .st-bar-wrap{margin-bottom:12px;}
@@ -2784,8 +2812,7 @@ function deleteCarEverywhere(name) {
 
 function setGarageView(v) {
   garageView = v;
-  document.getElementById('gvList').classList.toggle('active', v==='list');
-  document.getElementById('gvGrid').classList.toggle('active', v==='grid');
+  ['gvList','gvGrid','gvMap'].forEach(function(id){ var el = document.getElementById(id); if(el) el.classList.toggle('active', id==='gv'+v.charAt(0).toUpperCase()+v.slice(1)); });
   renderGarage();
 }
 function clearGarageSearch() {
@@ -2834,6 +2861,54 @@ function applyGarageFilters(cars) {
 const GARAGE_PAGE_SIZE = 40;
 let garagePage = 0;
 
+function clusterCars(cars) {
+  var THRESHOLD = 0.00015;
+  var clusters = [];
+  cars.forEach(function(car) {
+    var matched = false;
+    for (var i = 0; i < clusters.length; i++) {
+      var c = clusters[i];
+      if (Math.abs(c.lat - car.location.lat) < THRESHOLD && Math.abs(c.lng - car.location.lng) < THRESHOLD) {
+        c.cars.push(car);
+        c.lat = (c.lat * (c.cars.length - 1) + car.location.lat) / c.cars.length;
+        c.lng = (c.lng * (c.cars.length - 1) + car.location.lng) / c.cars.length;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) clusters.push({ lat: car.location.lat, lng: car.location.lng, cars: [car] });
+  });
+  return clusters;
+}
+
+function buildMapPopup(car) {
+  var rarity = getRarity(car.value);
+  var photoHtml = car.photo ? '<img class="map-popup-photo" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' : '';
+  var isRun = car.runDate && car.runDate.indexOf('Run') === 0;
+  var runLabel = isRun ? '<div class="map-popup-run run">RUN</div>' : '<div class="map-popup-run solo">SOLO</div>';
+  return '<div class="map-popup-name">' + escapeHtml(car.name) + '</div>' +
+    photoHtml +
+    runLabel +
+    '<div class="map-popup-val" style="color:' + rarity.color + '">' + fmtFull(car.value) + '</div>' +
+    '<div class="map-popup-meta">' + escapeHtml(car.runDate || '') + (car.location && car.location.label ? ' · ' + escapeHtml(car.location.label) : '') + '</div>' +
+    '<button class="map-popup-btn" onclick="openMapCar(decodeURIComponent(\'' + encodeURIComponent(JSON.stringify({ name: car.name, value: car.value, color: car.color, type: car.type, photo: car.photo, location: car.location })).replace(/'/g, '%27') + '\'))">VIEW SPECS</button>';
+}
+
+function buildClusterPopup(cluster) {
+  var html = '<div style="font-family:\'Bebas Neue\',cursive;font-size:0.82rem;letter-spacing:1px;color:var(--text);margin-bottom:6px;">' + cluster.cars.length + ' cars here</div><div class="map-cluster-list">';
+  cluster.cars.forEach(function(car) {
+    var rarity = getRarity(car.value);
+    var photoHtml = car.photo ? '<img src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' : '<div style="width:40px;height:40px;border-radius:6px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;border:1px solid var(--border)">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
+    var isRun = car.runDate && car.runDate.indexOf('Run') === 0;
+    html += '<div class="map-cluster-item" onclick="openMapCar(decodeURIComponent(\'' + encodeURIComponent(JSON.stringify({ name: car.name, value: car.value, color: car.color, type: car.type, photo: car.photo, location: car.location })).replace(/'/g, '%27') + '\'))">' +
+      photoHtml +
+      '<div class="map-cluster-item-info"><div class="map-cluster-item-name">' + escapeHtml(car.name) + '</div>' +
+      '<div class="map-cluster-item-meta">' + (isRun ? 'Run' : 'Solo') + ' · ' + fmtFull(car.value) + '</div></div></div>';
+  });
+  html += '</div>';
+  return html;
+}
+
 function renderGarage() {
   const allCars = getAllCars();
   const filtered = applyGarageFilters(sorted(allCars));
@@ -2843,6 +2918,55 @@ function renderGarage() {
   document.getElementById('gAvg').textContent   = allCars.length ? fmt(total/allCars.length) : '—';
 
   const el = document.getElementById('garageList');
+
+  if (garageView === 'map') {
+    el.className = '';
+    var allCarsForMap = getAllCars();
+    var mapped = allCarsForMap.filter(function(car){ return car.location && isFinite(car.location.lat) && isFinite(car.location.lng); });
+    if (!mapped.length) {
+      el.innerHTML = '<div class="map-empty"><span style="font-size:2rem;display:block;margin-bottom:10px">📍</span><strong style="display:block;margin-bottom:6px;color:var(--text)">No mapped spots yet</strong>Use the Pin button when logging a car and it will appear here.</div>';
+      return;
+    }
+    var clusters = clusterCars(mapped);
+    var clusterCount = clusters.length;
+    el.innerHTML = '<div class="garage-map-wrap" style="position:relative"><div id="leafletMap"></div><div class="map-hud"><div class="map-badge">' + clusterCount + ' mapped spot' + (clusterCount !== 1 ? 's' : '') + '</div></div></div><div class="garage-map-list" id="mapCarList"></div>';
+    var listEl = document.getElementById('mapCarList');
+    listEl.innerHTML = mapped.map(function(car){
+      var rarity = getRarity(car.value);
+      return '<div class="garage-map-row" style="border-left:3px solid ' + rarity.color + '"><strong>' + escapeHtml(car.name) + '</strong><span>' + escapeHtml(locLabel(car.location)) + ' · ' + fmtFull(car.value) + '</span></div>';
+    }).join('');
+    setTimeout(function(){
+      var mapEl = document.getElementById('leafletMap');
+      if (!mapEl || !window.L) return;
+      if (window._csLeafletMap) { try { window._csLeafletMap.remove(); } catch(e){} window._csLeafletMap = null; }
+      var bounds = [];
+      var map = L.map('leafletMap', { zoomControl: true, attributionControl: true }).setView([mapped[0].location.lat, mapped[0].location.lng], 13);
+      window._csLeafletMap = map;
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+        maxZoom: 19
+      }).addTo(map);
+      clusters.forEach(function(cluster){
+        bounds.push([cluster.lat, cluster.lng]);
+        if (cluster.cars.length === 1) {
+          var car = cluster.cars[0];
+          var rarity = getRarity(car.value);
+          var dotIcon = L.divIcon({ className: 'cs-dot-icon', html: '<div class="cs-dot" style="background:' + rarity.color + ';box-shadow:0 0 0 3px ' + rarity.color + '44"></div>', iconSize: [14, 14], iconAnchor: [7, 7], popupAnchor: [0, -10] });
+          var popupHtml = buildMapPopup(car);
+          var marker = L.marker([car.location.lat, car.location.lng], { icon: dotIcon }).addTo(map).bindPopup(popupHtml, { maxWidth: 240, minWidth: 180 });
+          marker.on('popupopen', function(){ var el = marker.getElement(); if (el) { var d = el.querySelector('.cs-dot'); if (d) d.classList.add('cs-dot-open'); } });
+          marker.on('popupclose', function(){ var el = marker.getElement(); if (el) { var d = el.querySelector('.cs-dot'); if (d) d.classList.remove('cs-dot-open'); } });
+        } else {
+          var clusterIcon = L.divIcon({ className: 'cs-dot-icon', html: '<div class="map-cluster">' + cluster.cars.length + '</div>', iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -18] });
+          var clusterPopup = buildClusterPopup(cluster);
+          L.marker([cluster.lat, cluster.lng], { icon: clusterIcon }).addTo(map).bindPopup(clusterPopup, { maxWidth: 280, minWidth: 200 });
+        }
+      });
+      if (bounds.length > 1) { map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 }); }
+    }, 100);
+    return;
+  }
+
   if (!filtered.length) {
     el.className = '';
     el.innerHTML='<div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px"></span>'+(allCars.length?'No matches':'No cars yet!')+'</div>';
@@ -4946,21 +5070,18 @@ async function loadNews() {
     document.getElementById('gTotal').textContent = fmt(total);
     document.getElementById('gAvg').textContent = allCars.length ? fmt(total / allCars.length) : '';
     var el = document.getElementById('garageList');
-    if (!filtered.length) {
-      el.className = '';
-      el.innerHTML='<div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">&#128270;</span>'+(allCars.length?'No matches':'No cars yet!')+'</div>';
-      return;
-    }
+
     if (garageView === 'map') {
       el.className = '';
-      // Use ALL cars with locations — ignore active type/rarity filter for map
       var allCarsForMap = getAllCars();
       var mapped = allCarsForMap.filter(function(car){ return car.location && isFinite(car.location.lat) && isFinite(car.location.lng); });
       if (!mapped.length) {
         el.innerHTML = '<div class="map-empty"><span style="font-size:2rem;display:block;margin-bottom:10px">📍</span><strong style="display:block;margin-bottom:6px;color:var(--text)">No mapped spots yet</strong>Use the Pin button when logging a car and it will appear here.</div>';
         return;
       }
-      el.innerHTML = '<div class="garage-map-wrap" style="position:relative"><div id="leafletMap"></div><div class="map-hud"><div class="map-badge">' + mapped.length + ' mapped spot' + (mapped.length !== 1 ? 's' : '') + '</div></div></div><div class="garage-map-list" id="mapCarList"></div>';
+      var clusters = clusterCars(mapped);
+      var clusterCount = clusters.length;
+      el.innerHTML = '<div class="garage-map-wrap" style="position:relative"><div id="leafletMap"></div><div class="map-hud"><div class="map-badge">' + clusterCount + ' mapped spot' + (clusterCount !== 1 ? 's' : '') + '</div></div></div><div class="garage-map-list" id="mapCarList"></div>';
       var listEl = document.getElementById('mapCarList');
       listEl.innerHTML = mapped.map(function(car){
         var rarity = getRarity(car.value);
@@ -4970,46 +5091,37 @@ async function loadNews() {
         var mapEl = document.getElementById('leafletMap');
         if (!mapEl || !window.L) return;
         if (window._csLeafletMap) { try { window._csLeafletMap.remove(); } catch(e){} window._csLeafletMap = null; }
-        var lats = mapped.map(function(c){ return c.location.lat; });
-        var lngs = mapped.map(function(c){ return c.location.lng; });
-        var map = L.map('leafletMap', { zoomControl: true, attributionControl: true }).setView([lats[0], lngs[0]], 13);
+        var bounds = [];
+        var map = L.map('leafletMap', { zoomControl: true, attributionControl: true }).setView([mapped[0].location.lat, mapped[0].location.lng], 13);
         window._csLeafletMap = map;
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
           maxZoom: 19
         }).addTo(map);
-        var bounds = [];
-        mapped.forEach(function(car){
-          bounds.push([car.location.lat, car.location.lng]);
-          var rarity = getRarity(car.value);
-          // Small dot icon — expands via CSS when popup opens
-          var dotIcon = L.divIcon({
-            className: 'cs-dot-icon',
-            html: '<div class="cs-dot" style="background:' + rarity.color + ';box-shadow:0 0 0 3px ' + rarity.color + '44"></div>',
-            iconSize: [14, 14],
-            iconAnchor: [7, 7],
-            popupAnchor: [0, -10]
-          });
-          var popupHtml = '<div class="map-popup-name">' + escapeHtml(car.name) + '</div>' +
-            '<div class="map-popup-val" style="color:' + rarity.color + '">' + fmtFull(car.value) + '</div>' +
-            '<div class="map-popup-meta">' + escapeHtml(locLabel(car.location)) + '</div>' +
-            '<button class="map-popup-btn" onclick="openMapCar(decodeURIComponent(\'' + encodeURIComponent(JSON.stringify(car)).replace(/'/g,'%27') + '\'))">↗ View Specs</button>';
-          var marker = L.marker([car.location.lat, car.location.lng], { icon: dotIcon })
-            .addTo(map)
-            .bindPopup(popupHtml, { maxWidth: 220 });
-          marker.on('popupopen', function(){
-            var el = marker.getElement();
-            if (el) { var d = el.querySelector('.cs-dot'); if (d) d.classList.add('cs-dot-open'); }
-          });
-          marker.on('popupclose', function(){
-            var el = marker.getElement();
-            if (el) { var d = el.querySelector('.cs-dot'); if (d) d.classList.remove('cs-dot-open'); }
-          });
+        clusters.forEach(function(cluster){
+          bounds.push([cluster.lat, cluster.lng]);
+          if (cluster.cars.length === 1) {
+            var car = cluster.cars[0];
+            var rarity = getRarity(car.value);
+            var dotIcon = L.divIcon({ className: 'cs-dot-icon', html: '<div class="cs-dot" style="background:' + rarity.color + ';box-shadow:0 0 0 3px ' + rarity.color + '44"></div>', iconSize: [14, 14], iconAnchor: [7, 7], popupAnchor: [0, -10] });
+            var popupHtml = buildMapPopup(car);
+            var marker = L.marker([car.location.lat, car.location.lng], { icon: dotIcon }).addTo(map).bindPopup(popupHtml, { maxWidth: 240, minWidth: 180 });
+            marker.on('popupopen', function(){ var el = marker.getElement(); if (el) { var d = el.querySelector('.cs-dot'); if (d) d.classList.add('cs-dot-open'); } });
+            marker.on('popupclose', function(){ var el = marker.getElement(); if (el) { var d = el.querySelector('.cs-dot'); if (d) d.classList.remove('cs-dot-open'); } });
+          } else {
+            var clusterIcon = L.divIcon({ className: 'cs-dot-icon', html: '<div class="map-cluster">' + cluster.cars.length + '</div>', iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -18] });
+            var clusterPopup = buildClusterPopup(cluster);
+            L.marker([cluster.lat, cluster.lng], { icon: clusterIcon }).addTo(map).bindPopup(clusterPopup, { maxWidth: 280, minWidth: 200 });
+          }
         });
-        if (bounds.length > 1) {
-          map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
-        }
+        if (bounds.length > 1) { map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 }); }
       }, 100);
+      return;
+    }
+
+    if (!filtered.length) {
+      el.className = '';
+      el.innerHTML='<div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">&#128270;</span>'+(allCars.length?'No matches':'No cars yet!')+'</div>';
       return;
     }
     if (garageView === 'grid') {
