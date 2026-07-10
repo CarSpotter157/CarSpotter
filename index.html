@@ -3152,89 +3152,252 @@ function showCarInstances(car) {
   document.body.appendChild(overlay);
 }
 
+// ── CAR LOOKUP CACHE (30-day TTL in localStorage) ──
+const _csCacheK = 'cs_lk_v1';
+function _csGet(k) {
+  try { var c = JSON.parse(localStorage.getItem(_csCacheK)||'{}'), e = c[k];
+    if (!e || Date.now()-e.t > 2592e6) return undefined; return e.v; } catch(x) { return undefined; }
+}
+function _csSet(k, v) {
+  try { var c = JSON.parse(localStorage.getItem(_csCacheK)||'{}');
+    c[k] = { v:v, t:Date.now() }; var keys = Object.keys(c);
+    if (keys.length > 200) { keys.sort(function(a,b){return c[a].t-c[b].t;}).slice(0,keys.length-150).forEach(function(x){delete c[x];}); }
+    localStorage.setItem(_csCacheK, JSON.stringify(c)); } catch(x) {}
+}
+
 async function fetchCarSpecs(carName) {
-  // Free static specs for popular cars — no API key needed
-  const name = carName.toLowerCase();
-  const db = [
-    { match:['ferrari 488','488 gtb'],       year:'2019', hp:'660',  tq:'560',  z60:'3.0', top:'205', eng:'3.9L Twin-Turbo V8',    dr:'RWD', wt:'3252', tag:'The twin-turbo V8 that rewrote the Ferrari rulebook.' },
-    { match:['ferrari sf90'],                year:'2021', hp:'986',  tq:'590',  z60:'2.5', top:'211', eng:'4.0L V8 Hybrid PHEV',    dr:'AWD', wt:'3461', tag:'Ferrari\'s first series production plug-in hybrid.' },
-    { match:['lamborghini huracán','huracan'],year:'2021', hp:'631',  tq:'443',  z60:'2.9', top:'202', eng:'5.2L Naturally Aspirated V10', dr:'AWD', wt:'3135', tag:'Italian thunder with no turbo in sight.' },
-    { match:['lamborghini aventador'],        year:'2021', hp:'769',  tq:'531',  z60:'2.9', top:'217', eng:'6.5L V12',               dr:'AWD', wt:'3472', tag:'The last naturally aspirated Lamborghini flagship.' },
-    { match:['porsche 911 gt3','gt3 rs','911 gt3'], year:'2022', hp:'502', tq:'346', z60:'3.2', top:'184', eng:'4.0L Flat-Six',     dr:'RWD', wt:'3126', tag:'The benchmark track machine you can drive to work.' },
-    { match:['porsche 911 turbo s'],          year:'2023', hp:'640',  tq:'590',  z60:'2.6', top:'205', eng:'3.8L Twin-Turbo Flat-Six', dr:'AWD', wt:'3625', tag:'All-weather supercar with zero excuses.' },
-    { match:['mclaren 720s','720s'],          year:'2022', hp:'710',  tq:'568',  z60:'2.8', top:'212', eng:'4.0L Twin-Turbo V8',    dr:'RWD', wt:'2828', tag:'Carbon everything, mid-engine magic.' },
-    { match:['mclaren senna'],                year:'2019', hp:'789',  tq:'590',  z60:'2.7', top:'208', eng:'4.0L Twin-Turbo V8',    dr:'RWD', wt:'2641', tag:'Built for the track. Barely legal for the street.' },
-    { match:['bugatti chiron'],               year:'2022', hp:'1479', tq:'1180', z60:'2.4', top:'261', eng:'8.0L Quad-Turbo W16',   dr:'AWD', wt:'4398', tag:'The 261-mph mile-muncher with 1,479 horsepower.' },
-    { match:['koenigsegg jesko'],             year:'2022', hp:'1600', tq:'1106', z60:'2.5', top:'300', eng:'5.0L Twin-Turbo V8',    dr:'RWD', wt:'3130', tag:'Designed to hit 300 mph. No, really.' },
-    { match:['dodge viper','srt viper'],      year:'2017', hp:'645',  tq:'600',  z60:'3.4', top:'206', eng:'8.4L V10',              dr:'RWD', wt:'3374', tag:'Ten cylinders, zero stability nannies, maximum drama.' },
-    { match:['dodge challenger hellcat','challenger hellcat'], year:'2023', hp:'717', tq:'656', z60:'3.6', top:'199', eng:'6.2L Supercharged HEMI V8', dr:'RWD', wt:'4455', tag:'The loudest muscle car you can buy brand new.' },
-    { match:['dodge challenger','charger r/t','charger sxt','dodge charger'], year:'2023', hp:'375', tq:'410', z60:'5.1', top:'155', eng:'5.7L HEMI V8', dr:'RWD', wt:'4189', tag:'Four-door muscle car that refuses to grow up.' },
-    { match:['ford mustang gt500','shelby gt500'], year:'2022', hp:'760', tq:'625', z60:'3.3', top:'180', eng:'5.2L Supercharged V8', dr:'RWD', wt:'4225', tag:'The most powerful street-legal Mustang ever built.' },
-    { match:['ford mustang mach 1'],          year:'2023', hp:'480',  tq:'420',  z60:'4.4', top:'163', eng:'5.0L Coyote V8',       dr:'RWD', wt:'3886', tag:'Track-tuned Mustang with the Voodoo\'s intake.' },
-    { match:['ford mustang gt','mustang gt'], year:'2023', hp:'450',  tq:'410',  z60:'4.5', top:'155', eng:'5.0L Coyote V8',       dr:'RWD', wt:'3842', tag:'The pony car that started it all, still kicking.' },
-    { match:['chevrolet camaro ss','camaro ss'], year:'2023', hp:'455', tq:'455', z60:'4.0', top:'165', eng:'6.2L LT1 V8',        dr:'RWD', wt:'3650', tag:'The bowtie bruiser built to beat Mustangs.' },
-    { match:['chevrolet camaro zl1','camaro zl1'], year:'2023', hp:'650', tq:'650', z60:'3.5', top:'198', eng:'6.2L Supercharged LT4 V8', dr:'RWD', wt:'3850', tag:'Supercharged, track-ready, unhinged fun.' },
-    { match:['chevrolet corvette z06','corvette z06'], year:'2023', hp:'670', tq:'460', z60:'2.6', top:'196', eng:'5.5L Flat-Plane V8', dr:'RWD', wt:'3366', tag:'America\'s answer to a Ferrari GT3.' },
-    { match:['chevrolet corvette','corvette c8'], year:'2023', hp:'495', tq:'470', z60:'2.9', top:'194', eng:'6.2L LT2 V8',       dr:'RWD', wt:'3366', tag:'Mid-engine American dream, finally.' },
-    { match:['bmw m3','m3 competition'],      year:'2023', hp:'503',  tq:'479',  z60:'3.4', top:'180', eng:'3.0L Twin-Turbo I6',   dr:'RWD', wt:'3827', tag:'The benchmark sports sedan, still setting the bar.' },
-    { match:['bmw m4'],                       year:'2023', hp:'503',  tq:'479',  z60:'3.5', top:'180', eng:'3.0L Twin-Turbo I6',   dr:'RWD', wt:'3891', tag:'Two fewer doors, same M-car fury.' },
-    { match:['mercedes amg gt','amg gt63'],   year:'2022', hp:'630',  tq:'664',  z60:'3.1', top:'196', eng:'4.0L Twin-Turbo V8',   dr:'AWD', wt:'4564', tag:'Four-door GT car with supercar intentions.' },
-    { match:['maserati mc20'],                year:'2022', hp:'621',  tq:'538',  z60:'2.9', top:'202', eng:'3.0L Twin-Turbo V6',   dr:'RWD', wt:'3306', tag:'Maserati\'s comeback car, and what a comeback.' },
-    { match:['aston martin vantage'],         year:'2023', hp:'503',  tq:'505',  z60:'3.5', top:'195', eng:'4.0L Twin-Turbo V8',   dr:'RWD', wt:'3461', tag:'British muscle dressed in a tuxedo.' },
-    { match:['rolls royce','rolls-royce'],    year:'2023', hp:'563',  tq:'664',  z60:'4.7', top:'155', eng:'6.75L Twin-Turbo V12', dr:'RWD', wt:'5644', tag:'The best car in the world, if money is no object.' },
-    { match:['bentley continental','bentayga'],year:'2023',hp:'542',  tq:'568',  z60:'3.6', top:'207', eng:'4.0L Twin-Turbo V8',   dr:'AWD', wt:'4938', tag:'Grand touring perfection with a twin-turbo punch.' },
-    { match:['tesla model s plaid'],          year:'2023', hp:'1020', tq:'1050', z60:'1.99',top:'200', eng:'Three Motor Electric',  dr:'AWD', wt:'4766', tag:'The quickest production car ever made. Full stop.' },
-    { match:['rimac nevera','rimac'],         year:'2023', hp:'1914', tq:'1740', z60:'1.85',top:'258', eng:'Four Motor Electric',   dr:'AWD', wt:'4740', tag:'Two thousand horsepower of Croatian hypercar.' },
-    { match:['pagani huayra','pagani zonda'], year:'2021', hp:'764',  tq:'738',  z60:'2.8', top:'238', eng:'6.0L Twin-Turbo V12',  dr:'RWD', wt:'2822', tag:'Rolling sculpture with a Mercedes AMG heartbeat.' },
-    { match:['genesis coupe','genesis 3.8'], year:'2016', hp:'348',  tq:'295',  z60:'5.3', top:'149', eng:'3.8L Lambda V6',       dr:'RWD', wt:'3461', tag:'Korea\'s surprise rear-wheel drive sports coupe.' },
-    { match:['nissan gt-r','gtr','nissan gtr'], year:'2020', hp:'565', tq:'467', z60:'2.7', top:'196', eng:'3.8L Twin-Turbo V6',  dr:'AWD', wt:'3931', tag:'Godzilla. Still.' },
-    { match:['toyota supra','gr supra'],      year:'2023', hp:'382',  tq:'368',  z60:'3.9', top:'155', eng:'3.0L Twin-Turbo I6',  dr:'RWD', wt:'3181', tag:'The legend reborn with a BMW engine inside.' },
+  var name = carName.toLowerCase().trim();
+  var ck = 'sp:' + name;
+  var cached = _csGet(ck);
+  if (cached !== undefined) return cached;
+
+  // Expanded database — longest match string checked first for trim-level accuracy
+  var db = [
+    // Ferrari
+    { m:['ferrari laferrari','laferrari'],      y:'2014', hp:'950',  tq:'664',  z:'2.6', ts:'217', e:'6.3L V12 Hybrid',         d:'RWD', w:'3495', t:'The hybrid halo car that rewrote the rulebook.' },
+    { m:['ferrari enzo','enzo ferrari'],         y:'2002', hp:'651',  tq:'485',  z:'3.3', ts:'217', e:'6.0L V12',                d:'RWD', w:'2868', t:'Named after the founder. As raw as it gets.' },
+    { m:['ferrari sf90 stradale','ferrari sf90'],y:'2021', hp:'986',  tq:'590',  z:'2.5', ts:'211', e:'4.0L Twin-Turbo V8 Hybrid',d:'AWD', w:'3461', t:'Ferrari\'s first plug-in hybrid. Instant, brutal power.' },
+    { m:['ferrari f8 tributo','ferrari f8'],     y:'2020', hp:'710',  tq:'568',  z:'2.9', ts:'211', e:'3.9L Twin-Turbo V8',       d:'RWD', w:'3362', t:'The last pure V8 Ferrari before electrification.' },
+    { m:['ferrari 488 pista','488 pista'],       y:'2019', hp:'710',  tq:'568',  z:'2.85',ts:'211', e:'3.9L Twin-Turbo V8',       d:'RWD', w:'3055', t:'Track-focused 488. Lighter, louder, faster.' },
+    { m:['ferrari 488 gtb','ferrari 488','488 gtb','488'],y:'2019',hp:'660', tq:'560',  z:'3.0', ts:'205', e:'3.9L Twin-Turbo V8',       d:'RWD', w:'3252', t:'The twin-turbo V8 that rewrote the Ferrari rulebook.' },
+    { m:['ferrari 458 italia','ferrari 458','458 italia'],y:'2014',hp:'562', tq:'398',  z:'3.4', ts:'202', e:'4.5L Naturally Aspirated V8',d:'RWD',w:'3274', t:'The last great naturally aspirated mid-engine Ferrari.' },
+    { m:['ferrari f430','f430'],                 y:'2009', hp:'483',  tq:'343',  z:'3.6', ts:'196', e:'4.3L V8',                 d:'RWD', w:'3346', t:'The V8 Ferrari that defined a generation.' },
+    { m:['ferrari roma','ferrari roma'],         y:'2021', hp:'612',  tq:'561',  z:'3.4', ts:'198', e:'3.9L Twin-Turbo V8',       d:'RWD', w:'3340', t:'La Nuova Dolce Vita — elegance meets speed.' },
+    { m:['ferrari 812 superfast','812 superfast','ferrari 812'],y:'2022',hp:'789',tq:'530', z:'2.8', ts:'211', e:'6.5L V12',                d:'RWD', w:'3594', t:'Front-engine V12 grand tourer. The last of its kind.' },
+    { m:['ferrari portofino','portofino'],       y:'2022', hp:'591',  tq:'561',  z:'3.5', ts:'199', e:'3.9L Twin-Turbo V8',       d:'RWD', w:'3657', t:'The entry-level Ferrari. Still absurdly fast.' },
+    { m:['ferrari california','california'],      y:'2017', hp:'483',  tq:'343',  z:'3.6', ts:'194', e:'4.3L V8',                 d:'RWD', w:'3834', t:'The convertible Ferrari for everyday use.' },
+    { m:['ferrari 296 gtb','296 gtb'],           y:'2023', hp:'819',  tq:'546',  z:'2.9', ts:'205', e:'3.0L V6 Hybrid',           d:'RWD', w:'3085', t:'Ferrari\'s V6 hybrid. Compact fury.' },
+    // Lamborghini
+    { m:['lamborghini countach lpi 800','countach lpi'],y:'2022',hp:'803',tq:'535', z:'2.8', ts:'220', e:'6.5L V12 Hybrid',          d:'AWD', w:'3863', t:'The Countach reborn. Limited to 112 units.' },
+    { m:['lamborghini revuelto','revuelto'],     y:'2024', hp:'1001', tq:'535',  z:'2.5', ts:'217', e:'6.5L V12 Hybrid',          d:'AWD', w:'4060', t:'V12 hybrid flagship. The Aventador successor.' },
+    { m:['lamborghini aventador svj','aventador svj'],y:'2020',hp:'759',tq:'531',  z:'2.8', ts:'217', e:'6.5L V12',                d:'AWD', w:'3522', t:'The Nürburgring record-holder. Pure aggression.' },
+    { m:['lamborghini aventador','aventador'],   y:'2021', hp:'769',  tq:'531',  z:'2.9', ts:'217', e:'6.5L V12',                d:'AWD', w:'3472', t:'The last naturally aspirated Lamborghini flagship.' },
+    { m:['lamborghini huracan sto','huracan sto'],y:'2021', hp:'631', tq:'417',  z:'3.0', ts:'193', e:'5.2L V10',                 d:'RWD', w:'3047', t:'Road-homologated track weapon. Rear-wheel drive only.' },
+    { m:['lamborghini huracan performante','huracan performante'],y:'2018',hp:'631',tq:'443',z:'2.9',ts:'202',e:'5.2L V10',                d:'AWD', w:'3135', t:'Forged composites and active aero. Still savage.' },
+    { m:['lamborghini huracan evo','huracan evo'],y:'2020', hp:'631', tq:'443',  z:'2.9', ts:'202', e:'5.2L V10',                 d:'AWD', w:'3135', t:'Evolved Huracán with predictive logic and more power.' },
+    { m:['lamborghini huracan','huracán'],       y:'2021', hp:'631',  tq:'443',  z:'2.9', ts:'202', e:'5.2L Naturally Aspirated V10',d:'AWD',w:'3135', t:'Italian thunder with no turbo in sight.' },
+    { m:['lamborghini urus','urus'],             y:'2023', hp:'641',  tq:'627',  z:'3.6', ts:'190', e:'4.0L Twin-Turbo V8',       d:'AWD', w:'4850', t:'The world\'s first Super SUV. Absurdly quick for its size.' },
+    { m:['lamborghini murcielago','murciélago'], y:'2010', hp:'631',  tq:'487',  z:'3.4', ts:'211', e:'6.2L V12',                d:'AWD', w:'4011', t:'The bat-inspired flagship that ended an era.' },
+    { m:['lamborghini gallardo','gallardo'],     y:'2013', hp:'562',  tq:'398',  z:'3.4', ts:'202', e:'5.2L V10',                d:'AWD', w:'3562', t:'The V10 Lamborghini that brought the fight to Ferrari.' },
+    // Porsche
+    { m:['porsche 911 gt3 rs','911 gt3 rs','gt3 rs'],y:'2023',hp:'518',tq:'342', z:'3.0', ts:'184', e:'4.0L Flat-Six',             d:'RWD', w:'3214', t:'The ultimate 911 track tool. 9,000 RPM naturally aspirated.' },
+    { m:['porsche 911 gt3','911 gt3','gt3'],     y:'2022', hp:'502',  tq:'346',  z:'3.2', ts:'184', e:'4.0L Flat-Six',            d:'RWD', w:'3126', t:'The benchmark track machine you can drive to work.' },
+    { m:['porsche 911 turbo s','911 turbo s'],   y:'2023', hp:'640',  tq:'590',  z:'2.6', ts:'205', e:'3.8L Twin-Turbo Flat-Six', d:'AWD', w:'3625', t:'All-weather supercar with zero excuses.' },
+    { m:['porsche 911 turbo','911 turbo'],       y:'2023', hp:'572',  tq:'553',  z:'2.7', ts:'199', e:'3.8L Twin-Turbo Flat-Six', d:'AWD', w:'3636', t:'The everyday supercar. Depressingly fast in any conditions.' },
+    { m:['porsche 911 gt2 rs','911 gt2 rs','gt2 rs'],y:'2019',hp:'700',tq:'553', z:'2.7', ts:'211', e:'3.8L Twin-Turbo Flat-Six', d:'RWD', w:'3241', t:'The Widowmaker. 700 hp, rear drive, no nannies.' },
+    { m:['porsche 911 carrera s','911 carrera s','carrera s'],y:'2023',hp:'443',tq:'390',z:'3.5',ts:'191',e:'3.0L Twin-Turbo Flat-Six', d:'RWD', w:'3382', t:'The sports car benchmark. Does everything brilliantly.' },
+    { m:['porsche 911 carrera','911 carrera'],   y:'2023', hp:'379',  tq:'331',  z:'4.0', ts:'182', e:'3.0L Twin-Turbo Flat-Six', d:'RWD', w:'3354', t:'The purest 911 experience. Still more than enough.' },
+    { m:['porsche 718 cayman gt4','cayman gt4','718 gt4'],y:'2022',hp:'414',tq:'309',z:'4.2',ts:'189',e:'4.0L Flat-Six',            d:'RWD', w:'3115', t:'Mid-engine perfection. The driver\'s Porsche.' },
+    { m:['porsche taycan turbo s','taycan turbo s'],y:'2023',hp:'750',tq:'774', z:'2.4', ts:'162', e:'Dual Motor Electric',       d:'AWD', w:'5154', t:'The electric Porsche that proved EVs can handle.' },
+    { m:['porsche taycan','taycan'],             y:'2023', hp:'670',  tq:'630',  z:'3.0', ts:'161', e:'Dual Motor Electric',       d:'AWD', w:'4975', t:'Electric grand touring with Porsche DNA.' },
+    { m:['porsche cayenne turbo gt','cayenne turbo gt'],y:'2023',hp:'631',tq:'626',z:'3.1',ts:'186',e:'4.0L Twin-Turbo V8',       d:'AWD', w:'5060', t:'The fastest Cayenne. A Nürburgring record-holding SUV.' },
+    { m:['porsche cayenne','cayenne'],           y:'2023', hp:'348',  tq:'368',  z:'5.7', ts:'158', e:'3.0L Turbo V6',            d:'AWD', w:'4735', t:'The SUV that saved Porsche. Still handles like a sports car.' },
+    { m:['porsche panamera turbo s','panamera turbo s'],y:'2023',hp:'620',tq:'604',z:'3.0',ts:'196',e:'4.0L Twin-Turbo V8',       d:'AWD', w:'4670', t:'The four-door Porsche. Luxury meets Lap Time.' },
+    // McLaren
+    { m:['mclaren p1','p1'],                    y:'2014', hp:'903',  tq:'664',  z:'2.7', ts:'217', e:'3.8L Twin-Turbo V8 Hybrid',d:'RWD', w:'3075', t:'The holy trinity member. Hybrid hypercar royalty.' },
+    { m:['mclaren speedtail','speedtail'],       y:'2020', hp:'1035', tq:'848',  z:'2.9', ts:'250', e:'4.0L Twin-Turbo V8 Hybrid',d:'RWD', w:'3150', t:'McLaren\'s fastest. 250 mph hyper-GT.' },
+    { m:['mclaren 765lt','765lt'],               y:'2022', hp:'755',  tq:'590',  z:'2.7', ts:'205', e:'4.0L Twin-Turbo V8',       d:'RWD', w:'3071', t:'Longtail aggression. 755 hp in a featherweight body.' },
+    { m:['mclaren 720s','720s'],                 y:'2022', hp:'710',  tq:'568',  z:'2.8', ts:'212', e:'4.0L Twin-Turbo V8',       d:'RWD', w:'2828', t:'Carbon everything, mid-engine magic.' },
+    { m:['mclaren artura','artura'],             y:'2023', hp:'671',  tq:'531',  z:'2.9', ts:'205', e:'3.0L V6 Hybrid',           d:'RWD', w:'3303', t:'McLaren\'s first series-production hybrid. New era.' },
+    { m:['mclaren 600lt','600lt'],               y:'2020', hp:'592',  tq:'457',  z:'2.8', ts:'204', e:'3.8L Twin-Turbo V8',       d:'RWD', w:'2952', t:'Top-exit exhausts and 600 horses. The baby Longtail.' },
+    { m:['mclaren senna','senna'],               y:'2019', hp:'789',  tq:'590',  z:'2.7', ts:'208', e:'4.0L Twin-Turbo V8',       d:'RWD', w:'2641', t:'Built for the track. Barely legal for the street.' },
+    { m:['mclaren 570s','570s'],                 y:'2020', hp:'562',  tq:'443',  z:'3.1', ts:'204', e:'3.8L Twin-Turbo V8',       d:'RWD', w:'3083', t:'McLaren for the people. Still devastatingly fast.' },
+    { m:['mclaren 650s','650s'],                 y:'2016', hp:'641',  tq:'500',  z:'2.9', ts:'207', e:'3.8L Twin-Turbo V8',       d:'RWD', w:'3062', t:'The P1-inspired supercar that bridged two eras.' },
+    // Bugatti
+    { m:['bugatti bolide','bolide'],             y:'2024', hp:'1578', tq:'1180', z:'2.3', ts:'311', e:'8.0L Quad-Turbo W16',      d:'AWD', w:'3375', t:'Track-only hypercar. 311 mph potential.' },
+    { m:['bugatti chiron','chiron'],             y:'2022', hp:'1479', tq:'1180', z:'2.4', ts:'261', e:'8.0L Quad-Turbo W16',      d:'AWD', w:'4398', t:'The 261-mph mile-muncher with 1,479 horsepower.' },
+    { m:['bugatti divo','divo'],                 y:'2020', hp:'1479', tq:'1180', z:'2.4', ts:'236', e:'8.0L Quad-Turbo W16',      d:'AWD', w:'4350', t:'Cornering-focused Chiron. Limited to 40 units.' },
+    { m:['bugatti veyron','veyron'],             y:'2015', hp:'987',  tq:'922',  z:'2.5', ts:'253', e:'8.0L Quad-Turbo W16',      d:'AWD', w:'4162', t:'The car that redefined what "fast" means.' },
+    // Koenigsegg
+    { m:['koenigsegg gemera','gemera'],           y:'2024', hp:'1700', tq:'1475', z:'1.9', ts:'249', e:'5.0L Twin-Turbo V8 Hybrid',d:'AWD', w:'4260', t:'The world\'s first Mega-GT. Four seats, 1700 hp.' },
+    { m:['koenigsegg jesko','jesko'],            y:'2022', hp:'1600', tq:'1106', z:'2.5', ts:'300', e:'5.0L Twin-Turbo V8',       d:'RWD', w:'3130', t:'Designed to hit 300 mph. No, really.' },
+    { m:['koenigsegg regera','regera'],          y:'2021', hp:'1500', tq:'1475', z:'2.8', ts:'255', e:'5.0L Twin-Turbo V8 Hybrid',d:'RWD', w:'3505', t:'Direct-drive hypercar. No gearbox, all torque.' },
+    // Pagani
+    { m:['pagani huayra bc','huayra bc'],        y:'2022', hp:'764',  tq:'738',  z:'2.6', ts:'238', e:'6.0L Twin-Turbo V12',      d:'RWD', w:'2770', t:'The track-focused Huayra. Lighter, meaner.' },
+    { m:['pagani huayra','huayra'],              y:'2021', hp:'764',  tq:'738',  z:'2.8', ts:'238', e:'6.0L Twin-Turbo V12',      d:'RWD', w:'2822', t:'Rolling sculpture with a Mercedes AMG heartbeat.' },
+    { m:['pagani zonda','zonda'],                y:'2019', hp:'760',  tq:'553',  z:'2.8', ts:'215', e:'7.3L V12',                d:'RWD', w:'2846', t:'The Zonda never dies. Hand-built art that screams.' },
+    // Aston Martin
+    { m:['aston martin valkyrie','valkyrie'],    y:'2023', hp:'1160', tq:'664',  z:'2.5', ts:'250', e:'6.5L V12 Hybrid',          d:'RWD', w:'2407', t:'Adrian Newey-designed. A Formula 1 car for the road.' },
+    { m:['aston martin dbs superleggera','dbs superleggera'],y:'2023',hp:'715',tq:'561',z:'3.4',ts:'211',e:'5.2L V12',                d:'RWD', w:'3839', t:'The most powerful Aston Martin road car ever.' },
+    { m:['aston martin db12','db12'],            y:'2024', hp:'671',  tq:'590',  z:'3.5', ts:'202', e:'4.0L Twin-Turbo V8',       d:'RWD', w:'3935', t:'The world\'s first super tourer. DB11\'s wilder sibling.' },
+    { m:['aston martin db11','db11'],            y:'2023', hp:'630',  tq:'516',  z:'3.7', ts:'208', e:'4.0L Twin-Turbo V8',       d:'RWD', w:'4398', t:'British elegance meets twin-turbo muscle.' },
+    { m:['aston martin vantage','vantage'],      y:'2023', hp:'503',  tq:'505',  z:'3.5', ts:'195', e:'4.0L Twin-Turbo V8',       d:'RWD', w:'3461', t:'British muscle dressed in a tuxedo.' },
+    // Mercedes-AMG
+    { m:['amg gt black series','gt black series'],y:'2021',hp:'720',  tq:'590',  z:'3.1', ts:'202', e:'4.0L Twin-Turbo V8',       d:'RWD', w:'3528', t:'The most powerful AMG engine ever. Track weapon.' },
+    { m:['amg gt63 s','gt63 s','amg gt63'],     y:'2023', hp:'630',  tq:'664',  z:'3.1', ts:'196', e:'4.0L Twin-Turbo V8',       d:'AWD', w:'4564', t:'Four-door GT car with supercar intentions.' },
+    { m:['amg gt','amg-gt'],                    y:'2022', hp:'577',  tq:'516',  z:'3.1', ts:'198', e:'4.0L Twin-Turbo V8',       d:'RWD', w:'3627', t:'Porsche 911 rival from Affalterbach.' },
+    { m:['amg e63 s','e63 s','e63 amg'],        y:'2023', hp:'603',  tq:'627',  z:'3.3', ts:'186', e:'4.0L Twin-Turbo V8',       d:'AWD', w:'4542', t:'The sleeper super sedan. Wagon version even cooler.' },
+    { m:['amg c63 s','c63 s','amg c63','c63 amg'],y:'23', hp:'503',  tq:'516',  z:'3.8', ts:'180', e:'4.0L Twin-Turbo V8',       d:'RWD', w:'3937', t:'The compact AMG muscle car. V8 rumble included.' },
+    { m:['amg g63','g63 amg','g-wagon','g wagon'],y:'2023',hp:'577',  tq:'627',  z:'4.5', ts:'149', e:'4.0L Twin-Turbo V8',       d:'AWD', w:'5842', t:'The icon. Boxy, brutal, brilliant.' },
+    { m:['amg a45 s','a45 amg'],                y:'2023', hp:'416',  tq:'369',  z:'3.9', ts:'167', e:'2.0L Turbo I4',            d:'AWD', w:'3572', t:'The world\'s most powerful four-cylinder. Absurd.' },
+    // BMW M
+    { m:['bmw m5 cs','m5 cs'],                  y:'2022', hp:'627',  tq:'553',  z:'2.9', ts:'190', e:'4.4L Twin-Turbo V8',       d:'AWD', w:'4268', t:'The limited-edition M5. 627 hp sedan madness.' },
+    { m:['bmw m5','m5'],                        y:'2023', hp:'617',  tq:'553',  z:'2.9', ts:'190', e:'4.4L Twin-Turbo V8',       d:'AWD', w:'4345', t:'The super sedan that started the category.' },
+    { m:['bmw m8 competition','m8'],            y:'2023', hp:'617',  tq:'553',  z:'3.0', ts:'190', e:'4.4L Twin-Turbo V8',       d:'AWD', w:'4370', t:'BMW\'s flagship GT. Luxury meets lap times.' },
+    { m:['bmw m4 competition','bmw m4','m4 competition'],y:'2023',hp:'503',tq:'479',z:'3.5',ts:'180',e:'3.0L Twin-Turbo I6',       d:'RWD', w:'3891', t:'Two fewer doors, same M-car fury.' },
+    { m:['bmw m3 competition','bmw m3','m3 competition'],y:'2023',hp:'503',tq:'479',z:'3.4',ts:'180',e:'3.0L Twin-Turbo I6',       d:'RWD', w:'3827', t:'The benchmark sports sedan, still setting the bar.' },
+    { m:['bmw x3m competition','x3m'],          y:'2023', hp:'503',  tq:'479',  z:'3.7', ts:'174', e:'3.0L Twin-Turbo I6',       d:'AWD', w:'4561', t:'The fastest compact SUV BMW makes.' },
+    { m:['bmw x5m competition','x5m'],          y:'2023', hp:'617',  tq:'553',  z:'3.7', ts:'177', e:'4.4L Twin-Turbo V8',       d:'AWD', w:'5370', t:'A supercar in SUV clothing.' },
+    // Audi
+    { m:['audi r8','r8'],                       y:'2023', hp:'562',  tq:'406',  z:'3.4', ts:'201', e:'5.2L V10',                 d:'AWD', w:'3715', t:'The everyday supercar. V10 wail included.' },
+    { m:['audi r8性能版','r8 performance','r8 performance edition'],y:'2023',hp:'602',tq:'413',z:'3.1',ts:'205',e:'5.2L V10',d:'AWD',w:'3672',t:'The final, most powerful R8. 602 hp goodbye.' },
+    { m:['audi rs6 avant','rs6'],               y:'2023', hp:'591',  tq:'590',  z:'3.5', ts:'174', e:'4.0L Twin-Turbo V8',       d:'AWD', w:'4850', t:'The wagon that does it all. Family hauler and tire shredder.' },
+    { m:['audi rs7','rs7'],                      y:'2023', hp:'591',  tq:'590',  z:'3.5', ts:'174', e:'4.0L Twin-Turbo V8',       d:'AWD', w:'4850', t:'The sportback supercar. Elegant violence.' },
+    { m:['audi rs3','rs3'],                      y:'2023', hp:'401',  tq:'354',  z:'3.8', ts:'180', e:'2.5L Turbo I5',            d:'AWD', w:'3571', t:'Five cylinders, all-wheel drive, maximum grin.' },
+    { m:['audi e-tron gt','e-tron gt','rs e-tron gt'],y:'2023',hp:'637',tq:'612',z:'3.1',ts:'155',e:'Dual Motor Electric',       d:'AWD', w:'5154', t:'The electric four-door GT. Stunning design.' },
+    // Tesla
+    { m:['tesla model s plaid','model s plaid'], y:'2023', hp:'1020', tq:'1050', z:'1.99',ts:'200',e:'Tri-Motor Electric',        d:'AWD', w:'4766', t:'The quickest production car ever made. Full stop.' },
+    { m:['tesla model 3 performance','model 3 performance','model 3'],y:'2023',hp:'510',tq:'487',z:'3.1',ts:'162',e:'Dual Motor Electric',     d:'AWD', w:'4046', t:'The EV that changed everything. Performance version.' },
+    { m:['tesla model x plaid','model x plaid','model x'],y:'2023',hp:'1020',tq:'1050',z:'2.5',ts:'163',e:'Tri-Motor Electric',      d:'AWD', w:'5390', t:'The fastest SUV ever made. Falcon wings included.' },
+    { m:['tesla cybertruck','cybertruck'],       y:'2024', hp:'845',  tq:'743',  z:'2.6', ts:'130', e:'Tri-Motor Electric',        d:'AWD', w:'6843', t:'Stainless steel angular madness. Love it or hate it.' },
+    { m:['tesla roadster','roadster'],           y:'2008', hp:'248',  tq:'273',  z:'3.7', ts:'125', e:'Single Motor Electric',     d:'RWD', w:'2723', t:'The original Tesla. The one that started it all.' },
+    // Rivian
+    { m:['rivian r1t','r1t'],                    y:'2024', hp:'835',  tq:'908',  z:'3.0', ts:'125', e:'Quad-Motor Electric',       d:'4WD', w:'6586', t:'The adventure truck. Quad motors go anywhere.' },
+    { m:['rivian r1s','r1s'],                    y:'2024', hp:'835',  tq:'908',  z:'3.0', ts:'125', e:'Quad-Motor Electric',       d:'4WD', w:'7148', t:'The electric SUV for the wilderness. Seven seats.' },
+    // Lucid
+    { m:['lucid air sapphire','air sapphire'],   y:'2024', hp:'1234', tq:'1430', z:'1.89',ts:'205',e:'Tri-Motor Electric',        d:'AWD', w:'5340', t:'The most powerful sedan ever built. 1,234 hp.' },
+    { m:['lucid air','air'],                     y:'2024', hp:'620',  tq:'516',  z:'3.4', ts:'168', e:'Dual Motor Electric',       d:'AWD', w:'4840', t:'The luxury EV that out-Teslas Tesla on range.' },
+    // Dodge
+    { m:['dodge challenger srt demon 170','demon 170','demon'],y:'2023',hp:'1025',tq:'945',z:'1.66',ts:'180',e:'6.2L Supercharged HEMI V8',d:'RWD',w:'4335', t:'The first 8th-gen Dodge with E85. 1.66-sec 60-ft.' },
+    { m:['dodge challenger srt redeye','challenger redeye','redeye'],y:'2023',hp:'797',tq:'707',z:'3.4',ts:'203',e:'6.2L Supercharged HEMI V8',d:'RWD',w:'4445',t:'797 hp of supercharged absurdity. Street-legal drag car.' },
+    { m:['dodge challenger srt hellcat','challenger hellcat','hellcat'],y:'2023',hp:'717',tq:'656',z:'3.6',ts:'199',e:'6.2L Supercharged HEMI V8',d:'RWD',w:'4455',t:'The loudest muscle car you can buy brand new.' },
+    { m:['dodge charger srt hellcat','charger hellcat','charger srt'],y:'2023',hp:'717',tq:'656',z:'3.6',ts:'203',e:'6.2L Supercharged HEMI V8',d:'AWD',w:'4592',t:'Four-door supercharged muscle. The family hauler from hell.' },
+    { m:['dodge charger','dodge challenger','charger r/t','charger sxt'],y:'2023',hp:'375',tq:'410',z:'5.1',ts:'155',e:'5.7L HEMI V8',d:'RWD',w:'4189',t:'Four-door muscle car that refuses to grow up.' },
+    { m:['dodge viper','srt viper'],             y:'2017', hp:'645',  tq:'600',  z:'3.4', ts:'206', e:'8.4L V10',                d:'RWD', w:'3374', t:'Ten cylinders, zero stability nannies, maximum drama.' },
+    // Ford
+    { m:['ford gt','ford gt'],                   y:'2018', hp:'647',  tq:'550',  z:'3.0', ts:'216', e:'3.5L Twin-Turbo V6',       d:'RWD', w:'3054', t:'Le Mans legend reborn. Carbon tub, EcoBoost V6.' },
+    { m:['ford mustang gt500','shelby gt500','gt500'],y:'2022',hp:'760',tq:'625',z:'3.3',ts:'180',e:'5.2L Supercharged V8',     d:'RWD', w:'4225', t:'The most powerful street-legal Mustang ever built.' },
+    { m:['ford mustang shelby gt350','shelby gt350','gt350'],y:'2020',hp:'526',tq:'429',z:'4.2',ts:'180',e:'5.2L Flat-Plane V8',      d:'RWD', w:'3693', t:'Flat-plane crank Mustang. Revs to 8,250 RPM.' },
+    { m:['ford mustang dark horse','mustang dark horse'],y:'2024',hp:'500',tq:'418',z:'4.1',ts:'168',e:'5.0L Coyote V8',          d:'RWD', w:'3908', t:'The most track-capable Mustang GT ever.' },
+    { m:['ford mustang mach 1','mustang mach 1'],y:'2023', hp:'480',  tq:'420',  z:'4.4', ts:'163', e:'5.0L Coyote V8',           d:'RWD', w:'3886', t:'Track-tuned Mustang with the Voodoo\'s intake.' },
+    { m:['ford mustang gt','mustang gt'],        y:'2024', hp:'480',  tq:'418',  z:'4.3', ts:'168', e:'5.0L Coyote V8',           d:'RWD', w:'3842', t:'The pony car that started it all, still kicking.' },
+    { m:['ford bronco raptor','bronco raptor'],  y:'2024', hp:'418',  tq:'440',  z:'5.6', ts:'114', e:'3.0L Twin-Turbo V6',       d:'4WD', w:'5768', t:'Baja-ready Bronco. 13 inches of suspension travel.' },
+    { m:['ford f-150 raptor r','f150 raptor r'], y:'2024', hp:'720',  tq:'640',  z:'3.8', ts:'114', e:'5.2L Supercharged V8',     d:'4WD', w:'5950', t:'Raptor with a Predator V8. The ultimate truck.' },
+    { m:['ford f-150 raptor','f150 raptor'],     y:'2024', hp:'450',  tq:'510',  z:'4.5', ts:'114', e:'3.5L Twin-Turbo V6',       d:'4WD', w:'5740', t:'The original desert runner. Baja in a pickup.' },
+    // Chevrolet
+    { m:['chevrolet corvette zr1','corvette zr1'],y:'2025',hp:'1064', tq:'828',  z:'2.6', ts:'233', e:'5.5L Twin-Turbo Flat-Plane V8',d:'RWD',w:'3589',t:'The king of Corvettes. 1,064 hp, 233 mph.' },
+    { m:['chevrolet corvette e-ray','corvette e-ray'],y:'2024',hp:'655',tq:'595', z:'2.5', ts:'190', e:'6.2L V8 Hybrid',           d:'AWD', w:'3784', t:'The hybrid Corvette. AWD, silent launch, then V8 fury.' },
+    { m:['chevrolet corvette z06','corvette z06'],y:'2023', hp:'670',  tq:'460',  z:'2.6', ts:'196', e:'5.5L Flat-Plane V8',       d:'RWD', w:'3434', t:'America\'s answer to a Ferrari GT3.' },
+    { m:['chevrolet corvette','corvette c8'],    y:'2024', hp:'495',  tq:'470',  z:'2.9', ts:'194', e:'6.2L LT2 V8',             d:'RWD', w:'3366', t:'Mid-engine American dream, finally.' },
+    { m:['chevrolet corvette c7 z06','corvette c7 z06','c7 z06'],y:'2019',hp:'650',tq:'650',z:'2.95',ts:'190',e:'6.2L Supercharged V8',    d:'RWD', w:'3560', t:'Supercharged C7. Still one of the greats.' },
+    { m:['chevrolet camaro zl1','camaro zl1'],   y:'2023', hp:'650',  tq:'650',  z:'3.5', ts:'198', e:'6.2L Supercharged LT4 V8', d:'RWD', w:'3850', t:'Supercharged, track-ready, unhinged fun.' },
+    { m:['chevrolet camaro ss','camaro ss'],     y:'2023', hp:'455',  tq:'455',  z:'4.0', ts:'165', e:'6.2L LT1 V8',             d:'RWD', w:'3650', t:'The bowtie bruiser built to beat Mustangs.' },
+    { m:['chevrolet silverado zr2','silverado zr2'],y:'2024',hp:'420',tq:'460', z:'5.4', ts:'130', e:'6.2L V8',                  d:'4WD', w:'5600', t:'Chevy\'s off-road flagship. DSSV dampers included.' },
+    // RAM
+    { m:['ram 1500 trx','ram trx','trx'],        y:'2024', hp:'702',  tq:'650',  z:'4.5', ts:'118', e:'6.2L Supercharged V8',     d:'4WD', w:'6350', t:'The Hellcat truck. 702 hp of desert-blasting fury.' },
+    // GMC
+    { m:['gmc hummer ev','hummer ev'],           y:'2024', hp:'1000', tq:'1200', z:'3.0', ts:'106', e:'Tri-Motor Electric',        d:'4WD', w:'9063', t:'Extraction Mode. CrabWalk. The EV Hummer is insane.' },
+    // Japanese
+    { m:['nissan gt-r nismo','gt-r nismo','gtr nismo'],y:'2024',hp:'600',tq:'481',z:'2.5',ts:'205',e:'3.8L Twin-Turbo V6',      d:'AWD', w:'3907', t:'Godzilla in Nismo trim. The ultimate GT-R.' },
+    { m:['nissan gt-r','gtr','nissan gtr'],      y:'2023', hp:'565',  tq:'467',  z:'2.7', ts:'196', e:'3.8L Twin-Turbo V6',       d:'AWD', w:'3931', t:'Godzilla. Still.' },
+    { m:['nissan z','nissan 400z','400z','nissan 240z'],y:'2024',hp:'400',tq:'350',z:'4.5',ts:'155',e:'3.0L Twin-Turbo V6',      d:'RWD', w:'3461', t:'The Z is back. 400 hp, rear drive, manual available.' },
+    { m:['toyota gr supra','gr supra','toyota supra','supra'],y:'2024',hp:'382',tq:'368',z:'3.9',ts:'155',e:'3.0L Twin-Turbo I6',     d:'RWD', w:'3181', t:'The legend reborn with a BMW engine inside.' },
+    { m:['toyota gr86','gr86','subaru brz','brz'],y:'2024',hp:'228',tq:'184', z:'6.1', ts:'140', e:'2.4L Flat-4',              d:'RWD', w:'2811', t:'The affordable sports car. Light, nimble, perfect.' },
+    { m:['toyota gr corolla','gr corolla'],      y:'2024', hp:'300',  tq:'273',  z:'5.0', ts:'143', e:'1.6L Turbo I3',            d:'AWD', w:'3395', t:'Hot hatch meets rally heritage. Three cylinders of fury.' },
+    { m:['honda civic type r','civic type r'],   y:'2024', hp:'315',  tq:'310',  z:'5.0', ts:'169', e:'2.0L Turbo I4',            d:'FWD', w:'3114', t:'The best front-wheel-drive car ever made. Period.' },
+    { m:['hyundai elantra n','elantra n'],       y:'2024', hp:'276',  tq:'289',  z:'5.0', ts:'155', e:'2.0L Turbo I4',            d:'FWD', w:'3245', t:'The value king. Rear differential, manual gearbox, grins.' },
+    { m:['subaru wrx sti','wrx sti','sti'],     y:'2021', hp:'310',  tq:'290',  z:'5.5', ts:'159', e:'2.5L Turbo Flat-4',        d:'AWD', w:'3450', t:'Rally-bred AWD sedan. The hood scoop is functional.' },
+    { m:['volkswagen golf r','golf r'],          y:'2024', hp:'315',  tq:'295',  z:'4.6', ts:'155', e:'2.0L Turbo I4',            d:'AWD', w:'3461', t:'The sophisticated hot hatch. Drift mode included.' },
+    // Rolls-Royce
+    { m:['rolls-royce spectre','rolls royce spectre','spectre'],y:'2024',hp:'577',tq:'664',z:'4.4',ts:'155',e:'Dual Motor Electric',     d:'AWD', w:'6559', t:'The first electric Rolls-Royce. Silent, majestic power.' },
+    { m:['rolls-royce cullinan','rolls royce cullinan','cullinan'],y:'2024',hp:'563',tq:'627',z:'4.8',ts:'155',e:'6.75L Twin-Turbo V12',   d:'AWD', w:'6027', t:'Named after the largest diamond ever found.' },
+    { m:['rolls royce ghost','rolls-royce ghost','ghost'],y:'2024',hp:'563',tq:'627',z:'4.6',ts:'155',e:'6.75L Twin-Turbo V12',   d:'AWD', w:'5384', t:'The minimalist Rolls. Hauntingly beautiful.' },
+    { m:['rolls royce','rolls-royce'],           y:'2023', hp:'563',  tq:'664',  z:'4.7', ts:'155', e:'6.75L Twin-Turbo V12',     d:'RWD', w:'5644', t:'The best car in the world, if money is no object.' },
+    // Bentley
+    { m:['bentley continental gt speed','continental gt speed'],y:'2024',hp:'650',tq:'664',z:'3.5',ts:'208',e:'6.0L Twin-Turbo W12',    d:'AWD', w:'4983', t:'The fastest Bentley ever. W12 grand touring at its peak.' },
+    { m:['bentley continental gt','bentley continental','continental gt'],y:'2024',hp:'542',tq:'568',z:'3.6',ts:'207',e:'4.0L Twin-Turbo V8',d:'AWD',w:'4938', t:'Grand touring perfection with a twin-turbo punch.' },
+    { m:['bentley bentayga','bentayga'],         y:'2024', hp:'542',  tq:'568',  z:'3.6', ts:'207', e:'4.0L Twin-Turbo V8',       d:'AWD', w:'4938', t:'The luxury SUV that does everything. Including 190 mph.' },
+    { m:['bentley flying spur','flying spur'],   y:'2024', hp:'626',  tq:'664',  z:'3.7', ts:'207', e:'6.0L Twin-Turbo W12',      d:'AWD', w:'5384', t:'Four-door luxury with surprising speed.' },
+    // Maserati
+    { m:['maserati mc20','mc20'],                y:'2023', hp:'621',  tq:'538',  z:'2.9', ts:'202', e:'3.0L Twin-Turbo V6',       d:'RWD', w:'3306', t:'Maserati\'s comeback car, and what a comeback.' },
+    { m:['maserati granturismo','granturismo'],  y:'2024', hp:'483',  tq:'443',  z:'4.3', ts:'188', e:'3.0L Twin-Turbo V6',       d:'RWD', w:'4350', t:'The Italian GT, reborn. Still gorgeous.' },
+    // Jaguar
+    { m:['jaguar f-type','f-type'],              y:'2024', hp:'575',  tq:'516',  z:'3.5', ts:'186', e:'5.0L Supercharged V8',     d:'AWD', w:'4020', t:'Jaguar\'s last ICE car. Supercharged V8 swan song.' },
+    // Land Rover
+    { m:['land rover range rover sport sv','range rover sport sv'],y:'2024',hp:'626',tq:'553',z:'3.6',ts:'180',e:'4.4L Twin-Turbo V8',d:'AWD',w:'5400',t:'The performance Range Rover. BMW V8 heart.' },
+    { m:['land rover defender v8','defender v8','land rover defender'],y:'2024',hp:'518',tq:'461',z:'4.8',ts:'149',e:'5.0L Supercharged V8',d:'AWD',w:'5360',t:'The rugged icon with a supercharged V8. Serious off-road.' },
+    // Genesis
+    { m:['genesis g70','g70'],                   y:'2024', hp:'365',  tq:'376',  z:'4.5', ts:'167', e:'3.3L Twin-Turbo V6',       d:'RWD', w:'3745', t:'Korea\'s sports sedan sleeper. Better than you think.' },
+    { m:['genesis coupe','genesis 3.8'],         y:'2016', hp:'348',  tq:'295',  z:'5.3', ts:'149', e:'3.8L Lambda V6',           d:'RWD', w:'3461', t:'Korea\'s surprise rear-wheel drive sports coupe.' },
+    // Rimac & Pininfarina
+    { m:['rimac nevera','rimac'],                y:'2023', hp:'1914', tq:'1740', z:'1.85',ts:'258',e:'Four Motor Electric',       d:'AWD', w:'4740', t:'Two thousand horsepower of Croatian hypercar.' },
+    { m:['pininfarina battista','battista'],     y:'2024', hp:'1874', tq:'1693', z:'1.89',ts:'217',e:'Quad-Motor Electric',       d:'AWD', w:'4760', t:'Italian design meets Rimac power. 1,874 hp.' },
   ];
 
-  const entry = db.find(e => e.match.some(m => name.includes(m)));
+  // Sort by longest match string descending — most specific match wins
+  db.sort(function(a,b){ var am=0,bm=0; a.m.forEach(function(s){if(s.length>am)am=s.length;}); b.m.forEach(function(s){if(s.length>bm)bm=s.length;}); return bm-am; });
+  var entry = db.find(function(e){ return e.m.some(function(m){ return name.indexOf(m)!==-1; }); });
   if (entry) {
-    return {
-      year: entry.year, horsepower: entry.hp, torque: entry.tq,
-      zeroToSixty: entry.z60, topSpeed: entry.top, engine: entry.eng,
-      drivetrain: entry.dr, weight: entry.wt, tagline: entry.tag
-    };
+    var result = { year:entry.y, horsepower:entry.hp, torque:entry.tq, zeroToSixty:entry.z, topSpeed:entry.ts, engine:entry.e, drivetrain:entry.d, weight:entry.w, tagline:entry.t };
+    _csSet(ck, result);
+    return result;
   }
 
-  // For unknown cars try NHTSA's free public API for basic info
+  // NHTSA fallback for unknown makes
   try {
-    const words = carName.trim().split(/\s+/);
-    const make  = words[0];
-    const model = words.slice(1).join('%20');
-    const res   = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/getmodelsformake/${encodeURIComponent(make)}?format=json`);
+    var words = carName.trim().split(/\s+/);
+    var make  = words[0];
+    var model = words.slice(1).join(' ');
+    var res   = await fetch('https://vpic.nhtsa.dot.gov/api/vehicles/getmodelsformake/' + encodeURIComponent(make) + '?format=json');
     if (res.ok) {
-      const data = await res.json();
-      const found = data.Results?.find(r => r.Model_Name?.toLowerCase().includes(words.slice(1).join(' ').toLowerCase()));
-      if (found) return { tagline: `${found.Make_Name} ${found.Model_Name} — a verified chassis on record.` };
+      var data = await res.json();
+      var found = data.Results && data.Results.find(function(r){ return r.Model_Name && r.Model_Name.toLowerCase().indexOf(model.toLowerCase())!==-1; });
+      if (found) { var nr = { tagline: found.Make_Name + ' ' + found.Model_Name + ' — a verified chassis on record.' }; _csSet(ck, nr); return nr; }
     }
   } catch(e) {}
+  _csSet(ck, null);
   return null;
 }
 
 async function fetchCarImage(carName) {
-  // Wikipedia REST API — completely free, no key needed
-  // Try exact name first, then make-only fallback
-  const attempts = [
-    carName.replace(/\s+/g, '_'),
-    carName.split(' ').slice(0,2).join('_'),
+  var name = carName.toLowerCase().trim();
+  var ck = 'img:' + name;
+  var cached = _csGet(ck);
+  if (cached !== undefined) return cached;
+
+  // Progressive search: exact name → with (car) suffix → make+model → make+model(car) → make only
+  var attempts = [
+    carName.trim(),
+    carName.trim() + ' (car)',
+    carName.split(' ').slice(0,2).join(' '),
+    carName.split(' ').slice(0,2).join(' ') + ' (car)',
     carName.split(' ')[0]
   ];
-  for (const q of attempts) {
+  for (var i = 0; i < attempts.length; i++) {
+    var slug = attempts[i].replace(/\s+/g, '_');
     try {
-      const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`, {
+      var res = await fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(slug), {
         headers: { 'Accept': 'application/json' }
       });
       if (res.ok) {
-        const data = await res.json();
-        const url = data.thumbnail?.source || data.originalimage?.source;
-        if (url) return url;
+        var data = await res.json();
+        if (data.type === 'disambiguation') continue;
+        var url = (data.thumbnail && data.thumbnail.source) || (data.originalimage && data.originalimage.source);
+        if (url) { _csSet(ck, url); return url; }
       }
     } catch(e) {}
   }
+  _csSet(ck, null);
   return null;
 }
 
