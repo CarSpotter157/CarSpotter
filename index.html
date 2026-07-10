@@ -2717,7 +2717,7 @@ function getAllCars() {
   const seen = new Map();
   // Iterate oldest-first so most recent data wins on update
   [...allRuns].reverse().forEach(run => {
-    run.cars.forEach(car => {
+    (run.cars || []).forEach(car => {
       const key = car.name.toLowerCase();
       const label = run.spotted ? 'Spotted · '+run.date : 'Run · '+run.date;
       if (seen.has(key)) {
@@ -2841,7 +2841,7 @@ let garagePage = 0;
 
 function renderGarage() {
   const allCars = getAllCars();
-  const filtered = applyGarageFilters(sorted(allCars));
+  const filtered = sorted(allCars);
   const total = allCars.reduce((x,c)=>x+c.value,0);
   document.getElementById('gCars').textContent  = allCars.length;
   document.getElementById('gTotal').textContent = fmt(total);
