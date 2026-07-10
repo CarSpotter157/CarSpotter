@@ -4579,7 +4579,7 @@ async function loadNews() {
   _prevAchievements = (_prevAchievements || []).filter(id => ACHIEVEMENTS.some(a => a.id === id));
   localStorage.setItem('cs_ach', JSON.stringify(_prevAchievements));
 
-  function escapeHtml(v){ return String(v || '').replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
+  window.escapeHtml = function(v){ return String(v || '').replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
   window.escapeHtml = escapeHtml; // expose globally so outer-scope functions can use it
   function locLabel(loc){ return !loc ? '' : (loc.label || [loc.city, loc.region].filter(Boolean).join(', ') || 'Pinned location'); }
   window.locLabel = locLabel;
