@@ -1905,6 +1905,7 @@ function setSyncDot(state) {
 }
 
 async function loadFromCloud() {
+  console.log("load from cloud")
   if (!currentUser) return;
   setSyncDot('syncing');
   try {
@@ -5090,6 +5091,49 @@ async function loadNews() {
     });
   };
 
+  window.renderGarage = renderGarage = function(){
+    try {
+      console.log("renderGarage()");
+console.log(getAllCars());
+    ensureSpotIds();
+    var allCars = getAllCars();
+    var filtered = applyGarageFilters(sorted(allCars));
+    var total = allCars.reduce(function(x,c){ return x + (Number(c.value)||0); }, 0);
+    document.getElementById('gCars').textContent = allCars.length;
+    document.getElementById('gTotal').textContent = fmt(total);
+    document.getElementById('gAvg').textContent = allCars.length ? fmt(total / allCars.length) : '';
+    var el = document.getElementById('garageList');
+    if (!filtered.length) {
+      el.className = '';
+      el.innerHTML = '<div class="empty-garage empty-watermark"><span style="font-size:1.8rem;display:block;margin-bottom:8px;position:relative;z-index:1;">&#128270;</span><strong>' + (allCars.length ? 'No matches' : 'No cars yet!') + '</strong><div style="position:relative;z-index:1;font-size:0.68rem;color:var(--text2);margin-top:4px;">Start spotting to build your collection</div></div>';
+      return;
+    }
+    if (garageView === 'map') return renderGarageMap(el);
+    var pageCars = filtered.slice(0, (garagePage + 1) * GARAGE_PAGE_SIZE);
+    var hasMore = filtered.length > pageCars.length;
+    if (garageView === 'grid') {
+      el.className = 'garage-grid';
+      el.innerHTML = pageCars.map(function(car, idx){
+        var rarity = getRarity(car.value);
+        return '<button class="garage-card" onclick="openCarDetailModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '"><span class="photo-badge">Photo</span>' : '<div class="gc-img-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '</div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + car.spotCount + 'x</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + canonicalTypeLabel(car.type, car.name) + '</div></div></div></div></button>';
+      }).join('');
+      if (hasMore) appendLoadMoreBtn(el, function(){ garagePage++; renderGarage(); }, filtered.length - pageCars.length);
+      return;
+    }
+    el.className = '';
+    el.innerHTML = pageCars.map(function(car, idx){
+      var rarity = getRarity(car.value);
+      var rarityClass = car.value >= 1000000 ? ' rarity-legend' : car.value >= 500000 ? ' rarity-hypercar' : car.value >= 150000 ? ' rarity-supercar' : '';
+      var thumb = car.photo ? '<div class="g-thumb-wrap"><img src="' + car.photo + '" alt="car"><span class="g-thumb-dot"></span></div>' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
+      return '<button class="garage-row' + rarityClass + '" draggable="true" data-idx="' + idx + '" data-name="' + escapeHtml(car.name) + '" onclick="openCarDetailModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" ondragstart="onGarageDragStart(event)" ondragover="onGarageDragOver(event)" ondrop="onGarageDrop(event)" ondragend="onGarageDragEnd(event)" style="animation-delay:' + (idx * 0.03) + 's"><div class="drag-handle" onmousedown="event.preventDefault()">⠿</div><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + thumb + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + '</div><div class="g-meta">' + escapeHtml([car.color, locLabel(car.location), car.runDate].filter(Boolean).join(' - ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.photo ? '<span class="latest-badge">Photo saved</span>' : '') + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')" title="Delete car"></button></button>';
+    }).join('');
+    if (hasMore) appendLoadMoreBtn(el, function(){ garagePage++; renderGarage(); }, filtered.length - pageCars.length);
+    } catch(e) {
+      console.error('renderGarage error:', e);
+      var el = document.getElementById('garageList');
+      if (el) el.innerHTML = '<div style="background:var(--surf2);border:1px solid #f44;border-radius:10px;padding:16px;margin:12px 0;color:var(--text);"><strong style="color:#f44">Garage Error</strong><div style="margin-top:6px;font-size:0.8rem;opacity:0.8;">' + e.message + '</div><div style="margin-top:4px;font-size:0.7rem;opacity:0.5;">' + (e.stack || '').split('\n').slice(0,3).join(' ') + '</div></div>';
+    }
+  };
 
   function renderGarageMap(el){
     el.className = '';
