@@ -3426,6 +3426,19 @@ async function fetchCarImage(carName) {
   return null;
 }
 
+function fetchAndStoreRefImage(car) {
+  if (car.photo) return;
+  fetchCarImage(car.name).then(function(url) {
+    if (url) {
+      car.photo = url;
+      var qp = quickPicks.find(function(q) { return q.name.toLowerCase() === car.name.toLowerCase(); });
+      if (qp && !qp.photo) qp.photo = url;
+      saveToCloud();
+      renderGarage();
+    }
+  });
+}
+
 //  TOAST 
 function showToast(msg) {
   const t=document.getElementById('toast');
@@ -5047,6 +5060,7 @@ async function loadNews() {
     currentRun.push(car);
     saveToQP(car);
     saveCurrentRun();
+    fetchAndStoreRefImage(car);
     clearInputs();
     renderQPTrigger();
     renderSpot();
@@ -5071,6 +5085,7 @@ async function loadNews() {
     allRuns.unshift(entry);
     localStorage.setItem('cs_runs', JSON.stringify(allRuns));
     saveToCloud();
+    fetchAndStoreRefImage(car);
     playSound('log');
     pushUndo('history', prevRuns, input.type + ' ' + name + ' removed');
     clearInputs();
