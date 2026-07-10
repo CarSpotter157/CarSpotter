@@ -2660,6 +2660,7 @@ function getBest() {
 
 //  RENDER SPOT PAGE 
 function renderSpot() {
+  console.log("the real renderspot")
   const total = currentRun.reduce((s,c)=>s+c.value,0);
   const best  = getBest();
 
@@ -4657,6 +4658,7 @@ async function loadNews() {
   };
 
   window.renderSpot = function(){
+    console.log("the fake renderspot")
     var total = currentRun.reduce(function(s,c){ return s + c.value; }, 0);
     var best = getBest();
     animateValue(document.getElementById('runTotal'), runTotalAnimated || 0, total, fmtFull, 420);
