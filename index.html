@@ -5089,6 +5089,8 @@ async function loadNews() {
 
   window.renderGarage = renderGarage = function(){
     try {
+      console.log("renderGarage()");
+console.log(getAllCars());
     ensureSpotIds();
     var allCars = getAllCars();
     var filtered = applyGarageFilters(sorted(allCars));
