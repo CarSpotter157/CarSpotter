@@ -544,7 +544,7 @@ body{
 .g-name{font-size:0.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .g-meta{font-size:0.62rem;color:var(--text2);margin-top:3px;}
 .g-val{font-family:'Bebas Neue',cursive;font-size:1rem;color:var(--accent);flex-shrink:0;}
-.g-arrow{color:var(--muted);font-size:0.75rem;flex-shrink:0;transition:color 0.15s;}
+.g-arrow{color:var(--muted);font-size:0.75rem;flex-shrink:0;transition:color 0.15s;text-decoration:none;}
 .garage-row:hover .g-arrow{color:var(--accent);}
 .g-edit,.g-del{background:none;border:none;cursor:pointer;padding:4px;flex-shrink:0;font-size:0.75rem;border-radius:6px;transition:background 0.12s;}
 .g-edit:hover{background:var(--surf3);}
@@ -563,7 +563,7 @@ body{
 .garage-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
 .garage-card{
   background:var(--surf);border:1px solid var(--border);border-radius:var(--radius-sm);
-  text-decoration:none;color:inherit;overflow:hidden;
+  text-decoration:none;color:inherit;overflow:hidden;position:relative;
   animation:fadeUp 0.2s ease both;transition:border-color 0.15s;
 }
 .garage-card:hover{border-color:var(--border2);}
@@ -575,6 +575,12 @@ body{
 .gc-name{font-size:0.8rem;font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .gc-val{font-family:'Bebas Neue',cursive;font-size:0.95rem;color:var(--accent);}
 .gc-rarity{font-size:0.44rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;display:block;}
+.gc-search{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);color:#fff;font-size:0.7rem;display:flex;align-items:center;justify-content:center;text-decoration:none;transition:background 0.15s;z-index:2;}
+.gc-search:hover{background:var(--accent);color:#000;}
+.gc-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
+.gc-meta-chip{background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:5px 7px;}
+.gc-meta-label{font-size:0.4rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:1px;}
+.gc-meta-val{font-size:0.6rem;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
 /* ── DETAIL MODAL ── */
 .detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:99991;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.18s ease;}
@@ -3099,7 +3105,8 @@ function renderGarage() {
           <div class="gc-name">${escapeHtml(car.name)}${car.spotCount > 1 ? ` <span style="font-size:0.6rem;color:var(--text2)">&times;${car.spotCount}</span>` : ''}</div>
           <div class="gc-val">${fmtFull(car.value)}</div>
           <span class="gc-rarity" style="color:${rarity.color}">${rarity.label}</span>
-        </div>`;
+        </div>
+        <a class="gc-search" href="${carUrl(car.name)}" target="_blank" rel="noopener noreferrer" onclick="event.preventDefault();event.stopPropagation()" title="Search up this car">↗</a>`;
       el.appendChild(a);
     });
     if (hasMore) appendLoadMoreBtn(el, () => { garagePage++; renderGarage(); }, filtered.length - pageCars.length);
@@ -3127,7 +3134,7 @@ function renderGarage() {
         </div>
       </div>
       <div class="g-val">${fmtFull(car.value)}</div>
-      <div class="g-arrow">↗</div>
+      <a class="g-arrow" href="${carUrl(car.name)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Search up this car">↗</a>
       <button class="g-edit" onclick="event.preventDefault();event.stopPropagation();openEditCarModal('${encodeURIComponent(JSON.stringify(car))}')" title="Edit car">✏️</button>
       <button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="${escapeHtml(car.name)}"></button>`;
     el.appendChild(a);
@@ -3248,7 +3255,7 @@ function renderHistory() {
         ${bulkMode ? `<input type="checkbox" class="hist-check" data-id="${entry.id}" ${bulkSelected.has(entry.id)?'checked':''} onclick="event.stopPropagation();toggleBulkSelect(${entry.id})">` : ''}
         <div class="hist-num${isSpot?' spot-num':''}">${escapeHtml(label)}</div>
         <div class="hist-info">
-          <div class="hist-date">${escapeHtml(entry.date)}</div>
+          <div class="hist-date">${escapeHtml(entry.date.replace(/,\s*\d{4}$/, ''))}</div>
           <div class="hist-total">${fmtFull(entry.total)}</div>
           <div class="hist-count">${entry.cars.length} car${entry.cars.length!==1?'s':''}${entry.total>=1000000?' ':''}</div>
           ${headlinerHTML}
@@ -5323,7 +5330,7 @@ async function loadNews() {
         var clickAttr = ' data-inst="1" data-car="' + encodeURIComponent(JSON.stringify(car)) + '"';
         var href = 'javascript:void(0)';
         var photoBadge = car.photo ? (car.photo.indexOf('data:') === 0 ? '<div class="gc-photo-badge">📷 Your Photo</div>' : '<div class="gc-photo-badge">🌐 Reference</div>') : '';
-        return '<a class="garage-card" href="' + href + '"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' + photoBadge : '<div class="gc-img-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '</div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Color</div><div class="gc-meta-val">' + escapeHtml(car.color || 'Unknown') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + escapeHtml(carTypeLabel(car.type)) + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + escapeHtml(car.runDate || 'Saved') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Place</div><div class="gc-meta-val">' + escapeHtml((car.location && car.location.label) || 'No pin') + '</div></div></div></div></a>';
+        return '<a class="garage-card" href="' + href + '"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' + photoBadge : '<div class="gc-img-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '</div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Color</div><div class="gc-meta-val">' + escapeHtml(car.color || 'Unknown') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + escapeHtml(carTypeLabel(car.type)) + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + escapeHtml(car.runDate || 'Saved') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Place</div><div class="gc-meta-val">' + escapeHtml((car.location && car.location.label) || 'No pin') + '</div></div></div></div><a class="gc-search" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" onclick="event.preventDefault();event.stopPropagation()" title="Search up this car">↗</a></a>';
       }).join('');
       el.querySelectorAll('[data-inst]').forEach(function(a){
         a.addEventListener('click', function(e){
@@ -5339,7 +5346,7 @@ async function loadNews() {
       var nameSuffix = car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '';
       var clickAttr = ' data-inst="1" data-car="' + encodeURIComponent(JSON.stringify(car)) + '"';
       var href = 'javascript:void(0)';
-      return '<a class="garage-row" href="' + href + '"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-arrow">↗</div><button class="g-edit" onclick="event.preventDefault();event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit car">✏️</button><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="' + escapeHtml(car.name) + '"></button></a>';
+      return '<a class="garage-row" href="' + href + '"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><a class="g-arrow" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Search up this car">↗</a><button class="g-edit" onclick="event.preventDefault();event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit car">✏️</button><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="' + escapeHtml(car.name) + '"></button></a>';
     }).join('');
     el.querySelectorAll('[data-inst]').forEach(function(a){
       a.addEventListener('click', function(e){
