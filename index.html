@@ -367,7 +367,7 @@ body{
 .map-picker-cancel:hover{border-color:var(--accent);color:var(--accent);}
 .map-picker-map{flex:1;position:relative;}
 .map-picker-map #pickerLeafletMap{width:100%;height:100%;}
-
+.map-picker-pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);z-index:1000;pointer-events:none;font-size:2rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));transition:top .1s ease,left .1s ease;}
 .map-picker-footer{padding:12px 16px;background:var(--surf);border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px;}
 .map-picker-confirm{flex:1;background:var(--accent);color:#0a0a0a;border:none;border-radius:10px;padding:12px;font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:1.5px;cursor:pointer;font-weight:700;}
 .map-picker-confirm:disabled{opacity:.4;cursor:not-allowed;}
@@ -411,6 +411,16 @@ body{
 .qp-item-name{flex:1;font-size:0.84rem;font-weight:500;}
 .qp-item-val{font-family:'Bebas Neue',cursive;font-size:0.9rem;color:var(--accent);}
 .qp-empty{padding:14px;font-size:0.7rem;color:var(--muted);text-align:center;}
+.qp-header{display:flex;align-items:center;gap:6px;padding:8px 10px 4px;}
+.qp-edit-btn{background:none;border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:0.62rem;font-weight:600;letter-spacing:0.5px;padding:4px 8px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;white-space:nowrap;}
+.qp-edit-btn:hover{border-color:var(--accent);color:var(--accent);}
+.qp-edit-btn.active{background:var(--accent);border-color:var(--accent);color:var(--bg);}
+.qp-clear-btn{background:none;border:1px solid #f44336;border-radius:5px;color:#f44336;font-size:0.62rem;font-weight:600;letter-spacing:0.5px;padding:4px 8px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;white-space:nowrap;margin-left:auto;}
+.qp-clear-btn:hover{background:#f44336;color:#fff;}
+.qp-item.editing{gap:6px;}
+.qp-item-del{width:22px;height:22px;border-radius:50%;border:none;background:#f4433622;color:#f44336;font-size:0.7rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;opacity:0;transform:scale(0.7);}
+.qp-item.editing .qp-item-del{opacity:1;transform:scale(1);}
+.qp-item-del:hover{background:#f44336;color:#fff;}
 
 /* ── RUN LIST ── */
 .empty-run{padding:40px 20px;text-align:center;color:var(--muted);font-size:0.75rem;}
@@ -1345,6 +1355,10 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
                 <span class="qp-arrow" id="qpArrow">▾</span>
               </button>
               <div class="qp-dropdown">
+                <div class="qp-header">
+                  <button class="qp-edit-btn" id="qpEditBtn" onclick="toggleQPEdit()">EDIT</button>
+                  <button class="qp-clear-btn" id="qpClearBtn" onclick="clearAllQP()" style="display:none">CLEAR ALL</button>
+                </div>
                 <div class="qp-search">
                   <input type="text" id="qpSearch" placeholder="Search..." oninput="renderQPList(this.value)" autocomplete="off">
                 </div>
@@ -1753,6 +1767,7 @@ let allRuns      = JSON.parse(localStorage.getItem('cs_runs')    || '[]');
 let quickPicks   = JSON.parse(localStorage.getItem('cs_qp')      || '[]');
 let sortMode     = 'desc';
 let qpOpen       = false;
+let qpEditMode   = false;
 let headlinerIdx = -1;
 
 let undoStack    = null;
@@ -2394,24 +2409,72 @@ function fmtFull(n) {
 function carUrl(name) { return 'https://www.google.com/search?q='+encodeURIComponent(name+' car specs price'); }
 
 //  QUICK PICKS 
+function carExistsAnywhere(name) {
+  const key = name.toLowerCase();
+  for (const run of allRuns) { if (run.cars.some(c => c.name.toLowerCase() === key)) return true; }
+  if (currentRun.some(c => c.name.toLowerCase() === key)) return true;
+  return false;
+}
+function cleanQPAfterRemoval(name) {
+  const key = name.toLowerCase();
+  if (!carExistsAnywhere(key)) {
+    quickPicks = quickPicks.filter(q => q.name.toLowerCase() !== key);
+    localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
+  }
+}
 function saveToQP(car) {
+  const existing = quickPicks.find(q => q.name.toLowerCase() === car.name.toLowerCase());
+  const photo = car.photo || (existing && existing.photo) || '';
   quickPicks = quickPicks.filter(q => q.name.toLowerCase() !== car.name.toLowerCase());
-  quickPicks.unshift({ name:car.name, value:car.value, color:car.color, type:car.type, ...(car.photo ? {photo:car.photo} : {}) });
+  quickPicks.unshift({ name:car.name, value:car.value, color:car.color, type:car.type, ...(photo ? {photo} : {}) });
   localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
   saveToCloud();
 }
 
 function toggleQP() {
   qpOpen = !qpOpen;
+  if (!qpOpen) qpEditMode = false;
   document.getElementById('qpWrap').classList.toggle('open', qpOpen);
   if (qpOpen) {
-    renderQPList('');
+    renderQPList(document.getElementById('qpSearch')?.value || '');
+    updateQPEditUI();
     setTimeout(() => document.getElementById('qpSearch').focus(), 80);
   }
 }
 function closeQP() {
   qpOpen = false;
+  qpEditMode = false;
   document.getElementById('qpWrap').classList.remove('open');
+  updateQPEditUI();
+}
+function toggleQPEdit() {
+  qpEditMode = !qpEditMode;
+  renderQPList(document.getElementById('qpSearch')?.value || '');
+  updateQPEditUI();
+}
+function updateQPEditUI() {
+  const editBtn = document.getElementById('qpEditBtn');
+  const clearBtn = document.getElementById('qpClearBtn');
+  if (editBtn) { editBtn.textContent = qpEditMode ? 'DONE' : 'EDIT'; editBtn.classList.toggle('active', qpEditMode); }
+  if (clearBtn) { clearBtn.style.display = qpEditMode && quickPicks.length ? 'block' : 'none'; }
+}
+function removeQP(name) {
+  quickPicks = quickPicks.filter(q => q.name.toLowerCase() !== name.toLowerCase());
+  localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
+  renderQPList(document.getElementById('qpSearch')?.value || '');
+  updateQPEditUI();
+  renderQPTrigger();
+}
+function clearAllQP() {
+  if (!quickPicks.length) return;
+  if (!confirm('Remove all ' + quickPicks.length + ' quick pick' + (quickPicks.length !== 1 ? 's' : '') + '?')) return;
+  quickPicks = [];
+  localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
+  qpEditMode = false;
+  renderQPList('');
+  updateQPEditUI();
+  renderQPTrigger();
+  showToast('All quick picks cleared');
 }
 function renderQPList(query) {
   const el = document.getElementById('qpList');
@@ -2421,16 +2484,20 @@ function renderQPList(query) {
   el.innerHTML = '';
   list.forEach(c => {
     const d = document.createElement('div');
-    d.className = 'qp-item';
-    d.innerHTML = `<span class="qp-item-type" style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:36px;text-align:right">${carTypeLabel(c.type)}</span><span class="qp-item-name">${c.name}</span><span class="qp-item-val">${fmtFull(c.value)}</span>`;
-    d.onclick = () => {
-      document.getElementById('carName').value  = c.name;
-      document.getElementById('carValue').value = c.value;
-      document.getElementById('carColor').value = c.color||'';
-      document.getElementById('carType').value  = c.type;
-      closeQP();
-      document.getElementById('qpSearch').value = '';
-    };
+    d.className = 'qp-item' + (qpEditMode ? ' editing' : '');
+    d.innerHTML = `<span class="qp-item-type" style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:36px;text-align:right">${carTypeLabel(c.type)}</span><span class="qp-item-name">${c.name}</span><span class="qp-item-val">${fmtFull(c.value)}</span>` + (qpEditMode ? `<button class="qp-item-del" title="Remove">✕</button>` : '');
+    if (qpEditMode) {
+      d.querySelector('.qp-item-del').onclick = (e) => { e.stopPropagation(); removeQP(c.name); };
+    } else {
+      d.onclick = () => {
+        document.getElementById('carName').value  = c.name;
+        document.getElementById('carValue').value = c.value;
+        document.getElementById('carColor').value = c.color||'';
+        document.getElementById('carType').value  = c.type;
+        closeQP();
+        document.getElementById('qpSearch').value = '';
+      };
+    }
     el.appendChild(d);
   });
 }
@@ -2535,16 +2602,21 @@ function removeCar(i) {
   saveCurrentRun();
   renderSpot();
   playSound('delete');
+  cleanQPAfterRemoval(car.name);
+  renderQPTrigger();
   pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, car.type + ' ' + car.name + ' removed');
 }
 
 function clearRun() {
   if (!currentRun.length) return;
   if (!confirm('Clear this run?')) return;
+  const removed = [...currentRun];
   currentRun = [];
   headlinerIdx = -1;
   saveCurrentRun();
+  removed.forEach(c => cleanQPAfterRemoval(c.name));
   renderSpot();
+  renderQPTrigger();
 }
 
 //  HEADLINER 
@@ -2818,8 +2890,6 @@ function deleteCarEverywhere(name) {
     return { ...run, cars: remaining, total: newTotal, headliner };
   }).filter(run=>run.cars.length>0);
   localStorage.setItem('cs_runs', JSON.stringify(allRuns));
-  quickPicks = quickPicks.filter(q=>q.name.toLowerCase()!==key);
-  localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
   currentRun = currentRun.filter(c=>c.name.toLowerCase()!==key);
   // Fix headlinerIdx if it pointed at the deleted car
   if (headlinerIdx >= 0) {
@@ -2828,6 +2898,8 @@ function deleteCarEverywhere(name) {
     else if (deletedAt < headlinerIdx) headlinerIdx--;
   }
   saveCurrentRun(); // also calls saveToCloud
+  // Only remove from QP if no instances remain anywhere
+  cleanQPAfterRemoval(name);
   renderQPTrigger();
   renderSpot();
   renderGarage();
@@ -5031,7 +5103,7 @@ async function loadNews() {
       '<div class="map-picker-title">TAP TO DROP A PIN</div>' +
       '<button class="map-picker-cancel" id="pickerCancelBtn">CANCEL</button>' +
     '</div>' +
-    '<div class="map-picker-map"><div id="pickerLeafletMap"></div></div>' +
+    '<div class="map-picker-map"><div id="pickerLeafletMap"></div><div class="map-picker-pin">📍</div></div>' +
     '<div class="map-picker-footer"><button class="map-picker-confirm" id="pickerConfirmBtn" disabled>CONFIRM LOCATION</button></div>' +
     '<div class="map-picker-coords" id="pickerCoords"></div>';
     document.body.appendChild(picker);
