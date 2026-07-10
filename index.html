@@ -4812,7 +4812,7 @@ async function loadNews() {
     clearInputs();
     renderQPTrigger();
     renderSpot();
-    if (garageView === 'map') renderGarage();
+    renderGarage();
     playSound('log');
     pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, input.type + ' ' + name + ' removed');
     showToast(input.type + ' ' + name + ' added to run!');
