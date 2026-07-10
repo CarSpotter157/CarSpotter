@@ -1778,6 +1778,7 @@ let soundEnabled = localStorage.getItem('cs_sound') !== 'off';
 let aliases      = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
 let leaderboardRuns = [];
 let leaderboardLoaded = false;
+let bestFromLB = parseInt(localStorage.getItem('cs_best_lb') || '0');
 
 // Garage view — declared here so renderGarage() works before auth fires
 let garageFilter = 'all';
@@ -2677,6 +2678,11 @@ function endRun() {
   const runCars = [...currentRun]; // snapshot before clearing
   allRuns.unshift(run);
   localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+  // Update leaderboard cache if this is the new best
+  if (total > bestFromLB) {
+    bestFromLB = total;
+    localStorage.setItem('cs_best_lb', String(bestFromLB));
+  }
   saveToCloud();
   publishRunToLeaderboard(run);
   currentRun = [];
@@ -2767,8 +2773,8 @@ function getRarity(value) {
 //  BEST (runs only, not spotted) 
 function getBest() {
   const runs = allRuns.filter(r => !r.spotted);
-  if (!runs.length) return 0;
-  return Math.max(...runs.map(r=>r.total));
+  const localBest = runs.length ? Math.max(...runs.map(r=>r.total)) : 0;
+  return Math.max(localBest, bestFromLB);
 }
 
 //  RENDER SPOT PAGE 
@@ -4233,7 +4239,7 @@ function clearAllData() {
   if (!confirm('Are you sure? Everything will be wiped locally.')) return;
   const keys = Object.keys(localStorage).filter(k => k.startsWith('cs_'));
   keys.forEach(k => localStorage.removeItem(k));
-  allRuns = []; currentRun = []; quickPicks = [];
+  allRuns = []; currentRun = []; quickPicks = []; bestFromLB = 0;
   renderGarage(); renderHistory(); renderSpot(); renderQPTrigger();
   showToast('All local data cleared.');
 }
@@ -4878,6 +4884,12 @@ async function loadLeaderboard(force) {
       }));
     }
     leaderboardLoaded = true;
+    // Sync user's best score from leaderboard into local cache
+    const myBest = leaderboardRuns.filter(r => r.isMe).reduce((max, r) => Math.max(max, r.total), 0);
+    if (myBest > bestFromLB) {
+      bestFromLB = myBest;
+      localStorage.setItem('cs_best_lb', String(bestFromLB));
+    }
     renderLeaderboard();
   } catch (e) {
     console.error(e);
