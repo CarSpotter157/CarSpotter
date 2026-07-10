@@ -2840,6 +2840,7 @@ const GARAGE_PAGE_SIZE = 40;
 let garagePage = 0;
 
 function renderGarage() {
+    console.log("renderGarage is running");
   const allCars = getAllCars();
   const filtered = sorted(allCars);
   const total = allCars.reduce((x,c)=>x+c.value,0);
