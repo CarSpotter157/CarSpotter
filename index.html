@@ -2849,7 +2849,7 @@ function renderGarage() {
   document.getElementById('gAvg').textContent   = allCars.length ? fmt(total/allCars.length) : '—';
 
   const el = document.getElementById('garageList');
-  console.log(el);
+  console.log("el: " + el);
   if (!filtered.length) {
     el.className = '';
     el.innerHTML='<div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px"></span>'+(allCars.length?'No matches':'No cars yet!')+'</div>';
