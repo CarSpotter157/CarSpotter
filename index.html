@@ -531,13 +531,39 @@ body{
   animation:fadeUp 0.2s ease both;transition:border-color 0.15s;
 }
 .garage-card:hover{border-color:var(--border2);}
-.gc-img-wrap{width:100%;height:110px;overflow:hidden;background:var(--surf2);}
+.gc-img-wrap{width:100%;height:130px;overflow:hidden;background:var(--surf2);position:relative;}
 .gc-img{width:100%;height:100%;object-fit:cover;}
 .gc-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem;}
+.gc-photo-badge{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);color:#fff;font-size:0.42rem;font-weight:600;padding:3px 7px;border-radius:4px;letter-spacing:0.3px;pointer-events:none;white-space:nowrap;}
 .gc-body{padding:12px 14px;}
 .gc-name{font-size:0.8rem;font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .gc-val{font-family:'Bebas Neue',cursive;font-size:0.95rem;color:var(--accent);}
 .gc-rarity{font-size:0.44rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;display:block;}
+
+/* ── DETAIL MODAL ── */
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:99991;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.18s ease;}
+.detail-card{width:100%;max-width:480px;background:var(--surf);border-top:1px solid var(--border);border-radius:24px 24px 0 0;overflow:hidden;animation:slideUpRecap 0.3s cubic-bezier(0.34,1.56,0.64,1);max-height:88vh;overflow-y:auto;padding-bottom:30px;}
+.detail-hero{position:relative;width:100%;height:240px;overflow:hidden;background:var(--surf2);}
+.detail-hero-img{width:100%;height:100%;object-fit:cover;}
+.detail-hero-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:4rem;}
+.detail-hero-badge{position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,0.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);color:#fff;font-size:0.5rem;font-weight:600;padding:4px 10px;border-radius:6px;letter-spacing:0.3px;}
+.detail-close{position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:none;color:#fff;cursor:pointer;font-size:1.2rem;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 0.15s;}
+.detail-close:hover{background:rgba(255,69,58,0.7);}
+.detail-info{padding:18px 20px 0;}
+.detail-name{font-family:'Bebas Neue',cursive;font-size:1.4rem;letter-spacing:0.5px;margin-bottom:12px;}
+.detail-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.detail-stat{background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 12px;text-align:center;}
+.detail-stat-label{font-size:0.42rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:3px;}
+.detail-stat-val{font-family:'Bebas Neue',cursive;font-size:1.1rem;color:var(--text);letter-spacing:0;line-height:1;}
+.detail-section-title{font-size:0.46rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:10px;padding:0 20px;}
+.detail-sighting{display:flex;align-items:center;gap:12px;padding:10px 20px;transition:background 0.1s;}
+.detail-sighting:hover{background:var(--surf2);}
+.detail-sighting-thumb{width:42px;height:42px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);background:var(--surf3);}
+.detail-sighting-nophoto{width:42px;height:42px;border-radius:8px;flex-shrink:0;background:var(--surf3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+.detail-sighting-info{flex:1;min-width:0;}
+.detail-sighting-date{font-size:0.72rem;font-weight:500;color:var(--text);}
+.detail-sighting-loc{font-size:0.62rem;color:var(--text2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.detail-sighting-badge{font-size:0.5rem;flex-shrink:0;}
 
 /* ── HISTORY ── */
 .record-card{
@@ -2832,17 +2858,14 @@ function renderGarage() {
     pageCars.forEach((car, idx) => {
       const a = document.createElement('a');
       a.className = 'garage-card';
-      if (car.spotCount > 1) {
-        a.href = 'javascript:void(0)';
-        a.onclick = (e) => { e.preventDefault(); showCarInstances(car); };
-      } else {
-        a.href = carUrl(car.name); a.target = '_blank'; a.rel = 'noopener noreferrer';
-      }
+      a.href = 'javascript:void(0)';
+      a.onclick = (e) => { e.preventDefault(); showCarInstances(car); };
       a.style.animationDelay = (idx*0.03)+'s';
       const rarity = getRarity(car.value);
+      const photoBadge = car.photo ? (car.photo.indexOf('data:') === 0 ? '<div class="gc-photo-badge">📷 Your Photo</div>' : '<div class="gc-photo-badge">🌐 Reference</div>') : '';
       a.innerHTML = `
         <div class="gc-img-wrap">
-          ${car.photo ? `<img class="gc-img" src="${car.photo}" alt="${escapeHtml(car.name)}">` : `<div class="gc-img-ph">${escapeHtml(carTypeLabel(car.type))}</div>`}
+          ${car.photo ? `<img class="gc-img" src="${car.photo}" alt="${escapeHtml(car.name)}">${photoBadge}` : `<div class="gc-img-ph">${escapeHtml(carTypeLabel(car.type))}</div>`}
         </div>
         <div class="gc-body">
           <div class="gc-name">${escapeHtml(car.name)}${car.spotCount > 1 ? ` <span style="font-size:0.6rem;color:var(--text2)">&times;${car.spotCount}</span>` : ''}</div>
@@ -2861,12 +2884,8 @@ function renderGarage() {
   pageCars.forEach((car,idx)=>{
     const a = document.createElement('a');
     a.className='garage-row';
-    if (car.spotCount > 1) {
-      a.href = 'javascript:void(0)';
-      a.onclick = (e) => { e.preventDefault(); showCarInstances(car); };
-    } else {
-      a.href=carUrl(car.name);a.target='_blank';a.rel='noopener noreferrer';
-    }
+    a.href = 'javascript:void(0)';
+    a.onclick = (e) => { e.preventDefault(); showCarInstances(car); };
     a.style.animationDelay=(idx*0.03)+'s';
     const rarity = getRarity(car.value);
     a.innerHTML=`<div class="g-rank">${sortMode!=='alpha'?'#'+(idx+1):''}</div>
@@ -3122,33 +3141,39 @@ async function showSpecsCard(car) {
 }
 
 function showCarInstances(car) {
-  const instances = (car.instances && car.instances.length) ? car.instances : [{...car, runDate: car.runDate || 'Unknown'}];
-  const overlay = document.createElement('div');
-  overlay.className = 'inst-overlay';
-  overlay.id = 'instOverlay';
-  overlay.onclick = () => overlay.remove();
-  const rarity = getRarity(car.value);
-  overlay.innerHTML = `
-    <div class="inst-card" onclick="event.stopPropagation()">
-      <div class="inst-header">
-        <div class="inst-title">${escapeHtml(car.name)} <span style="color:var(--text2);font-size:0.8rem">(${instances.length} spotted)</span></div>
-        <button class="inst-close" onclick="document.getElementById('instOverlay').remove()">&times;</button>
-      </div>
-      <div class="inst-list">
-        ${instances.map((inst, i) => `
-          <div class="inst-item" onclick="document.getElementById('instOverlay').remove();showSpecsCard(${JSON.stringify(inst).replace(/"/g, '&quot;')})">
-            ${inst.photo
-              ? `<img class="inst-item-photo" src="${inst.photo}" alt="${escapeHtml(inst.name)}">`
-              : `<div class="inst-item-nophoto">${escapeHtml(carTypeLabel(inst.type))}</div>`}
-            <div class="inst-item-body">
-              <div class="inst-item-name">${escapeHtml(inst.name)}</div>
-              <div class="inst-item-meta">${escapeHtml(inst.runDate || 'Unknown')} ${inst.color ? '&middot; ' + escapeHtml(inst.color) : ''} ${inst.location ? '&middot; ' + escapeHtml(inst.location.label || '') : ''}</div>
-              <div class="inst-item-val" style="color:${rarity.color}">${fmtFull(inst.value)}</div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    </div>`;
+  var instances = (car.instances && car.instances.length) ? car.instances : [{name:car.name,photo:car.photo,value:car.value,type:car.type,color:car.color,runDate:car.runDate||'Unknown',location:car.location}];
+  var rarity = getRarity(car.value);
+  var heroPhoto = null, heroBadge = '';
+  for (var i = instances.length - 1; i >= 0; i--) {
+    if (instances[i].photo && instances[i].photo.indexOf('data:') === 0) { heroPhoto = instances[i].photo; heroBadge = '\uD83D\uDCF7 Your Photo'; break; }
+  }
+  if (!heroPhoto) { for (var j = instances.length - 1; j >= 0; j--) { if (instances[j].photo) { heroPhoto = instances[j].photo; heroBadge = '\uD83C\uDF10 Reference Photo'; break; } } }
+  if (!heroPhoto && car.photo) { heroPhoto = car.photo; heroBadge = car.photo.indexOf('data:') === 0 ? '\uD83D\uDCF7 Your Photo' : '\uD83C\uDF10 Reference Photo'; }
+  var heroHtml = heroPhoto
+    ? '<img class="detail-hero-img" src="' + heroPhoto + '" alt="' + escapeHtml(car.name) + '">' + (heroBadge ? '<div class="detail-hero-badge">' + heroBadge + '</div>' : '')
+    : '<div class="detail-hero-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
+  var sorted = instances.slice().reverse();
+  var sightingsHtml = sorted.map(function(inst) {
+    var thumbHtml = inst.photo ? '<img class="detail-sighting-thumb" src="' + inst.photo + '" alt="">' : '<div class="detail-sighting-nophoto">' + escapeHtml(carTypeLabel(inst.type)) + '</div>';
+    var badge = inst.photo ? (inst.photo.indexOf('data:') === 0 ? '<div class="detail-sighting-badge">\uD83D\uDCF7</div>' : '<div class="detail-sighting-badge">\uD83C\uDF10</div>') : '';
+    var loc = (inst.location && inst.location.label) ? '<div class="detail-sighting-loc">\uD83D\uDCCD ' + escapeHtml(inst.location.label) + '</div>' : '';
+    return '<div class="detail-sighting">' + thumbHtml + '<div class="detail-sighting-info"><div class="detail-sighting-date">' + escapeHtml(inst.runDate || 'Unknown') + '</div>' + loc + '</div>' + badge + '</div>';
+  }).join('');
+  var overlay = document.createElement('div');
+  overlay.className = 'detail-overlay';
+  overlay.id = 'detailOverlay';
+  overlay.onclick = function() { overlay.remove(); };
+  overlay.innerHTML = '<div class="detail-card" onclick="event.stopPropagation()">' +
+    '<div class="detail-hero">' + heroHtml + '<button class="detail-close" onclick="document.getElementById(\'detailOverlay\').remove()">&times;</button></div>' +
+    '<div class="detail-info"><div class="detail-name">' + escapeHtml(car.name) + '</div>' +
+    '<div class="detail-stats">' +
+    '<div class="detail-stat"><div class="detail-stat-label">Value</div><div class="detail-stat-val" style="color:var(--accent)">' + fmtFull(car.value) + '</div></div>' +
+    '<div class="detail-stat"><div class="detail-stat-label">Rarity</div><div class="detail-stat-val" style="color:' + rarity.color + '">' + rarity.label + '</div></div>' +
+    '<div class="detail-stat"><div class="detail-stat-label">Sightings</div><div class="detail-stat-val">' + instances.length + '</div></div>' +
+    '</div></div>' +
+    '<div class="detail-section-title">Sighting History</div>' +
+    '<div class="detail-sightings">' + sightingsHtml + '</div>' +
+    '</div>';
   document.body.appendChild(overlay);
 }
 
@@ -4979,9 +5004,10 @@ async function loadNews() {
       el.innerHTML = filtered.map(function(car, idx){
         var rarity = getRarity(car.value);
         var nameSuffix = car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '';
-        var clickAttr = car.spotCount > 1 ? ' data-inst="1" data-car="' + encodeURIComponent(JSON.stringify(car)) + '"' : ' target="_blank" rel="noopener noreferrer"';
-        var href = car.spotCount > 1 ? 'javascript:void(0)' : carUrl(car.name);
-        return '<a class="garage-card" href="' + href + '"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' : '<div class="gc-img-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '</div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Color</div><div class="gc-meta-val">' + escapeHtml(car.color || 'Unknown') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + escapeHtml(carTypeLabel(car.type)) + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + escapeHtml(car.runDate || 'Saved') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Place</div><div class="gc-meta-val">' + escapeHtml((car.location && car.location.label) || 'No pin') + '</div></div></div></div></a>';
+        var clickAttr = ' data-inst="1" data-car="' + encodeURIComponent(JSON.stringify(car)) + '"';
+        var href = 'javascript:void(0)';
+        var photoBadge = car.photo ? (car.photo.indexOf('data:') === 0 ? '<div class="gc-photo-badge">📷 Your Photo</div>' : '<div class="gc-photo-badge">🌐 Reference</div>') : '';
+        return '<a class="garage-card" href="' + href + '"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' + photoBadge : '<div class="gc-img-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '</div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Color</div><div class="gc-meta-val">' + escapeHtml(car.color || 'Unknown') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + escapeHtml(carTypeLabel(car.type)) + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + escapeHtml(car.runDate || 'Saved') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Place</div><div class="gc-meta-val">' + escapeHtml((car.location && car.location.label) || 'No pin') + '</div></div></div></div></a>';
       }).join('');
       el.querySelectorAll('[data-inst]').forEach(function(a){
         a.addEventListener('click', function(e){
@@ -4995,8 +5021,8 @@ async function loadNews() {
     el.innerHTML = filtered.map(function(car, idx){
       var rarity = getRarity(car.value);
       var nameSuffix = car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '';
-      var clickAttr = car.spotCount > 1 ? ' data-inst="1" data-car="' + encodeURIComponent(JSON.stringify(car)) + '"' : ' target="_blank" rel="noopener noreferrer"';
-      var href = car.spotCount > 1 ? 'javascript:void(0)' : carUrl(car.name);
+      var clickAttr = ' data-inst="1" data-car="' + encodeURIComponent(JSON.stringify(car)) + '"';
+      var href = 'javascript:void(0)';
       return '<a class="garage-row" href="' + href + '"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-arrow">↗</div><button class="g-edit" onclick="event.preventDefault();event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit car">✏️</button><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="' + escapeHtml(car.name) + '"></button></a>';
     }).join('');
     el.querySelectorAll('[data-inst]').forEach(function(a){
