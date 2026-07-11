@@ -531,7 +531,7 @@ body{
   margin-bottom:8px;
   text-decoration:none;color:inherit;
   animation:fadeUp 0.2s ease both;
-  transition:border-color 0.15s,background 0.15s;touch-action:manipulation;
+  transition:border-color 0.15s,background 0.15s;
 }
 .garage-row:hover{border-color:var(--border2);background:var(--surf2);}
 .g-rank{font-family:'Bebas Neue',cursive;font-size:0.7rem;color:var(--muted);min-width:26px;}
@@ -541,10 +541,10 @@ body{
   display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;
 }
 .g-info{flex:1;min-width:0;}
-.g-name{font-size:0.9rem;font-weight:600;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;-webkit-line-clamp:2;word-break:break-word;}
+.g-name{font-size:0.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .g-meta{font-size:0.62rem;color:var(--text2);margin-top:3px;}
 .g-val{font-family:'Bebas Neue',cursive;font-size:1rem;color:var(--accent);flex-shrink:0;}
-.g-arrow{color:var(--muted);font-size:0.75rem;flex-shrink:0;transition:color 0.15s;text-decoration:none;}
+.g-arrow{color:var(--muted);font-size:0.75rem;flex-shrink:0;transition:color 0.15s;}
 .garage-row:hover .g-arrow{color:var(--accent);}
 .g-edit,.g-del{background:none;border:none;cursor:pointer;padding:4px;flex-shrink:0;font-size:0.75rem;border-radius:6px;transition:background 0.12s;}
 .g-edit:hover{background:var(--surf3);}
@@ -563,8 +563,8 @@ body{
 .garage-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
 .garage-card{
   background:var(--surf);border:1px solid var(--border);border-radius:var(--radius-sm);
-  text-decoration:none;color:inherit;overflow:hidden;position:relative;
-  animation:fadeUp 0.2s ease both;transition:border-color 0.15s;touch-action:manipulation;
+  text-decoration:none;color:inherit;overflow:hidden;
+  animation:fadeUp 0.2s ease both;transition:border-color 0.15s;
 }
 .garage-card:hover{border-color:var(--border2);}
 .gc-img-wrap{width:100%;height:130px;overflow:hidden;background:var(--surf2);position:relative;}
@@ -572,15 +572,9 @@ body{
 .gc-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem;}
 .gc-photo-badge{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);color:#fff;font-size:0.42rem;font-weight:600;padding:3px 7px;border-radius:4px;letter-spacing:0.3px;pointer-events:none;white-space:nowrap;}
 .gc-body{padding:12px 14px;}
-.gc-name{font-size:0.8rem;font-weight:600;margin-bottom:3px;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;-webkit-line-clamp:2;word-break:break-word;}
+.gc-name{font-size:0.8rem;font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .gc-val{font-family:'Bebas Neue',cursive;font-size:0.95rem;color:var(--accent);}
 .gc-rarity{font-size:0.44rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;display:block;}
-.gc-search{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);color:#fff;font-size:0.7rem;display:flex;align-items:center;justify-content:center;text-decoration:none;transition:background 0.15s;z-index:2;}
-.gc-search:hover{background:var(--accent);color:#000;}
-.gc-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
-.gc-meta-chip{background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:5px 7px;}
-.gc-meta-label{font-size:0.4rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:1px;}
-.gc-meta-val{font-size:0.6rem;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
 /* ── DETAIL MODAL ── */
 .detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:99991;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.18s ease;}
@@ -606,10 +600,6 @@ body{
 .detail-sighting-date{font-size:0.72rem;font-weight:500;color:var(--text);}
 .detail-sighting-loc{font-size:0.62rem;color:var(--text2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .detail-sighting-badge{font-size:0.5rem;flex-shrink:0;}
-.detail-actions{display:flex;gap:8px;padding:16px 20px;}
-.detail-action-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--surf2);color:var(--text2);font-size:0.72rem;font-weight:600;letter-spacing:0.3px;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;transition:all 0.15s;}
-.detail-action-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--adim);}
-.detail-action-del:hover{border-color:#f44336;color:#f44336;background:rgba(244,67,54,0.08);}
 
 /* ── HISTORY ── */
 .record-card{
@@ -937,6 +927,20 @@ body{
   display:flex;align-items:center;gap:10px;
 }
 .offline-banner.show{opacity:1;}
+
+/* ── UPDATE BANNER ── */
+.update-banner{
+  position:fixed;top:0;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,#1b8a4e,#22b573);color:#fff;
+  font-family:'Bebas Neue',cursive;font-size:0.72rem;letter-spacing:2px;
+  padding:9px 24px;border-radius:0 0 12px 12px;
+  z-index:10000;opacity:0;pointer-events:none;transition:opacity 0.4s;
+  display:flex;align-items:center;gap:10px;cursor:pointer;
+  box-shadow:0 4px 16px rgba(34,181,115,0.35);
+}
+.update-banner.show{opacity:1;pointer-events:auto;}
+.update-banner span:first-child{font-weight:700;}
+.update-banner:active{transform:translateX(-50%) scale(0.97);}
 
 /* ── AUTOCOMPLETE ── */
 .car-ac-wrap{position:relative;}
@@ -1762,11 +1766,13 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
 <div class="toast" id="toast"></div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
+<div class="update-banner" id="updateBanner" onclick="location.reload()"><span>NEW VERSION</span><span>Tap to reload</span></div>
 
 <script>
 // 
 //  ALL STATE (must be declared first) 
 // 
+const APP_VERSION = 'v27.1';
 let currentUser  = null;
 let syncUnsub    = null;
 let syncTimer    = null;
@@ -1788,7 +1794,6 @@ let soundEnabled = localStorage.getItem('cs_sound') !== 'off';
 let aliases      = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
 let leaderboardRuns = [];
 let leaderboardLoaded = false;
-let bestFromLB = parseInt(localStorage.getItem('cs_best_lb') || '0');
 
 // Garage view — declared here so renderGarage() works before auth fires
 let garageFilter = 'all';
@@ -2688,11 +2693,6 @@ function endRun() {
   const runCars = [...currentRun]; // snapshot before clearing
   allRuns.unshift(run);
   localStorage.setItem('cs_runs', JSON.stringify(allRuns));
-  // Update leaderboard cache if this is the new best
-  if (total > bestFromLB) {
-    bestFromLB = total;
-    localStorage.setItem('cs_best_lb', String(bestFromLB));
-  }
   saveToCloud();
   publishRunToLeaderboard(run);
   currentRun = [];
@@ -2783,8 +2783,8 @@ function getRarity(value) {
 //  BEST (runs only, not spotted) 
 function getBest() {
   const runs = allRuns.filter(r => !r.spotted);
-  const localBest = runs.length ? Math.max(...runs.map(r=>r.total)) : 0;
-  return Math.max(localBest, bestFromLB);
+  if (!runs.length) return 0;
+  return Math.max(...runs.map(r=>r.total));
 }
 
 //  RENDER SPOT PAGE 
@@ -3136,7 +3136,10 @@ function renderGarage() {
           ${car.spotCount > 1 ? `<span class="g-spotted-count">👀 ${car.spotCount}x</span>` : ''}
         </div>
       </div>
-      <div class="g-val">${fmtFull(car.value)}</div>`;
+      <div class="g-val">${fmtFull(car.value)}</div>
+      <div class="g-arrow">↗</div>
+      <button class="g-edit" onclick="event.preventDefault();event.stopPropagation();openEditCarModal('${encodeURIComponent(JSON.stringify(car))}')" title="Edit car">✏️</button>
+      <button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="${escapeHtml(car.name)}"></button>`;
     el.appendChild(a);
   });
   if (hasMore) appendLoadMoreBtn(el, () => { garagePage++; renderGarage(); }, filtered.length - pageCars.length);
@@ -3255,7 +3258,7 @@ function renderHistory() {
         ${bulkMode ? `<input type="checkbox" class="hist-check" data-id="${entry.id}" ${bulkSelected.has(entry.id)?'checked':''} onclick="event.stopPropagation();toggleBulkSelect(${entry.id})">` : ''}
         <div class="hist-num${isSpot?' spot-num':''}">${escapeHtml(label)}</div>
         <div class="hist-info">
-          <div class="hist-date">${escapeHtml(entry.date.replace(/,\s*\d{4}$/, ''))}</div>
+          <div class="hist-date">${escapeHtml(entry.date)}</div>
           <div class="hist-total">${fmtFull(entry.total)}</div>
           <div class="hist-count">${entry.cars.length} car${entry.cars.length!==1?'s':''}${entry.total>=1000000?' ':''}</div>
           ${headlinerHTML}
@@ -3406,11 +3409,6 @@ function showCarInstances(car) {
     '<div class="detail-stat"><div class="detail-stat-label">Rarity</div><div class="detail-stat-val" style="color:' + rarity.color + '">' + rarity.label + '</div></div>' +
     '<div class="detail-stat"><div class="detail-stat-label">Sightings</div><div class="detail-stat-val">' + instances.length + '</div></div>' +
     '</div></div>' +
-    '<div class="detail-actions">' +
-    '<a class="detail-action-btn" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" onclick="event.preventDefault();event.stopPropagation();window.open(\'' + carUrl(car.name) + '\',\'_blank\')" title="Search this car">↗ Search</a>' +
-    '<button class="detail-action-btn" onclick="event.stopPropagation();document.getElementById(\'detailOverlay\').remove();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit car">✏️ Edit</button>' +
-    '<button class="detail-action-btn detail-action-del" onclick="event.stopPropagation();document.getElementById(\'detailOverlay\').remove();deleteCarEverywhere(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')" title="Delete car">✕ Delete</button>' +
-    '</div>' +
     '<div class="detail-section-title">Sighting History</div>' +
     '<div class="detail-sightings">' + sightingsHtml + '</div>' +
     '</div>';
@@ -3752,10 +3750,10 @@ applyTheme(activeTheme);
 applyCarbon();
 initSoundToggle();
 
-//  SERVICE WORKER — cache-first for offline support
+//  SERVICE WORKER — network-first for fresh deploys, cache fallback for offline
 if ('serviceWorker' in navigator) {
   const swCode = `
-const CACHE = 'cs-v5';
+const CACHE = 'cs-v6';
 const URLS = ['.', location.pathname, location.href];
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -3772,16 +3770,18 @@ self.addEventListener('activate', e => {
   );
 });
 self.addEventListener('fetch', e => {
-  // For navigation requests, serve cached app shell
   if (e.request.mode === 'navigate') {
     e.respondWith(
-      fetch(e.request).catch(() =>
+      fetch(new Request(e.request, {cache:'no-store'})).then(res => {
+        const clone = res.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+        return res;
+      }).catch(() =>
         caches.match('.') || caches.match(location.pathname)
       )
     );
     return;
   }
-  // For everything else: network first, fall back to cache
   e.respondWith(
     fetch(e.request)
       .then(res => {
@@ -3798,10 +3798,27 @@ self.addEventListener('fetch', e => {
     const blob = new Blob([swCode], { type: 'application/javascript' });
     const swUrl = URL.createObjectURL(blob);
     navigator.serviceWorker.register(swUrl).then(reg => {
-      // Force update check
       reg.update();
+      setInterval(() => reg.update(), 60 * 60 * 1000);
     });
   } catch(e) {}
+
+  function showUpdateBanner() {
+    const b = document.getElementById('updateBanner');
+    if (b) b.classList.add('show');
+  }
+
+  navigator.serviceWorker.addEventListener('controllerchange', showUpdateBanner);
+
+  setInterval(() => {
+    fetch(location.pathname + '?_v=' + Date.now(), {cache:'no-store'})
+      .then(r => r.text())
+      .then(html => {
+        const m = html.match(/APP_VERSION\s*=\s*['"]([^'"]+)['"]/);
+        if (m && m[1] !== APP_VERSION) showUpdateBanner();
+      })
+      .catch(()=>{});
+  }, 5 * 60 * 1000);
 }
 
 //  OFFLINE MODE 
@@ -4251,7 +4268,7 @@ function clearAllData() {
   if (!confirm('Are you sure? Everything will be wiped locally.')) return;
   const keys = Object.keys(localStorage).filter(k => k.startsWith('cs_'));
   keys.forEach(k => localStorage.removeItem(k));
-  allRuns = []; currentRun = []; quickPicks = []; bestFromLB = 0;
+  allRuns = []; currentRun = []; quickPicks = [];
   renderGarage(); renderHistory(); renderSpot(); renderQPTrigger();
   showToast('All local data cleared.');
 }
@@ -4896,12 +4913,6 @@ async function loadLeaderboard(force) {
       }));
     }
     leaderboardLoaded = true;
-    // Sync user's best score from leaderboard into local cache
-    const myBest = leaderboardRuns.filter(r => r.isMe).reduce((max, r) => Math.max(max, r.total), 0);
-    if (myBest > bestFromLB) {
-      bestFromLB = myBest;
-      localStorage.setItem('cs_best_lb', String(bestFromLB));
-    }
     renderLeaderboard();
   } catch (e) {
     console.error(e);
@@ -5351,7 +5362,7 @@ async function loadNews() {
       var nameSuffix = car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '';
       var clickAttr = ' data-inst="1" data-car="' + encodeURIComponent(JSON.stringify(car)) + '"';
       var href = 'javascript:void(0)';
-      return '<a class="garage-row" href="' + href + '"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div></a>';
+      return '<a class="garage-row" href="' + href + '"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-arrow">↗</div><button class="g-edit" onclick="event.preventDefault();event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit car">✏️</button><button class="g-del" onclick="event.preventDefault();event.stopPropagation();deleteCarEverywhere(this.dataset.name)" data-name="' + escapeHtml(car.name) + '"></button></a>';
     }).join('');
     el.querySelectorAll('[data-inst]').forEach(function(a){
       a.addEventListener('click', function(e){
