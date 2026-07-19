@@ -344,7 +344,7 @@ body{
   border-radius:20px;padding:4px 12px;
   font-size:0.62rem;color:var(--accent);font-weight:600;
 }
-.location-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;flex-shrink:0;animation:pulse 1.5s ease-in-out infinite;}
+.location-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;flex-shrink:0;}
 .location-chip button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.75rem;line-height:1;padding:0;opacity:0.7;}
 .location-chip button:hover{opacity:1;}
 
@@ -369,7 +369,7 @@ body{
 .map-picker-map{flex:1;position:relative;}
 .map-picker-map #pickerLeafletMap{width:100%;height:100%;}
 .map-picker-pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);z-index:1000;pointer-events:none;transition:top .1s ease,left .1s ease;}
-.map-pin-dot{width:16px;height:16px;background:var(--accent);border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.4);animation:pulse 1.5s ease-in-out infinite;}
+.map-pin-dot{width:16px;height:16px;background:var(--accent);border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.4);}
 .map-picker-footer{padding:12px 16px;background:var(--surf);border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px;}
 .map-picker-confirm{flex:1;background:var(--accent);color:#0a0a0a;border:none;border-radius:10px;padding:12px;font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:1.5px;cursor:pointer;font-weight:700;}
 .map-picker-confirm:disabled{opacity:.4;cursor:not-allowed;}
@@ -1413,7 +1413,6 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
             <button class="gv-btn active" id="gvList" onclick="setGarageView('list')" title="List view">&#9776;</button>
             <button class="gv-btn" id="gvGrid" onclick="setGarageView('grid')" title="Car cards">Cards</button>
             <button class="gv-btn" id="gvMap" onclick="setGarageView('map')" title="Map view">Map</button>
-            <button class="gv-btn" id="gvPodium" onclick="setGarageView('podium')" title="Podium - Top 3">🏆</button>
           </div>
           <button class="txt-btn" id="sortBtn" onclick="cycleSort()">Value &#8595;</button>
           <button class="txt-btn" onclick="openCarSearch()" title="Search car specs">🔍 Search</button>
@@ -2480,6 +2479,7 @@ function renderQPList(query) {
     d.className = 'qp-item';
     d.innerHTML = `<span class="qp-item-type" style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:36px;text-align:right">${carTypeLabel(c.type)}</span><span class="qp-item-name">${c.name}</span><span class="qp-item-val">${fmtFull(c.value)}</span><button class="qp-item-del" title="Remove">✕</button>`;
     d.querySelector('.qp-item-del').onclick = (e) => { e.stopPropagation(); removeQP(c.name); };
+    d.querySelector('.qp-item-name').onclick = (e) => { e.stopPropagation(); editQPName(d, c); };
     d.onclick = () => {
       document.getElementById('carName').value  = c.name;
       document.getElementById('carValue').value = c.value;
@@ -2490,6 +2490,31 @@ function renderQPList(query) {
     };
     el.appendChild(d);
   });
+}
+function editQPName(li, car) {
+  const nameSpan = li.querySelector('.qp-item-name');
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = car.name;
+  input.style.cssText = 'background:var(--surf2);border:1px solid var(--accent);border-radius:4px;padding:2px 6px;font:inherit;color:var(--text);width:auto;min-width:120px;';
+  nameSpan.replaceWith(input);
+  input.focus();
+  input.select();
+  const finish = () => {
+    const newName = sanitizeText(input.value);
+    if (newName && newName !== car.name) {
+      const oldKey = car.name.toLowerCase();
+      car.name = newName;
+      quickPicks = quickPicks.map(q => q.name.toLowerCase() === oldKey ? {...q, name: newName} : q);
+      localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
+      saveToCloud();
+      renderQPList(document.getElementById('qpSearch')?.value || '');
+    } else {
+      renderQPList(document.getElementById('qpSearch')?.value || '');
+    }
+  };
+  input.onblur = finish;
+  input.onkeydown = (e) => { if (e.key === 'Enter') finish(); if (e.key === 'Escape') renderQPList(document.getElementById('qpSearch')?.value || ''); };
 }
 function renderQPTrigger() {
   document.getElementById('qpWrap').style.display = quickPicks.length ? 'block' : 'none';
@@ -2900,7 +2925,7 @@ function deleteCarEverywhere(name) {
 
 function setGarageView(v) {
   garageView = v;
-  ['gvList','gvGrid','gvMap','gvPodium'].forEach(function(id){ var el = document.getElementById(id); if(el) el.classList.toggle('active', id==='gv'+v.charAt(0).toUpperCase()+v.slice(1)); });
+  ['gvList','gvGrid','gvMap'].forEach(function(id){ var el = document.getElementById(id); if(el) el.classList.toggle('active', id==='gv'+v.charAt(0).toUpperCase()+v.slice(1)); });
   renderGarage();
 }
 function clearGarageSearch() {
@@ -3065,23 +3090,16 @@ function renderGarage() {
     return;
   }
 
-  if (garageView === 'podium') {
-    el.className = '';
-    // Get all cars sorted by value descending
-    const sortedCars = [...allCars].sort((a,b) => b.value - a.value);
-    const top3 = sortedCars.slice(0, 3);
-    
-    if (!top3.length) {
-      el.innerHTML = '<div class="empty-garage" style="padding:60px 20px;text-align:center"><span style="font-size:3rem;display:block;margin-bottom:16px">🏆</span><strong style="display:block;margin-bottom:8px;color:var(--text);font-size:1.1rem">No podium yet</strong><span style="color:var(--text2)">Log some cars to see your top 3!</span></div>';
-      return;
-    }
-
+  // Podium at top of list view - show top 3 cars
+  const sortedCars = [...allCars].sort((a,b) => b.value - a.value);
+  const top3 = sortedCars.slice(0, 3);
+  if (top3.length > 0) {
     const podiumColors = ['#d4a843', '#888', '#a67c52']; // Gold, Silver, Bronze
-    const podiumHeights = ['220px', '180px', '140px'];
+    const podiumHeights = ['160px', '130px', '100px'];
     const podiumLabels = ['🥇 1st', '🥈 2nd', '🥉 3rd'];
 
     const podiumHTML = `
-      <div style="display:flex;align-items:flex-end;justify-content:center;gap:24px;padding:40px 20px;min-height:400px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:flex-end;justify-content:center;gap:16px;padding:20px 10px;min-height:220px;flex-wrap:wrap;margin-bottom:8px;">
         ${top3.map((car, i) => {
           const refImage = getRefImageUrl(car.name);
           const photoUrl = car.photo || refImage;
@@ -3092,34 +3110,31 @@ function renderGarage() {
           
           return `
             <div class="podium-place" style="display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform 0.2s;" data-car-index="${i}">
-              <div style="width:140px;height:${podiumHeight};background:linear-gradient(180deg,var(--surf) 0%,var(--surf2) 100%);border:2px solid var(--border);border-radius:16px 16px 0 0;display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.4);">
-                <div style="position:absolute;top:0;left:0;right:0;height:4px;background:${podiumColor};"></div>
-                <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:20px 12px 16px;width:100%;">
+              <div style="width:110px;height:${podiumHeight};background:linear-gradient(180deg,var(--surf) 0%,var(--surf2) 100%);border:2px solid var(--border);border-radius:12px 12px 0 0;display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,0.3);">
+                <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${podiumColor};"></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:14px 8px 12px;width:100%;">
                   ${photoUrl ? `
-                    <img src="${photoUrl}" alt="${escapeHtml(car.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;margin-bottom:12px;box-shadow:0 4px 16px rgba(0,0,0,0.3);" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-                    <div style="display:none;width:100%;height:100%;object-fit:cover;border-radius:8px;background:var(--surf2);align-items:center;justify-content:center;font-size:3rem;">${escapeHtml(carTypeLabel(car.type))}</div>
+                    <img src="${photoUrl}" alt="${escapeHtml(car.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;margin-bottom:8px;box-shadow:0 3px 12px rgba(0,0,0,0.2);" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                    <div style="display:none;width:100%;height:100%;object-fit:cover;border-radius:6px;background:var(--surf2);align-items:center;justify-content:center;font-size:2rem;">${escapeHtml(carTypeLabel(car.type))}</div>
                   ` : `
-                    <div style="width:100%;height:100%;object-fit:cover;border-radius:8px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:3rem;margin-bottom:12px;">${escapeHtml(carTypeLabel(car.type))}</div>
+                    <div style="width:100%;height:100%;object-fit:cover;border-radius:6px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:8px;">${escapeHtml(carTypeLabel(car.type))}</div>
                   `}
-                  <div style="text-align:center;width:100%;padding:0 8px;">
-                    <div style="font-family:'Bebas Neue',cursive;font-size:1.1rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;">${escapeHtml(car.name)}</div>
-                    <div style="font-family:'Bebas Neue',cursive;font-size:1.3rem;color:var(--accent);margin-bottom:6px;">${fmtFull(car.value)}</div>
-                    <div style="font-size:0.55rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;">${rarity.label}</div>
-                    ${car.spotCount > 1 ? `<div style="font-size:0.55rem;color:var(--accent);margin-top:4px;font-weight:600">👁 ${car.spotCount}x spotted</div>` : ''}
+                  <div style="text-align:center;width:100%;padding:0 6px;">
+                    <div style="font-family:'Bebas Neue',cursive;font-size:0.9rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;">${escapeHtml(car.name)}</div>
+                    <div style="font-family:'Bebas Neue',cursive;font-size:1rem;color:var(--accent);margin-bottom:4px;">${fmtFull(car.value)}</div>
+                    <div style="font-size:0.5rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;">${rarity.label}</div>
+                    ${car.spotCount > 1 ? `<div style="font-size:0.5rem;color:var(--accent);margin-top:2px;font-weight:600">👁 ${car.spotCount}x</div>` : ''}
                   </div>
                 </div>
               </div>
-              <div class="podium-base" style="width:160px;height:18px;background:${podiumColor};border-radius:6px;margin-top:-6px;box-shadow:0 6px 24px ${podiumColor}88;"></div>
-              <div class="podium-position" style="margin-top:10px;font-family:'Bebas Neue',cursive;font-size:1.5rem;color:${podiumColor};text-shadow:0 2px 8px ${podiumColor}66;">${podiumLabels[i]}</div>
+              <div class="podium-base" style="width:130px;height:14px;background:${podiumColor};border-radius:4px;margin-top:-4px;box-shadow:0 4px 16px ${podiumColor}88;"></div>
+              <div class="podium-position" style="margin-top:6px;font-family:'Bebas Neue',cursive;font-size:1.1rem;color:${podiumColor};text-shadow:0 1px 4px ${podiumColor}66;">${podiumLabels[i]}</div>
             </div>
           `;
         }).join('')}
       </div>
-      <div style="text-align:center;padding:20px;color:var(--text2);font-size:0.75rem;">
-        Top ${top3.length} car${top3.length !== 1 ? 's' : ''} by value. Tap a car to view details.
-      </div>
     `;
-    el.innerHTML = podiumHTML;
+    el.innerHTML = podiumHTML + el.innerHTML;
     
     // Add click handlers to podium cars
     top3.forEach((car, i) => {
@@ -3128,7 +3143,6 @@ function renderGarage() {
         podiumPlace.onclick = () => showCarInstances(car);
       }
     });
-    return;
   }
 
   if (!filtered.length) {
@@ -3737,6 +3751,14 @@ function fetchAndStoreRefImage(car) {
       saveToCloud();
       renderGarage();
     }
+  });
+}
+
+// Fetch reference images for all cars without photos
+function fetchRefImagesForAllCars() {
+  var allCars = getAllCars();
+  allCars.forEach(function(car) {
+    if (!car.photo) fetchAndStoreRefImage(car);
   });
 }
 
@@ -5637,6 +5659,7 @@ async function loadNews() {
   renderPendingLocation();
   renderSpot();
   renderGarage();
+  fetchRefImagesForAllCars();
   renderAchievements();
   refreshOfflineStatus();
   tutorialTimer = setInterval(function(){
