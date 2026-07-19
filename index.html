@@ -344,6 +344,7 @@ body{
   border-radius:20px;padding:4px 12px;
   font-size:0.62rem;color:var(--accent);font-weight:600;
 }
+.location-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;flex-shrink:0;animation:pulse 1.5s ease-in-out infinite;}
 .location-chip button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.75rem;line-height:1;padding:0;opacity:0.7;}
 .location-chip button:hover{opacity:1;}
 
@@ -367,7 +368,8 @@ body{
 .map-picker-cancel:hover{border-color:var(--accent);color:var(--accent);}
 .map-picker-map{flex:1;position:relative;}
 .map-picker-map #pickerLeafletMap{width:100%;height:100%;}
-.map-picker-pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);z-index:1000;pointer-events:none;font-size:2rem;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4));transition:top .1s ease,left .1s ease;}
+.map-picker-pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);z-index:1000;pointer-events:none;transition:top .1s ease,left .1s ease;}
+.map-pin-dot{width:16px;height:16px;background:var(--accent);border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.4);animation:pulse 1.5s ease-in-out infinite;}
 .map-picker-footer{padding:12px 16px;background:var(--surf);border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px;}
 .map-picker-confirm{flex:1;background:var(--accent);color:#0a0a0a;border:none;border-radius:10px;padding:12px;font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:1.5px;cursor:pointer;font-weight:700;}
 .map-picker-confirm:disabled{opacity:.4;cursor:not-allowed;}
@@ -411,15 +413,8 @@ body{
 .qp-item-name{flex:1;font-size:0.84rem;font-weight:500;}
 .qp-item-val{font-family:'Bebas Neue',cursive;font-size:0.9rem;color:var(--accent);}
 .qp-empty{padding:14px;font-size:0.7rem;color:var(--muted);text-align:center;}
-.qp-header{display:flex;align-items:center;gap:6px;padding:8px 10px 4px;}
-.qp-edit-btn{background:none;border:1px solid var(--border2);border-radius:5px;color:var(--text2);font-size:0.62rem;font-weight:600;letter-spacing:0.5px;padding:4px 8px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;white-space:nowrap;}
-.qp-edit-btn:hover{border-color:var(--accent);color:var(--accent);}
-.qp-edit-btn.active{background:var(--accent);border-color:var(--accent);color:var(--bg);}
-.qp-clear-btn{background:none;border:1px solid #f44336;border-radius:5px;color:#f44336;font-size:0.62rem;font-weight:600;letter-spacing:0.5px;padding:4px 8px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;white-space:nowrap;margin-left:auto;}
-.qp-clear-btn:hover{background:#f44336;color:#fff;}
-.qp-item.editing{gap:6px;}
-.qp-item-del{width:22px;height:22px;border-radius:50%;border:none;background:#f4433622;color:#f44336;font-size:0.7rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;opacity:0;transform:scale(0.7);}
-.qp-item.editing .qp-item-del{opacity:1;transform:scale(1);}
+
+.qp-item-del{width:22px;height:22px;border-radius:50%;border:none;background:#f4433622;color:#f44336;font-size:0.7rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;}
 .qp-item-del:hover{background:#f44336;color:#fff;}
 
 /* ── RUN LIST ── */
@@ -1089,6 +1084,8 @@ body.carbon-on .modal-card{
 .news-source-btn.active,.news-source-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--adim);}
 .news-loading{text-align:center;padding:44px 12px;color:var(--muted);font-size:0.74rem;letter-spacing:1px;}
 .news-error{text-align:center;padding:26px 12px;color:var(--muted);font-size:0.74rem;border:1px dashed var(--border);border-radius:var(--radius-sm);}
+.news-banner{text-decoration:none;color:#fff;display:block;margin-bottom:16px;border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--border);background:var(--surf)}
+.news-banner:hover{opacity:0.9;}
 
 /* ── MORE PAGE ── */
 .more-page-tile{
@@ -1113,6 +1110,8 @@ body.carbon-on .modal-card{
 .garage-map-row:hover{border-color:var(--accent);}
 .garage-map-row strong{font-size:0.78rem;}
 .garage-map-row span{color:var(--text2);font-size:0.68rem;text-align:right;}
+.garage-map-photo{border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);}
+.garage-map-photo-placeholder{display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
 .cs-dot-icon{background:transparent!important;border:none!important;}
 .cs-dot{width:12px;height:12px;border-radius:50%;transition:all 0.18s;cursor:pointer;}
 .cs-dot.cs-dot-open{width:32px;height:32px;margin:-10px 0 0 -10px;}
@@ -1369,10 +1368,6 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
                 <span class="qp-arrow" id="qpArrow">▾</span>
               </button>
               <div class="qp-dropdown">
-                <div class="qp-header">
-                  <button class="qp-edit-btn" id="qpEditBtn" onclick="toggleQPEdit()">EDIT</button>
-                  <button class="qp-clear-btn" id="qpClearBtn" onclick="clearAllQP()" style="display:none">CLEAR ALL</button>
-                </div>
                 <div class="qp-search">
                   <input type="text" id="qpSearch" placeholder="Search..." oninput="renderQPList(this.value)" autocomplete="off">
                 </div>
@@ -1418,6 +1413,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
             <button class="gv-btn active" id="gvList" onclick="setGarageView('list')" title="List view">&#9776;</button>
             <button class="gv-btn" id="gvGrid" onclick="setGarageView('grid')" title="Car cards">Cards</button>
             <button class="gv-btn" id="gvMap" onclick="setGarageView('map')" title="Map view">Map</button>
+            <button class="gv-btn" id="gvPodium" onclick="setGarageView('podium')" title="Podium - Top 3">🏆</button>
           </div>
           <button class="txt-btn" id="sortBtn" onclick="cycleSort()">Value &#8595;</button>
           <button class="txt-btn" onclick="openCarSearch()" title="Search car specs">🔍 Search</button>
@@ -1783,7 +1779,6 @@ let allRuns      = JSON.parse(localStorage.getItem('cs_runs')    || '[]');
 let quickPicks   = JSON.parse(localStorage.getItem('cs_qp')      || '[]');
 let sortMode     = 'desc';
 let qpOpen       = false;
-let qpEditMode   = false;
 let headlinerIdx = -1;
 
 let undoStack    = null;
@@ -2449,36 +2444,20 @@ function saveToQP(car) {
 
 function toggleQP() {
   qpOpen = !qpOpen;
-  if (!qpOpen) qpEditMode = false;
   document.getElementById('qpWrap').classList.toggle('open', qpOpen);
   if (qpOpen) {
     renderQPList(document.getElementById('qpSearch')?.value || '');
-    updateQPEditUI();
     setTimeout(() => document.getElementById('qpSearch').focus(), 80);
   }
 }
 function closeQP() {
   qpOpen = false;
-  qpEditMode = false;
   document.getElementById('qpWrap').classList.remove('open');
-  updateQPEditUI();
-}
-function toggleQPEdit() {
-  qpEditMode = !qpEditMode;
-  renderQPList(document.getElementById('qpSearch')?.value || '');
-  updateQPEditUI();
-}
-function updateQPEditUI() {
-  const editBtn = document.getElementById('qpEditBtn');
-  const clearBtn = document.getElementById('qpClearBtn');
-  if (editBtn) { editBtn.textContent = qpEditMode ? 'DONE' : 'EDIT'; editBtn.classList.toggle('active', qpEditMode); }
-  if (clearBtn) { clearBtn.style.display = qpEditMode && quickPicks.length ? 'block' : 'none'; }
 }
 function removeQP(name) {
   quickPicks = quickPicks.filter(q => q.name.toLowerCase() !== name.toLowerCase());
   localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
   renderQPList(document.getElementById('qpSearch')?.value || '');
-  updateQPEditUI();
   renderQPTrigger();
 }
 function clearAllQP() {
@@ -2486,9 +2465,7 @@ function clearAllQP() {
   if (!confirm('Remove all ' + quickPicks.length + ' quick pick' + (quickPicks.length !== 1 ? 's' : '') + '?')) return;
   quickPicks = [];
   localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
-  qpEditMode = false;
   renderQPList('');
-  updateQPEditUI();
   renderQPTrigger();
   showToast('All quick picks cleared');
 }
@@ -2500,20 +2477,17 @@ function renderQPList(query) {
   el.innerHTML = '';
   list.forEach(c => {
     const d = document.createElement('div');
-    d.className = 'qp-item' + (qpEditMode ? ' editing' : '');
-    d.innerHTML = `<span class="qp-item-type" style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:36px;text-align:right">${carTypeLabel(c.type)}</span><span class="qp-item-name">${c.name}</span><span class="qp-item-val">${fmtFull(c.value)}</span>` + (qpEditMode ? `<button class="qp-item-del" title="Remove">✕</button>` : '');
-    if (qpEditMode) {
-      d.querySelector('.qp-item-del').onclick = (e) => { e.stopPropagation(); removeQP(c.name); };
-    } else {
-      d.onclick = () => {
-        document.getElementById('carName').value  = c.name;
-        document.getElementById('carValue').value = c.value;
-        document.getElementById('carColor').value = c.color||'';
-        document.getElementById('carType').value  = c.type;
-        closeQP();
-        document.getElementById('qpSearch').value = '';
-      };
-    }
+    d.className = 'qp-item';
+    d.innerHTML = `<span class="qp-item-type" style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:36px;text-align:right">${carTypeLabel(c.type)}</span><span class="qp-item-name">${c.name}</span><span class="qp-item-val">${fmtFull(c.value)}</span><button class="qp-item-del" title="Remove">✕</button>`;
+    d.querySelector('.qp-item-del').onclick = (e) => { e.stopPropagation(); removeQP(c.name); };
+    d.onclick = () => {
+      document.getElementById('carName').value  = c.name;
+      document.getElementById('carValue').value = c.value;
+      document.getElementById('carColor').value = c.color||'';
+      document.getElementById('carType').value  = c.type;
+      closeQP();
+      document.getElementById('qpSearch').value = '';
+    };
     el.appendChild(d);
   });
 }
@@ -2926,7 +2900,7 @@ function deleteCarEverywhere(name) {
 
 function setGarageView(v) {
   garageView = v;
-  ['gvList','gvGrid','gvMap'].forEach(function(id){ var el = document.getElementById(id); if(el) el.classList.toggle('active', id==='gv'+v.charAt(0).toUpperCase()+v.slice(1)); });
+  ['gvList','gvGrid','gvMap','gvPodium'].forEach(function(id){ var el = document.getElementById(id); if(el) el.classList.toggle('active', id==='gv'+v.charAt(0).toUpperCase()+v.slice(1)); });
   renderGarage();
 }
 function clearGarageSearch() {
@@ -3047,7 +3021,17 @@ function renderGarage() {
     var listEl = document.getElementById('mapCarList');
     listEl.innerHTML = mapped.map(function(car){
       var rarity = getRarity(car.value);
-      return '<div class="garage-map-row" style="border-left:3px solid ' + rarity.color + '"><strong>' + escapeHtml(car.name) + '</strong><span>' + escapeHtml(locLabel(car.location)) + ' · ' + fmtFull(car.value) + '</span></div>';
+      var refImage = getRefImageUrl(car.name);
+      var photoUrl = car.photo || refImage;
+      var photoHtml = photoUrl ? '<img class="garage-map-photo" src="' + photoUrl + '" alt="' + escapeHtml(car.name) + '" style="width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);margin-right:10px">' : '<div class="garage-map-photo-placeholder" style="width:44px;height:44px;border-radius:8px;background:var(--surf2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;margin-right:10px">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
+      return '<div class="garage-map-row" style="border-left:3px solid ' + rarity.color + ';display:flex;align-items:center;gap:10px;padding:10px 12px">' +
+        photoHtml +
+        '<div style="flex:1;min-width:0">' +
+        '<strong style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + escapeHtml(car.name) + '</strong>' +
+        '<span style="font-size:0.68rem;color:var(--text2)">' + escapeHtml(locLabel(car.location)) + ' · ' + fmtFull(car.value) + (car.runDate ? ' · ' + escapeHtml(car.runDate) : '') + '</span>' +
+        '</div>' +
+        '<span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33;font-size:0.5rem">' + rarity.label + '</span>' +
+        '</div>';
     }).join('');
     setTimeout(function(){
       var mapEl = document.getElementById('leafletMap');
@@ -3081,6 +3065,72 @@ function renderGarage() {
     return;
   }
 
+  if (garageView === 'podium') {
+    el.className = '';
+    // Get all cars sorted by value descending
+    const sortedCars = [...allCars].sort((a,b) => b.value - a.value);
+    const top3 = sortedCars.slice(0, 3);
+    
+    if (!top3.length) {
+      el.innerHTML = '<div class="empty-garage" style="padding:60px 20px;text-align:center"><span style="font-size:3rem;display:block;margin-bottom:16px">🏆</span><strong style="display:block;margin-bottom:8px;color:var(--text);font-size:1.1rem">No podium yet</strong><span style="color:var(--text2)">Log some cars to see your top 3!</span></div>';
+      return;
+    }
+
+    const podiumColors = ['#d4a843', '#888', '#a67c52']; // Gold, Silver, Bronze
+    const podiumHeights = ['220px', '180px', '140px'];
+    const podiumLabels = ['🥇 1st', '🥈 2nd', '🥉 3rd'];
+
+    const podiumHTML = `
+      <div style="display:flex;align-items:flex-end;justify-content:center;gap:24px;padding:40px 20px;min-height:400px;flex-wrap:wrap;">
+        ${top3.map((car, i) => {
+          const refImage = getRefImageUrl(car.name);
+          const photoUrl = car.photo || refImage;
+          const rarity = getRarity(car.value);
+          const place = i + 1;
+          const podiumColor = podiumColors[i];
+          const podiumHeight = podiumHeights[i];
+          
+          return `
+            <div class="podium-place" style="display:flex;flex-direction:column;align-items:center;cursor:pointer;transition:transform 0.2s;" data-car-index="${i}">
+              <div style="width:140px;height:${podiumHeight};background:linear-gradient(180deg,var(--surf) 0%,var(--surf2) 100%);border:2px solid var(--border);border-radius:16px 16px 0 0;display:flex;flex-direction:column;align-items:center;position:relative;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.4);">
+                <div style="position:absolute;top:0;left:0;right:0;height:4px;background:${podiumColor};"></div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;padding:20px 12px 16px;width:100%;">
+                  ${photoUrl ? `
+                    <img src="${photoUrl}" alt="${escapeHtml(car.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;margin-bottom:12px;box-shadow:0 4px 16px rgba(0,0,0,0.3);" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                    <div style="display:none;width:100%;height:100%;object-fit:cover;border-radius:8px;background:var(--surf2);align-items:center;justify-content:center;font-size:3rem;">${escapeHtml(carTypeLabel(car.type))}</div>
+                  ` : `
+                    <div style="width:100%;height:100%;object-fit:cover;border-radius:8px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:3rem;margin-bottom:12px;">${escapeHtml(carTypeLabel(car.type))}</div>
+                  `}
+                  <div style="text-align:center;width:100%;padding:0 8px;">
+                    <div style="font-family:'Bebas Neue',cursive;font-size:1.1rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;">${escapeHtml(car.name)}</div>
+                    <div style="font-family:'Bebas Neue',cursive;font-size:1.3rem;color:var(--accent);margin-bottom:6px;">${fmtFull(car.value)}</div>
+                    <div style="font-size:0.55rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;">${rarity.label}</div>
+                    ${car.spotCount > 1 ? `<div style="font-size:0.55rem;color:var(--accent);margin-top:4px;font-weight:600">👁 ${car.spotCount}x spotted</div>` : ''}
+                  </div>
+                </div>
+              </div>
+              <div class="podium-base" style="width:160px;height:18px;background:${podiumColor};border-radius:6px;margin-top:-6px;box-shadow:0 6px 24px ${podiumColor}88;"></div>
+              <div class="podium-position" style="margin-top:10px;font-family:'Bebas Neue',cursive;font-size:1.5rem;color:${podiumColor};text-shadow:0 2px 8px ${podiumColor}66;">${podiumLabels[i]}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      <div style="text-align:center;padding:20px;color:var(--text2);font-size:0.75rem;">
+        Top ${top3.length} car${top3.length !== 1 ? 's' : ''} by value. Tap a car to view details.
+      </div>
+    `;
+    el.innerHTML = podiumHTML;
+    
+    // Add click handlers to podium cars
+    top3.forEach((car, i) => {
+      const podiumPlace = el.querySelector(`[data-car-index="${i}"]`);
+      if (podiumPlace) {
+        podiumPlace.onclick = () => showCarInstances(car);
+      }
+    });
+    return;
+  }
+
   if (!filtered.length) {
     el.className = '';
     el.innerHTML='<div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px"></span>'+(allCars.length?'No matches':'No cars yet!')+'</div>';
@@ -3100,10 +3150,12 @@ function renderGarage() {
       a.onclick = (e) => { e.preventDefault(); showCarInstances(car); };
       a.style.animationDelay = (idx*0.03)+'s';
       const rarity = getRarity(car.value);
-      const photoBadge = car.photo ? (car.photo.indexOf('data:') === 0 ? '<div class="gc-photo-badge">📷 Your Photo</div>' : '<div class="gc-photo-badge">🌐 Reference</div>') : '';
+      const refImage = getRefImageUrl(car.name);
+      const photoUrl = car.photo || refImage;
+      const photoBadge = photoUrl ? (car.photo && car.photo.indexOf('data:') === 0 ? '<div class="gc-photo-badge">📷 Your Photo</div>' : '<div class="gc-photo-badge">🌐 Reference</div>') : '';
       a.innerHTML = `
         <div class="gc-img-wrap">
-          ${car.photo ? `<img class="gc-img" src="${car.photo}" alt="${escapeHtml(car.name)}">${photoBadge}` : `<div class="gc-img-ph">${escapeHtml(carTypeLabel(car.type))}</div>`}
+          ${photoUrl ? `<img class="gc-img" src="${photoUrl}" alt="${escapeHtml(car.name)}">${photoBadge}` : `<div class="gc-img-ph">${escapeHtml(carTypeLabel(car.type))}</div>`}
         </div>
         <div class="gc-body">
           <div class="gc-name">${escapeHtml(car.name)}${car.spotCount > 1 ? ` <span style="font-size:0.6rem;color:var(--text2)">&times;${car.spotCount}</span>` : ''}</div>
@@ -3126,8 +3178,10 @@ function renderGarage() {
     a.onclick = (e) => { e.preventDefault(); showCarInstances(car); };
     a.style.animationDelay=(idx*0.03)+'s';
     const rarity = getRarity(car.value);
+    const refImage = getRefImageUrl(car.name);
+    const photoUrl = car.photo || refImage;
     a.innerHTML=`<div class="g-rank">${sortMode!=='alpha'?'#'+(idx+1):''}</div>
-      ${car.photo ? `<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="${car.photo}" alt="car">` : `<div class="g-emoji">${escapeHtml(carTypeLabel(car.type))}</div>`}
+      ${photoUrl ? `<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="${photoUrl}" alt="car">` : `<div class="g-emoji">${escapeHtml(carTypeLabel(car.type))}</div>`}
       <div class="g-info">
         <div class="g-name">${escapeHtml(car.name)}${car.spotCount > 1 ? ` <span style="font-size:0.6rem;color:var(--text2)">&times;${car.spotCount}</span>` : ''}</div>
         <div class="g-meta">${escapeHtml([car.color,car.runDate].filter(Boolean).join(' · '))}</div>
@@ -3237,10 +3291,12 @@ function renderHistory() {
 
     const carsHTML = [...entry.cars].sort((a,b)=>b.value-a.value).map(car=>{
       const isCarHL = !isSpot && entry.headliner && entry.headliner.name === car.name;
+      const refImage = getRefImageUrl(car.name);
+      const photoUrl = car.photo || refImage;
       return `
       <div class="hc-row-wrap">
         <a class="hc-row" href="${carUrl(car.name)}" target="_blank" rel="noopener noreferrer">
-          ${car.photo ? `<img class="hc-photo" src="${car.photo}" alt="car">` : `<span class="hc-emoji">${carTypeLabel(car.type)}</span>`}
+          ${photoUrl ? `<img class="hc-photo" src="${photoUrl}" alt="car">` : `<span class="hc-emoji">${carTypeLabel(car.type)}</span>`}
           <span class="hc-name">${escapeHtml(car.name)}${car.color?' <span style="font-weight:400;color:var(--text2)">· '+escapeHtml(car.color)+'</span>':''}${isCarHL?' <span style="color:var(--accent);font-size:0.6rem;letter-spacing:1px;font-weight:700">HEADLINER</span>':''}</span>
           <span class="hc-val">${fmtFull(car.value)}</span>
           <span class="hc-arrow">↗</span>
@@ -3381,19 +3437,22 @@ async function showSpecsCard(car) {
 function showCarInstances(car) {
   var instances = (car.instances && car.instances.length) ? car.instances : [{name:car.name,photo:car.photo,value:car.value,type:car.type,color:car.color,runDate:car.runDate||'Unknown',location:car.location}];
   var rarity = getRarity(car.value);
+  var refImage = getRefImageUrl(car.name);
   var heroPhoto = null, heroBadge = '';
   for (var i = instances.length - 1; i >= 0; i--) {
     if (instances[i].photo && instances[i].photo.indexOf('data:') === 0) { heroPhoto = instances[i].photo; heroBadge = '\uD83D\uDCF7 Your Photo'; break; }
   }
   if (!heroPhoto) { for (var j = instances.length - 1; j >= 0; j--) { if (instances[j].photo) { heroPhoto = instances[j].photo; heroBadge = '\uD83C\uDF10 Reference Photo'; break; } } }
   if (!heroPhoto && car.photo) { heroPhoto = car.photo; heroBadge = car.photo.indexOf('data:') === 0 ? '\uD83D\uDCF7 Your Photo' : '\uD83C\uDF10 Reference Photo'; }
+  if (!heroPhoto && refImage) { heroPhoto = refImage; heroBadge = '\uD83C\uDF10 Reference Photo'; }
   var heroHtml = heroPhoto
     ? '<img class="detail-hero-img" src="' + heroPhoto + '" alt="' + escapeHtml(car.name) + '">' + (heroBadge ? '<div class="detail-hero-badge">' + heroBadge + '</div>' : '')
     : '<div class="detail-hero-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
   var sorted = instances.slice().reverse();
   var sightingsHtml = sorted.map(function(inst) {
-    var thumbHtml = inst.photo ? '<img class="detail-sighting-thumb" src="' + inst.photo + '" alt="">' : '<div class="detail-sighting-nophoto">' + escapeHtml(carTypeLabel(inst.type)) + '</div>';
-    var badge = inst.photo ? (inst.photo.indexOf('data:') === 0 ? '<div class="detail-sighting-badge">\uD83D\uDCF7</div>' : '<div class="detail-sighting-badge">\uD83C\uDF10</div>') : '';
+    var instRefImage = inst.photo || getRefImageUrl(inst.name);
+    var thumbHtml = instRefImage ? '<img class="detail-sighting-thumb" src="' + instRefImage + '" alt="">' : '<div class="detail-sighting-nophoto">' + escapeHtml(carTypeLabel(inst.type)) + '</div>';
+    var badge = inst.photo ? (inst.photo.indexOf('data:') === 0 ? '<div class="detail-sighting-badge">\uD83D\uDCF7</div>' : '<div class="detail-sighting-badge">\uD83C\uDF10</div>') : (instRefImage ? '<div class="detail-sighting-badge">\uD83C\uDF10</div>' : '');
     var loc = (inst.location && inst.location.label) ? '<div class="detail-sighting-loc">\uD83D\uDCCD ' + escapeHtml(inst.location.label) + '</div>' : '';
     return '<div class="detail-sighting">' + thumbHtml + '<div class="detail-sighting-info"><div class="detail-sighting-date">' + escapeHtml(inst.runDate || 'Unknown') + '</div>' + loc + '</div>' + badge + '</div>';
   }).join('');
@@ -3411,6 +3470,10 @@ function showCarInstances(car) {
     '</div></div>' +
     '<div class="detail-section-title">Sighting History</div>' +
     '<div class="detail-sightings">' + sightingsHtml + '</div>' +
+    '<div style="padding:12px 20px 20px;display:flex;gap:8px;">' +
+    '<button class="btn-spot" style="flex:1;padding:12px" onclick="event.stopPropagation();document.getElementById(\'detailOverlay\').remove();showSpecsCard({name:\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\',value:' + car.value + ',color:\'' + escapeHtml(car.color||'').replace(/'/g,"\\'") + '\',type:\'' + car.type + '\'})">🔍 LOOK UP SPECS</button>' +
+    '<button class="btn-run" style="flex:1;padding:12px" onclick="event.stopPropagation();document.getElementById(\'detailOverlay\').remove();goTo(\'spot\');setTimeout(()=>{document.getElementById(\'carName\').value=\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\';document.getElementById(\'carValue\').value=' + car.value + ';document.getElementById(\'carColor\').value=\'' + escapeHtml(car.color||'').replace(/'/g,"\\'") + '\';document.getElementById(\'carType\').value=\'' + car.type + '\';},100)">➕ LOG AGAIN</button>' +
+    '</div>' +
     '</div>';
   document.body.appendChild(overlay);
 }
@@ -3675,6 +3738,13 @@ function fetchAndStoreRefImage(car) {
       renderGarage();
     }
   });
+}
+
+// Synchronous helper to get cached reference image for rendering
+function getRefImageUrl(carName) {
+  var ck = 'img:' + carName.toLowerCase().trim();
+  var cached = _csGet(ck);
+  return cached !== undefined ? cached : null;
 }
 
 //  TOAST 
@@ -4045,6 +4115,65 @@ function getPhotoAndClear() {
   return p;
 }
 
+//  EDIT MODAL PHOTO HANDLING
+let editPendingPhotoDataUrl = null;
+
+function handleEditPhotoInput(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const raw = e.target.result;
+    editPendingPhotoDataUrl = raw;
+    const wrap = document.getElementById('editPhotoPreviewWrap');
+    wrap.style.display = 'block';
+    wrap.innerHTML = `<div class="photo-preview-wrap">
+      <img class="photo-preview-img" src="${raw}" alt="Car photo">
+      <button class="photo-remove" onclick="removeEditPhoto()"></button>
+    </div>`;
+    showToast(' Photo attached!');
+    // Compress in background
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const MAX = 800;
+        let w = img.width, h = img.height;
+        if (w > MAX || h > MAX) {
+          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+          else       { w = Math.round(w * MAX / h); h = MAX; }
+        }
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        const compressed = c.toDataURL('image/jpeg', 0.6);
+        if (editPendingPhotoDataUrl === raw) {
+          editPendingPhotoDataUrl = compressed;
+          const imgEl = wrap.querySelector('.photo-preview-img');
+          if (imgEl) imgEl.src = compressed;
+        }
+      } catch(err) { /* keep raw photo on compression failure */ }
+    };
+    img.src = raw;
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
+}
+
+function removeEditPhoto() {
+  editPendingPhotoDataUrl = null;
+  const wrap = document.getElementById('editPhotoPreviewWrap');
+  wrap.style.display = 'none';
+  wrap.innerHTML = '';
+}
+
+function getEditPhotoAndClear() {
+  const p = editPendingPhotoDataUrl;
+  editPendingPhotoDataUrl = null;
+  const wrap = document.getElementById('editPhotoPreviewWrap');
+  if (wrap) { wrap.style.display = 'none'; wrap.innerHTML = ''; }
+  return p;
+}
+
 function photoThumb(dataUrl) {
   if (!dataUrl) return '';
   return `<img class="run-item-photo" src="${dataUrl}" alt="car" onclick="event.stopPropagation();viewPhoto('${dataUrl.substring(0,30)}...')" style="cursor:pointer">`;
@@ -4164,6 +4293,20 @@ window.openEditCarModal = function(encodedCar) {
           </select>
         </div>
       </div>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+        <label style="font-size:0.5rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:600;display:block;margin-bottom:8px">Photo</label>
+        <div id="editPhotoPreviewWrap" style="display:${car.photo ? 'block' : 'none'};margin-bottom:12px;">
+          <div class="photo-preview-wrap">
+            <img class="photo-preview-img" src="${car.photo}" alt="Car photo">
+            <button class="photo-remove" onclick="removeEditPhoto()"></button>
+          </div>
+        </div>
+        <label class="photo-btn" style="margin-bottom:0">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span>${car.photo ? 'Change Photo' : 'Add Photo'}</span>
+          <input type="file" accept="image/*" style="display:none" id="editPhotoInput" onchange="handleEditPhotoInput(this)">
+        </label>
+      </div>
       <button class="modal-save-btn" onclick="saveEditCar('${escapeHtml(car.name).replace(/'/g,"\\'")}')">SAVE CHANGES</button>
     </div>`;
   overlay.onclick = () => overlay.remove();
@@ -4176,6 +4319,7 @@ window.saveEditCar = function(originalName) {
   const newValue = parseFloat(document.getElementById('editCarValue')?.value || '0');
   const newColor = sanitizeText(document.getElementById('editCarColor')?.value || '');
   const newType  = document.getElementById('editCarType')?.value || 'sports';
+  const newPhoto = getEditPhotoAndClear(); // Get and clear the edit photo
 
   if (!newName) { showToast('Name can\'t be empty!'); return; }
   if (isNaN(newValue) || newValue < 0) { showToast('Enter a valid value!'); return; }
@@ -4187,7 +4331,7 @@ window.saveEditCar = function(originalName) {
     ...run,
     cars: (run.cars || []).map(c => {
       if (c.name.toLowerCase() !== origKey) return c;
-      return { ...c, name: newName, value: newValue, color: newColor, type: newType };
+      return { ...c, name: newName, value: newValue, color: newColor, type: newType, ...(newPhoto ? {photo: newPhoto} : {}) };
     }),
     total: (run.cars || []).map(c => {
       if (c.name.toLowerCase() !== origKey) return c.value;
@@ -4201,13 +4345,13 @@ window.saveEditCar = function(originalName) {
   // Update in currentRun
   currentRun = currentRun.map(c => {
     if (c.name.toLowerCase() !== origKey) return c;
-    return { ...c, name: newName, value: newValue, color: newColor, type: newType };
+    return { ...c, name: newName, value: newValue, color: newColor, type: newType, ...(newPhoto ? {photo: newPhoto} : {}) };
   });
 
   // Update in quickPicks
   quickPicks = quickPicks.map(c => {
     if (c.name.toLowerCase() !== origKey) return c;
-    return { ...c, name: newName, value: newValue, color: newColor, type: newType };
+    return { ...c, name: newName, value: newValue, color: newColor, type: newType, ...(newPhoto ? {photo: newPhoto} : {}) };
   });
 
   localStorage.setItem('cs_runs', JSON.stringify(allRuns));
@@ -4797,8 +4941,8 @@ function renderStats() {
       </div>`).join('')
     : '<div class="st-empty">No data yet — start spotting</div>';
 
-  //  By type 
-  const typeMap = {'supercar':'🏎️ Supercar','sports':'🚗 Sports','muscle':'🐎 Muscle','track':'🏁 Track','exotic':'🔥 Exotic','ev':'⚡ EV'};
+  //  By type - cleaner grouped display 
+  const typeMap = {'supercar':'🏎️ Supercar','sports':'🚗 Sports','muscle':'🐎 Muscle','track':'🏁 Track','exotic':'🔥 Exotic','ev':'⚡ EV','luxury':'👑 Luxury','suv':'🛻 SUV','classic':'🕹️ Classic','hotrod':'🔧 Hot Rod'};
   const typeCounts = {};
   allCars.forEach(c => { const t=typeMap[c.type]||c.type||'🚘 Other'; typeCounts[t]=(typeCounts[t]||0)+1; });
   const topTypes = Object.entries(typeCounts).sort((a,b)=>b[1]-a[1]);
@@ -4998,18 +5142,52 @@ async function loadNews() {
     const res  = await fetch(url);
     const data = await res.json();
     if (!data.items || !data.items.length) throw new Error('No items');
-    el.innerHTML = data.items.map((item, idx) => {
+    
+    // Get top story for banner
+    const topStory = data.items[0];
+    let topImgSrc = '';
+    if (topStory.thumbnail && topStory.thumbnail.length > 4) {
+      topImgSrc = topStory.thumbnail;
+    } else if (topStory.enclosure && topStory.enclosure.link && topStory.enclosure.type && topStory.enclosure.type.startsWith('image')) {
+      topImgSrc = topStory.enclosure.link;
+    } else {
+      const html = topStory.description || topStory.content || '';
+      const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+      if (m) topImgSrc = m[1];
+    }
+    
+    const topImgHTML = topImgSrc
+      ? `<img src="${topImgSrc}" alt="" style="width:100%;height:180px;object-fit:cover;border-radius:12px">`
+      : `<div style="width:100%;height:180px;background:var(--surf2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:3rem">🚘</div>`;
+    
+    const topStoryDate = topStory.pubDate ? new Date(topStory.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
+    const topStoryTitle = topStory.title || 'No title';
+    const topStoryLink = topStory.link || '#';
+    
+    let bannerHTML = '';
+    if (topImgSrc) {
+      bannerHTML = `
+        <a class="news-banner" href="${topStoryLink}" target="_blank" rel="noopener" style="display:block;margin-bottom:16px;border-radius:16px;overflow:hidden;position:relative;border:1px solid var(--border);background:var(--surf)">
+          ${topImgHTML}
+          <div style="position:absolute;bottom:0;left:0;right:0;padding:20px;background:linear-gradient(180deg,transparent,rgba(0,0,0,0.9))">
+            <div style="font-size:0.5rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:4px">${NEWS_SOURCES[activeSource].name} • TOP STORY</div>
+            <div style="font-family:'Bebas Neue',cursive;font-size:1.3rem;color:#fff;line-height:1.2;margin-bottom:4px">${escapeHtml(topStoryTitle)}</div>
+            <div style="font-size:0.65rem;color:rgba(255,255,255,0.7)">${topStoryDate}</div>
+          </div>
+        </a>`;
+    }
+    
+    // Render rest of stories
+    const storiesHTML = data.items.slice(1).map((item, idx) => {
       const date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
       const title = item.title || 'No title';
       const link  = item.link  || '#';
-      // Try all possible thumbnail fields from rss2json
       let imgSrc = '';
       if (item.thumbnail && item.thumbnail.length > 4) {
         imgSrc = item.thumbnail;
       } else if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.startsWith('image')) {
         imgSrc = item.enclosure.link;
       } else {
-        // Parse from description or content HTML
         const html = item.description || item.content || '';
         const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
         if (m) imgSrc = m[1];
@@ -5021,11 +5199,13 @@ async function loadNews() {
         ${imgHTML}
         <div class="news-card-body">
           <div class="news-source">${NEWS_SOURCES[activeSource].name}</div>
-          <div class="news-title">${title}</div>
+          <div class="news-title">${escapeHtml(title)}</div>
           <div class="news-date">${date}</div>
         </div>
       </a>`;
     }).join('');
+    
+    el.innerHTML = bannerHTML + storiesHTML;
   } catch(e) {
     el.innerHTML = '<div class="news-error">Could not load news — check your connection.</div>';
   }
@@ -5084,7 +5264,7 @@ async function loadNews() {
       return;
     }
     row.style.display = 'flex';
-    row.innerHTML = '<div class="location-chip">PIN ' + escapeHtml(locLabel(currentSpotLocation)) + '<button onclick="clearPendingLocation()">x</button></div>';
+    row.innerHTML = '<div class="location-chip"><span class="location-dot"></span>PIN ' + escapeHtml(locLabel(currentSpotLocation)) + '<button onclick="clearPendingLocation()">×</button></div>';
     btn.classList.remove('locating');
     btn.textContent = 'Update Location';
   }
@@ -5138,7 +5318,7 @@ async function loadNews() {
       '<div class="map-picker-title">TAP TO DROP A PIN</div>' +
       '<button class="map-picker-cancel" id="pickerCancelBtn">CANCEL</button>' +
     '</div>' +
-    '<div class="map-picker-map"><div id="pickerLeafletMap"></div><div class="map-picker-pin">📍</div></div>' +
+    '<div class="map-picker-map"><div id="pickerLeafletMap"></div><div class="map-picker-pin"><div class="map-pin-dot"></div></div></div>' +
     '<div class="map-picker-footer"><button class="map-picker-confirm" id="pickerConfirmBtn" disabled>CONFIRM LOCATION</button></div>' +
     '<div class="map-picker-coords" id="pickerCoords"></div>';
     document.body.appendChild(picker);
