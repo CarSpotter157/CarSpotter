@@ -3515,11 +3515,9 @@ async function showSpecsCard(car) {
   overlay.onclick = () => overlay.remove();
   document.body.appendChild(overlay);
 
-  // Fetch specs from Claude API and image in parallel
-  const [specsData, imgUrl] = await Promise.all([
-    fetchCarSpecs(car.name),
-    fetchCarImage(car.name)
-  ]);
+  // Use user's photo if available, otherwise fetch reference image
+  var userPhoto = car.photo;
+  var imgUrl = userPhoto || await fetchCarImage(car.name).catch(function(){ return null; });
 
   // Replace content
   const card = overlay.querySelector('.specs-card');
