@@ -368,8 +368,6 @@ body{
 .map-picker-cancel:hover{border-color:var(--accent);color:var(--accent);}
 .map-picker-map{flex:1;position:relative;}
 .map-picker-map #pickerLeafletMap{width:100%;height:100%;}
-.map-picker-pin{position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);z-index:1000;pointer-events:none;transition:top .1s ease,left .1s ease;}
-.map-pin-dot{width:16px;height:16px;background:var(--accent);border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.4);}
 .map-picker-footer{padding:12px 16px;background:var(--surf);border-top:1px solid var(--border);flex-shrink:0;display:flex;gap:8px;}
 .map-picker-confirm{flex:1;background:var(--accent);color:#0a0a0a;border:none;border-radius:10px;padding:12px;font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:1.5px;cursor:pointer;font-weight:700;}
 .map-picker-confirm:disabled{opacity:.4;cursor:not-allowed;}
@@ -1830,15 +1828,52 @@ function _mergeRunHistory(local, cloud) {
   for (const r of local) byId.set(r.id, r);
   for (const r of cloud) {
     const existing = byId.get(r.id);
-    if (!existing) byId.set(r.id, r);
-    else if ((r.cars||[]).length > (existing.cars||[]).length) byId.set(r.id, r);
+    if (!existing) {
+      // New run from cloud - filter out any deleted cars
+      if (r.cars && r.cars.length > 0) {
+        r.cars = r.cars.filter(c => !isCarDeleted(r.id, c.name));
+        if (r.cars.length > 0) byId.set(r.id, r);
+      } else {
+        byId.set(r.id, r);
+      }
+    } else if ((r.cars||[]).length > (existing.cars||[]).length) {
+      // Cloud has more cars - but filter out locally deleted ones
+      const filteredCars = (r.cars||[]).filter(c => !isCarDeleted(r.id, c.name));
+      if (filteredCars.length > (existing.cars||[]).length) {
+        byId.set(r.id, {...r, cars: filteredCars});
+      }
+    }
   }
   return [...byId.values()];
 }
+
+// Track deleted cars to prevent re-sync from cloud
+let deletedCarKeys = new Set();
+function loadDeletedCarKeys() {
+  try { deletedCarKeys = new Set(JSON.parse(localStorage.getItem('cs_deleted_cars') || '[]')); } catch(e) {}
+}
+function isCarDeleted(runId, carName) {
+  const key = `${runId}|${carName.toLowerCase()}`;
+  return deletedCarKeys.has(key);
+}
+function markCarDeleted(runId, carName) {
+  const key = `${runId}|${carName.toLowerCase()}`;
+  deletedCarKeys.add(key);
+  localStorage.setItem('cs_deleted_cars', JSON.stringify([...deletedCarKeys]));
+}
+function unmarkCarDeleted(runId, carName) {
+  const key = `${runId}|${carName.toLowerCase()}`;
+  deletedCarKeys.delete(key);
+  localStorage.setItem('cs_deleted_cars', JSON.stringify([...deletedCarKeys]));
+}
+loadDeletedCarKeys();
 function _mergeQuickPicks(local, cloud) {
   const byName = new Map();
   for (const c of local) byName.set(c.name.toLowerCase(), c);
-  for (const c of cloud) if (!byName.has(c.name.toLowerCase())) byName.set(c.name.toLowerCase(), c);
+  for (const c of cloud) {
+    const key = c.name.toLowerCase();
+    if (!byName.has(key) && !deletedQPKeys.has(key)) byName.set(key, c);
+  }
   return [...byName.values()];
 }
 
@@ -2431,8 +2466,20 @@ function cleanQPAfterRemoval(name) {
     quickPicks = quickPicks.filter(q => q.name.toLowerCase() !== key);
     localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
   }
+  markQPDeleted(name);
+}
+
+// Track deleted QP keys to prevent re-sync from cloud
+let deletedQPKeys = new Set(JSON.parse(localStorage.getItem('cs_deleted_qp') || '[]'));
+function markQPDeleted(name) {
+  deletedQPKeys.add(name.toLowerCase());
+  localStorage.setItem('cs_deleted_qp', JSON.stringify([...deletedQPKeys]));
+}
+function isQPDeleted(name) {
+  return deletedQPKeys.has(name.toLowerCase());
 }
 function saveToQP(car) {
+  if (isQPDeleted(car.name)) return;
   const existing = quickPicks.find(q => q.name.toLowerCase() === car.name.toLowerCase());
   const photo = car.photo || (existing && existing.photo) || '';
   quickPicks = quickPicks.filter(q => q.name.toLowerCase() !== car.name.toLowerCase());
@@ -2456,12 +2503,14 @@ function closeQP() {
 function removeQP(name) {
   quickPicks = quickPicks.filter(q => q.name.toLowerCase() !== name.toLowerCase());
   localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
+  markQPDeleted(name);
   renderQPList(document.getElementById('qpSearch')?.value || '');
   renderQPTrigger();
 }
 function clearAllQP() {
   if (!quickPicks.length) return;
   if (!confirm('Remove all ' + quickPicks.length + ' quick pick' + (quickPicks.length !== 1 ? 's' : '') + '?')) return;
+  quickPicks.forEach(q => markQPDeleted(q.name));
   quickPicks = [];
   localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
   renderQPList('');
@@ -2480,13 +2529,15 @@ function renderQPList(query) {
     d.innerHTML = `<span class="qp-item-type" style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:36px;text-align:right">${carTypeLabel(c.type)}</span><span class="qp-item-name">${c.name}</span><span class="qp-item-val">${fmtFull(c.value)}</span><button class="qp-item-del" title="Remove">✕</button>`;
     d.querySelector('.qp-item-del').onclick = (e) => { e.stopPropagation(); removeQP(c.name); };
     d.querySelector('.qp-item-name').onclick = (e) => { e.stopPropagation(); editQPName(d, c); };
-    d.onclick = () => {
-      document.getElementById('carName').value  = c.name;
-      document.getElementById('carValue').value = c.value;
-      document.getElementById('carColor').value = c.color||'';
-      document.getElementById('carType').value  = c.type;
-      closeQP();
-      document.getElementById('qpSearch').value = '';
+    d.onclick = (e) => {
+      if (e.target === d || e.target.classList.contains('qp-item-type') || e.target.classList.contains('qp-item-val')) {
+        document.getElementById('carName').value  = c.name;
+        document.getElementById('carValue').value = c.value;
+        document.getElementById('carColor').value = c.color||'';
+        document.getElementById('carType').value  = c.type;
+        closeQP();
+        document.getElementById('qpSearch').value = '';
+      }
     };
     el.appendChild(d);
   });
@@ -2900,20 +2951,17 @@ function deleteCarEverywhere(name) {
   allRuns = allRuns.map(run => {
     const remaining = run.cars.filter(c=>c.name.toLowerCase()!==key);
     const newTotal  = remaining.reduce((s,c)=>s+c.value,0);
-    // Clean up headliner if it was the deleted car
     const headliner = (run.headliner && run.headliner.name.toLowerCase()===key) ? null : run.headliner;
     return { ...run, cars: remaining, total: newTotal, headliner };
   }).filter(run=>run.cars.length>0);
   localStorage.setItem('cs_runs', JSON.stringify(allRuns));
   currentRun = currentRun.filter(c=>c.name.toLowerCase()!==key);
-  // Fix headlinerIdx if it pointed at the deleted car
   if (headlinerIdx >= 0) {
     const deletedAt = currentRun.findIndex(c=>c.name.toLowerCase()===key);
-    if (deletedAt < 0) headlinerIdx = -1; // was deleted
+    if (deletedAt < 0) headlinerIdx = -1;
     else if (deletedAt < headlinerIdx) headlinerIdx--;
   }
-  saveCurrentRun(); // also calls saveToCloud
-  // Only remove from QP if no instances remain anywhere
+  saveCurrentRun();
   cleanQPAfterRemoval(name);
   renderQPTrigger();
   renderSpot();
@@ -3262,6 +3310,9 @@ function toggleHistoryHeadliner(runId, carName, carType, carValue) {
 function deleteRun(id) {
   const prev = JSON.parse(JSON.stringify(allRuns));
   const entry = allRuns.find(r => r.id === id);
+  if (entry && entry.cars) {
+    entry.cars.forEach(c => markCarDeleted(c.name));
+  }
   allRuns = allRuns.filter(r => r.id !== id);
   localStorage.setItem('cs_runs', JSON.stringify(allRuns));
   saveToCloud();
@@ -5340,16 +5391,35 @@ async function loadNews() {
       '<div class="map-picker-title">TAP TO DROP A PIN</div>' +
       '<button class="map-picker-cancel" id="pickerCancelBtn">CANCEL</button>' +
     '</div>' +
-    '<div class="map-picker-map"><div id="pickerLeafletMap"></div><div class="map-picker-pin"><div class="map-pin-dot"></div></div></div>' +
+    '<div class="map-picker-map"><div id="pickerLeafletMap"></div></div>' +
     '<div class="map-picker-footer"><button class="map-picker-confirm" id="pickerConfirmBtn" disabled>CONFIRM LOCATION</button></div>' +
     '<div class="map-picker-coords" id="pickerCoords"></div>';
     document.body.appendChild(picker);
     document.getElementById('pickerCancelBtn').onclick = function(){ closeMapPicker(); };
 
     var pickedLat = null, pickedLng = null;
-    var pMap = L.map('pickerLeafletMap', { zoomControl: true, attributionControl: false }).setView([39.8283, -98.5795], 4);
+    var pMap = L.map('pickerLeafletMap', { zoomControl: true, attributionControl: false });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(pMap);
     var pickedMarker = null;
+
+    // Try to get user location first
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(function(pos){
+        var lat = pos.coords.latitude, lng = pos.coords.longitude;
+        pMap.setView([lat, lng], 14);
+        pickedLat = lat; pickedLng = lng;
+        pickedMarker = L.marker([lat, lng]).addTo(pMap);
+        var confirmBtn = document.getElementById('pickerConfirmBtn');
+        if (confirmBtn) { confirmBtn.disabled = false; }
+        var coordsEl = document.getElementById('pickerCoords');
+        if (coordsEl) { coordsEl.textContent = lat.toFixed(6) + ', ' + lng.toFixed(6); }
+      }, function(){
+        // Fallback to US view if geolocation fails
+        pMap.setView([39.8283, -98.5795], 4);
+      }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+    } else {
+      pMap.setView([39.8283, -98.5795], 4);
+    }
 
     pMap.on('click', function(e){
       pickedLat = e.latlng.lat;
