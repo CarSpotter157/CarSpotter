@@ -1879,9 +1879,17 @@ function _mergeQuickPicks(local, cloud) {
 
 //  FIREBASE AUTH & SYNC 
 
+var _signingIn = false;
 function signInGoogle() {
+  if (_signingIn) return;
+  _signingIn = true;
   auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
-    .catch(e => alert('Sign-in error: ' + e.message));
+    .catch(function(e) {
+      if (e.code !== 'auth/cancelled-popup-request' && e.code !== 'auth/popup-closed-by-user') {
+        alert('Sign-in error: ' + e.message);
+      }
+    })
+    .then(function() { _signingIn = false; });
 }
 function signOutUser() {
   if (!confirm('Sign out?')) return;
