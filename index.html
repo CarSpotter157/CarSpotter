@@ -3516,8 +3516,8 @@ async function showSpecsCard(car) {
   document.body.appendChild(overlay);
 
   // Use user's photo if available, otherwise fetch reference image
-  var userPhoto = car.photo;
-  var imgUrl = userPhoto || await fetchCarImage(car.name).catch(function(){ return null; });
+  var imgUrl = car.photo || await fetchCarImage(car.name).catch(function(){ return null; });
+  const specsData = await fetchCarSpecs(car.name).catch(function(){ return null; });
 
   // Replace content
   const card = overlay.querySelector('.specs-card');
