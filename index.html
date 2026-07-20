@@ -1994,8 +1994,6 @@ async function loadFromCloud() {
   if (!currentUser) return;
   setSyncDot('syncing');
   try {
-    // Load photos from Firestore subcollection into IDB first
-    await loadPhotosFromCloud();
     const snap = await db.collection('users').doc(currentUser.uid).get();
     if (snap.exists) {
       const d = snap.data();
@@ -2030,7 +2028,6 @@ async function loadFromCloud() {
         updatedAt: _lastSave
       }).then(function() {
         setSyncDot('ok');
-        syncPhotosToCloud();
       }).catch(() => setSyncDot(''));
     }
     if (!_lastSave) setSyncDot('ok');
@@ -2106,8 +2103,6 @@ function saveToCloud() {
     }).then(function() {
       setSyncDot('ok');
       leaderboardLoaded = false;
-      // Sync photos to subcollection in the background
-      syncPhotosToCloud();
     }).catch(() => setSyncDot(''));
   }, 1500);
 }
@@ -3902,10 +3897,11 @@ function importFromFile(input) {
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target.result);
-      const importedRuns = JSON.parse(data.cs_runs || '[]');
-      const importedQP   = JSON.parse(data.cs_qp   || '[]');
-      const importedCur  = JSON.parse(data.cs_current || '[]');
-      const importedNotes = data.cs_notes || '';
+      // Support both new format (v21+) and legacy format (v20)
+      const importedRuns = data.runs || JSON.parse(data.cs_runs || '[]');
+      const importedQP   = data.quickPicks || JSON.parse(data.cs_qp   || '[]');
+      const importedCur  = data.currentRun || JSON.parse(data.cs_current || '[]');
+      const importedNotes = data.notes || data.cs_notes || '';
 
       const existingIds = new Set(allRuns.map(r => r.id));
       const newRuns = importedRuns.filter(r => !existingIds.has(r.id));
@@ -3924,9 +3920,37 @@ function importFromFile(input) {
         if (area) area.value = importedNotes;
       }
 
+      // Restore photos from backup into IndexedDB
+      if (data.photos) {
+        var photoKeys = Object.keys(data.photos);
+        var photoPromises = photoKeys.map(function(key) {
+          return storePhotoInIDB(key, data.photos[key]);
+        });
+        Promise.all(photoPromises).then(function() {
+          var allCars = [];
+          allRuns.forEach(function(r) { if (r.cars) r.cars.forEach(function(c) { allCars.push(c); }); });
+          currentRun.forEach(function(c) { allCars.push(c); });
+          quickPicks.forEach(function(c) { allCars.push(c); });
+          Promise.all(allCars.map(function(c) { return loadCarPhotoFromIDB(c); })).then(function() {
+            renderGarage(); renderSpot(); renderHistory();
+          });
+        });
+        showToast(' Restored ' + newRuns.length + ' runs + ' + photoKeys.length + ' photos!');
+      } else {
+        // Legacy backup without photos — migrate embedded base64
+        allRuns.forEach(function(r) { if (r.cars) migrateLegacyPhotos(r.cars); });
+        migrateLegacyPhotos(currentRun);
+        migrateLegacyPhotos(quickPicks);
+        var allCars = [];
+        allRuns.forEach(function(r) { if (r.cars) r.cars.forEach(function(c) { allCars.push(c); }); });
+        currentRun.forEach(function(c) { allCars.push(c); });
+        quickPicks.forEach(function(c) { allCars.push(c); });
+        Promise.all(allCars.map(function(c) { return loadCarPhotoFromIDB(c); }));
+        showToast(' Restored ' + newRuns.length + ' runs from backup!');
+      }
+
       saveToCloud();
-      renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
-      showToast(' Restored ' + newRuns.length + ' runs from backup!');
+      renderQPTrigger(); renderHistory();
     } catch(err) {
       alert('Could not read backup file. Make sure it\'s a valid carspotter-backup.json');
     }
@@ -4258,7 +4282,7 @@ function handlePhotoInput(input) {
     var img = new Image();
     img.onload = function() {
       try {
-        var MAX = 400; // smaller compression saves space
+        var MAX = 800;
         var w = img.width, h = img.height;
         if (w > MAX || h > MAX) {
           if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
@@ -4267,7 +4291,7 @@ function handlePhotoInput(input) {
         var c = document.createElement('canvas');
         c.width = w; c.height = h;
         c.getContext('2d').drawImage(img, 0, 0, w, h);
-        var compressed = c.toDataURL('image/jpeg', 0.4); // lower quality saves space
+        var compressed = c.toDataURL('image/jpeg', 0.6);
         if (pendingPhotoFile && pendingPhotoFile.data === raw) {
           var photoId = 'photo_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
           pendingPhotoFile.id = photoId;
@@ -4407,7 +4431,7 @@ function handleEditPhotoInput(input) {
     var img = new Image();
     img.onload = function() {
       try {
-        var MAX = 400;
+        var MAX = 800;
         var w = img.width, h = img.height;
         if (w > MAX || h > MAX) {
           if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
@@ -4416,7 +4440,7 @@ function handleEditPhotoInput(input) {
         var c = document.createElement('canvas');
         c.width = w; c.height = h;
         c.getContext('2d').drawImage(img, 0, 0, w, h);
-        var compressed = c.toDataURL('image/jpeg', 0.4);
+        var compressed = c.toDataURL('image/jpeg', 0.6);
         if (editPendingPhotoFile && editPendingPhotoFile.data === raw) {
           var photoId = 'photo_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
           editPendingPhotoFile.id = photoId;
@@ -4668,13 +4692,36 @@ function initSortPrefBtns() {
 
 // ── EXPORT ALL DATA ──
 function exportAllData() {
-  const data = { runs: allRuns, quickPicks, exportedAt: new Date().toISOString(), version: 20 };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'CarSpotter_backup_' + new Date().toISOString().slice(0,10) + '.json';
-  a.click(); URL.revokeObjectURL(url);
-  showToast('📥 Backup downloaded!');
+  var self = this;
+  _openPhotoDB().then(function(idb) {
+    var tx = idb.transaction('photos', 'readonly');
+    var getAll = tx.objectStore('photos').getAll();
+    var getAllKeys = tx.objectStore('photos').getAllKeys();
+    getAll.onsuccess = function() {
+      var photos = {};
+      var keys = getAllKeys.result;
+      var vals = getAll.result;
+      for (var i = 0; i < keys.length; i++) {
+        photos[keys[i]] = vals[i];
+      }
+      var data = { runs: allRuns, quickPicks, photos: photos, exportedAt: new Date().toISOString(), version: 21 };
+      var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'CarSpotter_backup_' + new Date().toISOString().slice(0,10) + '.json';
+      a.click(); URL.revokeObjectURL(url);
+      showToast('📥 Backup downloaded with ' + keys.length + ' photos!');
+    };
+  }).catch(function() {
+    // Fallback: export without photos
+    var data = { runs: allRuns, quickPicks, exportedAt: new Date().toISOString(), version: 21 };
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'CarSpotter_backup_' + new Date().toISOString().slice(0,10) + '.json';
+    a.click(); URL.revokeObjectURL(url);
+    showToast('📥 Backup downloaded (no photos — IndexedDB unavailable)');
+  });
 }
 
 // ── CLEAR ALL DATA ──
