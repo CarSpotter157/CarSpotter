@@ -2646,6 +2646,32 @@ function clearInputs() {
 
 //  LOG TO RUN 
 // Adds to current run list only. Does NOT go to history until you End Run.
+function findExistingPhoto(name) {
+  var all = [];
+  allRuns.forEach(function(r) { if (r.cars) r.cars.forEach(function(c) { all.push(c); }); });
+  currentRun.forEach(function(c) { all.push(c); });
+  quickPicks.forEach(function(c) { all.push(c); });
+  for (var i = all.length - 1; i >= 0; i--) {
+    var c = all[i];
+    if (c.name.toLowerCase() !== name.toLowerCase() || !c.photoFile) continue;
+    if (c.photo) return Promise.resolve({ id: c.photoFile, data: c.photo });
+    return getPhotoFromIDB(c.photoFile).then(function(url) {
+      if (url) return { id: c.photoFile, data: url };
+      return { id: c.photoFile, data: null };
+    });
+  }
+  return Promise.resolve(null);
+}
+
+function injectPhotoToRun(car, name) {
+  return findExistingPhoto(name).then(function(photoResult) {
+    if (!photoResult) return false;
+    applyPhotoToCar(car, photoResult);
+    renderSpot();
+    return true;
+  });
+}
+
 function logRun() {
   const { name: rawName, value, color, type } = getInputs();
   if (!rawName)             { showToast('Enter a car name!');    return; }
@@ -2654,24 +2680,32 @@ function logRun() {
 
   const prevRun = JSON.parse(JSON.stringify(currentRun));
   const prevHL  = headlinerIdx;
-  const photoResult = getPhotoAndClear();
+  var photoResult = getPhotoAndClear();
   const car = { name, value, color, type, ts: Date.now() };
-  applyPhotoToCar(car, photoResult);
-  currentRun.push(car);
-  saveToQP(car);
-  saveCurrentRun();
-  clearInputs();
-  renderQPTrigger();
-  renderSpot();
-  playSound('log');
-  pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, type + ' ' + name + ' removed');
-
-  const el = document.getElementById('runTotal');
-  el.style.animation = 'none';
-  requestAnimationFrame(() => { el.style.animation = 'numPop 0.3s ease'; });
-  showToast(type+' '+name+' added to run!');
-  showSpecsCard({ name, value, color, type });
-  setTimeout(checkNewAchievements, 400);
+  function finishLog() {
+    currentRun.push(car);
+    saveToQP(car);
+    saveCurrentRun();
+    clearInputs();
+    renderQPTrigger();
+    renderSpot();
+    playSound('log');
+    pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, type + ' ' + name + ' removed');
+    const el = document.getElementById('runTotal');
+    el.style.animation = 'none';
+    requestAnimationFrame(() => { el.style.animation = 'numPop 0.3s ease'; });
+    showToast(type+' '+name+' added to run!');
+    showSpecsCard({ name, value, color, type });
+    setTimeout(checkNewAchievements, 400);
+  }
+  if (photoResult) {
+    applyPhotoToCar(car, photoResult);
+    finishLog();
+  } else {
+    injectPhotoToRun(car, name).then(function(hadPhoto) {
+      finishLog();
+    });
+  }
 }
 
 //  LOG AS SPOTTED 
@@ -2682,30 +2716,34 @@ function logSpotted() {
   if (isNaN(value)||value<0){ showToast('Enter a valid value!'); return; }
   const name = resolveAlias(rawName);
 
-  const photoResult = getPhotoAndClear();
+  var photoResult = getPhotoAndClear();
   const car = { name, value, color, type, ts: Date.now() };
-  applyPhotoToCar(car, photoResult);
-  saveToQP(car);
-
-  const prevRuns = JSON.parse(JSON.stringify(allRuns));
-  // Save as a standalone spotted entry in history
-  const entry = {
-    id:      Date.now(),
-    date:    new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
-    total:   value,
-    spotted: true,
-    cars:    [car]
-  };
-  allRuns.unshift(entry);
-  saveToCloud(); // _persistToLocal() handles localStorage with photos stripped
-  playSound('log');
-  pushUndo('history', prevRuns, type + ' ' + name + ' removed');
-
-  clearInputs();
-  renderQPTrigger();
-  showToast(type+' '+name+' spotted & saved to garage!');
-  showSpecsCard({ name, value, color, type });
-  setTimeout(checkNewAchievements, 400);
+  function finishSpotted() {
+    saveToQP(car);
+    var prevRuns = JSON.parse(JSON.stringify(allRuns));
+    var entry = {
+      id:      Date.now(),
+      date:    new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
+      total:   value,
+      spotted: true,
+      cars:    [car]
+    };
+    allRuns.unshift(entry);
+    saveToCloud();
+    playSound('log');
+    pushUndo('history', prevRuns, type + ' ' + name + ' removed');
+    clearInputs();
+    renderQPTrigger();
+    showToast(type+' '+name+' spotted & saved to garage!');
+    showSpecsCard({ name, value, color, type });
+    setTimeout(checkNewAchievements, 400);
+  }
+  if (photoResult) {
+    applyPhotoToCar(car, photoResult);
+    finishSpotted();
+  } else {
+    injectPhotoToRun(car, name).then(function() { finishSpotted(); });
+  }
 }
 
 //  REMOVE FROM RUN 
@@ -5907,20 +5945,27 @@ async function loadNews() {
     var prevHL = headlinerIdx;
     var photoResult = getPhotoAndClear();
     var car = attachPendingLocation({ name:name, value:input.value, color:input.color, type:input.type, ts:Date.now() });
-    applyPhotoToCar(car, photoResult);
-    currentRun.push(car);
-    saveToQP(car);
-    saveCurrentRun();
-    fetchAndStoreRefImage(car);
-    clearInputs();
-    renderQPTrigger();
-    renderSpot();
-    if (garageView === 'map') renderGarage();
-    playSound('log');
-    pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, input.type + ' ' + name + ' removed');
-    showToast(input.type + ' ' + name + ' added to run!');
-    showSpecsCard({ name:name, value:input.value, color:input.color, type:input.type, photo:car.photo, location:car.location });
-    setTimeout(checkNewAchievements, 400);
+    function finishIIFERun() {
+      currentRun.push(car);
+      saveToQP(car);
+      saveCurrentRun();
+      fetchAndStoreRefImage(car);
+      clearInputs();
+      renderQPTrigger();
+      renderSpot();
+      if (garageView === 'map') renderGarage();
+      playSound('log');
+      pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, input.type + ' ' + name + ' removed');
+      showToast(input.type + ' ' + name + ' added to run!');
+      showSpecsCard({ name:name, value:input.value, color:input.color, type:input.type, photo:car.photo, location:car.location });
+      setTimeout(checkNewAchievements, 400);
+    }
+    if (photoResult) {
+      applyPhotoToCar(car, photoResult);
+      finishIIFERun();
+    } else {
+      injectPhotoToRun(car, name).then(function() { finishIIFERun(); });
+    }
   };
 
   window.logSpotted = function(){
@@ -5930,21 +5975,28 @@ async function loadNews() {
     var name = resolveAlias(input.name);
     var photoResult = getPhotoAndClear();
     var car = attachPendingLocation({ name:name, value:input.value, color:input.color, type:input.type, ts:Date.now() });
-    applyPhotoToCar(car, photoResult);
-    saveToQP(car);
-    var prevRuns = JSON.parse(JSON.stringify(allRuns));
-    var entry = { id:Date.now(), date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), total:input.value, spotted:true, cars:[car] };
-    allRuns.unshift(entry);
-    saveToCloud(); // _persistToLocal() handles localStorage with photos stripped
-    fetchAndStoreRefImage(car);
-    playSound('log');
-    pushUndo('history', prevRuns, input.type + ' ' + name + ' removed');
-    clearInputs();
-    renderQPTrigger();
-    renderGarage();
-    showToast(input.type + ' ' + name + ' spotted & saved to garage!');
-    showSpecsCard({ name:name, value:input.value, color:input.color, type:input.type, photo:car.photo, location:car.location });
-    setTimeout(checkNewAchievements, 400);
+    function finishIIFESpotted() {
+      saveToQP(car);
+      var prevRuns = JSON.parse(JSON.stringify(allRuns));
+      var entry = { id:Date.now(), date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), total:input.value, spotted:true, cars:[car] };
+      allRuns.unshift(entry);
+      saveToCloud();
+      fetchAndStoreRefImage(car);
+      playSound('log');
+      pushUndo('history', prevRuns, input.type + ' ' + name + ' removed');
+      clearInputs();
+      renderQPTrigger();
+      renderGarage();
+      showToast(input.type + ' ' + name + ' spotted & saved to garage!');
+      showSpecsCard({ name:name, value:input.value, color:input.color, type:input.type, photo:car.photo, location:car.location });
+      setTimeout(checkNewAchievements, 400);
+    }
+    if (photoResult) {
+      applyPhotoToCar(car, photoResult);
+      finishIIFESpotted();
+    } else {
+      injectPhotoToRun(car, name).then(function() { finishIIFESpotted(); });
+    }
   };
 
   function tutorialData(){
