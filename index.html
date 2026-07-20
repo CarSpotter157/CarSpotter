@@ -2015,6 +2015,8 @@ async function loadFromCloud() {
         const a = document.getElementById('notesArea');
         if (a) a.value = d.notes;
       }
+      // Load photos from Firestore subcollection into IDB
+      await loadPhotosFromCloud();
       // Migrate legacy base64 photos to IDB
       allRuns.forEach(function(r) { if (r.cars) migrateLegacyPhotos(r.cars); });
       migrateLegacyPhotos(currentRun);
@@ -2037,6 +2039,7 @@ async function loadFromCloud() {
         updatedAt: _lastSave
       }).then(function() {
         setSyncDot('ok');
+        syncPhotosToCloud();
       }).catch(() => setSyncDot(''));
     }
     if (!_lastSave) setSyncDot('ok');
@@ -2060,12 +2063,14 @@ function subscribeCloud() {
         const a = document.getElementById('notesArea');
         if (a && document.activeElement !== a) a.value = d.notes;
       }
-      // Reconstruct photos from IDB after merge
-      var allCars = [];
-      allRuns.forEach(function(r) { if (r.cars) r.cars.forEach(function(c) { allCars.push(c); }); });
-      currentRun.forEach(function(c) { allCars.push(c); });
-      quickPicks.forEach(function(c) { allCars.push(c); });
-      Promise.all(allCars.map(function(c) { return loadCarPhotoFromIDB(c); }));
+      // Load photos from Firestore subcollection into IDB, then reconstruct
+      loadPhotosFromCloud().then(function() {
+        var allCars = [];
+        allRuns.forEach(function(r) { if (r.cars) r.cars.forEach(function(c) { allCars.push(c); }); });
+        currentRun.forEach(function(c) { allCars.push(c); });
+        quickPicks.forEach(function(c) { allCars.push(c); });
+        Promise.all(allCars.map(function(c) { return loadCarPhotoFromIDB(c); }));
+      });
       localStorage.setItem('cs_current', JSON.stringify(stripPhotosFromData(JSON.parse(JSON.stringify(currentRun)))));
       localStorage.setItem('cs_runs',    JSON.stringify(stripPhotosFromData(JSON.parse(JSON.stringify(allRuns)))));
       localStorage.setItem('cs_qp',      JSON.stringify(stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks)))));
@@ -2112,6 +2117,7 @@ function saveToCloud() {
     }).then(function() {
       setSyncDot('ok');
       leaderboardLoaded = false;
+      syncPhotosToCloud();
     }).catch(() => setSyncDot(''));
   }, 1500);
 }
@@ -2132,6 +2138,8 @@ function _flushPendingSave() {
       profileName: currentUser?.displayName || 'Spotter',
       profilePhoto: currentUser?.photoURL || '',
       updatedAt: _lastSave
+    }).then(function() {
+      syncPhotosToCloud();
     }).catch(function(){});
   }
 }
