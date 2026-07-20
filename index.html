@@ -2127,21 +2127,7 @@ function _flushPendingSave() {
   if (!syncTimer) return;
   clearTimeout(syncTimer);
   syncTimer = null;
-  if (currentUser && navigator.onLine) {
-    var strippedRuns    = stripPhotosFromData(JSON.parse(JSON.stringify(allRuns)));
-    var strippedCurrent = stripPhotosFromData(JSON.parse(JSON.stringify(currentRun)));
-    var strippedQP      = stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks)));
-    _lastSave = Date.now();
-    db.collection('users').doc(currentUser.uid).set({
-      currentRun: strippedCurrent, allRuns: strippedRuns, quickPicks: strippedQP,
-      notes: localStorage.getItem('cs_notes') || '',
-      profileName: currentUser?.displayName || 'Spotter',
-      profilePhoto: currentUser?.photoURL || '',
-      updatedAt: _lastSave
-    }).then(function() {
-      syncPhotosToCloud();
-    }).catch(function(){});
-  }
+  _immediateCloudSave();
 }
 window.addEventListener('beforeunload', _flushPendingSave);
 window.addEventListener('pagehide',     _flushPendingSave);
@@ -2755,12 +2741,32 @@ function removeCar(i) {
   else if (headlinerIdx > i) headlinerIdx--;
   currentRun.splice(i,1);
   saveCurrentRun();
-  _flushPendingSave();
+  _immediateCloudSave();
   renderSpot();
   playSound('delete');
   cleanQPAfterRemoval(car.name);
   renderQPTrigger();
   pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, car.type + ' ' + car.name + ' removed');
+}
+
+function _immediateCloudSave() {
+  if (!currentUser || !navigator.onLine) return;
+  clearTimeout(syncTimer);
+  syncTimer = null;
+  var strippedRuns    = stripPhotosFromData(JSON.parse(JSON.stringify(allRuns)));
+  var strippedCurrent = stripPhotosFromData(JSON.parse(JSON.stringify(currentRun)));
+  var strippedQP      = stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks)));
+  _lastSave = Date.now();
+  db.collection('users').doc(currentUser.uid).set({
+    currentRun: strippedCurrent, allRuns: strippedRuns, quickPicks: strippedQP,
+    notes: localStorage.getItem('cs_notes') || '',
+    profileName: currentUser?.displayName || 'Spotter',
+    profilePhoto: currentUser?.photoURL || '',
+    updatedAt: _lastSave
+  }).then(function() {
+    setSyncDot('ok');
+    syncPhotosToCloud();
+  }).catch(function(){ setSyncDot(''); });
 }
 
 function clearRun() {
@@ -2770,7 +2776,7 @@ function clearRun() {
   currentRun = [];
   headlinerIdx = -1;
   saveCurrentRun();
-  _flushPendingSave();
+  _immediateCloudSave();
   removed.forEach(c => cleanQPAfterRemoval(c.name));
   renderSpot();
   renderQPTrigger();
@@ -3059,7 +3065,7 @@ function deleteCarEverywhere(name) {
   }
   saveCurrentRun();
   cleanQPAfterRemoval(name);
-  _flushPendingSave();
+  _immediateCloudSave();
   renderQPTrigger();
   renderSpot();
   renderGarage();
