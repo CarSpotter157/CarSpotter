@@ -3479,18 +3479,18 @@ function addPhotoToCar(name) {
           // Attach to all instances in allRuns
           allRuns.forEach(function(run) {
             run.cars.forEach(function(car) {
-              if (car.name.toLowerCase() === key && !car.photo) car.photo = compressed;
+              if (car.name.toLowerCase() === key) car.photo = compressed;
             });
           });
           localStorage.setItem('cs_runs', JSON.stringify(allRuns));
           // Attach to currentRun
           currentRun.forEach(function(car) {
-            if (car.name.toLowerCase() === key && !car.photo) car.photo = compressed;
+            if (car.name.toLowerCase() === key) car.photo = compressed;
           });
           saveCurrentRun();
           // Attach to QP
           var qp = quickPicks.find(function(q) { return q.name.toLowerCase() === key; });
-          if (qp && !qp.photo) { qp.photo = compressed; localStorage.setItem('cs_qp', JSON.stringify(quickPicks)); }
+          if (qp) { qp.photo = compressed; localStorage.setItem('cs_qp', JSON.stringify(quickPicks)); }
           // Close detail modal if open and re-show
           var detailEl = document.getElementById('detailOverlay');
           if (detailEl) detailEl.remove();
