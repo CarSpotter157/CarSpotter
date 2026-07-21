@@ -3973,9 +3973,9 @@ function exportLocalData() {
         photos[results.keys[i]] = results.vals[i];
       }
       var data = {
-        currentRun: currentRun,
-        runs: allRuns,
-        quickPicks: quickPicks,
+        currentRun: stripPhotosFromData(JSON.parse(JSON.stringify(currentRun))),
+        runs:       stripPhotosFromData(JSON.parse(JSON.stringify(allRuns))),
+        quickPicks: stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks))),
         photos: photos,
         settings: settings,
         exportedAt: new Date().toISOString(),
@@ -3995,9 +3995,9 @@ function exportLocalData() {
   }).catch(function() {
     // Fallback: export without photos
     var data = {
-      currentRun: currentRun,
-      runs: allRuns,
-      quickPicks: quickPicks,
+      currentRun: stripPhotosFromData(JSON.parse(JSON.stringify(currentRun))),
+      runs:       stripPhotosFromData(JSON.parse(JSON.stringify(allRuns))),
+      quickPicks: stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks))),
       settings: settings,
       exportedAt: new Date().toISOString(),
       version: 21
@@ -4838,9 +4838,9 @@ function exportAllData() {
         photos[results.keys[i]] = results.vals[i];
       }
       var data = {
-        currentRun: currentRun,
-        runs: allRuns,
-        quickPicks: quickPicks,
+        currentRun: stripPhotosFromData(JSON.parse(JSON.stringify(currentRun))),
+        runs:       stripPhotosFromData(JSON.parse(JSON.stringify(allRuns))),
+        quickPicks: stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks))),
         photos: photos,
         settings: settings,
         exportedAt: new Date().toISOString(),
@@ -4860,9 +4860,9 @@ function exportAllData() {
   }).catch(function() {
     // Fallback: export without photos
     var data = {
-      currentRun: currentRun,
-      runs: allRuns,
-      quickPicks: quickPicks,
+      currentRun: stripPhotosFromData(JSON.parse(JSON.stringify(currentRun))),
+      runs:       stripPhotosFromData(JSON.parse(JSON.stringify(allRuns))),
+      quickPicks: stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks))),
       settings: settings,
       exportedAt: new Date().toISOString(),
       version: 21
