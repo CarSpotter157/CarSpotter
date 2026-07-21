@@ -2633,31 +2633,56 @@ function clearInputs() {
 }
 
 //  LOG TO RUN 
-// Adds to current run list only. Does NOT go to history until you End Run.
-function findExistingPhoto(name) {
-  var all = [];
-  allRuns.forEach(function(r) { if (r.cars) r.cars.forEach(function(c) { all.push(c); }); });
-  currentRun.forEach(function(c) { all.push(c); });
-  quickPicks.forEach(function(c) { all.push(c); });
-  for (var i = all.length - 1; i >= 0; i--) {
-    var c = all[i];
+// Look up the garage car's photo by name (newest match in allRuns)
+function getGaragePhoto(name) {
+  for (var i = allRuns.length - 1; i >= 0; i--) {
+    var run = allRuns[i];
+    if (!run.cars) continue;
+    for (var j = run.cars.length - 1; j >= 0; j--) {
+      var c = run.cars[j];
+      if (c.name.toLowerCase() !== name.toLowerCase() || !c.photoFile) continue;
+      if (c.photo) return Promise.resolve({ id: c.photoFile, data: c.photo });
+      return getPhotoFromIDB(c.photoFile).then(function(url) {
+        if (url) return { id: c.photoFile, data: url };
+        return null;
+      });
+    }
+  }
+  // Fallback to current run
+  for (var i = currentRun.length - 1; i >= 0; i--) {
+    var c = currentRun[i];
     if (c.name.toLowerCase() !== name.toLowerCase() || !c.photoFile) continue;
     if (c.photo) return Promise.resolve({ id: c.photoFile, data: c.photo });
     return getPhotoFromIDB(c.photoFile).then(function(url) {
       if (url) return { id: c.photoFile, data: url };
-      return { id: c.photoFile, data: null };
+      return null;
     });
   }
   return Promise.resolve(null);
 }
 
-function injectPhotoToRun(car, name) {
-  return findExistingPhoto(name).then(function(photoResult) {
-    if (!photoResult) return false;
-    applyPhotoToCar(car, photoResult);
-    renderSpot();
-    return true;
-  });
+// Update the most recent garage entry's photo with a new image
+function updateGaragePhoto(name, photoResult) {
+  name = name.toLowerCase();
+  for (var i = allRuns.length - 1; i >= 0; i--) {
+    var run = allRuns[i];
+    if (!run.cars) continue;
+    for (var j = run.cars.length - 1; j >= 0; j--) {
+      var c = run.cars[j];
+      if (c.name.toLowerCase() !== name) continue;
+      c.photoFile = photoResult.id;
+      c.photo = photoResult.data;
+      return;
+    }
+  }
+  // Also update current run entries
+  for (var i = currentRun.length - 1; i >= 0; i--) {
+    var c = currentRun[i];
+    if (c.name.toLowerCase() !== name) continue;
+    c.photoFile = photoResult.id;
+    c.photo = photoResult.data;
+    return;
+  }
 }
 
 function logRun() {
@@ -2687,9 +2712,13 @@ function logRun() {
   }
   if (photoResult) {
     applyPhotoToCar(car, photoResult);
+    updateGaragePhoto(name, photoResult);
     finishLog();
   } else {
-    injectPhotoToRun(car, name).then(function() { finishLog(); });
+    getGaragePhoto(name).then(function(garagePhoto) {
+      if (garagePhoto) applyPhotoToCar(car, garagePhoto);
+      finishLog();
+    });
   }
 }
 
@@ -2721,9 +2750,13 @@ function logSpotted() {
   }
   if (photoResult) {
     applyPhotoToCar(car, photoResult);
+    updateGaragePhoto(name, photoResult);
     finishSpotted();
   } else {
-    injectPhotoToRun(car, name).then(function() { finishSpotted(); });
+    getGaragePhoto(name).then(function(garagePhoto) {
+      if (garagePhoto) applyPhotoToCar(car, garagePhoto);
+      finishSpotted();
+    });
   }
 }
 
