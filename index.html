@@ -2612,6 +2612,7 @@ function removeCar(i) {
   else if (headlinerIdx > i) headlinerIdx--;
   currentRun.splice(i,1);
   saveCurrentRun();
+  _flushPendingSave();
   renderSpot();
   playSound('delete');
   cleanQPAfterRemoval(car.name);
@@ -4043,6 +4044,27 @@ function getPhotoAndClear() {
   return p;
 }
 
+window.checkPhotos = function(){
+  var all = getAllCars ? getAllCars() : [];
+  var withPhoto = all.filter(function(c){ return c.photo; });
+  var personal = withPhoto.filter(function(c){ return c.photo && c.photo.indexOf('data:') === 0; });
+  var refs = withPhoto.filter(function(c){ return c.photo && c.photo.indexOf('data:') !== 0; });
+  console.log('Total cars:', all.length);
+  console.log('Cars with any photo:', withPhoto.length);
+  console.log('  Personal (data: URLs):', personal.length);
+  console.log('  Reference (http URLs):', refs.length);
+  if (personal.length) console.log('Personal photo cars:', personal.map(function(c){ return c.name; }));
+  var lsRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
+  var lsCur = JSON.parse(localStorage.getItem('cs_current') || '[]');
+  var lsQP = JSON.parse(localStorage.getItem('cs_qp') || '[]');
+  var lsPhotoCount = 0;
+  lsRuns.forEach(function(r){ if (r.cars) r.cars.forEach(function(c){ if (c.photo) lsPhotoCount++; }); });
+  lsCur.forEach(function(c){ if (c.photo) lsPhotoCount++; });
+  lsQP.forEach(function(c){ if (c.photo) lsPhotoCount++; });
+  console.log('Photos in localStorage:', lsPhotoCount);
+  console.log('localStorage data size:', new Blob([JSON.stringify({runs:lsRuns,cur:lsCur,qp:lsQP})]).size / 1024 + ' KB');
+  return { total: all.length, withPhoto: withPhoto.length, personal: personal.length, refs: refs.length, localStoragePhotos: lsPhotoCount };
+};
 function photoThumb(dataUrl) {
   if (!dataUrl) return '';
   return `<img class="run-item-photo" src="${dataUrl}" alt="car" onclick="event.stopPropagation();viewPhoto('${dataUrl.substring(0,30)}...')" style="cursor:pointer">`;
