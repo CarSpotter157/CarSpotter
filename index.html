@@ -3963,19 +3963,52 @@ function exportLocalData() {
   var settingsKeys = ['cs_notes','cs_aliases','cs_theme','cs_sound','cs_carbon','cs_compact','cs_sort','cs_ach','cs_deleted_cars','cs_deleted_qp','cs_lb_last','cs_offline_queue','cs_pending_loc','cs_tutorial_done','cs_install_dismissed','cs_lk_v1'];
   var settings = {};
   settingsKeys.forEach(function(k) { var v = localStorage.getItem(k); if (v !== null) settings[k] = v; });
-  var data = {
-    cs_runs:    localStorage.getItem('cs_runs')    || '[]',
-    cs_current: localStorage.getItem('cs_current') || '[]',
-    cs_qp:      localStorage.getItem('cs_qp')      || '[]',
-    settings:   settings,
-    exported:   new Date().toISOString()
-  };
-  var blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-  var url  = URL.createObjectURL(blob);
-  var a    = document.createElement('a');
-  a.href = url; a.download = 'carspotter-backup.json'; a.click();
-  URL.revokeObjectURL(url);
-  showToast('📥 Quick backup downloaded!');
+  _openPhotoDB().then(function(idb) {
+    var tx = idb.transaction('photos', 'readonly');
+    var results = { keys: null, vals: null };
+    function tryDownload() {
+      if (!results.keys || !results.vals) return;
+      var photos = {};
+      for (var i = 0; i < results.keys.length; i++) {
+        photos[results.keys[i]] = results.vals[i];
+      }
+      var data = {
+        currentRun: currentRun,
+        runs: allRuns,
+        quickPicks: quickPicks,
+        photos: photos,
+        settings: settings,
+        exportedAt: new Date().toISOString(),
+        version: 21
+      };
+      var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'CarSpotter_backup_' + new Date().toISOString().slice(0,10) + '.json';
+      a.click(); URL.revokeObjectURL(url);
+      showToast('📥 Quick backup downloaded with ' + results.keys.length + ' photos!');
+    }
+    var getAll = tx.objectStore('photos').getAll();
+    getAll.onsuccess = function() { results.vals = getAll.result; tryDownload(); };
+    var getAllKeys = tx.objectStore('photos').getAllKeys();
+    getAllKeys.onsuccess = function() { results.keys = getAllKeys.result; tryDownload(); };
+  }).catch(function() {
+    // Fallback: export without photos
+    var data = {
+      currentRun: currentRun,
+      runs: allRuns,
+      quickPicks: quickPicks,
+      settings: settings,
+      exportedAt: new Date().toISOString(),
+      version: 21
+    };
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'CarSpotter_backup_' + new Date().toISOString().slice(0,10) + '.json';
+    a.click(); URL.revokeObjectURL(url);
+    showToast('📥 Quick backup downloaded (no photos — IndexedDB unavailable)');
+  });
 }
 
 function importFromFile(input) {
