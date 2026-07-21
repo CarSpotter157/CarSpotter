@@ -4015,14 +4015,30 @@ function importFromFile(input) {
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
+  reader.onerror = function() { console.error('FileReader error'); alert('Could not read backup file — file read failed.'); };
   reader.onload = (e) => {
     try {
-      const data = JSON.parse(e.target.result);
+      const raw = e.target.result;
+      if (typeof raw !== 'string' || !raw) throw new Error('Empty or invalid file content');
+      const data = JSON.parse(raw);
       // Support v21+ format (structured) and legacy format (raw JSON strings)
-      const importedRuns = data.runs || JSON.parse(data.cs_runs || '[]');
-      const importedQP   = data.quickPicks || JSON.parse(data.cs_qp || '[]');
-      const importedCur  = data.currentRun || JSON.parse(data.cs_current || '[]');
-      const importedNotes = data.notes || data.settings?.cs_notes || data.cs_notes || '';
+      var importedRuns, importedQP, importedCur;
+      if (Array.isArray(data.runs)) {
+        importedRuns = data.runs;
+      } else {
+        try { importedRuns = JSON.parse(data.cs_runs || '[]'); } catch(e) { importedRuns = []; }
+      }
+      if (Array.isArray(data.quickPicks)) {
+        importedQP = data.quickPicks;
+      } else {
+        try { importedQP = JSON.parse(data.cs_qp || '[]'); } catch(e) { importedQP = []; }
+      }
+      if (Array.isArray(data.currentRun)) {
+        importedCur = data.currentRun;
+      } else {
+        try { importedCur = JSON.parse(data.cs_current || '[]'); } catch(e) { importedCur = []; }
+      }
+      const importedNotes = data.notes || (data.settings && data.settings.cs_notes) || data.cs_notes || '';
 
       // Merge runs (dedup by id)
       const existingIds = new Set(allRuns.map(r => r.id));
@@ -4040,13 +4056,11 @@ function importFromFile(input) {
 
       // Restore settings
       var importedSettings = data.settings || {};
-      // Map legacy settings fields into new settings object
       ['cs_notes','cs_aliases','cs_theme','cs_sound','cs_carbon','cs_compact','cs_sort','cs_ach','cs_deleted_cars','cs_deleted_qp','cs_lb_last','cs_offline_queue','cs_pending_loc','cs_tutorial_done','cs_install_dismissed','cs_lk_v1'].forEach(function(k) {
         var val = importedSettings[k];
         if (val !== undefined && val !== null) {
           localStorage.setItem(k, val);
         } else if (k === 'cs_notes' && importedNotes) {
-          // legacy: data.cs_notes at top level
           localStorage.setItem('cs_notes', importedNotes);
         }
       });
@@ -4079,14 +4093,14 @@ function importFromFile(input) {
       if (data.photos) {
         restorePhotosAndRender(data.photos);
       } else {
-        // Legacy: migrate embedded base64 from car objects into IDB
         allRuns.forEach(function(r) { if (r.cars) migrateLegacyPhotos(r.cars); });
         migrateLegacyPhotos(currentRun);
         migrateLegacyPhotos(quickPicks);
         restorePhotosAndRender(null);
       }
     } catch(err) {
-      alert('Could not read backup file. Make sure it\'s a valid carspotter-backup.json');
+      console.error('Import failed:', err);
+      alert('Could not read backup file. Make sure it\'s a valid carspotter-backup.json\n\nError: ' + err.message);
     }
   };
   reader.readAsText(file);
