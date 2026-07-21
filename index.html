@@ -2127,7 +2127,7 @@ function _flushPendingSave() {
   if (!syncTimer) return;
   clearTimeout(syncTimer);
   syncTimer = null;
-  _immediateCloudSave();
+  _directCloudSave();
 }
 window.addEventListener('beforeunload', _flushPendingSave);
 window.addEventListener('pagehide',     _flushPendingSave);
@@ -2741,7 +2741,8 @@ function removeCar(i) {
   else if (headlinerIdx > i) headlinerIdx--;
   currentRun.splice(i,1);
   saveCurrentRun();
-  _immediateCloudSave();
+  // Direct Firestore write — no debounce, no timer dependency
+  _directCloudSave();
   renderSpot();
   playSound('delete');
   cleanQPAfterRemoval(car.name);
@@ -2749,10 +2750,8 @@ function removeCar(i) {
   pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, car.type + ' ' + car.name + ' removed');
 }
 
-function _immediateCloudSave() {
+function _directCloudSave() {
   if (!currentUser || !navigator.onLine) return;
-  clearTimeout(syncTimer);
-  syncTimer = null;
   var strippedRuns    = stripPhotosFromData(JSON.parse(JSON.stringify(allRuns)));
   var strippedCurrent = stripPhotosFromData(JSON.parse(JSON.stringify(currentRun)));
   var strippedQP      = stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks)));
@@ -2776,7 +2775,7 @@ function clearRun() {
   currentRun = [];
   headlinerIdx = -1;
   saveCurrentRun();
-  _immediateCloudSave();
+  _directCloudSave();
   removed.forEach(c => cleanQPAfterRemoval(c.name));
   renderSpot();
   renderQPTrigger();
@@ -3065,7 +3064,7 @@ function deleteCarEverywhere(name) {
   }
   saveCurrentRun();
   cleanQPAfterRemoval(name);
-  _immediateCloudSave();
+  _directCloudSave();
   renderQPTrigger();
   renderSpot();
   renderGarage();
