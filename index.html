@@ -68,6 +68,7 @@ const db   = firebase.firestore();
   --nav-h:    64px;
   --shadow:   0 4px 20px rgba(0,0,0,0.4);
   --shadow-sm:0 2px 8px  rgba(0,0,0,0.3);
+  --ease: cubic-bezier(0.34,1.56,0.64,1);
 }
 
 /* Light theme */
@@ -172,8 +173,9 @@ body{
 .page{
   position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:20px 20px calc(var(--nav-h) + 28px + env(safe-area-inset-bottom,0px));
-  opacity:0;pointer-events:none;transform:translateY(4px);
-  transition:opacity 0.2s ease,transform 0.2s ease;
+  opacity:0;pointer-events:none;transform:translateY(6px);
+  transition:opacity 0.25s var(--ease),transform 0.3s var(--ease);
+  will-change:transform,opacity;
 }
 .page.active{opacity:1;pointer-events:all;transform:translateY(0);}
 
@@ -198,6 +200,7 @@ body{
   position:absolute;top:0;left:25%;right:25%;
   height:2px;background:var(--accent);border-radius:0 0 2px 2px;
 }
+.nav-btn:not(.active):hover{color:var(--text2);}
 .nav-icon{width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
 .nav-btn.active .nav-icon svg{stroke:var(--accent);}
 .nav-label{font-size:0.5rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;}
@@ -256,6 +259,7 @@ body{
   padding:20px;
   margin-bottom:12px;
   animation:fadeUp 0.22s ease both;
+  transition:border-color 0.2s;
 }
 .card-title{
   font-size:0.52rem;font-weight:700;letter-spacing:2.5px;
@@ -300,11 +304,12 @@ body{
   border:none;border-radius:var(--radius-sm);
   font-family:'Bebas Neue',cursive;font-size:1.1rem;letter-spacing:3px;
   padding:17px 20px;cursor:pointer;
-  transition:background 0.15s,transform 0.12s;
+  transition:background 0.15s,transform 0.12s,box-shadow 0.15s;
   text-align:center;
 }
 .btn-run:hover{background:var(--accent-d);}
-.btn-run:active{transform:scale(0.98);}
+.btn-run:active{transform:scale(0.97);}
+.btn-run:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 .btn-spot{
   width:100%;
   background:transparent;color:var(--text2);
@@ -423,8 +428,9 @@ body{
   background:var(--surf);border:1px solid var(--border);
   border-radius:var(--radius-sm);padding:12px 14px;
   margin-bottom:8px;animation:fadeUp 0.2s ease both;
-  transition:border-color 0.15s;
+  transition:border-color 0.15s,background 0.15s;
 }
+.run-item:hover{border-color:var(--border2);background:var(--surf2);}
 .run-item-photo{width:40px;height:40px;border-radius:9px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);}
 .re{
   width:40px;height:40px;background:var(--surf2);border:1px solid var(--border);
@@ -462,7 +468,8 @@ body{
   padding:15px;cursor:pointer;transition:all 0.18s;
 }
 .btn-end:hover{background:var(--adim);}
-.btn-end:active{transform:scale(0.98);}
+.btn-end:active{transform:scale(0.97);}
+.btn-end:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
 
 /* ── RARITY PILL ── */
 .rarity-pill{
@@ -572,7 +579,7 @@ body{
 
 /* ── DETAIL MODAL ── */
 .detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:99991;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.18s ease;}
-.detail-card{width:100%;max-width:480px;background:var(--surf);border-top:1px solid var(--border);border-radius:24px 24px 0 0;overflow:hidden;animation:slideUpRecap 0.3s cubic-bezier(0.34,1.56,0.64,1);max-height:88vh;overflow-y:auto;padding-bottom:30px;}
+.detail-card{width:100%;max-width:480px;background:var(--surf);border-top:1px solid var(--border);border-radius:24px 24px 0 0;overflow:hidden;animation:slideUpRecap 0.3s var(--ease);max-height:88vh;overflow-y:auto;padding-bottom:30px;}
 .detail-hero{position:relative;width:100%;height:240px;overflow:hidden;background:var(--surf2);}
 .detail-hero-img{width:100%;height:100%;object-fit:cover;}
 .detail-hero-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:4rem;}
@@ -765,7 +772,7 @@ body{
   width:100%;max-width:480px;
   background:var(--surf);border-top:1px solid var(--border);
   border-radius:24px 24px 0 0;padding:24px 22px 36px;
-  animation:slideUpRecap 0.28s cubic-bezier(0.34,1.56,0.64,1);
+  animation:slideUpRecap 0.28s var(--ease);
   max-height:86vh;overflow-y:auto;
 }
 .modal-handle{width:36px;height:3px;background:var(--border2);border-radius:2px;margin:0 auto 20px;}
@@ -803,7 +810,7 @@ body{
   width:100%;max-width:480px;
   background:var(--surf);border-top:1px solid var(--border);
   border-radius:24px 24px 0 0;padding:28px 24px 40px;
-  animation:slideUpRecap 0.34s cubic-bezier(0.34,1.56,0.64,1);
+  animation:slideUpRecap 0.34s var(--ease);
   position:relative;overflow:hidden;
 }
 .recap-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);}
@@ -1508,7 +1515,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
           <div class="setting-icon">Theme</div>
           <div class="setting-copy">
             <div class="card-title">THEME</div>
-            <div class="setting-desc">Tune CarSpotter''s look with bold palettes, then add carbon fiber texture for extra depth.</div>
+            <div class="setting-desc">Tune CarSpotter's look with bold palettes, then add carbon fiber texture for extra depth.</div>
           </div>
         </div>
         <div class="theme-bar" id="themeBar"></div>
@@ -1815,13 +1822,15 @@ let _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
 
 //  MERGE HELPERS — prevent data loss when cloud & local diverge 
 function _mergeRunArrays(local, cloud) {
-  const byTs = new Map();
-  for (const c of local)  byTs.set(c.ts, c);
-  for (const c of cloud)  {
-    const existing = byTs.get(c.ts);
-    if (!existing || (c.photo && !existing.photo) || (c.photoFile && !existing.photoFile)) byTs.set(c.ts, c);
+  var byTs = new Map();
+  for (var _i = 0; _i < local.length; _i++) { var c = local[_i]; byTs.set(c.ts, c); }
+  for (var _i2 = 0; _i2 < cloud.length; _i2++) { var c2 = cloud[_i2];
+    var existing = byTs.get(c2.ts);
+    if (!existing) { byTs.set(c2.ts, c2); }
+    else if ((c2.photo && !existing.photo) || (c2.photoFile && !existing.photoFile)) { byTs.set(c2.ts, c2); }
+    else if ((existing.ts || 0) < (c2.ts || 0)) { byTs.set(c2.ts, c2); }
   }
-  return [...byTs.values()];
+  return Array.from(byTs.values());
 }
 function _mergeRunHistory(local, cloud) {
   const byId = new Map();
@@ -2027,7 +2036,7 @@ async function loadFromCloud() {
       allRuns.forEach(function(r) { if (r.cars) r.cars.forEach(function(c) { allCars.push(c); }); });
       currentRun.forEach(function(c) { allCars.push(c); });
       quickPicks.forEach(function(c) { allCars.push(c); });
-      Promise.all(allCars.map(function(c) { return loadCarPhotoFromIDB(c); }));
+      await Promise.all(allCars.map(function(c) { return loadCarPhotoFromIDB(c); }));
       // Save merged result back to cloud so other devices see it
       _lastSave = Date.now();
       db.collection('users').doc(currentUser.uid).set({
@@ -2070,7 +2079,7 @@ function subscribeCloud() {
         allRuns.forEach(function(r) { if (r.cars) r.cars.forEach(function(c) { allCars.push(c); }); });
         currentRun.forEach(function(c) { allCars.push(c); });
         quickPicks.forEach(function(c) { allCars.push(c); });
-        Promise.all(allCars.map(function(c) { return loadCarPhotoFromIDB(c); }));
+        return Promise.all(allCars.map(function(c) { return loadCarPhotoFromIDB(c); }));
       });
       localStorage.setItem('cs_current', JSON.stringify(stripPhotosFromData(JSON.parse(JSON.stringify(currentRun)))));
       localStorage.setItem('cs_runs',    JSON.stringify(stripPhotosFromData(JSON.parse(JSON.stringify(allRuns)))));
@@ -2166,15 +2175,15 @@ async function publishRunToLeaderboard(run) {
 }
 
 const THEMES = [
-  { name:'Default',      accent:'#f5c842', accent2:'#ff5733', bg:'#0a0a0a', surf:'#141414', bodyClass:'' },
-  { name:'Carbon',       accent:'#e0e0e0', accent2:'#ff4444', bg:'#0d0d0d', surf:'#1a1a1a', bodyClass:'' },
-  { name:'Stealth',      accent:'#6ee7b7', accent2:'#f472b6', bg:'#050505', surf:'#101010', bodyClass:'' },
-  { name:'Inferno',      accent:'#fb923c', accent2:'#f43f5e', bg:'#0c0a09', surf:'#1c1410', bodyClass:'' },
-  { name:'Cobalt',       accent:'#60a5fa', accent2:'#a78bfa', bg:'#080c14', surf:'#0f1624', bodyClass:'' },
-  { name:'Acid',         accent:'#a3e635', accent2:'#facc15', bg:'#090a05', surf:'#131505', bodyClass:'' },
-  { name:'Light',        accent:'#e65c00', accent2:'#ff3366', bg:'#f5f5f0', surf:'#ffffff', bodyClass:'theme-light' },
-  { name:'Cyberpunk',    accent:'#bf00ff', accent2:'#00ffee', bg:'#08001a', surf:'#100028', bodyClass:'theme-cyberpunk' },
-  { name:'Retro 80s',    accent:'#ff6ec7', accent2:'#ffe600', bg:'#0d0d1a', surf:'#131325', bodyClass:'theme-retro80s' },
+  { name:'Default',      accent:'#f5c842', accent2:'#ff5733', bg:'#0a0a0a', surf:'#141414', surf2:'#1c1c20', bodyClass:'' },
+  { name:'Carbon',       accent:'#e0e0e0', accent2:'#ff4444', bg:'#0d0d0d', surf:'#1a1a1a', surf2:'#222222', bodyClass:'' },
+  { name:'Stealth',      accent:'#6ee7b7', accent2:'#f472b6', bg:'#050505', surf:'#101010', surf2:'#181818', bodyClass:'' },
+  { name:'Inferno',      accent:'#fb923c', accent2:'#f43f5e', bg:'#0c0a09', surf:'#1c1410', surf2:'#261a14', bodyClass:'' },
+  { name:'Cobalt',       accent:'#60a5fa', accent2:'#a78bfa', bg:'#080c14', surf:'#0f1624', surf2:'#161e30', bodyClass:'' },
+  { name:'Acid',         accent:'#a3e635', accent2:'#facc15', bg:'#090a05', surf:'#131505', surf2:'#1d2008', bodyClass:'' },
+  { name:'Light',        accent:'#e65c00', accent2:'#ff3366', bg:'#f5f5f0', surf:'#ffffff', surf2:'#eae9e3', bodyClass:'theme-light' },
+  { name:'Cyberpunk',    accent:'#bf00ff', accent2:'#00ffee', bg:'#08001a', surf:'#100028', surf2:'#180038', bodyClass:'theme-cyberpunk' },
+  { name:'Retro 80s',    accent:'#ff6ec7', accent2:'#ffe600', bg:'#0d0d1a', surf:'#131325', surf2:'#191933', bodyClass:'theme-retro80s' },
 ];
 let activeTheme = parseInt(localStorage.getItem('cs_theme') || '0');
 let carbonOn    = localStorage.getItem('cs_carbon') === 'on';
@@ -2187,7 +2196,7 @@ function applyTheme(idx) {
   r.setProperty('--accent2', t.accent2);
   r.setProperty('--bg',      t.bg);
   r.setProperty('--surf',    t.surf);
-  r.setProperty('--surf2',   t.surf);
+  r.setProperty('--surf2',   t.surf2 || t.surf);
   r.setProperty('--adim',    hexToRgba(t.accent, 0.10));
   // Remove all theme body classes then apply new one
   document.body.classList.remove('theme-light','theme-cyberpunk','theme-retro80s');
@@ -3959,56 +3968,23 @@ function showToast(msg) {
 }
 
 function exportLocalData() {
-  // Collect all cs_* localStorage keys
   var settingsKeys = ['cs_notes','cs_aliases','cs_theme','cs_sound','cs_carbon','cs_compact','cs_sort','cs_ach','cs_deleted_cars','cs_deleted_qp','cs_lb_last','cs_offline_queue','cs_pending_loc','cs_tutorial_done','cs_install_dismissed','cs_lk_v1'];
   var settings = {};
   settingsKeys.forEach(function(k) { var v = localStorage.getItem(k); if (v !== null) settings[k] = v; });
-  _openPhotoDB().then(function(idb) {
-    var tx = idb.transaction('photos', 'readonly');
-    var results = { keys: null, vals: null };
-    function tryDownload() {
-      if (!results.keys || !results.vals) return;
-      var photos = {};
-      for (var i = 0; i < results.keys.length; i++) {
-        photos[results.keys[i]] = results.vals[i];
-      }
-      var data = {
-        currentRun: stripPhotosFromData(JSON.parse(JSON.stringify(currentRun))),
-        runs:       stripPhotosFromData(JSON.parse(JSON.stringify(allRuns))),
-        quickPicks: stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks))),
-        photos: photos,
-        settings: settings,
-        exportedAt: new Date().toISOString(),
-        version: 21
-      };
-      var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url; a.download = 'CarSpotter_backup_' + new Date().toISOString().slice(0,10) + '.json';
-      a.click(); URL.revokeObjectURL(url);
-      showToast('📥 Quick backup downloaded with ' + results.keys.length + ' photos!');
-    }
-    var getAll = tx.objectStore('photos').getAll();
-    getAll.onsuccess = function() { results.vals = getAll.result; tryDownload(); };
-    var getAllKeys = tx.objectStore('photos').getAllKeys();
-    getAllKeys.onsuccess = function() { results.keys = getAllKeys.result; tryDownload(); };
-  }).catch(function() {
-    // Fallback: export without photos
-    var data = {
-      currentRun: stripPhotosFromData(JSON.parse(JSON.stringify(currentRun))),
-      runs:       stripPhotosFromData(JSON.parse(JSON.stringify(allRuns))),
-      quickPicks: stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks))),
-      settings: settings,
-      exportedAt: new Date().toISOString(),
-      version: 21
-    };
-    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url; a.download = 'CarSpotter_backup_' + new Date().toISOString().slice(0,10) + '.json';
-    a.click(); URL.revokeObjectURL(url);
-    showToast('📥 Quick backup downloaded (no photos — IndexedDB unavailable)');
-  });
+  var data = {
+    currentRun: stripPhotosFromData(JSON.parse(JSON.stringify(currentRun))),
+    runs:       stripPhotosFromData(JSON.parse(JSON.stringify(allRuns))),
+    quickPicks: stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks))),
+    settings:   settings,
+    exportedAt: new Date().toISOString(),
+    version:    21
+  };
+  var blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'CarSpotter_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('Backup downloaded!');
 }
 
 function importFromFile(input) {
@@ -4210,12 +4186,12 @@ window.addEventListener('offline', updateOfflineBanner);
 setTimeout(updateOfflineBanner, 1000);
 
 function flushOfflineQueue() {
-  if (!offlineQueue.length || !currentUser) return;
-  // Just do a normal save — it will catch up
+  var n = offlineQueue.length;
+  if (!n || !currentUser) return;
   offlineQueue = [];
   localStorage.removeItem('cs_offline_queue');
   saveToCloud();
-  showToast(' Synced ' + offlineQueue.length + ' offline saves!');
+  showToast(' Synced ' + n + ' offline saves!');
 }
 
 function refreshOfflineStatus() {
@@ -4290,8 +4266,8 @@ function initNotes() {
     }
     if (newFinal) {
       // Insert final text with a newline if cursor is at start of line
-      const needsNewline = area.value.length > 0 && !area.value.endsWith('\n');
-      area.value += (needsNewline && newFinal.trim() ? '' : '') + newFinal;
+      const needsNewline = area.value.length > 0 && !area.value.endsWith('\n') && newFinal.trim().length > 0;
+      area.value += (needsNewline ? '\n' : '') + newFinal;
       micInterim = '';
     }
     micInterim = interim;
@@ -4838,56 +4814,23 @@ function initSortPrefBtns() {
 
 // ── EXPORT ALL DATA ──
 function exportAllData() {
-  // Collect all settings from localStorage
   var settingsKeys = ['cs_notes','cs_aliases','cs_theme','cs_sound','cs_carbon','cs_compact','cs_sort','cs_ach','cs_deleted_cars','cs_deleted_qp','cs_lb_last','cs_offline_queue','cs_pending_loc','cs_tutorial_done','cs_install_dismissed','cs_lk_v1'];
   var settings = {};
   settingsKeys.forEach(function(k) { var v = localStorage.getItem(k); if (v !== null) settings[k] = v; });
-  _openPhotoDB().then(function(idb) {
-    var tx = idb.transaction('photos', 'readonly');
-    var results = { keys: null, vals: null };
-    function tryDownload() {
-      if (!results.keys || !results.vals) return;
-      var photos = {};
-      for (var i = 0; i < results.keys.length; i++) {
-        photos[results.keys[i]] = results.vals[i];
-      }
-      var data = {
-        currentRun: stripPhotosFromData(JSON.parse(JSON.stringify(currentRun))),
-        runs:       stripPhotosFromData(JSON.parse(JSON.stringify(allRuns))),
-        quickPicks: stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks))),
-        photos: photos,
-        settings: settings,
-        exportedAt: new Date().toISOString(),
-        version: 21
-      };
-      var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url; a.download = 'CarSpotter_backup_' + new Date().toISOString().slice(0,10) + '.json';
-      a.click(); URL.revokeObjectURL(url);
-      showToast('📥 Full backup downloaded with ' + results.keys.length + ' photos!');
-    }
-    var getAll = tx.objectStore('photos').getAll();
-    getAll.onsuccess = function() { results.vals = getAll.result; tryDownload(); };
-    var getAllKeys = tx.objectStore('photos').getAllKeys();
-    getAllKeys.onsuccess = function() { results.keys = getAllKeys.result; tryDownload(); };
-  }).catch(function() {
-    // Fallback: export without photos
-    var data = {
-      currentRun: stripPhotosFromData(JSON.parse(JSON.stringify(currentRun))),
-      runs:       stripPhotosFromData(JSON.parse(JSON.stringify(allRuns))),
-      quickPicks: stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks))),
-      settings: settings,
-      exportedAt: new Date().toISOString(),
-      version: 21
-    };
-    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url; a.download = 'CarSpotter_backup_' + new Date().toISOString().slice(0,10) + '.json';
-    a.click(); URL.revokeObjectURL(url);
-    showToast('📥 Full backup downloaded (no photos — IndexedDB unavailable)');
-  });
+  var data = {
+    currentRun: stripPhotosFromData(JSON.parse(JSON.stringify(currentRun))),
+    runs:       stripPhotosFromData(JSON.parse(JSON.stringify(allRuns))),
+    quickPicks: stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks))),
+    settings:   settings,
+    exportedAt: new Date().toISOString(),
+    version:    21
+  };
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url; a.download = 'CarSpotter_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('Full backup downloaded!');
 }
 
 // ── CLEAR ALL DATA ──
@@ -5140,117 +5083,103 @@ const _origEndRun = endRun;
 //  CAR AUTOCOMPLETE DATABASE 
 // 
 const CAR_AC_DB = [
-  // Ferrari
-  {name:'Ferrari 488 GTB',      type:'', val:280000},
-  {name:'Ferrari 488 Pista',    type:'', val:350000},
-  {name:'Ferrari F8 Tributo',   type:'', val:300000},
-  {name:'Ferrari Roma',         type:'', val:222000},
-  {name:'Ferrari Portofino',    type:'', val:215000},
-  {name:'Ferrari SF90 Stradale',type:'', val:625000},
-  {name:'Ferrari 812 Superfast',type:'', val:340000},
-  {name:'Ferrari LaFerrari',    type:'', val:1400000},
-  {name:'Ferrari F40',          type:'', val:1300000},
-  {name:'Ferrari Enzo',         type:'', val:3500000},
-  // Lamborghini
-  {name:'Lamborghini Huracan',  type:'', val:220000},
-  {name:'Lamborghini Huracan STO', type:'', val:330000},
-  {name:'Lamborghini Aventador',type:'', val:400000},
-  {name:'Lamborghini Urus',     type:'', val:230000},
-  {name:'Lamborghini Revuelto', type:'', val:600000},
-  {name:'Lamborghini Sian',     type:'', val:3600000},
-  // Porsche
-  {name:'Porsche 911 GT3',      type:'', val:170000},
-  {name:'Porsche 911 GT3 RS',   type:'', val:225000},
-  {name:'Porsche 911 Turbo S',  type:'', val:210000},
-  {name:'Porsche 911 Carrera',  type:'', val:110000},
-  {name:'Porsche 718 Cayman GT4',type:'', val:95000},
-  {name:'Porsche Taycan Turbo S',type:'', val:190000},
-  {name:'Porsche Panamera',     type:'', val:95000},
-  // McLaren
-  {name:'McLaren 720S',         type:'', val:300000},
-  {name:'McLaren 765LT',        type:'', val:380000},
-  {name:'McLaren Senna',        type:'', val:750000},
-  {name:'McLaren P1',           type:'', val:1400000},
-  {name:'McLaren Artura',       type:'', val:230000},
-  {name:'McLaren 570S',         type:'', val:190000},
-  // Bugatti
-  {name:'Bugatti Chiron',       type:'', val:3000000},
-  {name:'Bugatti Veyron',       type:'', val:1800000},
-  {name:'Bugatti Divo',         type:'', val:5800000},
-  // Koenigsegg
-  {name:'Koenigsegg Jesko',     type:'', val:3000000},
-  {name:'Koenigsegg Regera',    type:'', val:2000000},
-  {name:'Koenigsegg Agera RS',  type:'', val:2500000},
-  // American Muscle
-  {name:'Dodge Charger R/T',    type:'', val:45000},
-  {name:'Dodge Charger Hellcat',type:'', val:72000},
-  {name:'Dodge Challenger R/T', type:'', val:42000},
-  {name:'Dodge Challenger Hellcat',type:'', val:68000},
-  {name:'Dodge Challenger SRT Demon',type:'', val:85000},
-  {name:'Dodge Viper ACR',      type:'', val:120000},
-  {name:'Ford Mustang GT',      type:'', val:38000},
-  {name:'Ford Mustang GT500',   type:'', val:82000},
-  {name:'Ford Mustang Mach 1',  type:'', val:55000},
-  {name:'Ford Mustang Dark Horse',type:'', val:60000},
-  {name:'Ford GT',              type:'', val:500000},
-  {name:'Chevrolet Camaro SS',  type:'', val:42000},
-  {name:'Chevrolet Camaro ZL1', type:'', val:70000},
-  {name:'Chevrolet Corvette C8',type:'', val:65000},
-  {name:'Chevrolet Corvette Z06',type:'',val:110000},
-  {name:'Chevrolet Corvette ZR1',type:'',val:130000},
-  // BMW
-  {name:'BMW M2',               type:'', val:65000},
-  {name:'BMW M3 Competition',   type:'', val:80000},
-  {name:'BMW M4 Competition',   type:'', val:82000},
-  {name:'BMW M5 CS',            type:'', val:142000},
-  {name:'BMW M8 Competition',   type:'', val:135000},
-  {name:'BMW i8',               type:'', val:150000},
-  // Mercedes
-  {name:'Mercedes AMG GT R',    type:'', val:165000},
-  {name:'Mercedes AMG GT 63 S', type:'', val:170000},
-  {name:'Mercedes SLS AMG',     type:'', val:180000},
-  {name:'Mercedes AMG One',     type:'', val:2700000},
-  {name:'Mercedes C63 AMG',     type:'', val:77000},
-  // Audi
-  {name:'Audi R8 V10',          type:'', val:145000},
-  {name:'Audi RS7',             type:'', val:120000},
-  {name:'Audi RS6 Avant',       type:'', val:115000},
-  {name:'Audi e-tron GT RS',    type:'', val:145000},
-  // Other Sports
-  {name:'Nissan GT-R',          type:'', val:115000},
-  {name:'Toyota Supra GR',      type:'', val:55000},
-  {name:'Honda NSX',            type:'', val:190000},
-  {name:'Acura NSX',            type:'', val:165000},
-  {name:'Subaru BRZ',           type:'', val:32000},
-  {name:'Mazda MX-5 Miata',     type:'', val:30000},
-  {name:'Genesis Coupe 3.8',    type:'', val:18000},
-  // Luxury
-  {name:'Rolls-Royce Ghost',    type:'', val:360000},
-  {name:'Rolls-Royce Wraith',   type:'', val:340000},
-  {name:'Rolls-Royce Cullinan', type:'', val:340000},
-  {name:'Rolls-Royce Phantom',  type:'', val:460000},
-  {name:'Bentley Continental GT',type:'', val:220000},
-  {name:'Bentley Bentayga',     type:'', val:200000},
-  {name:'Bentley Mulsanne',     type:'', val:310000},
-  {name:'Aston Martin Vantage', type:'', val:145000},
-  {name:'Aston Martin DB11',    type:'', val:205000},
-  {name:'Aston Martin DBS',     type:'', val:305000},
-  {name:'Aston Martin Valkyrie',type:'', val:3000000},
-  {name:'Maserati MC20',        type:'', val:215000},
-  {name:'Alfa Romeo 4C',        type:'', val:65000},
-  // EVs
-  {name:'Tesla Model S Plaid',  type:'', val:90000},
-  {name:'Tesla Model 3',        type:'', val:42000},
-  {name:'Tesla Roadster',       type:'', val:200000},
-  {name:'Rimac Nevera',         type:'', val:2400000},
-  {name:'Lotus Evija',          type:'', val:2000000},
-  {name:'Lucid Air',            type:'', val:80000},
-  {name:'Rivian R1T',           type:'', val:70000},
-  // Pagani / Others
-  {name:'Pagani Huayra',        type:'', val:2400000},
-  {name:'Pagani Zonda',         type:'', val:1800000},
-  {name:'Hennessey Venom F5',   type:'', val:2100000},
-  {name:'SSC Tuatara',          type:'', val:1900000},
+  {name:'Ferrari 488 GTB',        type:'exotic', val:280000},
+  {name:'Ferrari 488 Pista',      type:'exotic', val:350000},
+  {name:'Ferrari F8 Tributo',     type:'exotic', val:300000},
+  {name:'Ferrari Roma',           type:'exotic', val:222000},
+  {name:'Ferrari Portofino',      type:'exotic', val:215000},
+  {name:'Ferrari SF90 Stradale',  type:'exotic', val:625000},
+  {name:'Ferrari 812 Superfast',  type:'exotic', val:340000},
+  {name:'Ferrari LaFerrari',      type:'exotic', val:1400000},
+  {name:'Ferrari F40',            type:'exotic', val:1300000},
+  {name:'Ferrari Enzo',           type:'exotic', val:3500000},
+  {name:'Lamborghini Huracan',    type:'exotic', val:220000},
+  {name:'Lamborghini Huracan STO',type:'exotic', val:330000},
+  {name:'Lamborghini Aventador',  type:'exotic', val:400000},
+  {name:'Lamborghini Urus',       type:'exotic', val:230000},
+  {name:'Lamborghini Revuelto',   type:'exotic', val:600000},
+  {name:'Lamborghini Sian',       type:'exotic', val:3600000},
+  {name:'Porsche 911 GT3',        type:'sports', val:170000},
+  {name:'Porsche 911 GT3 RS',     type:'sports', val:225000},
+  {name:'Porsche 911 Turbo S',    type:'sports', val:210000},
+  {name:'Porsche 911 Carrera',    type:'sports', val:110000},
+  {name:'Porsche 718 Cayman GT4', type:'sports', val:95000},
+  {name:'Porsche Taycan Turbo S', type:'sports', val:190000},
+  {name:'Porsche Panamera',       type:'sports', val:95000},
+  {name:'McLaren 720S',           type:'exotic', val:300000},
+  {name:'McLaren 765LT',          type:'exotic', val:380000},
+  {name:'McLaren Senna',          type:'exotic', val:750000},
+  {name:'McLaren P1',             type:'exotic', val:1400000},
+  {name:'McLaren Artura',         type:'exotic', val:230000},
+  {name:'McLaren 570S',           type:'exotic', val:190000},
+  {name:'Bugatti Chiron',         type:'exotic', val:3000000},
+  {name:'Bugatti Veyron',         type:'exotic', val:1800000},
+  {name:'Bugatti Divo',           type:'exotic', val:5800000},
+  {name:'Koenigsegg Jesko',       type:'exotic', val:3000000},
+  {name:'Koenigsegg Regera',      type:'exotic', val:2000000},
+  {name:'Koenigsegg Agera RS',    type:'exotic', val:2500000},
+  {name:'Dodge Charger R/T',      type:'muscle', val:45000},
+  {name:'Dodge Charger Hellcat',  type:'muscle', val:72000},
+  {name:'Dodge Challenger R/T',   type:'muscle', val:42000},
+  {name:'Dodge Challenger Hellcat',type:'muscle', val:68000},
+  {name:'Dodge Challenger SRT Demon',type:'muscle', val:85000},
+  {name:'Dodge Viper ACR',        type:'muscle', val:120000},
+  {name:'Ford Mustang GT',        type:'muscle', val:38000},
+  {name:'Ford Mustang GT500',     type:'muscle', val:82000},
+  {name:'Ford Mustang Mach 1',    type:'muscle', val:55000},
+  {name:'Ford Mustang Dark Horse',type:'muscle', val:60000},
+  {name:'Ford GT',                type:'exotic', val:500000},
+  {name:'Chevrolet Camaro SS',    type:'muscle', val:42000},
+  {name:'Chevrolet Camaro ZL1',   type:'muscle', val:70000},
+  {name:'Chevrolet Corvette C8',  type:'sports', val:65000},
+  {name:'Chevrolet Corvette Z06', type:'sports', val:110000},
+  {name:'Chevrolet Corvette ZR1', type:'sports', val:130000},
+  {name:'BMW M2',                 type:'sports', val:65000},
+  {name:'BMW M3 Competition',     type:'sports', val:80000},
+  {name:'BMW M4 Competition',     type:'sports', val:82000},
+  {name:'BMW M5 CS',              type:'sports', val:142000},
+  {name:'BMW M8 Competition',     type:'sports', val:135000},
+  {name:'BMW i8',                 type:'sports', val:150000},
+  {name:'Mercedes AMG GT R',      type:'luxury', val:165000},
+  {name:'Mercedes AMG GT 63 S',   type:'luxury', val:170000},
+  {name:'Mercedes SLS AMG',       type:'luxury', val:180000},
+  {name:'Mercedes AMG One',       type:'exotic', val:2700000},
+  {name:'Mercedes C63 AMG',       type:'luxury', val:77000},
+  {name:'Audi R8 V10',            type:'sports', val:145000},
+  {name:'Audi RS7',               type:'sports', val:120000},
+  {name:'Audi RS6 Avant',         type:'sports', val:115000},
+  {name:'Audi e-tron GT RS',      type:'sports', val:145000},
+  {name:'Nissan GT-R',            type:'sports', val:115000},
+  {name:'Toyota Supra GR',        type:'sports', val:55000},
+  {name:'Honda NSX',              type:'exotic', val:190000},
+  {name:'Acura NSX',              type:'exotic', val:165000},
+  {name:'Subaru BRZ',             type:'sports', val:32000},
+  {name:'Mazda MX-5 Miata',       type:'sports', val:30000},
+  {name:'Genesis Coupe 3.8',      type:'sports', val:18000},
+  {name:'Rolls-Royce Ghost',      type:'luxury', val:360000},
+  {name:'Rolls-Royce Wraith',     type:'luxury', val:340000},
+  {name:'Rolls-Royce Cullinan',   type:'luxury', val:340000},
+  {name:'Rolls-Royce Phantom',    type:'luxury', val:460000},
+  {name:'Bentley Continental GT', type:'luxury', val:220000},
+  {name:'Bentley Bentayga',       type:'luxury', val:200000},
+  {name:'Bentley Mulsanne',       type:'luxury', val:310000},
+  {name:'Aston Martin Vantage',   type:'luxury', val:145000},
+  {name:'Aston Martin DB11',      type:'luxury', val:205000},
+  {name:'Aston Martin DBS',       type:'luxury', val:305000},
+  {name:'Aston Martin Valkyrie',  type:'exotic', val:3000000},
+  {name:'Maserati MC20',          type:'exotic', val:215000},
+  {name:'Alfa Romeo 4C',          type:'sports', val:65000},
+  {name:'Tesla Model S Plaid',    type:'ev', val:90000},
+  {name:'Tesla Model 3',          type:'ev', val:42000},
+  {name:'Tesla Roadster',         type:'ev', val:200000},
+  {name:'Rimac Nevera',           type:'ev', val:2400000},
+  {name:'Lotus Evija',            type:'ev', val:2000000},
+  {name:'Lucid Air',              type:'ev', val:80000},
+  {name:'Rivian R1T',             type:'ev', val:70000},
+  {name:'Pagani Huayra',          type:'exotic', val:2400000},
+  {name:'Pagani Zonda',           type:'exotic', val:1800000},
+  {name:'Hennessey Venom F5',     type:'exotic', val:2100000},
+  {name:'SSC Tuatara',            type:'exotic', val:1900000},
 ];
 
 let acIdx = -1;
@@ -6087,9 +6016,6 @@ async function loadNews() {
   };
   window.nextTutorialStep = function(){ tutorialStep += 1; if (tutorialStep >= tutorialData().length) closeTutorial(); else renderTutorial(); };
   window.closeTutorial = function(){ localStorage.setItem('cs_tutorial_done', '1'); var overlay = document.getElementById('tutorialOverlay'); if (overlay) overlay.remove(); if (tutorialTimer) { clearInterval(tutorialTimer); tutorialTimer = null; } };
-
-  var settingsPage = document.getElementById('page-settings');
-  if (settingsPage) settingsPage.innerHTML = settingsPage.innerHTML.replace("CarSpotter''s", "CarSpotter's");
 
   // Migrate legacy base64 photos to IDB and reconstruct car.photo from photoFile
   allRuns.forEach(function(r) { if (r.cars) migrateLegacyPhotos(r.cars); });
