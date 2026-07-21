@@ -2220,7 +2220,7 @@ function initSoundToggle() {
 }
 
 //  UNDO — now supports a stack of up to 5 recent actions
-let undoStack = [];
+undoStack = [];
 function pushUndo(type, data, msg) {
   undoStack.push({ type, data });
   if (undoStack.length > 5) undoStack.shift();
