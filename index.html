@@ -1984,6 +1984,7 @@ async function loadFromCloud() {
     if (!_lastSave) setSyncDot('ok');
   } catch(e) { setSyncDot(''); console.error(e); }
   renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
+  fetchRefImagesForAllCars();
   if (currentRun.length > 0)
     setTimeout(() => showToast(' Run resumed — ' + currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '') + ' restored!'), 700);
 }
@@ -3678,6 +3679,7 @@ function fetchRefImagesForAllCars() {
   });
 }
 
+var _imgRenderTimer = null;
 function fetchAndStoreRefImage(car) {
   if (car.photo) return;
   fetchCarImage(car.name).then(function(url) {
@@ -3686,7 +3688,8 @@ function fetchAndStoreRefImage(car) {
       var qp = quickPicks.find(function(q) { return q.name.toLowerCase() === car.name.toLowerCase(); });
       if (qp && !qp.photo) qp.photo = url;
       saveToCloud();
-      renderGarage();
+      clearTimeout(_imgRenderTimer);
+      _imgRenderTimer = setTimeout(function() { renderGarage(); }, 600);
     }
   });
 }
