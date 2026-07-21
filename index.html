@@ -1816,10 +1816,11 @@ let _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
 //  MERGE HELPERS — prevent data loss when cloud & local diverge 
 function _mergeRunArrays(local, cloud) {
   const byTs = new Map();
-  for (const c of local)  byTs.set(c.ts, c);
+  for (const c of local)  if (!isCarDeleted('current', c.name)) byTs.set(c.ts, c);
   for (const c of cloud)  {
+    if (isCarDeleted('current', c.name)) continue;
     const existing = byTs.get(c.ts);
-    if (!existing || (c.photo && !existing.photo) || (c.photoFile && !existing.photoFile)) byTs.set(c.ts, c); // prefer version with photo
+    if (!existing || (c.photo && !existing.photo) || (c.photoFile && !existing.photoFile)) byTs.set(c.ts, c);
   }
   return [...byTs.values()];
 }
@@ -2740,8 +2741,13 @@ function removeCar(i) {
   if (headlinerIdx === i) headlinerIdx = -1;
   else if (headlinerIdx > i) headlinerIdx--;
   currentRun.splice(i,1);
-  saveCurrentRun();
-  // Direct Firestore write — no debounce, no timer dependency
+  try { saveCurrentRun(); } catch(e) {}
+  // Directly update localStorage as fallback
+  try {
+    localStorage.setItem('cs_current', JSON.stringify(stripPhotosFromData(JSON.parse(JSON.stringify(currentRun)))));
+  } catch(e) {}
+  // Mark as deleted so cloud merge won't bring it back
+  markCarDeleted('current', car.name);
   _directCloudSave();
   renderSpot();
   playSound('delete');
@@ -2752,20 +2758,22 @@ function removeCar(i) {
 
 function _directCloudSave() {
   if (!currentUser || !navigator.onLine) return;
-  var strippedRuns    = stripPhotosFromData(JSON.parse(JSON.stringify(allRuns)));
-  var strippedCurrent = stripPhotosFromData(JSON.parse(JSON.stringify(currentRun)));
-  var strippedQP      = stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks)));
-  _lastSave = Date.now();
-  db.collection('users').doc(currentUser.uid).set({
-    currentRun: strippedCurrent, allRuns: strippedRuns, quickPicks: strippedQP,
-    notes: localStorage.getItem('cs_notes') || '',
-    profileName: currentUser?.displayName || 'Spotter',
-    profilePhoto: currentUser?.photoURL || '',
-    updatedAt: _lastSave
-  }).then(function() {
-    setSyncDot('ok');
-    syncPhotosToCloud();
-  }).catch(function(){ setSyncDot(''); });
+  try {
+    var strippedRuns    = stripPhotosFromData(JSON.parse(JSON.stringify(allRuns)));
+    var strippedCurrent = stripPhotosFromData(JSON.parse(JSON.stringify(currentRun)));
+    var strippedQP      = stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks)));
+    _lastSave = Date.now();
+    db.collection('users').doc(currentUser.uid).set({
+      currentRun: strippedCurrent, allRuns: strippedRuns, quickPicks: strippedQP,
+      notes: localStorage.getItem('cs_notes') || '',
+      profileName: currentUser?.displayName || 'Spotter',
+      profilePhoto: currentUser?.photoURL || '',
+      updatedAt: _lastSave
+    }).then(function() {
+      setSyncDot('ok');
+      syncPhotosToCloud();
+    }).catch(function(){ setSyncDot(''); });
+  } catch(e) {}
 }
 
 function clearRun() {
@@ -2775,6 +2783,7 @@ function clearRun() {
   currentRun = [];
   headlinerIdx = -1;
   saveCurrentRun();
+  removed.forEach(c => markCarDeleted('current', c.name));
   _directCloudSave();
   removed.forEach(c => cleanQPAfterRemoval(c.name));
   renderSpot();
