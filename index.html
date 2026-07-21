@@ -1770,7 +1770,7 @@ const APP_VERSION = 'v27.1';
 let currentUser  = null;
 let syncUnsub    = null;
 let syncTimer    = null;
-let _lastSave    = 0;
+let _lastSave    = parseInt(localStorage.getItem('cs_updated_at') || '0');
 
 let currentRun   = JSON.parse(localStorage.getItem('cs_current') || '[]');
 let allRuns      = JSON.parse(localStorage.getItem('cs_runs')    || '[]');
@@ -1816,9 +1816,8 @@ let _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
 //  MERGE HELPERS — prevent data loss when cloud & local diverge 
 function _mergeRunArrays(local, cloud) {
   const byTs = new Map();
-  for (const c of local)  if (!isCarDeleted('current', c.name)) byTs.set(c.ts, c);
+  for (const c of local)  byTs.set(c.ts, c);
   for (const c of cloud)  {
-    if (isCarDeleted('current', c.name)) continue;
     const existing = byTs.get(c.ts);
     if (!existing || (c.photo && !existing.photo) || (c.photoFile && !existing.photoFile)) byTs.set(c.ts, c);
   }
@@ -1948,7 +1947,6 @@ auth.onAuthStateChanged(async user => {
     document.getElementById('authOverlay').style.display = 'none';
     document.getElementById('appShell').style.display    = 'flex';
     renderUserPill();
-    _lastSave = Date.now();
     await loadFromCloud();
     subscribeCloud();
     // Show import button if this device has local data
@@ -2007,14 +2005,16 @@ async function loadFromCloud() {
     const snap = await db.collection('users').doc(currentUser.uid).get();
     if (snap.exists) {
       const d = snap.data();
-      // Merge instead of replace — keeps local-only cars that haven't synced yet
-      if (d.currentRun) currentRun = _mergeRunArrays(currentRun, d.currentRun);
-      if (d.allRuns)    allRuns    = _mergeRunHistory(allRuns, d.allRuns.filter((r,i,a) => a.findIndex(x=>x.id===r.id)===i));
-      if (d.quickPicks) quickPicks = _mergeQuickPicks(quickPicks, d.quickPicks);
-      if (d.notes != null) {
-        localStorage.setItem('cs_notes', d.notes);
-        const a = document.getElementById('notesArea');
-        if (a) a.value = d.notes;
+      // Only merge cloud data if it's newer than our last local save
+      if (!d.updatedAt || d.updatedAt > _lastSave) {
+        if (d.currentRun) currentRun = _mergeRunArrays(currentRun, d.currentRun);
+        if (d.allRuns)    allRuns    = _mergeRunHistory(allRuns, d.allRuns.filter((r,i,a) => a.findIndex(x=>x.id===r.id)===i));
+        if (d.quickPicks) quickPicks = _mergeQuickPicks(quickPicks, d.quickPicks);
+        if (d.notes != null) {
+          localStorage.setItem('cs_notes', d.notes);
+          const a = document.getElementById('notesArea');
+          if (a) a.value = d.notes;
+        }
       }
       // Load photos from Firestore subcollection into IDB
       await loadPhotosFromCloud();
@@ -2088,6 +2088,7 @@ function _persistToLocal() {
   localStorage.setItem('cs_runs',    JSON.stringify(stripPhotosFromData(JSON.parse(JSON.stringify(allRuns)))));
   localStorage.setItem('cs_current', JSON.stringify(stripPhotosFromData(JSON.parse(JSON.stringify(currentRun)))));
   localStorage.setItem('cs_qp',      JSON.stringify(stripPhotosFromData(JSON.parse(JSON.stringify(quickPicks)))));
+  localStorage.setItem('cs_updated_at', String(Date.now()));
 }
 
 function saveToCloud() {
@@ -2746,8 +2747,6 @@ function removeCar(i) {
   try {
     localStorage.setItem('cs_current', JSON.stringify(stripPhotosFromData(JSON.parse(JSON.stringify(currentRun)))));
   } catch(e) {}
-  // Mark as deleted so cloud merge won't bring it back
-  markCarDeleted('current', car.name);
   _directCloudSave();
   renderSpot();
   playSound('delete');
@@ -2783,7 +2782,6 @@ function clearRun() {
   currentRun = [];
   headlinerIdx = -1;
   saveCurrentRun();
-  removed.forEach(c => markCarDeleted('current', c.name));
   _directCloudSave();
   removed.forEach(c => cleanQPAfterRemoval(c.name));
   renderSpot();
