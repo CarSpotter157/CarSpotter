@@ -3927,18 +3927,23 @@ function showToast(msg) {
 }
 
 function exportLocalData() {
-  const data = {
+  // Collect all cs_* localStorage keys
+  var settingsKeys = ['cs_notes','cs_aliases','cs_theme','cs_sound','cs_carbon','cs_compact','cs_sort','cs_ach','cs_deleted_cars','cs_deleted_qp','cs_lb_last','cs_offline_queue','cs_pending_loc','cs_tutorial_done','cs_install_dismissed','cs_lk_v1'];
+  var settings = {};
+  settingsKeys.forEach(function(k) { var v = localStorage.getItem(k); if (v !== null) settings[k] = v; });
+  var data = {
     cs_runs:    localStorage.getItem('cs_runs')    || '[]',
     cs_current: localStorage.getItem('cs_current') || '[]',
     cs_qp:      localStorage.getItem('cs_qp')      || '[]',
-    cs_notes:   localStorage.getItem('cs_notes')   || '',
+    settings:   settings,
     exported:   new Date().toISOString()
   };
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
+  var blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
   a.href = url; a.download = 'carspotter-backup.json'; a.click();
   URL.revokeObjectURL(url);
+  showToast('📥 Quick backup downloaded!');
 }
 
 function importFromFile(input) {
@@ -3948,60 +3953,73 @@ function importFromFile(input) {
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target.result);
-      // Support both new format (v21+) and legacy format (v20)
+      // Support v21+ format (structured) and legacy format (raw JSON strings)
       const importedRuns = data.runs || JSON.parse(data.cs_runs || '[]');
-      const importedQP   = data.quickPicks || JSON.parse(data.cs_qp   || '[]');
+      const importedQP   = data.quickPicks || JSON.parse(data.cs_qp || '[]');
       const importedCur  = data.currentRun || JSON.parse(data.cs_current || '[]');
-      const importedNotes = data.notes || data.cs_notes || '';
+      const importedNotes = data.notes || data.settings?.cs_notes || data.cs_notes || '';
 
+      // Merge runs (dedup by id)
       const existingIds = new Set(allRuns.map(r => r.id));
       const newRuns = importedRuns.filter(r => !existingIds.has(r.id));
       allRuns = [...newRuns, ...allRuns];
 
-      importedQP.forEach(car => {
-        if (!quickPicks.find(q => q.name.toLowerCase() === car.name.toLowerCase()))
+      // Merge quick picks (dedup by name)
+      importedQP.forEach(function(car) {
+        if (!quickPicks.find(function(q) { return q.name.toLowerCase() === car.name.toLowerCase(); }))
           quickPicks.push(car);
       });
 
+      // Restore current run (only if local is empty)
       if (!currentRun.length && importedCur.length) currentRun = importedCur;
 
-      const area = document.getElementById('notesArea');
-      if (!localStorage.getItem('cs_notes') && importedNotes) {
-        localStorage.setItem('cs_notes', importedNotes);
-        if (area) area.value = importedNotes;
-      }
+      // Restore settings
+      var importedSettings = data.settings || {};
+      // Map legacy settings fields into new settings object
+      ['cs_notes','cs_aliases','cs_theme','cs_sound','cs_carbon','cs_compact','cs_sort','cs_ach','cs_deleted_cars','cs_deleted_qp','cs_lb_last','cs_offline_queue','cs_pending_loc','cs_tutorial_done','cs_install_dismissed','cs_lk_v1'].forEach(function(k) {
+        var val = importedSettings[k];
+        if (val !== undefined && val !== null) {
+          localStorage.setItem(k, val);
+        } else if (k === 'cs_notes' && importedNotes) {
+          // legacy: data.cs_notes at top level
+          localStorage.setItem('cs_notes', importedNotes);
+        }
+      });
 
-      // Restore photos from backup into IndexedDB
-      if (data.photos) {
-        var photoKeys = Object.keys(data.photos);
+      // Apply restored settings to UI
+      const area = document.getElementById('notesArea');
+      if (area) area.value = localStorage.getItem('cs_notes') || '';
+      loadDeletedCarKeys();
+      if (typeof window.applyTheme === 'function') window.applyTheme();
+
+      // Restore photos from backup into IndexedDB, then restore car.photo from IDs
+      function restorePhotosAndRender(photoData) {
+        var photoKeys = photoData ? Object.keys(photoData) : [];
         var photoPromises = photoKeys.map(function(key) {
-          return storePhotoInIDB(key, data.photos[key]);
+          return storePhotoInIDB(key, photoData[key]);
         });
         Promise.all(photoPromises).then(function() {
           var allCars = [];
           allRuns.forEach(function(r) { if (r.cars) r.cars.forEach(function(c) { allCars.push(c); }); });
           currentRun.forEach(function(c) { allCars.push(c); });
           quickPicks.forEach(function(c) { allCars.push(c); });
-          Promise.all(allCars.map(function(c) { return loadCarPhotoFromIDB(c); })).then(function() {
-            renderGarage(); renderSpot(); renderHistory();
-          });
+          return Promise.all(allCars.map(function(c) { return loadCarPhotoFromIDB(c); }));
+        }).then(function() {
+          renderGarage(); renderSpot(); renderHistory(); renderQPTrigger();
+          saveToCloud();
+          showToast(' Restored ' + newRuns.length + ' runs' + (photoKeys.length ? ' + ' + photoKeys.length + ' photos' : '') + '!');
         });
-        showToast(' Restored ' + newRuns.length + ' runs + ' + photoKeys.length + ' photos!');
+      }
+
+      if (data.photos) {
+        restorePhotosAndRender(data.photos);
       } else {
-        // Legacy backup without photos — migrate embedded base64
+        // Legacy: migrate embedded base64 from car objects into IDB
         allRuns.forEach(function(r) { if (r.cars) migrateLegacyPhotos(r.cars); });
         migrateLegacyPhotos(currentRun);
         migrateLegacyPhotos(quickPicks);
-        var allCars = [];
-        allRuns.forEach(function(r) { if (r.cars) r.cars.forEach(function(c) { allCars.push(c); }); });
-        currentRun.forEach(function(c) { allCars.push(c); });
-        quickPicks.forEach(function(c) { allCars.push(c); });
-        Promise.all(allCars.map(function(c) { return loadCarPhotoFromIDB(c); }));
-        showToast(' Restored ' + newRuns.length + ' runs from backup!');
+        restorePhotosAndRender(null);
       }
-
-      saveToCloud();
-      renderQPTrigger(); renderHistory();
     } catch(err) {
       alert('Could not read backup file. Make sure it\'s a valid carspotter-backup.json');
     }
@@ -4741,6 +4759,10 @@ function initSortPrefBtns() {
 
 // ── EXPORT ALL DATA ──
 function exportAllData() {
+  // Collect all settings from localStorage
+  var settingsKeys = ['cs_notes','cs_aliases','cs_theme','cs_sound','cs_carbon','cs_compact','cs_sort','cs_ach','cs_deleted_cars','cs_deleted_qp','cs_lb_last','cs_offline_queue','cs_pending_loc','cs_tutorial_done','cs_install_dismissed','cs_lk_v1'];
+  var settings = {};
+  settingsKeys.forEach(function(k) { var v = localStorage.getItem(k); if (v !== null) settings[k] = v; });
   _openPhotoDB().then(function(idb) {
     var tx = idb.transaction('photos', 'readonly');
     var results = { keys: null, vals: null };
@@ -4750,13 +4772,21 @@ function exportAllData() {
       for (var i = 0; i < results.keys.length; i++) {
         photos[results.keys[i]] = results.vals[i];
       }
-      var data = { runs: allRuns, quickPicks, photos: photos, exportedAt: new Date().toISOString(), version: 21 };
+      var data = {
+        currentRun: currentRun,
+        runs: allRuns,
+        quickPicks: quickPicks,
+        photos: photos,
+        settings: settings,
+        exportedAt: new Date().toISOString(),
+        version: 21
+      };
       var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a');
       a.href = url; a.download = 'CarSpotter_backup_' + new Date().toISOString().slice(0,10) + '.json';
       a.click(); URL.revokeObjectURL(url);
-      showToast('📥 Backup downloaded with ' + results.keys.length + ' photos!');
+      showToast('📥 Full backup downloaded with ' + results.keys.length + ' photos!');
     }
     var getAll = tx.objectStore('photos').getAll();
     getAll.onsuccess = function() { results.vals = getAll.result; tryDownload(); };
@@ -4764,13 +4794,20 @@ function exportAllData() {
     getAllKeys.onsuccess = function() { results.keys = getAllKeys.result; tryDownload(); };
   }).catch(function() {
     // Fallback: export without photos
-    var data = { runs: allRuns, quickPicks, exportedAt: new Date().toISOString(), version: 21 };
+    var data = {
+      currentRun: currentRun,
+      runs: allRuns,
+      quickPicks: quickPicks,
+      settings: settings,
+      exportedAt: new Date().toISOString(),
+      version: 21
+    };
     var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url; a.download = 'CarSpotter_backup_' + new Date().toISOString().slice(0,10) + '.json';
     a.click(); URL.revokeObjectURL(url);
-    showToast('📥 Backup downloaded (no photos — IndexedDB unavailable)');
+    showToast('📥 Full backup downloaded (no photos — IndexedDB unavailable)');
   });
 }
 
