@@ -1959,8 +1959,7 @@ async function loadFromCloud() {
     const snap = await db.collection('users').doc(currentUser.uid).get();
     if (snap.exists) {
       const d = snap.data();
-      // Merge instead of replace — keeps local-only cars that haven't synced yet
-      if (d.currentRun) currentRun = _mergeRunArrays(currentRun, d.currentRun);
+      if (d.currentRun) currentRun = d.currentRun.slice();
       if (d.allRuns)    allRuns    = _mergeRunHistory(allRuns, d.allRuns.filter((r,i,a) => a.findIndex(x=>x.id===r.id)===i));
       if (d.quickPicks) quickPicks = _mergeQuickPicks(quickPicks, d.quickPicks);
       if (d.notes != null) {
@@ -1995,7 +1994,7 @@ function subscribeCloud() {
     if (!snap.exists) return;
     const d = snap.data();
     if (d.updatedAt && d.updatedAt > _lastSave) {
-      if (d.currentRun) currentRun = _mergeRunArrays(currentRun, d.currentRun);
+      if (d.currentRun) currentRun = d.currentRun.slice();
       if (d.allRuns)    allRuns    = _mergeRunHistory(allRuns, d.allRuns.filter((r,i,a) => a.findIndex(x=>x.id===r.id)===i));
       if (d.quickPicks) quickPicks = _mergeQuickPicks(quickPicks, d.quickPicks);
       if (d.notes != null) {
@@ -2666,6 +2665,7 @@ function showUnicornAlert(total) {
 }
 
 function saveCurrentRun() {
+  _lastSave = Date.now();
   localStorage.setItem('cs_current', JSON.stringify(currentRun));
   saveToCloud();
 }
@@ -4045,26 +4045,14 @@ function getPhotoAndClear() {
 }
 
 window.checkPhotos = function(){
-  var all = getAllCars ? getAllCars() : [];
-  var withPhoto = all.filter(function(c){ return c.photo; });
-  var personal = withPhoto.filter(function(c){ return c.photo && c.photo.indexOf('data:') === 0; });
-  var refs = withPhoto.filter(function(c){ return c.photo && c.photo.indexOf('data:') !== 0; });
-  console.log('Total cars:', all.length);
-  console.log('Cars with any photo:', withPhoto.length);
-  console.log('  Personal (data: URLs):', personal.length);
-  console.log('  Reference (http URLs):', refs.length);
-  if (personal.length) console.log('Personal photo cars:', personal.map(function(c){ return c.name; }));
-  var lsRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
-  var lsCur = JSON.parse(localStorage.getItem('cs_current') || '[]');
-  var lsQP = JSON.parse(localStorage.getItem('cs_qp') || '[]');
-  var lsPhotoCount = 0;
-  lsRuns.forEach(function(r){ if (r.cars) r.cars.forEach(function(c){ if (c.photo) lsPhotoCount++; }); });
-  lsCur.forEach(function(c){ if (c.photo) lsPhotoCount++; });
-  lsQP.forEach(function(c){ if (c.photo) lsPhotoCount++; });
-  console.log('Photos in localStorage:', lsPhotoCount);
-  console.log('localStorage data size:', new Blob([JSON.stringify({runs:lsRuns,cur:lsCur,qp:lsQP})]).size / 1024 + ' KB');
-  return { total: all.length, withPhoto: withPhoto.length, personal: personal.length, refs: refs.length, localStoragePhotos: lsPhotoCount };
+  try {
+    var all = getAllCars();
+    var withPhoto = all.filter(function(c){ return c.photo; });
+    var personal = withPhoto.filter(function(c){ return c.photo.indexOf('data:') === 0; });
+    return { total: all.length, withPhoto: withPhoto.length, personal: personal.length };
+  } catch(e) { return 'Error: ' + e.message; }
 };
+window._csReady = Date.now();
 function photoThumb(dataUrl) {
   if (!dataUrl) return '';
   return `<img class="run-item-photo" src="${dataUrl}" alt="car" onclick="event.stopPropagation();viewPhoto('${dataUrl.substring(0,30)}...')" style="cursor:pointer">`;
