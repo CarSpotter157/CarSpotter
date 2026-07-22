@@ -1091,28 +1091,6 @@ body.carbon-on .modal-card{
 .news-loading{text-align:center;padding:44px 12px;color:var(--muted);font-size:0.74rem;letter-spacing:1px;}
 .news-error{text-align:center;padding:26px 12px;color:var(--muted);font-size:0.74rem;border:1px dashed var(--border);border-radius:var(--radius-sm);}
 
-/* ── FAVORITES ── */
-.fav-scroll{display:flex;gap:10px;overflow-x:auto;padding:8px 0;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;}
-.fav-scroll::-webkit-scrollbar{display:none}
-.fav-item{flex-shrink:0;width:110px;background:var(--surf);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;scroll-snap-align:start;cursor:pointer;transition:border-color .15s;}
-.fav-item:hover{border-color:var(--accent);}
-.fav-item-img{width:100%;height:70px;object-fit:cover;display:block;background:var(--surf2);}
-.fav-item-ph{width:100%;height:70px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:1.3rem;}
-.fav-item-name{font-size:0.65rem;font-weight:600;padding:5px 8px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.fav-item-val{font-size:0.6rem;color:var(--accent);padding:0 8px 7px;font-family:'Bebas Neue',cursive;}
-.map-list-overlay{position:absolute;bottom:10px;left:10px;right:10px;max-height:120px;overflow-y:auto;background:var(--surf);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;z-index:1000;}
-.map-list-row{display:flex;align-items:center;gap:8px;padding:5px 4px;cursor:pointer;border-radius:5px;transition:background .1s;}
-.map-list-row:hover{background:var(--surf2);}
-.map-list-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.map-list-name{flex:1;font-size:0.65rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.map-list-val{font-family:'Bebas Neue',cursive;font-size:0.7rem;color:var(--accent);flex-shrink:0;}
-.news-headliner{position:relative;margin:0 -16px 18px;height:260px;overflow:hidden;background:var(--surf);border-bottom:1px solid var(--border);cursor:pointer}
-.news-headliner img{width:100%;height:100%;object-fit:cover}
-.news-headliner .hl-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,10,12,.95) 0%,transparent 60%);display:flex;flex-direction:column;justify-content:flex-end;padding:20px}
-.news-headliner .hl-source{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent)}
-.news-headliner .hl-title{font-family:"Bebas Neue",cursive;font-size:26px;font-weight:400;color:var(--text);line-height:1.1;letter-spacing:0;margin-top:4px}
-.news-headliner .hl-date{font-size:11px;color:var(--text2);margin-top:4px}
-
 /* ── MORE PAGE ── */
 .more-page-tile{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -1412,10 +1390,6 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
               <span>Adds to current session</span>
               <span>Saves immediately</span>
             </div>
-            <div class="section" id="favSection" style="display:none;margin:12px 0 0">
-              <div class="sec-row"><div class="sec-title">FAVORITES</div><button class="txt-btn" id="favToggle" onclick="stopFavRotation()">Show All</button></div>
-              <div class="fav-scroll" id="favList"></div>
-            </div>
           </div>
 
         </div><!-- /dsk-col left -->
@@ -1692,7 +1666,6 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
     <div class="page" id="page-news">
       <div class="sec-title" style="margin-bottom:10px">Car News</div>
-      <div id="newsHeadliner" class="news-headliner" style="display:none" onclick="window.open(window._hlLink || '#', '_blank')"></div>
       <div id="newsSources" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;overflow-x:auto;padding-bottom:2px;"></div>
       <div id="newsList"></div>
     </div>
@@ -1817,8 +1790,6 @@ let sortMode     = 'desc';
 let qpOpen       = false;
 let qpEditMode   = false;
 let headlinerIdx = -1;
-let favTimer = null;
-let favIdx = 0;
 
 let undoStack    = null;
 let undoTimer    = null;
@@ -2424,17 +2395,10 @@ function dismissInstall() {
   localStorage.setItem('cs_install_dismissed','1');
 }
 // Check after a delay — will fire after auth + data loads
-  setTimeout(showInstall, 4000);
-
-//  FAVORITES 
-function renderHomeFav(){var el=document.getElementById('favList');var all=getAllCars();var f=all.slice().sort(function(a,b){return b.value-a.value}).slice(0,10);if(!f.length){document.getElementById('favSection').style.display='none';return}var html=f.map(function(c){return'<div class="fav-item" onclick="showCarInstances('+JSON.stringify(c).replace(/"/g,'&quot;')+')">'+(c.photo?'<img class="fav-item-img" src="'+c.photo+'" onerror="this.style.display=\'none\'">':'<div class="fav-item-ph"><i class="fas fa-star"></i></div>')+'<div class="fav-item-name">'+c.name.split(' ').pop()+'</div><div class="fav-item-val">$'+((c.value||0).toLocaleString())+'</div></div>'}).join('');el.innerHTML=html;document.getElementById('favSection').style.display='block';}
-function startFavRotation(){if(favTimer)clearInterval(favTimer);var all=getAllCars();var f=all.slice().sort(function(a,b){return b.value-a.value}).slice(0,10);if(f.length<2)return;favIdx=0;var scroller=document.getElementById('favList');if(!scroller)return;favTimer=setInterval(function(){favIdx=(favIdx+1)%f.length;var child=scroller.children[favIdx];if(child)child.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'})},4000);}
-function stopFavRotation(){if(favTimer){clearInterval(favTimer);favTimer=null}}
+setTimeout(showInstall, 4000);
 
 //  NAV 
 function goTo(page) {
-  var prev = document.querySelector('.page.active');
-  if (prev && prev.id==='page-spot' && page!=='spot') stopFavRotation();
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   const pageEl = document.getElementById('page-'+page);
@@ -2449,7 +2413,6 @@ function goTo(page) {
   if (page==='news')         { if (!newsLoaded) { newsLoaded=true; renderNewsSources(); } loadNews(); }
   if (page==='leaderboard')  loadLeaderboard(true);
   if (page==='stats')        renderStats();
-  if (page==='spot')         { renderHomeFav(); setTimeout(startFavRotation, 250); }
 }
 
 //  FORMAT 
@@ -2987,20 +2950,7 @@ function deleteCarEverywhere(name) {
     // else: car not in current run or after headliner — keep headlinerIdx
   }
   currentRun = currentRun.filter(c=>c.name.toLowerCase()!==key);
-  saveCurrentRun();
-  // Sync to cloud immediately — don't wait for the 1.5s debounce,
-  // otherwise a reload will pull stale cloud data via _mergeRunHistory
-  clearTimeout(syncTimer);
-  if (currentUser && navigator.onLine) {
-    _lastSave = Date.now();
-    db.collection('users').doc(currentUser.uid).set({
-      currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks,
-      notes: localStorage.getItem('cs_notes') || '',
-      profileName: currentUser?.displayName || 'Spotter',
-      profilePhoto: currentUser?.photoURL || '',
-      updatedAt: _lastSave
-    }).then(function(){ setSyncDot('ok'); leaderboardLoaded = false; }).catch(function(){ setSyncDot(''); });
-  }
+  saveCurrentRun(); // also calls saveToCloud
   // Only remove from QP if no instances remain anywhere
   cleanQPAfterRemoval(name);
   renderQPTrigger();
@@ -3131,13 +3081,12 @@ function renderGarage() {
     }
     var clusters = clusterCars(mapped);
     var clusterCount = clusters.length;
-    el.innerHTML = '<div class="garage-map-wrap" style="position:relative"><div id="leafletMap"></div><div class="map-hud"><div class="map-badge">' + clusterCount + ' mapped spot' + (clusterCount !== 1 ? 's' : '') + '</div></div><div class="map-list-overlay" id="mapOverlay"></div></div>';
-    var overlayEl = document.getElementById('mapOverlay');
-    if (overlayEl) {
-      overlayEl.innerHTML = '<div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:6px">' + clusterCount + ' spotted' + (clusterCount !== 1 ? 's' : '') + '</div>' + mapped.map(function(c){
-        var color = (c.type==='hypercar'||c.type==='exotic')?'#e05240':(c.type==='supercar'?'#e0b04a':(c.type==='muscle'?'#ff6b4a':(c.type==='ev'?'#34c759':'#7a7a84')));
-        return '<div class="map-list-row" onclick="showCarInstances(' + JSON.stringify(c).replace(/"/g,'&quot;') + ')"><div class="map-list-dot" style="background:' + color + ';box-shadow:0 0 0 2px ' + color + '44"></div><div class="map-list-name">' + escapeHtml(c.name) + '</div><div class="map-list-val">' + fmtFull(c.value) + '</div></div>';
-      }).join('');}
+    el.innerHTML = '<div class="garage-map-wrap" style="position:relative"><div id="leafletMap"></div><div class="map-hud"><div class="map-badge">' + clusterCount + ' mapped spot' + (clusterCount !== 1 ? 's' : '') + '</div></div></div><div class="garage-map-list" id="mapCarList"></div>';
+    var listEl = document.getElementById('mapCarList');
+    listEl.innerHTML = mapped.map(function(car){
+      var rarity = getRarity(car.value);
+      return '<div class="garage-map-row" style="border-left:3px solid ' + rarity.color + '"><strong>' + escapeHtml(car.name) + '</strong><span>' + escapeHtml(locLabel(car.location)) + ' · ' + fmtFull(car.value) + '</span></div>';
+    }).join('');
     setTimeout(function(){
       var mapEl = document.getElementById('leafletMap');
       if (!mapEl || !window.L) return;
@@ -3149,17 +3098,12 @@ function renderGarage() {
         attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
         maxZoom: 19
       }).addTo(map);
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(p){
-          L.circleMarker([p.coords.latitude, p.coords.longitude], {radius:5,color:'#34c759',fillColor:'#34c759',fillOpacity:.8}).addTo(map);
-        }, function(){}, { enableHighAccuracy: true, timeout: 5000 });
-      }
       clusters.forEach(function(cluster){
         bounds.push([cluster.lat, cluster.lng]);
         if (cluster.cars.length === 1) {
           var car = cluster.cars[0];
-          var color = (car.type==='hypercar'||car.type==='exotic')?'#e05240':(car.type==='supercar'?'#e0b04a':(car.type==='muscle'?'#ff6b4a':(car.type==='ev'?'#34c759':'#7a7a84')));
-          var dotIcon = L.divIcon({ className: 'cs-dot-icon', html: '<div class="cs-dot" style="background:' + color + ';box-shadow:0 0 0 2px ' + color + '44"></div>', iconSize: [14, 14], iconAnchor: [7, 7], popupAnchor: [0, -10] });
+          var rarity = getRarity(car.value);
+          var dotIcon = L.divIcon({ className: 'cs-dot-icon', html: '<div class="cs-dot" style="background:' + rarity.color + ';box-shadow:0 0 0 3px ' + rarity.color + '44"></div>', iconSize: [14, 14], iconAnchor: [7, 7], popupAnchor: [0, -10] });
           var popupHtml = buildMapPopup(car);
           var marker = L.marker([car.location.lat, car.location.lng], { icon: dotIcon }).addTo(map).bindPopup(popupHtml, { maxWidth: 240, minWidth: 180 });
           marker.on('popupopen', function(){ var el = marker.getElement(); if (el) { var d = el.querySelector('.cs-dot'); if (d) d.classList.add('cs-dot-open'); } });
@@ -5304,15 +5248,6 @@ function switchSource(i) {
   loadNews();
 }
 
-function extractNewsImg(item) {
-  if (item.thumbnail && item.thumbnail.length > 4) return item.thumbnail;
-  if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.startsWith('image')) return item.enclosure.link;
-  if (item['media:content'] && item['media:content'].url) return item['media:content'].url;
-  const html = [item.description, item.content].filter(Boolean).join(' ');
-  const m = html.match(/<img[^>]+src\s*=\s*["']([^"']+)["']/i);
-  if (m) return m[1];
-  return '';
-}
 async function loadNews() {
   const el = document.getElementById('newsList');
   el.innerHTML = '<div class="news-loading">Loading latest news...</div>';
@@ -5321,37 +5256,36 @@ async function loadNews() {
     const res  = await fetch(url);
     const data = await res.json();
     if (!data.items || !data.items.length) throw new Error('No items');
-    var hl = document.getElementById('newsHeadliner');
-    if (hl) {
-      var first = data.items[0];
-      var hlImg = extractNewsImg(first);
-      hl.style.display = hlImg ? 'block' : 'none';
-      if (hlImg) {
-        hl.innerHTML = '<img src="' + hlImg + '" alt="" onerror="this.outerHTML=\'<div style=width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var\\(--surf2\\)></div>\'"><div class="hl-overlay"><div class="hl-source">' + NEWS_SOURCES[activeSource].name + '</div><div class="hl-title">' + escapeHtml(first.title || '') + '</div><div class="hl-date">' + (first.pubDate ? new Date(first.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '') + '</div></div>';
+    el.innerHTML = data.items.map((item, idx) => {
+      const date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
+      const title = item.title || 'No title';
+      const link  = item.link  || '#';
+      // Try all possible thumbnail fields from rss2json
+      let imgSrc = '';
+      if (item.thumbnail && item.thumbnail.length > 4) {
+        imgSrc = item.thumbnail;
+      } else if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.startsWith('image')) {
+        imgSrc = item.enclosure.link;
+      } else {
+        // Parse from description or content HTML
+        const html = item.description || item.content || '';
+        const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+        if (m) imgSrc = m[1];
       }
-      window._hlLink = first.link || '#';
-    }
-    el.innerHTML = data.items.map(function(item, idx) {
-      var date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
-      var title = item.title || 'No title';
-      var link  = item.link  || '#';
-      var imgSrc = extractNewsImg(item);
-      var imgHTML = imgSrc
-        ? '<img class="news-card-img" src="' + imgSrc + '" alt="" onerror="this.outerHTML=\'<div class=news-card-img-ph>🚘</div>\'">'
-        : '<div class="news-card-img-ph">🚘</div>';
-      return '<a class="news-card" href="' + link + '" target="_blank" rel="noopener" style="animation-delay:' + (idx*0.03) + 's">' +
-        imgHTML +
-        '<div class="news-card-body">' +
-          '<div class="news-source">' + NEWS_SOURCES[activeSource].name + '</div>' +
-          '<div class="news-title">' + escapeHtml(title) + '</div>' +
-          '<div class="news-date">' + escapeHtml(date) + '</div>' +
-        '</div>' +
-      '</a>';
+      const imgHTML = imgSrc
+        ? `<img class="news-card-img" src="${imgSrc}" alt="" onerror="this.outerHTML='<div class=news-card-img-ph>🚘</div>'">`
+        : `<div class="news-card-img-ph">🚘</div>`;
+      return `<a class="news-card" href="${link}" target="_blank" rel="noopener" style="animation-delay:${idx*0.03}s">
+        ${imgHTML}
+        <div class="news-card-body">
+          <div class="news-source">${NEWS_SOURCES[activeSource].name}</div>
+          <div class="news-title">${title}</div>
+          <div class="news-date">${date}</div>
+        </div>
+      </a>`;
     }).join('');
   } catch(e) {
     el.innerHTML = '<div class="news-error">Could not load news — check your connection.</div>';
-    var hl = document.getElementById('newsHeadliner');
-    if (hl) hl.style.display = 'none';
   }
 }
 
@@ -5501,11 +5435,6 @@ async function loadNews() {
             window._closeMapPicker(pickedLat, pickedLng);
           }
         };
-      }
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(p){
-          pMap.setView([p.coords.latitude, p.coords.longitude], 15);
-        }, function(){}, { enableHighAccuracy: true, timeout: 5000 });
       }
       pMap.invalidateSize();
       window._pickerLeafletMap = pMap;
