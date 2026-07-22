@@ -1456,9 +1456,11 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
         <div class="rec-val" id="recordVal">—</div>
         <div class="rec-sub" id="recordSub"></div>
       </div>
-      <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
-        <div style="font-size:0.7rem;color:var(--text2);line-height:1.5;"><strong style="color:var(--text)"> Export backup</strong><br>Download all your data as a .json file</div>
-        <button onclick="exportLocalData()" style="background:var(--accent);color:#0a0a0a;border:none;border-radius:7px;font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:1.5px;padding:8px 13px;cursor:pointer;flex-shrink:0;">EXPORT</button>
+      <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <div style="font-size:0.7rem;color:var(--text2);line-height:1.5;flex-shrink:0;"><strong style="color:var(--text)">Export</strong><br>No photos</div>
+        <button onclick="exportLocalData()" style="background:var(--accent);color:#0a0a0a;border:none;border-radius:7px;font-family:'Bebas Neue',cursive;font-size:0.8rem;letter-spacing:1.5px;padding:8px 13px;cursor:pointer;flex-shrink:0;">EXPORT</button>
+        <div style="font-size:0.7rem;color:var(--text2);line-height:1.5;flex-shrink:0;"><strong style="color:var(--text)">With photos</strong><br>Large file</div>
+        <button onclick="exportAllData()" style="background:var(--accent);color:#0a0a0a;border:none;border-radius:7px;font-family:'Bebas Neue',cursive;font-size:0.8rem;letter-spacing:1.5px;padding:8px 13px;cursor:pointer;flex-shrink:0;">EXPORT</button>
       </div>
       <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
         <div style="font-size:0.7rem;color:var(--text2);line-height:1.5;"><strong style="color:var(--text)"> Import backup</strong><br>Restore from a carspotter-backup.json file</div>
@@ -3810,23 +3812,18 @@ function deepStripPhotos(obj) {
 }
 
 function exportLocalData() {
-  // Export ALL cs_* localStorage keys, with photos stripped
   const data = {};
-  let keyCount = 0;
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key.startsWith('cs_')) {
       data[key] = localStorage.getItem(key);
-      keyCount++;
     }
   }
-  console.log('exportLocalData: found ' + keyCount + ' cs_* keys:', Object.keys(data));
   // Deep-strip photos from runs, current, qp
   try {
     if (data.cs_runs) {
       const runs = JSON.parse(data.cs_runs);
       data.cs_runs = JSON.stringify(deepStripPhotos(runs));
-      console.log('exportLocalData: cs_runs has ' + runs.length + ' runs with ' + runs.reduce((s,r) => s + (r.cars||[]).length, 0) + ' total cars (photos stripped)');
     }
     if (data.cs_current) {
       const cur = JSON.parse(data.cs_current);
@@ -3835,19 +3832,16 @@ function exportLocalData() {
     if (data.cs_qp) {
       const qp = JSON.parse(data.cs_qp);
       data.cs_qp = JSON.stringify(deepStripPhotos(qp));
-      console.log('exportLocalData: cs_qp has ' + qp.length + ' garage cars (photos stripped)');
     }
-  } catch(e) { console.warn('exportLocalData: error stripping photos', e); }
-  data.exportedAt = new Date().toISOString();
-  data.version = 21;
-  data.includePhotos = false;
-  // Add computed garage data (aggregated unique cars from all runs)
+  } catch(e) {}
+  // Add computed garage data (no photos)
   try {
     const garage = getAllCars().map(c => ({ name: c.name, value: c.value, type: c.type, color: c.color, spotCount: c.spotCount, runDate: c.runDate }));
     data.cs_garage = JSON.stringify(garage);
-    console.log('exportLocalData: cs_garage has ' + garage.length + ' unique cars');
-  } catch(e) { console.warn('exportLocalData: could not compute garage', e); }
-  console.log('exportLocalData: total keys in export:', Object.keys(data).length);
+  } catch(e) {}
+  data.exportedAt = new Date().toISOString();
+  data.version = 21;
+  data.includePhotos = false;
 
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
   const url  = URL.createObjectURL(blob);
@@ -3858,23 +3852,18 @@ function exportLocalData() {
 }
 
 function exportAllData() {
-  // Export with photos included (larger file)
   const data = {};
-  let keyCount = 0;
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key.startsWith('cs_')) {
       data[key] = localStorage.getItem(key);
-      keyCount++;
     }
   }
-  console.log('exportAllData: found ' + keyCount + ' cs_* keys');
-  // Add computed garage data (aggregated unique cars from all runs, with photos)
+  // Add computed garage data with photos
   try {
     const garage = getAllCars().map(c => ({ name: c.name, value: c.value, type: c.type, color: c.color, photo: c.photo, location: c.location, spotCount: c.spotCount, runDate: c.runDate }));
     data.cs_garage = JSON.stringify(garage);
-    console.log('exportAllData: cs_garage has ' + garage.length + ' unique cars');
-  } catch(e) { console.warn('exportAllData: could not compute garage', e); }
+  } catch(e) {}
   data.exportedAt = new Date().toISOString();
   data.version = 21;
   data.includePhotos = true;
@@ -5747,4 +5736,3 @@ async function loadNews() {
 
 
 
-w
