@@ -3841,6 +3841,12 @@ function exportLocalData() {
   data.exportedAt = new Date().toISOString();
   data.version = 21;
   data.includePhotos = false;
+  // Add computed garage data (aggregated unique cars from all runs)
+  try {
+    const garage = getAllCars().map(c => ({ name: c.name, value: c.value, type: c.type, color: c.color, spotCount: c.spotCount, runDate: c.runDate }));
+    data.cs_garage = JSON.stringify(garage);
+    console.log('exportLocalData: cs_garage has ' + garage.length + ' unique cars');
+  } catch(e) { console.warn('exportLocalData: could not compute garage', e); }
   console.log('exportLocalData: total keys in export:', Object.keys(data).length);
 
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
@@ -3863,27 +3869,12 @@ function exportAllData() {
     }
   }
   console.log('exportAllData: found ' + keyCount + ' cs_* keys');
-  data.exportedAt = new Date().toISOString();
-  data.version = 21;
-  data.includePhotos = true;
-
-  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = 'CarSpotter_backup_full_' + new Date().toISOString().slice(0,10) + '.json'; a.click();
-  URL.revokeObjectURL(url);
-  showToast('📥 Exported all data WITH photos — file may be large');
-}
-
-function exportAllData() {
-  // Export with photos included (larger file)
-  const data = {};
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith('cs_')) {
-      data[key] = localStorage.getItem(key);
-    }
-  }
+  // Add computed garage data (aggregated unique cars from all runs, with photos)
+  try {
+    const garage = getAllCars().map(c => ({ name: c.name, value: c.value, type: c.type, color: c.color, photo: c.photo, location: c.location, spotCount: c.spotCount, runDate: c.runDate }));
+    data.cs_garage = JSON.stringify(garage);
+    console.log('exportAllData: cs_garage has ' + garage.length + ' unique cars');
+  } catch(e) { console.warn('exportAllData: could not compute garage', e); }
   data.exportedAt = new Date().toISOString();
   data.version = 21;
   data.includePhotos = true;
@@ -5756,3 +5747,4 @@ async function loadNews() {
 
 
 
+w
