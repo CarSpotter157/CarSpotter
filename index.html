@@ -2468,7 +2468,7 @@ function dismissInstall() {
 function toggleFavorite(name){
   if (favoriteNames.has(name)) { favoriteNames.delete(name); } else { favoriteNames.add(name); }
   localStorage.setItem('cs_fav', JSON.stringify(Array.from(favoriteNames)));
-  renderHomeFav();
+  renderHomeFav(); renderGarage();
 }
 function isFavorite(name){ return favoriteNames.has(name); }
 
@@ -3223,6 +3223,7 @@ function renderGarage() {
   if (!filtered.length) {
     el.className = '';
     el.innerHTML='<div class="empty-garage"><div style="font-size:2.2rem;margin-bottom:12px;opacity:0.6">🔍</div><strong style="color:var(--text2);font-size:0.85rem;display:block;margin-bottom:4px">'+(allCars.length?'No matches found':'Your garage is empty')+'</strong>'+(allCars.length?'Try a different filter or search term':'Head to the Spot tab to log your first car!')+'</div>';
+    attachGarageDelegates(el);
     return;
   }
   if (garageView === 'grid') {
@@ -3237,6 +3238,7 @@ function renderGarage() {
     el.querySelectorAll('[data-inst]').forEach(function(a){
       attachCarTap(a);
     });
+    attachGarageDelegates(el);
     return;
   }
   el.className = '';
@@ -3249,15 +3251,22 @@ function renderGarage() {
   el.querySelectorAll('[data-inst]').forEach(function(a){
     attachCarTap(a);
   });
-  // Delegated listeners for action buttons in list rows
-  el.addEventListener('click', function(e) {
+  attachGarageDelegates(el);
+}
+
+// Shared delegated listener for garage action buttons (applied once to each container)
+function attachGarageDelegates(el) {
+  // Remove previous listener to avoid duplicates on re-render
+  el.removeEventListener('click', el._garageClick);
+  el._garageClick = function(e) {
     var t = e.target.closest('[data-fav],[data-edit],[data-del]');
     if (!t) return;
     e.stopPropagation();
     if (t.hasAttribute('data-fav')) toggleFavorite(t.getAttribute('data-fav'));
     else if (t.hasAttribute('data-edit')) openEditCarModal(t.getAttribute('data-edit'));
     else if (t.hasAttribute('data-del')) deleteCarEverywhere(t.getAttribute('data-del'));
-  });
+  };
+  el.addEventListener('click', el._garageClick);
 }
 
 function attachCarTap(el) {
