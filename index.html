@@ -2050,13 +2050,13 @@ async function loadFromCloud() {
       localStorage.setItem('cs_qp',      JSON.stringify(quickPicks));
       // Save merged result back to cloud so other devices see it
       _lastSave = Date.now();
-      db.collection('users').doc(currentUser.uid).set({
+      db.collection('users').doc(currentUser.uid).set(JSON.parse(JSON.stringify({
         currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
         notes: localStorage.getItem('cs_notes') || '',
         profileName: currentUser?.displayName || 'Spotter',
         profilePhoto: currentUser?.photoURL || '',
         updatedAt: _lastSave
-      }).then(() => setSyncDot('ok')).catch(() => setSyncDot(''));
+      }))).then(() => setSyncDot('ok')).catch(() => setSyncDot(''));
     }
     if (!_lastSave) setSyncDot('ok');
   } catch(e) { setSyncDot(''); console.error(e); }
@@ -2110,13 +2110,13 @@ function saveToCloud() {
   // Raise the gate immediately so incoming snapshots don't overwrite local state
   _lastSave = Date.now();
   syncTimer = setTimeout(() => {
-    db.collection('users').doc(currentUser.uid).set({
+    db.collection('users').doc(currentUser.uid).set(JSON.parse(JSON.stringify({
       currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
       notes: localStorage.getItem('cs_notes') || '',
       profileName: currentUser?.displayName || 'Spotter',
       profilePhoto: currentUser?.photoURL || '',
       updatedAt: _lastSave
-    }).then(() => { setSyncDot('ok'); leaderboardLoaded = false; }).catch(() => setSyncDot(''));
+    }))).then(() => { setSyncDot('ok'); leaderboardLoaded = false; }).catch(() => setSyncDot(''));
   }, 1500);
 }
 
@@ -2127,13 +2127,13 @@ function _flushPendingSave() {
   syncTimer = null;
   if (currentUser && navigator.onLine) {
     _lastSave = Date.now();
-    db.collection('users').doc(currentUser.uid).set({
+    db.collection('users').doc(currentUser.uid).set(JSON.parse(JSON.stringify({
       currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
       notes: localStorage.getItem('cs_notes') || '',
       profileName: currentUser?.displayName || 'Spotter',
       profilePhoto: currentUser?.photoURL || '',
       updatedAt: _lastSave
-    }).catch(()=>{});
+    }))).catch(()=>{});
   }
 }
 window.addEventListener('beforeunload', _flushPendingSave);
@@ -3032,13 +3032,14 @@ function deleteCarEverywhere(name) {
   clearTimeout(syncTimer);
   if (currentUser && navigator.onLine) {
     _lastSave = Date.now();
-    db.collection('users').doc(currentUser.uid).set({
-      currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
+    var data = { currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
       notes: localStorage.getItem('cs_notes') || '',
       profileName: currentUser?.displayName || 'Spotter',
       profilePhoto: currentUser?.photoURL || '',
       updatedAt: _lastSave
-    }).then(function(){ setSyncDot('ok'); leaderboardLoaded = false; }).catch(function(){ setSyncDot(''); });
+    };
+    db.collection('users').doc(currentUser.uid).set(JSON.parse(JSON.stringify(data)))
+      .then(function(){ setSyncDot('ok'); leaderboardLoaded = false; }).catch(function(){ setSyncDot(''); });
   }
   // Only remove from QP if no instances remain anywhere
   cleanQPAfterRemoval(name);
