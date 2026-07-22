@@ -878,6 +878,9 @@ body{
   background:var(--bg);display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:24px;padding:40px;
 }
+.auth-loading{display:flex;flex-direction:column;align-items:center;gap:16px;}
+.auth-spinner{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
+.auth-loading-text{font-size:0.72rem;color:var(--muted);letter-spacing:1px;}
 .auth-logo{font-family:'Bebas Neue',cursive;font-size:3rem;letter-spacing:2px;color:var(--text);line-height:1;}
 .auth-logo span{color:var(--accent);}
 .auth-sub{font-size:0.68rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;text-align:center;}
@@ -1293,6 +1296,8 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
 <!-- AUTH OVERLAY -->
 <div class="auth-overlay" id="authOverlay">
+  <div class="auth-loading" id="authLoading"><div class="auth-spinner"></div><div class="auth-loading-text">Initializing CarSpotter...</div></div>
+  <div class="auth-content" id="authContent" style="display:none">
   <div class="auth-logo">Car<span>Spotter</span></div>
   <div class="auth-sub">Sign in to sync across devices</div>
   <div class="auth-card">
@@ -1302,6 +1307,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
       Continue with Google
     </button>
     <div class="auth-note">Your spots, runs &amp; garage sync automatically.<br>Works on any device you sign into.</div>
+  </div>
   </div>
 </div>
 
@@ -1952,6 +1958,7 @@ function importLocalData() {
 
   saveToCloud();
   renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
+  checkNewAchievements();
   document.getElementById('importBtn')?.remove();
   showToast(' Imported ' + newRuns.length + ' runs from this device!');
 }
@@ -1965,11 +1972,14 @@ auth.onAuthStateChanged(async user => {
     _lastSave = Date.now();
     await loadFromCloud();
     subscribeCloud();
+    checkNewAchievements();
     // Show import button if this device has local data
     const localRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
     if (localRuns.length > 0) showImportBanner(localRuns.length);
   } else {
     document.getElementById('authOverlay').style.display = 'flex';
+    document.getElementById('authLoading').style.display = 'none';
+    document.getElementById('authContent').style.display = '';
     document.getElementById('appShell').style.display    = 'none';
     document.getElementById('userPillWrap').innerHTML    = '';
     if (syncUnsub) { syncUnsub(); syncUnsub = null; }
@@ -3145,6 +3155,15 @@ function renderGarage() {
   document.getElementById('gCars').textContent = allCars.length;
   document.getElementById('gTotal').textContent = fmt(total);
   document.getElementById('gAvg').textContent = allCars.length ? fmt(total / allCars.length) : '';
+  // Show filtered count if filter/search is active
+  var filterEl = document.getElementById('garageSearch');
+  var showFiltered = (garageFilter !== 'all' || (filterEl && filterEl.value.trim()));
+  var countEl = document.getElementById('gCars');
+  if (showFiltered && filtered.length !== allCars.length) {
+    countEl.textContent = filtered.length + '/' + allCars.length;
+  } else {
+    countEl.textContent = allCars.length;
+  }
   var el = document.getElementById('garageList');
 
   if (garageView === 'map') {
@@ -3265,11 +3284,13 @@ function cycleSort() {
   document.getElementById('sortBtn').textContent = labels[sortMode];
   renderGarage();
 }
+var _garageSearchTimer = null;
 function onGarageSearch() {
   garagePage = 0;
   const q = document.getElementById('garageSearch').value;
   document.getElementById('garageSearchClear').style.display = q ? 'block' : 'none';
-  renderGarage();
+  if (_garageSearchTimer) clearTimeout(_garageSearchTimer);
+  _garageSearchTimer = setTimeout(function(){ renderGarage(); }, 150);
 }
 
 function appendLoadMoreBtn(container, handler, remaining) {
@@ -5426,8 +5447,8 @@ async function loadNews() {
     { id:'five_makes', icon:'M5', name:'Make Explorer', desc:'Spot 5 different makes', check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=5 },
     { id:'fifteen_makes', icon:'M15', name:'Globe Trotter', desc:'Spot 15 different makes', check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=15 },
     { id:'twentyfive_makes', icon:'M25', name:'World Garage', desc:'Spot 25 different makes', check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=25 },
-    { id:'ev_collector', icon:'EV', name:'Electric Dreams', desc:'Log 10 EVs', check:(c,r)=>c.filter(x=>(x.name||'').toLowerCase().includes('tesla') || (x.name||'').toLowerCase().includes('taycan') || (x.name||'').toLowerCase().includes('rimac') || (x.name||'').toLowerCase().includes('lucid') || (x.name||'').toLowerCase().includes('rivian')).length>=10 },
-    { id:'muscle_master', icon:'MU', name:'Muscle Master', desc:'Log 10 muscle cars', check:(c,r)=>c.filter(x=>(x.name||'').toLowerCase().includes('mustang') || (x.name||'').toLowerCase().includes('charger') || (x.name||'').toLowerCase().includes('challenger') || (x.name||'').toLowerCase().includes('camaro')).length>=10 },
+    { id:'ev_collector', icon:'EV', name:'Electric Dreams', desc:'Log 10 EVs', check:(c,r)=>c.filter(x=>x.type==='ev').length>=10 },
+    { id:'muscle_master', icon:'MU', name:'Muscle Master', desc:'Log 10 muscle cars', check:(c,r)=>c.filter(x=>x.type==='muscle').length>=10 },
     { id:'supercar_stack', icon:'SC', name:'Supercar Stack', desc:'Log 20 supercars or exotics', check:(c,r)=>c.filter(x=>x.value>=150000).length>=20 },
     { id:'photo_five', icon:'P5', name:'Photographer', desc:'Log 5 cars with photos', check:(c,r)=>c.filter(x=>x.photo).length>=5 },
     { id:'photo_twenty', icon:'P20', name:'Rolling Gallery', desc:'Log 20 cars with photos', check:(c,r)=>c.filter(x=>x.photo).length>=20 },
@@ -5610,10 +5631,10 @@ async function loadNews() {
   renderGarage();
   renderAchievements();
   refreshOfflineStatus();
-  tutorialTimer = setInterval(function(){
-    if (currentUser && !localStorage.getItem('cs_tutorial_done') && !document.getElementById('tutorialOverlay')) openTutorial(false);
-    if (localStorage.getItem('cs_tutorial_done')) { clearInterval(tutorialTimer); tutorialTimer = null; }
-  }, 2500);
+  // One-shot tutorial check after auth resolves
+  if (currentUser && !localStorage.getItem('cs_tutorial_done') && !document.getElementById('tutorialOverlay')) {
+    setTimeout(function(){ openTutorial(false); }, 2500);
+  }
 })();
 </script>
 </body>
