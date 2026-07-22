@@ -2051,7 +2051,7 @@ async function loadFromCloud() {
       // Save merged result back to cloud so other devices see it
       _lastSave = Date.now();
       db.collection('users').doc(currentUser.uid).set({
-        currentRun, allRuns, quickPicks,
+        currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
         notes: localStorage.getItem('cs_notes') || '',
         profileName: currentUser?.displayName || 'Spotter',
         profilePhoto: currentUser?.photoURL || '',
@@ -2111,7 +2111,7 @@ function saveToCloud() {
   _lastSave = Date.now();
   syncTimer = setTimeout(() => {
     db.collection('users').doc(currentUser.uid).set({
-      currentRun, allRuns, quickPicks,
+      currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
       notes: localStorage.getItem('cs_notes') || '',
       profileName: currentUser?.displayName || 'Spotter',
       profilePhoto: currentUser?.photoURL || '',
@@ -2128,7 +2128,7 @@ function _flushPendingSave() {
   if (currentUser && navigator.onLine) {
     _lastSave = Date.now();
     db.collection('users').doc(currentUser.uid).set({
-      currentRun, allRuns, quickPicks,
+      currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
       notes: localStorage.getItem('cs_notes') || '',
       profileName: currentUser?.displayName || 'Spotter',
       profilePhoto: currentUser?.photoURL || '',
@@ -3033,7 +3033,7 @@ function deleteCarEverywhere(name) {
   if (currentUser && navigator.onLine) {
     _lastSave = Date.now();
     db.collection('users').doc(currentUser.uid).set({
-      currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks,
+      currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
       notes: localStorage.getItem('cs_notes') || '',
       profileName: currentUser?.displayName || 'Spotter',
       profilePhoto: currentUser?.photoURL || '',
