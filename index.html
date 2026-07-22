@@ -3812,17 +3812,21 @@ function deepStripPhotos(obj) {
 function exportLocalData() {
   // Export ALL cs_* localStorage keys, with photos stripped
   const data = {};
+  let keyCount = 0;
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key.startsWith('cs_')) {
       data[key] = localStorage.getItem(key);
+      keyCount++;
     }
   }
+  console.log('exportLocalData: found ' + keyCount + ' cs_* keys:', Object.keys(data));
   // Deep-strip photos from runs, current, qp
   try {
     if (data.cs_runs) {
       const runs = JSON.parse(data.cs_runs);
       data.cs_runs = JSON.stringify(deepStripPhotos(runs));
+      console.log('exportLocalData: cs_runs has ' + runs.length + ' runs with ' + runs.reduce((s,r) => s + (r.cars||[]).length, 0) + ' total cars (photos stripped)');
     }
     if (data.cs_current) {
       const cur = JSON.parse(data.cs_current);
@@ -3831,11 +3835,13 @@ function exportLocalData() {
     if (data.cs_qp) {
       const qp = JSON.parse(data.cs_qp);
       data.cs_qp = JSON.stringify(deepStripPhotos(qp));
+      console.log('exportLocalData: cs_qp has ' + qp.length + ' garage cars (photos stripped)');
     }
-  } catch(e) {}
+  } catch(e) { console.warn('exportLocalData: error stripping photos', e); }
   data.exportedAt = new Date().toISOString();
   data.version = 21;
   data.includePhotos = false;
+  console.log('exportLocalData: total keys in export:', Object.keys(data).length);
 
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
   const url  = URL.createObjectURL(blob);
@@ -3843,6 +3849,30 @@ function exportLocalData() {
   a.href = url; a.download = 'carspotter-backup-nophotos.json'; a.click();
   URL.revokeObjectURL(url);
   showToast('📥 Exported all data (no photos)');
+}
+
+function exportAllData() {
+  // Export with photos included (larger file)
+  const data = {};
+  let keyCount = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('cs_')) {
+      data[key] = localStorage.getItem(key);
+      keyCount++;
+    }
+  }
+  console.log('exportAllData: found ' + keyCount + ' cs_* keys');
+  data.exportedAt = new Date().toISOString();
+  data.version = 21;
+  data.includePhotos = true;
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'CarSpotter_backup_full_' + new Date().toISOString().slice(0,10) + '.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('📥 Exported all data WITH photos — file may be large');
 }
 
 function exportAllData() {
