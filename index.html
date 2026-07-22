@@ -3135,7 +3135,7 @@ function buildMapPopup(car) {
     '<div class="map-popup-meta">' + (car.runDate ? escapeHtml(car.runDate) + (locLabel ? ' · ' : '') : '') + locLabel + '</div>' +
     '<div style="display:flex;gap:6px;margin-top:10px">' +
     '<button class="map-popup-btn" onclick="openMapCar(decodeURIComponent(\'' + encodeURIComponent(JSON.stringify({ name: car.name, value: car.value, color: car.color, type: car.type, photo: car.photo, location: car.location })).replace(/'/g, '%27') + '\'))">VIEW CAR →</button>' +
-    '<button class="map-popup-fav" onclick="event.stopPropagation();toggleFavorite(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\');this.textContent=this.textContent===\'★\'?\'☆\':\'★\';" title="Toggle favorite">' + (isFavorite(car.name) ? '★' : '☆') + '</button>' +
+    '<button class="map-popup-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');this.textContent=this.textContent===\'★\'?\'☆\':\'★\';" title="Toggle favorite">' + (isFavorite(car.name) ? '★' : '☆') + '</button>' +
     '</div></div></div>';
 }
 
@@ -3232,7 +3232,7 @@ function renderGarage() {
       var nameSuffix = car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '';
       var clickAttr = ' data-inst="1" data-car="' + encodeURIComponent(JSON.stringify(car)) + '"';
       var photoBadge = car.photo ? (car.photo.indexOf('data:') === 0 ? '<div class="gc-photo-badge">📷 Your Photo</div>' : '<div class="gc-photo-badge">🌐 Reference</div>') : '';
-      return '<div class="garage-card" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' + photoBadge : '<div class="gc-img-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="gc-actions"><button class="gc-fav" onclick="event.stopPropagation();event.preventDefault();toggleFavorite(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="gc-del" onclick="event.stopPropagation();event.preventDefault();if(confirm(\'Delete ' + escapeHtml(car.name) + ' everywhere?\'))deleteCarEverywhere(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')" title="Delete car">✕</button></div></div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Color</div><div class="gc-meta-val">' + escapeHtml(car.color || 'Unknown') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + escapeHtml(carTypeLabel(car.type)) + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + escapeHtml(car.runDate || 'Saved') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Place</div><div class="gc-meta-val">' + escapeHtml((car.location && car.location.label) || 'No pin') + '</div></div></div></div></div>';
+      return '<div class="garage-card" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' + photoBadge : '<div class="gc-img-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="gc-actions"><button class="gc-fav" data-fav="' + escapeHtml(car.name) + '">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="gc-del" data-del="' + escapeHtml(car.name) + '">✕</button></div></div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Color</div><div class="gc-meta-val">' + escapeHtml(car.color || 'Unknown') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + escapeHtml(carTypeLabel(car.type)) + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + escapeHtml(car.runDate || 'Saved') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Place</div><div class="gc-meta-val">' + escapeHtml((car.location && car.location.label) || 'No pin') + '</div></div></div></div></div>';
     }).join('');
     el.querySelectorAll('[data-inst]').forEach(function(a){
       attachCarTap(a);
@@ -3244,10 +3244,19 @@ function renderGarage() {
     var rarity = getRarity(car.value);
     var nameSuffix = car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '';
     var clickAttr = ' data-inst="1" data-car="' + encodeURIComponent(JSON.stringify(car)) + '"';
-    return '<div class="garage-row" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" onclick="event.stopPropagation();event.preventDefault();toggleFavorite(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')" title="' + (isFavorite(car.name) ? 'Remove from favorites' : 'Add to favorites') + '">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" onclick="event.stopPropagation();event.preventDefault();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit car">✎</button><button class="g-act-btn g-del" onclick="event.stopPropagation();event.preventDefault();if(confirm(\'Delete ' + escapeHtml(car.name) + ' everywhere?\'))deleteCarEverywhere(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')" title="Delete car">✕</button></div></div>';
+    return '<div class="garage-row" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" data-fav="' + escapeHtml(car.name) + '">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" data-edit="' + encodeURIComponent(JSON.stringify(car)) + '">✎</button><button class="g-act-btn g-del" data-del="' + escapeHtml(car.name) + '">✕</button></div></div>';
   }).join('');
   el.querySelectorAll('[data-inst]').forEach(function(a){
     attachCarTap(a);
+  });
+  // Delegated listeners for action buttons in list rows
+  el.addEventListener('click', function(e) {
+    var t = e.target.closest('[data-fav],[data-edit],[data-del]');
+    if (!t) return;
+    e.stopPropagation();
+    if (t.hasAttribute('data-fav')) toggleFavorite(t.getAttribute('data-fav'));
+    else if (t.hasAttribute('data-edit')) openEditCarModal(t.getAttribute('data-edit'));
+    else if (t.hasAttribute('data-del')) deleteCarEverywhere(t.getAttribute('data-del'));
   });
 }
 
@@ -3376,8 +3385,8 @@ function renderHistory() {
           <span class="hc-val">${fmtFull(car.value)}</span>
           <span class="hc-arrow">↗</span>
         </a>
-        <button class="hc-photo-btn" onclick="event.stopPropagation();addPhotoToCar('${escapeHtml(car.name).replace(/'/g,"\\'")}')" title="Add photo">📷</button>
-        ${!isSpot ? `<button class="hc-star-btn${isCarHL?' active':''}" onclick="event.stopPropagation();toggleHistoryHeadliner(${entry.id},'${escapeHtml(car.name).replace(/'/g,"\\'")}','${escapeHtml(car.type).replace(/'/g,"\\'")}',${car.value})" title="${isCarHL?'Remove headliner':'Set as headliner'}">&#9733;</button>` : ''}
+        <button class="hc-photo-btn" onclick="event.stopPropagation();addPhotoToCar('${jsEscape(car.name)}')" title="Add photo">📷</button>
+        ${!isSpot ? `<button class="hc-star-btn${isCarHL?' active':''}" onclick="event.stopPropagation();toggleHistoryHeadliner(${entry.id},'${jsEscape(car.name)}','${jsEscape(car.type)}',${car.value})" title="${isCarHL?'Remove headliner':'Set as headliner'}">&#9733;</button>` : ''}
       </div>`;
     }).join('');
 
@@ -3534,7 +3543,7 @@ function showCarInstances(car) {
   overlay.id = 'detailOverlay';
   overlay.onclick = function() { overlay.remove(); };
   overlay.innerHTML = '<div class="detail-card" onclick="event.stopPropagation()">' +
-    '<div class="detail-hero">' + heroHtml + '<button class="detail-close" onclick="document.getElementById(\'detailOverlay\').remove()">&times;</button></div>' +
+    '<div class="detail-hero">' + heroHtml + '<button class="detail-close" onclick="this.closest(\'.detail-overlay\').remove()">&times;</button></div>' +
     '<div class="detail-info"><div class="detail-name">' + escapeHtml(car.name) + '</div>' +
     '<div class="detail-stats">' +
     '<div class="detail-stat"><div class="detail-stat-label">Value</div><div class="detail-stat-val" style="color:var(--accent)">' + fmtFull(car.value) + '</div></div>' +
@@ -3542,15 +3551,24 @@ function showCarInstances(car) {
     '<div class="detail-stat"><div class="detail-stat-label">Sightings</div><div class="detail-stat-val">' + instances.length + '</div></div>' +
     '</div></div>' +
     '<div class="detail-actions">' +
-    '<button class="detail-action-btn" onclick="event.stopPropagation();toggleFavorite(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\');document.getElementById(\'detailOverlay\').remove();" title="' + (isFavorite(car.name) ? 'Remove from favorites' : 'Add to favorites') + '">' + (isFavorite(car.name) ? '★ Favorite' : '☆ Favorite') + '</button>' +
-    '<a class="detail-action-btn" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" onclick="event.preventDefault();event.stopPropagation();window.open(\'' + carUrl(car.name) + '\',\'_blank\')" title="Search this car">↗ Search</a>' +
-    '<button class="detail-action-btn" onclick="event.stopPropagation();document.getElementById(\'detailOverlay\').remove();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit car">✏️ Edit</button>' +
-    '<button class="detail-action-btn" onclick="event.stopPropagation();addPhotoToCar(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')" title="Add photo">📷 Photo</button>' +
-    '<button class="detail-action-btn detail-action-del" onclick="event.stopPropagation();document.getElementById(\'detailOverlay\').remove();deleteCarEverywhere(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')" title="Delete car">✕ Delete</button>' +
+    '<button class="detail-action-btn" data-fav="' + escapeHtml(car.name) + '">' + (isFavorite(car.name) ? '★ Favorite' : '☆ Favorite') + '</button>' +
+    '<a class="detail-action-btn" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Search this car">↗ Search</a>' +
+    '<button class="detail-action-btn" data-edit-car="' + encodeURIComponent(JSON.stringify(car)) + '">✏️ Edit</button>' +
+    '<button class="detail-action-btn" data-photo="' + escapeHtml(car.name) + '">📷 Photo</button>' +
+    '<button class="detail-action-btn detail-action-del" data-del="' + escapeHtml(car.name) + '">✕ Delete</button>' +
     '</div>' +
     '<div class="detail-section-title">Sighting History</div>' +
     '<div class="detail-sightings">' + sightingsHtml + '</div>' +
     '</div>';
+  overlay.addEventListener('click', function(e) {
+    var t = e.target.closest('[data-fav],[data-edit-car],[data-photo],[data-del]');
+    if (!t) return;
+    e.stopPropagation();
+    if (t.hasAttribute('data-fav')) { toggleFavorite(t.getAttribute('data-fav')); overlay.remove(); }
+    else if (t.hasAttribute('data-edit-car')) { overlay.remove(); openEditCarModal(t.getAttribute('data-edit-car')); }
+    else if (t.hasAttribute('data-photo')) { addPhotoToCar(t.getAttribute('data-photo')); }
+    else if (t.hasAttribute('data-del')) { overlay.remove(); deleteCarEverywhere(t.getAttribute('data-del')); }
+  });
   document.body.appendChild(overlay);
 }
 
@@ -4416,6 +4434,7 @@ function photoThumbSmall(dataUrl) {
 }
 
 function escapeHtml(v){ return String(v || '').replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
+function jsEscape(v){ return String(v||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
 function locLabel(loc){ return !loc ? '' : (loc.label || [loc.city, loc.region].filter(Boolean).join(', ') || 'Pinned location'); }
 
 function animateValue(el, from, to, formatter, duration){
@@ -4561,7 +4580,7 @@ window.openEditCarModal = function(encodedCar) {
           </select>
         </div>
       </div>
-      <button class="modal-save-btn" onclick="saveEditCar('${escapeHtml(car.name).replace(/'/g,"\\'")}')">SAVE CHANGES</button>
+      <button class="modal-save-btn" onclick="saveEditCar('${jsEscape(car.name)}')">SAVE CHANGES</button>
     </div>`;
   overlay.onclick = () => overlay.remove();
   document.body.appendChild(overlay);
@@ -4668,7 +4687,7 @@ window.openCarSearch = function(prefill) {
   overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
 
   const suggestions = ['Ferrari 488','Lamborghini Huracan','Porsche 911 GT3','McLaren 720S','Dodge Charger R/T','Ford Mustang GT','Chevrolet Corvette C8','Bugatti Chiron','Tesla Model S Plaid','BMW M3'];
-  const sugHTML = suggestions.map(s => `<button class="csr-sug-chip" onclick="runCarSearch('${escapeHtml(s)}')">${s}</button>`).join('');
+  const sugHTML = suggestions.map(s => `<button class="csr-sug-chip" onclick="runCarSearch('${jsEscape(s)}')">${s}</button>`).join('');
 
   overlay.innerHTML = `
     <div class="car-search-card" onclick="event.stopPropagation()">
@@ -4794,7 +4813,7 @@ window.runCarSearch = async function(query) {
         ${s.weight     ? `<div class="csr-cell"><div class="csr-cell-lbl">Weight</div><div class="csr-cell-val">${s.weight}</div><div class="csr-cell-unit">lbs</div></div>` : ''}
       </div>
       ${wikiUrl ? `<a href="${wikiUrl}" target="_blank" rel="noopener" class="csr-wiki-link">Wikipedia ↗</a>` : ''}
-      <button class="csr-fill-btn" onclick="fillFromSearch('${escapeHtml(query).replace(/'/g,"\\'")}',${guessVal},'','${guessType}')">➕ LOG THIS CAR</button>
+      <button class="csr-fill-btn" onclick="fillFromSearch('${jsEscape(query)}',${guessVal},'','${guessType}')">➕ LOG THIS CAR</button>
     </div>`;
   } else if (wikiSummary || wikiImg) {
     // Wikipedia fallback card — still useful
@@ -4804,14 +4823,14 @@ window.runCarSearch = async function(query) {
       <div class="csr-name">${escapeHtml(query)}</div>
       ${wikiSummary ? `<div class="csr-tagline">${escapeHtml(wikiSummary)}</div>` : ''}
       ${wikiUrl ? `<a href="${wikiUrl}" target="_blank" rel="noopener" class="csr-wiki-link">Read more on Wikipedia ↗</a>` : ''}
-      <button class="csr-fill-btn" onclick="fillFromSearch('${escapeHtml(query).replace(/'/g,"\\'")}',${guessVal},'','${guessType}')">➕ LOG THIS CAR</button>
+      <button class="csr-fill-btn" onclick="fillFromSearch('${jsEscape(query)}',${guessVal},'','${guessType}')">➕ LOG THIS CAR</button>
     </div>`;
   } else {
     el.innerHTML = `<div class="car-search-result">
       <div class="csr-img-ph" style="margin-bottom:10px">🚘</div>
       <div class="csr-name">${escapeHtml(query)}</div>
       <div class="csr-tagline" style="color:var(--muted)">Nothing found — check the spelling or try a more specific name like "Porsche 911 GT3 RS".</div>
-      <button class="csr-fill-btn" onclick="fillFromSearch('${escapeHtml(query).replace(/'/g,"\\'")}',${guessVal},'','${guessType}')">➕ LOG ANYWAY</button>
+      <button class="csr-fill-btn" onclick="fillFromSearch('${jsEscape(query)}',${guessVal},'','${guessType}')">➕ LOG ANYWAY</button>
     </div>`;
   }
 };
