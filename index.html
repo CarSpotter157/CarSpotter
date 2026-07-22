@@ -1841,6 +1841,7 @@ let leaderboardRuns = [];
 let leaderboardLoaded = false;
 let bestFromLB = parseInt(localStorage.getItem('cs_best_lb') || '0');
 let favoriteNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
+let currentSpotLocation = JSON.parse(localStorage.getItem('cs_pending_loc') || 'null');
 
 // Garage view — declared here so renderGarage() works before auth fires
 let garageFilter = 'all';
@@ -1906,10 +1907,10 @@ function _mergeQuickPicks(local, cloud) {
 
 //  FIREBASE AUTH & SYNC 
 
-function signInGoogle() {
+window.signInGoogle = function() {
   auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
     .catch(e => alert('Sign-in error: ' + e.message));
-}
+};
 function signOutUser() {
   if (!confirm('Sign out?')) return;
   if (syncUnsub) { syncUnsub(); syncUnsub = null; }
@@ -5412,7 +5413,6 @@ async function loadNews() {
 
 
 (function(){
-  var currentSpotLocation = JSON.parse(localStorage.getItem('cs_pending_loc') || 'null');
 
   ACHIEVEMENTS.splice(0, ACHIEVEMENTS.length,
     { id:'first_car', icon:'1', name:'First Spot', desc:'Log your first car', check:(c,r)=>c.length>=1 },
