@@ -142,7 +142,7 @@ body{
   #page-spot{display:flex;flex-direction:column;overflow:hidden;}
   .dsk-cols{display:grid;grid-template-columns:1fr 1fr;flex:1;overflow:hidden;}
   .dsk-col{overflow-y:auto;padding:28px 32px;height:100%;}
-  .dsk-col:first-child{border-right:1px solid var(--border);overflow:visible;}
+  .dsk-col:first-child{border-right:1px solid var(--border);overflow:hidden;}
   #page-garage,#page-history,#page-stats,#page-achievements,#page-leaderboard{overflow-y:auto;padding:32px 40px;}
   #page-voice{overflow-y:hidden;padding:28px 40px;display:flex;flex-direction:column;}
   .road-deco{display:none;}
@@ -169,7 +169,7 @@ body{
 /* ── PAGES ── */
 .pages{flex:1;overflow:hidden;position:relative;}
 .page{
-  position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+  position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:20px 20px calc(var(--nav-h) + 28px + env(safe-area-inset-bottom,0px));
   opacity:0;pointer-events:none;transform:translateY(4px);
   transition:opacity 0.2s ease,transform 0.2s ease;
