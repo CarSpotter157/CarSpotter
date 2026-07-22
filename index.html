@@ -3208,7 +3208,7 @@ function renderGarage() {
       return '<a class="garage-card" href="' + href + '"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' + photoBadge : '<div class="gc-img-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<button class="gc-fav" onclick="event.stopPropagation();event.preventDefault();toggleFavorite(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')">' + (isFavorite(car.name) ? '★' : '☆') + '</button></div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Color</div><div class="gc-meta-val">' + escapeHtml(car.color || 'Unknown') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + escapeHtml(carTypeLabel(car.type)) + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + escapeHtml(car.runDate || 'Saved') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Place</div><div class="gc-meta-val">' + escapeHtml((car.location && car.location.label) || 'No pin') + '</div></div></div></div></a>';
     }).join('');
     el.querySelectorAll('[data-inst]').forEach(function(a){
-      a.addEventListener('pointerdown', function(e){
+      a.addEventListener('click', function(e){
         e.preventDefault();
         try { showCarInstances(JSON.parse(decodeURIComponent(a.dataset.car))); } catch(ex){}
       });
@@ -3224,7 +3224,7 @@ function renderGarage() {
     return '<a class="garage-row" href="' + href + '"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><button class="g-fav" onclick="event.stopPropagation();event.preventDefault();toggleFavorite(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')" title="' + (isFavorite(car.name) ? 'Remove from favorites' : 'Add to favorites') + '">' + (isFavorite(car.name) ? '★' : '☆') + '</button></a>';
   }).join('');
   el.querySelectorAll('[data-inst]').forEach(function(a){
-    a.addEventListener('pointerdown', function(e){
+    a.addEventListener('click', function(e){
       e.preventDefault();
       try { showCarInstances(JSON.parse(decodeURIComponent(a.dataset.car))); } catch(ex){}
     });
