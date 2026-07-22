@@ -169,7 +169,7 @@ body{
 /* ── PAGES ── */
 .pages{flex:1;overflow:hidden;position:relative;}
 .page{
-  position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
   padding:20px 20px calc(var(--nav-h) + 28px + env(safe-area-inset-bottom,0px));
   opacity:0;pointer-events:none;transform:translateY(4px);
   transition:opacity 0.2s ease,transform 0.2s ease;
