@@ -540,6 +540,7 @@ body{
   -webkit-tap-highlight-color:transparent;user-select:none;
 }
 .garage-row:hover{border-color:var(--border2);background:var(--surf2);}
+.garage-row:hover .g-val{color:var(--accent-d);}
 .g-rank{font-family:'Bebas Neue',cursive;font-size:0.7rem;color:var(--muted);min-width:26px;}
 .g-emoji{
   width:38px;height:38px;border-radius:9px;
@@ -550,20 +551,21 @@ body{
 .g-name{font-size:0.9rem;font-weight:600;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;-webkit-line-clamp:2;word-break:break-word;}
 .g-meta{font-size:0.62rem;color:var(--text2);margin-top:3px;}
 .g-val{font-family:'Bebas Neue',cursive;font-size:1rem;color:var(--accent);flex-shrink:0;}
+.g-actions{display:flex;align-items:center;gap:2px;flex-shrink:0;}
+.g-fav{background:none;border:none;cursor:pointer;width:30px;height:30px;border-radius:8px;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all 0.15s;color:var(--accent);flex-shrink:0;}
+.g-fav:hover{background:var(--surf2);transform:scale(1.15);}
+.g-act-btn{background:none;border:none;cursor:pointer;width:30px;height:30px;border-radius:8px;font-size:0.65rem;display:flex;align-items:center;justify-content:center;transition:all 0.15s;color:var(--muted);flex-shrink:0;}
+.g-act-btn:hover{background:var(--surf2);color:var(--text);}
+.g-edit:hover{color:var(--accent);}
+.g-del:hover{color:var(--red);background:rgba(255,69,58,0.1);}
 .g-arrow{color:var(--muted);font-size:0.75rem;flex-shrink:0;transition:color 0.15s;text-decoration:none;}
 .garage-row:hover .g-arrow{color:var(--accent);}
-.g-edit,.g-del{background:none;border:none;cursor:pointer;padding:4px;flex-shrink:0;font-size:0.75rem;border-radius:6px;transition:background 0.12s;}
-.g-edit:hover{background:var(--surf3);}
-.g-del{width:36px;height:36px;position:relative;border-radius:50%;display:flex;align-items:center;justify-content:center;}
-.g-del::after{content:'✕';color:var(--muted);font-size:0.6rem;}
-.g-del:hover{background:rgba(255,69,58,0.1);}
-.g-del:hover::after{color:var(--red);}
 .g-spotted-count{
   font-size:0.46rem;color:var(--text2);background:var(--surf2);
   border:1px solid var(--border);border-radius:4px;
   padding:1px 6px;font-weight:700;letter-spacing:0.5px;
 }
-.empty-garage{padding:56px 20px;text-align:center;color:var(--muted);font-size:0.75rem;}
+.empty-garage{padding:56px 20px;text-align:center;color:var(--muted);font-size:0.75rem;line-height:1.7;}
 
 /* Grid */
 .garage-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
@@ -575,7 +577,9 @@ body{
 }
 .garage-card:hover{border-color:var(--border2);}
 .gc-img-wrap{width:100%;height:130px;overflow:hidden;background:var(--surf2);position:relative;}
-.gc-img{width:100%;height:100%;object-fit:cover;}
+.gc-img-wrap::after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,0.4) 0%,transparent 50%);pointer-events:none;z-index:1;}
+.gc-img{width:100%;height:100%;object-fit:cover;transition:transform 0.3s ease;}
+.garage-card:hover .gc-img{transform:scale(1.05);}
 .gc-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2rem;}
 .gc-photo-badge{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,0.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);color:#fff;font-size:0.42rem;font-weight:600;padding:3px 7px;border-radius:4px;letter-spacing:0.3px;pointer-events:none;white-space:nowrap;}
 .gc-body{padding:12px 14px;}
@@ -584,10 +588,12 @@ body{
 .gc-rarity{font-size:0.44rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-top:4px;display:block;}
 .gc-search{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);color:#fff;font-size:0.7rem;display:flex;align-items:center;justify-content:center;text-decoration:none;transition:background 0.15s;z-index:2;}
 .gc-search:hover{background:var(--accent);color:#000;}
-.gc-fav{position:absolute;bottom:6px;right:6px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:none;color:var(--accent);font-size:0.9rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.15s;z-index:2;}
+.gc-actions{position:absolute;bottom:6px;right:6px;display:flex;gap:4px;z-index:2;}
+.gc-fav,.gc-del{width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:none;font-size:0.85rem;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.15s,background 0.15s;}
+.gc-fav{color:var(--accent);}
 .gc-fav:hover{transform:scale(1.15);}
-.g-fav{background:none;border:none;cursor:pointer;padding:4px;flex-shrink:0;font-size:1rem;border-radius:6px;transition:transform 0.12s;color:var(--accent);}
-.g-fav:hover{transform:scale(1.2);}
+.gc-del{color:#fff;}
+.gc-del:hover{transform:scale(1.15);background:rgba(255,69,58,0.8);}
 .gc-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
 .gc-meta-chip{background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:5px 7px;}
 .gc-meta-label{font-size:0.4rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:1px;}
@@ -681,7 +687,7 @@ body{
 .hc-star-btn.active{color:var(--accent);}
 .hc-photo-btn{background:none;border:none;font-size:0.85rem;color:var(--muted);cursor:pointer;padding:6px 4px;transition:color 0.15s;opacity:0.5;flex-shrink:0;}
 .hc-photo-btn:hover{opacity:1;color:var(--accent);}
-.no-history{padding:56px 20px;text-align:center;color:var(--muted);font-size:0.75rem;}
+.no-history{padding:56px 20px;text-align:center;color:var(--muted);font-size:0.75rem;line-height:1.7;}
 
 /* ── NOTES ── */
 .notes-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-shrink:0;}
@@ -1488,7 +1494,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
         <button class="gf-pill" data-filter="hypercar" onclick="setGarageFilter('hypercar',this)">🚀 Hyper+</button>
       </div>
       <div id="garageList">
-        <div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">&#127950;</span>No cars yet!</div>
+        <div class="empty-garage"><div style="font-size:2.5rem;margin-bottom:12px;opacity:0.5">🚗</div><strong style="color:var(--text2);font-size:0.85rem;display:block;margin-bottom:4px">Your garage is empty</strong><span style="color:var(--muted)">Log your first car from the Spot tab!</span></div>
       </div>
     </div>
 
@@ -1522,7 +1528,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
         <button class="bulk-del-btn" onclick="bulkDelete()"> Delete</button>
       </div>
       <div id="histList">
-        <div class="no-history"><span style="font-size:1.8rem;display:block;margin-bottom:8px"></span>Nothing saved yet</div>
+        <div class="no-history"><div style="font-size:2rem;margin-bottom:10px;opacity:0.5">📋</div><strong style="color:var(--text2);font-size:0.85rem;display:block;margin-bottom:4px">No runs yet</strong>Complete a run or spot a solo car to see it here</div>
       </div>
     </div>
 
@@ -3216,7 +3222,7 @@ function renderGarage() {
 
   if (!filtered.length) {
     el.className = '';
-    el.innerHTML='<div class="empty-garage"><span style="font-size:1.8rem;display:block;margin-bottom:8px">&#128270;</span>'+(allCars.length?'No matches':'No cars yet!')+'</div>';
+    el.innerHTML='<div class="empty-garage"><div style="font-size:2.2rem;margin-bottom:12px;opacity:0.6">🔍</div><strong style="color:var(--text2);font-size:0.85rem;display:block;margin-bottom:4px">'+(allCars.length?'No matches found':'Your garage is empty')+'</strong>'+(allCars.length?'Try a different filter or search term':'Head to the Spot tab to log your first car!')+'</div>';
     return;
   }
   if (garageView === 'grid') {
@@ -3226,7 +3232,7 @@ function renderGarage() {
       var nameSuffix = car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '';
       var clickAttr = ' data-inst="1" data-car="' + encodeURIComponent(JSON.stringify(car)) + '"';
       var photoBadge = car.photo ? (car.photo.indexOf('data:') === 0 ? '<div class="gc-photo-badge">📷 Your Photo</div>' : '<div class="gc-photo-badge">🌐 Reference</div>') : '';
-      return '<div class="garage-card" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' + photoBadge : '<div class="gc-img-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<button class="gc-fav" onclick="event.stopPropagation();event.preventDefault();toggleFavorite(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')">' + (isFavorite(car.name) ? '★' : '☆') + '</button></div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Color</div><div class="gc-meta-val">' + escapeHtml(car.color || 'Unknown') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + escapeHtml(carTypeLabel(car.type)) + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + escapeHtml(car.runDate || 'Saved') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Place</div><div class="gc-meta-val">' + escapeHtml((car.location && car.location.label) || 'No pin') + '</div></div></div></div></div>';
+      return '<div class="garage-card" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' + photoBadge : '<div class="gc-img-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="gc-actions"><button class="gc-fav" onclick="event.stopPropagation();event.preventDefault();toggleFavorite(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="gc-del" onclick="event.stopPropagation();event.preventDefault();if(confirm(\'Delete ' + escapeHtml(car.name) + ' everywhere?\'))deleteCarEverywhere(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')" title="Delete car">✕</button></div></div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Color</div><div class="gc-meta-val">' + escapeHtml(car.color || 'Unknown') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + escapeHtml(carTypeLabel(car.type)) + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + escapeHtml(car.runDate || 'Saved') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Place</div><div class="gc-meta-val">' + escapeHtml((car.location && car.location.label) || 'No pin') + '</div></div></div></div></div>';
     }).join('');
     el.querySelectorAll('[data-inst]').forEach(function(a){
       attachCarTap(a);
@@ -3238,7 +3244,7 @@ function renderGarage() {
     var rarity = getRarity(car.value);
     var nameSuffix = car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '';
     var clickAttr = ' data-inst="1" data-car="' + encodeURIComponent(JSON.stringify(car)) + '"';
-    return '<div class="garage-row" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><button class="g-fav" onclick="event.stopPropagation();event.preventDefault();toggleFavorite(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')" title="' + (isFavorite(car.name) ? 'Remove from favorites' : 'Add to favorites') + '">' + (isFavorite(car.name) ? '★' : '☆') + '</button></div>';
+    return '<div class="garage-row" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" onclick="event.stopPropagation();event.preventDefault();toggleFavorite(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')" title="' + (isFavorite(car.name) ? 'Remove from favorites' : 'Add to favorites') + '">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" onclick="event.stopPropagation();event.preventDefault();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit car">✎</button><button class="g-act-btn g-del" onclick="event.stopPropagation();event.preventDefault();if(confirm(\'Delete ' + escapeHtml(car.name) + ' everywhere?\'))deleteCarEverywhere(\'' + escapeHtml(car.name).replace(/'/g,"\\'") + '\')" title="Delete car">✕</button></div></div>';
   }).join('');
   el.querySelectorAll('[data-inst]').forEach(function(a){
     attachCarTap(a);
@@ -3248,6 +3254,7 @@ function renderGarage() {
 function attachCarTap(el) {
   var x0, y0, moved;
   el.addEventListener('pointerdown', function(e) {
+    if (e.target.closest('button')) return;
     x0 = e.clientX;
     y0 = e.clientY;
     moved = false;
@@ -3342,7 +3349,7 @@ function renderHistory() {
   }
 
   const el = document.getElementById('histList');
-  if (!allRuns.length) { el.innerHTML='<div class="no-history"><span style="font-size:1.8rem;display:block;margin-bottom:8px"></span>Nothing saved yet</div>'; return; }
+  if (!allRuns.length) { el.innerHTML='<div class="no-history"><div style="font-size:2rem;margin-bottom:10px;opacity:0.5">📋</div><strong style="color:var(--text2);font-size:0.85rem;display:block;margin-bottom:4px">No runs yet</strong>Complete a run or spot a solo car and it will appear here</div>'; return; }
 
   const pageRuns = allRuns.slice(0, (histPage + 1) * HIST_PAGE_SIZE);
   const hasMore  = allRuns.length > pageRuns.length;
