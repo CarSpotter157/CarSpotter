@@ -3223,7 +3223,6 @@ function renderGarage() {
   if (!filtered.length) {
     el.className = '';
     el.innerHTML='<div class="empty-garage"><div style="font-size:2.2rem;margin-bottom:12px;opacity:0.6">🔍</div><strong style="color:var(--text2);font-size:0.85rem;display:block;margin-bottom:4px">'+(allCars.length?'No matches found':'Your garage is empty')+'</strong>'+(allCars.length?'Try a different filter or search term':'Head to the Spot tab to log your first car!')+'</div>';
-    attachGarageDelegates(el);
     return;
   }
   if (garageView === 'grid') {
@@ -3233,12 +3232,11 @@ function renderGarage() {
       var nameSuffix = car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '';
       var clickAttr = ' data-inst="1" data-car="' + encodeURIComponent(JSON.stringify(car)) + '"';
       var photoBadge = car.photo ? (car.photo.indexOf('data:') === 0 ? '<div class="gc-photo-badge">📷 Your Photo</div>' : '<div class="gc-photo-badge">🌐 Reference</div>') : '';
-      return '<div class="garage-card" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' + photoBadge : '<div class="gc-img-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="gc-actions"><button class="gc-fav" data-fav="' + escapeHtml(car.name) + '">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="gc-del" data-del="' + escapeHtml(car.name) + '">✕</button></div></div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Color</div><div class="gc-meta-val">' + escapeHtml(car.color || 'Unknown') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + escapeHtml(carTypeLabel(car.type)) + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + escapeHtml(car.runDate || 'Saved') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Place</div><div class="gc-meta-val">' + escapeHtml((car.location && car.location.label) || 'No pin') + '</div></div></div></div></div>';
+      return '<div class="garage-card" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' + photoBadge : '<div class="gc-img-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="gc-actions"><button class="gc-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\')">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="gc-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')">✕</button></div></div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Color</div><div class="gc-meta-val">' + escapeHtml(car.color || 'Unknown') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + escapeHtml(carTypeLabel(car.type)) + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + escapeHtml(car.runDate || 'Saved') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Place</div><div class="gc-meta-val">' + escapeHtml((car.location && car.location.label) || 'No pin') + '</div></div></div></div></div>';
     }).join('');
     el.querySelectorAll('[data-inst]').forEach(function(a){
       attachCarTap(a);
     });
-    attachGarageDelegates(el);
     return;
   }
   el.className = '';
@@ -3246,27 +3244,11 @@ function renderGarage() {
     var rarity = getRarity(car.value);
     var nameSuffix = car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '';
     var clickAttr = ' data-inst="1" data-car="' + encodeURIComponent(JSON.stringify(car)) + '"';
-    return '<div class="garage-row" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" data-fav="' + escapeHtml(car.name) + '">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" data-edit="' + encodeURIComponent(JSON.stringify(car)) + '">✎</button><button class="g-act-btn g-del" data-del="' + escapeHtml(car.name) + '">✕</button></div></div>';
+    return '<div class="garage-row" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\')">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')">✎</button><button class="g-act-btn g-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')">✕</button></div></div>';
   }).join('');
   el.querySelectorAll('[data-inst]').forEach(function(a){
     attachCarTap(a);
   });
-  attachGarageDelegates(el);
-}
-
-// Shared delegated listener for garage action buttons (applied once to each container)
-function attachGarageDelegates(el) {
-  // Remove previous listener to avoid duplicates on re-render
-  el.removeEventListener('click', el._garageClick);
-  el._garageClick = function(e) {
-    var t = e.target.closest('[data-fav],[data-edit],[data-del]');
-    if (!t) return;
-    e.stopPropagation();
-    if (t.hasAttribute('data-fav')) toggleFavorite(t.getAttribute('data-fav'));
-    else if (t.hasAttribute('data-edit')) openEditCarModal(t.getAttribute('data-edit'));
-    else if (t.hasAttribute('data-del')) deleteCarEverywhere(t.getAttribute('data-del'));
-  };
-  el.addEventListener('click', el._garageClick);
 }
 
 function attachCarTap(el) {
