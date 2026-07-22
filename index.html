@@ -1625,12 +1625,16 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
           <div class="setting-icon">Data</div>
           <div class="setting-copy">
             <div class="card-title">EXPORT & BACKUP</div>
-            <div class="setting-desc">Download all your runs and garage data as a JSON file you can import later.</div>
+            <div class="setting-desc">Download all your runs, garage, aliases, settings as JSON. Import later to restore.</div>
           </div>
         </div>
-        <button class="setting-link" onclick="exportAllData()">
-          <span>Export all data</span>
+        <button class="setting-link" onclick="exportLocalData()">
+          <span>Export (no photos)</span>
           <span style="color:var(--accent)">↓ JSON</span>
+        </button>
+        <button class="setting-link" onclick="exportAllData()">
+          <span>Export WITH photos</span>
+          <span style="color:var(--accent)">↓ JSON (large)</span>
         </button>
       </div>
 
@@ -3789,19 +3793,77 @@ function showToast(msg) {
   setTimeout(()=>t.classList.remove('show'),2300);
 }
 
+function deepStripPhotos(obj) {
+  if (Array.isArray(obj)) {
+    obj.forEach(deepStripPhotos);
+  } else if (obj && typeof obj === 'object') {
+    delete obj.photo;
+    for (const k of Object.keys(obj)) {
+      if (k === 'cars' && Array.isArray(obj[k])) {
+        obj[k].forEach(deepStripPhotos);
+      } else if (typeof obj[k] === 'object') {
+        deepStripPhotos(obj[k]);
+      }
+    }
+  }
+  return obj;
+}
+
 function exportLocalData() {
-  const data = {
-    cs_runs:    localStorage.getItem('cs_runs')    || '[]',
-    cs_current: localStorage.getItem('cs_current') || '[]',
-    cs_qp:      localStorage.getItem('cs_qp')      || '[]',
-    cs_notes:   localStorage.getItem('cs_notes')   || '',
-    exported:   new Date().toISOString()
-  };
+  // Export ALL cs_* localStorage keys, with photos stripped
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('cs_')) {
+      data[key] = localStorage.getItem(key);
+    }
+  }
+  // Deep-strip photos from runs, current, qp
+  try {
+    if (data.cs_runs) {
+      const runs = JSON.parse(data.cs_runs);
+      data.cs_runs = JSON.stringify(deepStripPhotos(runs));
+    }
+    if (data.cs_current) {
+      const cur = JSON.parse(data.cs_current);
+      data.cs_current = JSON.stringify(deepStripPhotos(cur));
+    }
+    if (data.cs_qp) {
+      const qp = JSON.parse(data.cs_qp);
+      data.cs_qp = JSON.stringify(deepStripPhotos(qp));
+    }
+  } catch(e) {}
+  data.exportedAt = new Date().toISOString();
+  data.version = 21;
+  data.includePhotos = false;
+
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href = url; a.download = 'carspotter-backup.json'; a.click();
+  a.href = url; a.download = 'carspotter-backup-nophotos.json'; a.click();
   URL.revokeObjectURL(url);
+  showToast('📥 Exported all data (no photos)');
+}
+
+function exportAllData() {
+  // Export with photos included (larger file)
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('cs_')) {
+      data[key] = localStorage.getItem(key);
+    }
+  }
+  data.exportedAt = new Date().toISOString();
+  data.version = 21;
+  data.includePhotos = true;
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'CarSpotter_backup_full_' + new Date().toISOString().slice(0,10) + '.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('📥 Exported all data WITH photos — file may be large');
 }
 
 function importFromFile(input) {
@@ -3811,36 +3873,64 @@ function importFromFile(input) {
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target.result);
-      const importedRuns = JSON.parse(data.cs_runs || '[]');
-      const importedQP   = JSON.parse(data.cs_qp   || '[]');
-      const importedCur  = JSON.parse(data.cs_current || '[]');
-      const importedNotes = data.cs_notes || '';
+      const hasPhotos = data.includePhotos === true;
 
-      const existingIds = new Set(allRuns.map(r => r.id));
-      const newRuns = importedRuns.filter(r => !existingIds.has(r.id));
-      allRuns = [...newRuns, ...allRuns];
-
-      importedQP.forEach(car => {
-        if (!quickPicks.find(q => q.name.toLowerCase() === car.name.toLowerCase()))
-          quickPicks.push(car);
-      });
-
-      if (!currentRun.length && importedCur.length) currentRun = importedCur;
-
-      const area = document.getElementById('notesArea');
-      if (!localStorage.getItem('cs_notes') && importedNotes) {
-        localStorage.setItem('cs_notes', importedNotes);
-        if (area) area.value = importedNotes;
+      let restored = 0;
+      for (const key of Object.keys(data)) {
+        if (key.startsWith('cs_')) {
+          localStorage.setItem(key, data[key]);
+          restored++;
+        }
       }
 
-      saveToCloud();
-      renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
-      showToast(' Restored ' + newRuns.length + ' runs from backup!');
+      // Reload all runtime state from localStorage
+      allRuns    = JSON.parse(localStorage.getItem('cs_runs')    || '[]');
+      currentRun = JSON.parse(localStorage.getItem('cs_current') || '[]');
+      quickPicks = JSON.parse(localStorage.getItem('cs_qp')      || '[]');
+      aliases    = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
+      bestFromLB = parseInt(localStorage.getItem('cs_best_lb')   || '0');
+      _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
+
+      // Re-apply settings
+      const theme = parseInt(localStorage.getItem('cs_theme') || '0');
+      applyTheme(theme);
+      carbonOn = localStorage.getItem('cs_carbon') === 'on';
+      applyCarbon();
+      compactMode = localStorage.getItem('cs_compact') === 'on';
+      applyCompactMode();
+      soundEnabled = localStorage.getItem('cs_sound') !== 'off';
+      const soundToggle = document.getElementById('soundToggle');
+      if (soundToggle) soundToggle.classList.toggle('on', soundEnabled);
+
+      // Reload notes textarea
+      const savedNotes = localStorage.getItem('cs_notes') || '';
+      const notesArea = document.getElementById('notesArea');
+      if (notesArea) notesArea.value = savedNotes;
+
+      // Refresh everything
+      renderAll();
+      showToast('✅ Restored ' + restored + ' data fields' +
+        (hasPhotos ? ' WITH photos' : ' (no photos)') +
+        ' — ' + allRuns.reduce((s,r) => s + (r.cars||[]).length, 0) + ' cars total');
+      // Re-check achievements
+      setTimeout(checkNewAchievements, 800);
     } catch(err) {
-      alert('Could not read backup file. Make sure it\'s a valid carspotter-backup.json');
+      alert('Could not read backup file: ' + err.message);
     }
   };
   reader.readAsText(file);
+}
+
+function renderAll() {
+  renderThemeBar();
+  renderQPTrigger();
+  renderSpot();
+  renderGarage();
+  renderHistory();
+  renderAchievements();
+  refreshOfflineStatus();
+  initSortPrefBtns();
+  updateAliasCount();
 }
 
 //  ENTER KEYS 
@@ -4412,17 +4502,6 @@ function initSortPrefBtns() {
   document.querySelectorAll('.sort-pref-btn').forEach(b => b.classList.remove('active'));
   const btn = document.getElementById('spb-' + (sortMode || 'desc'));
   if (btn) btn.classList.add('active');
-}
-
-// ── EXPORT ALL DATA ──
-function exportAllData() {
-  const data = { runs: allRuns, quickPicks, exportedAt: new Date().toISOString(), version: 20 };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'CarSpotter_backup_' + new Date().toISOString().slice(0,10) + '.json';
-  a.click(); URL.revokeObjectURL(url);
-  showToast('📥 Backup downloaded!');
 }
 
 // ── CLEAR ALL DATA ──
