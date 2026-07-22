@@ -2427,10 +2427,10 @@ function dismissInstall() {
   setTimeout(showInstall, 4000);
 
 //  FAVORITES 
-function renderHomeFav(){const el=document.getElementById('favList');const all=getAllCars();const f=all.slice().sort((a,b)=>b.value-a.value).slice(0,10);if(!f.length){document.getElementById('favSection').style.display='none';return}document.getElementById('favSection').style.display='block';
-el.innerHTML=f.map(c=>'<div class="fav-item" onclick="showCarInstances('+JSON.stringify(c).replace(/"/g,'&quot;')+')">'+(c.photo?'<img class="fav-item-img" src="'+c.photo+'" onerror="this.style.display=\'none\'">':'<div class="fav-item-ph"><i class="fas fa-star"></i></div>')+'<div class="fav-item-name">'+c.name.split(' ').pop()+'</div><div class="fav-item-val">$'+((c.value||0).toLocaleString())+'</div></div>').join('');}
-function startFavRotation(){if(favTimer)clearInterval(favTimer);const all=getAllCars();const f=all.slice().sort((a,b)=>b.value-a.value).slice(0,10);if(f.length<2)return;favIdx=0;var scroller=document.getElementById('favList');if(!scroller)return;favTimer=setInterval(function(){favIdx=(favIdx+1)%f.length;var child=scroller.children[favIdx];if(child)child.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'})},4000);}
-function stopFavRotation(){if(favTimer){clearInterval(favTimer);favTimer=null}}
+var _favRendered = false;
+function renderHomeFav(){var el=document.getElementById('favList');var all=getAllCars();var f=all.slice().sort(function(a,b){return b.value-a.value}).slice(0,10);if(!f.length){document.getElementById('favSection').style.display='none';return}if(_favRendered){document.getElementById('favSection').style.display='block';return}_favRendered=true;var html=f.map(function(c){return'<div class="fav-item" onclick="showCarInstances('+JSON.stringify(c).replace(/"/g,'&quot;')+')">'+(c.photo?'<img class="fav-item-img" src="'+c.photo+'" onerror="this.style.display=\'none\'">':'<div class="fav-item-ph"><i class="fas fa-star"></i></div>')+'<div class="fav-item-name">'+c.name.split(' ').pop()+'</div><div class="fav-item-val">$'+((c.value||0).toLocaleString())+'</div></div>'}).join('');el.innerHTML=html;document.getElementById('favSection').style.display='block';}
+function startFavRotation(){if(favTimer)return;var all=getAllCars();var f=all.slice().sort(function(a,b){return b.value-a.value}).slice(0,10);if(f.length<2)return;favIdx=0;var scroller=document.getElementById('favList');if(!scroller)return;favTimer=setInterval(function(){favIdx=(favIdx+1)%f.length;var child=scroller.children[favIdx];if(child)child.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'})},4000);}
+function stopFavRotation(){if(favTimer){clearInterval(favTimer);favTimer=null}_favRendered=false;}
 
 //  NAV 
 function goTo(page) {
