@@ -1106,6 +1106,12 @@ body.carbon-on .modal-card{
 .map-list-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .map-list-name{flex:1;font-size:0.65rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .map-list-val{font-family:'Bebas Neue',cursive;font-size:0.7rem;color:var(--accent);flex-shrink:0;}
+.news-headliner{position:relative;margin:0 -16px 18px;height:260px;overflow:hidden;background:var(--surf);border-bottom:1px solid var(--border);cursor:pointer}
+.news-headliner img{width:100%;height:100%;object-fit:cover}
+.news-headliner .hl-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,10,12,.95) 0%,transparent 60%);display:flex;flex-direction:column;justify-content:flex-end;padding:20px}
+.news-headliner .hl-source{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent)}
+.news-headliner .hl-title{font-family:"Bebas Neue",cursive;font-size:26px;font-weight:400;color:var(--text);line-height:1.1;letter-spacing:0;margin-top:4px}
+.news-headliner .hl-date{font-size:11px;color:var(--text2);margin-top:4px}
 
 /* ── MORE PAGE ── */
 .more-page-tile{
@@ -1686,6 +1692,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
     <div class="page" id="page-news">
       <div class="sec-title" style="margin-bottom:10px">Car News</div>
+      <div id="newsHeadliner" class="news-headliner" style="display:none" onclick="window.open(window._hlLink || '#', '_blank')"></div>
       <div id="newsSources" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;overflow-x:auto;padding-bottom:2px;"></div>
       <div id="newsList"></div>
     </div>
@@ -1778,10 +1785,6 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
     <button class="nav-btn" onclick="goTo('voice')" id="nav-voice">
       <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span>
       <span class="nav-label">Notes</span>
-    </button>
-    <button class="nav-btn" onclick="goTo('news')" id="nav-news">
-      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg></span>
-      <span class="nav-label">News</span>
     </button>
     <button class="nav-btn" onclick="goTo('more')" id="nav-more">
       <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.3" fill="currentColor" stroke="none"/></svg></span>
@@ -5287,6 +5290,15 @@ function switchSource(i) {
   loadNews();
 }
 
+function extractNewsImg(item) {
+  if (item.thumbnail && item.thumbnail.length > 4) return item.thumbnail;
+  if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.startsWith('image')) return item.enclosure.link;
+  if (item['media:content'] && item['media:content'].url) return item['media:content'].url;
+  const html = [item.description, item.content].filter(Boolean).join(' ');
+  const m = html.match(/<img[^>]+src\s*=\s*["']([^"']+)["']/i);
+  if (m) return m[1];
+  return '';
+}
 async function loadNews() {
   const el = document.getElementById('newsList');
   el.innerHTML = '<div class="news-loading">Loading latest news...</div>';
@@ -5295,36 +5307,37 @@ async function loadNews() {
     const res  = await fetch(url);
     const data = await res.json();
     if (!data.items || !data.items.length) throw new Error('No items');
-    el.innerHTML = data.items.map((item, idx) => {
-      const date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
-      const title = item.title || 'No title';
-      const link  = item.link  || '#';
-      // Try all possible thumbnail fields from rss2json
-      let imgSrc = '';
-      if (item.thumbnail && item.thumbnail.length > 4) {
-        imgSrc = item.thumbnail;
-      } else if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.startsWith('image')) {
-        imgSrc = item.enclosure.link;
-      } else {
-        // Parse from description or content HTML
-        const html = item.description || item.content || '';
-        const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
-        if (m) imgSrc = m[1];
+    var hl = document.getElementById('newsHeadliner');
+    if (hl) {
+      var first = data.items[0];
+      var hlImg = extractNewsImg(first);
+      hl.style.display = hlImg ? 'block' : 'none';
+      if (hlImg) {
+        hl.innerHTML = '<img src="' + hlImg + '" alt="" onerror="this.outerHTML=\'<div style=width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var\\(--surf2\\)></div>\'"><div class="hl-overlay"><div class="hl-source">' + NEWS_SOURCES[activeSource].name + '</div><div class="hl-title">' + escapeHtml(first.title || '') + '</div><div class="hl-date">' + (first.pubDate ? new Date(first.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '') + '</div></div>';
       }
-      const imgHTML = imgSrc
-        ? `<img class="news-card-img" src="${imgSrc}" alt="" onerror="this.outerHTML='<div class=news-card-img-ph>🚘</div>'">`
-        : `<div class="news-card-img-ph">🚘</div>`;
-      return `<a class="news-card" href="${link}" target="_blank" rel="noopener" style="animation-delay:${idx*0.03}s">
-        ${imgHTML}
-        <div class="news-card-body">
-          <div class="news-source">${NEWS_SOURCES[activeSource].name}</div>
-          <div class="news-title">${title}</div>
-          <div class="news-date">${date}</div>
-        </div>
-      </a>`;
+      window._hlLink = first.link || '#';
+    }
+    el.innerHTML = data.items.map(function(item, idx) {
+      var date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
+      var title = item.title || 'No title';
+      var link  = item.link  || '#';
+      var imgSrc = extractNewsImg(item);
+      var imgHTML = imgSrc
+        ? '<img class="news-card-img" src="' + imgSrc + '" alt="" onerror="this.outerHTML=\'<div class=news-card-img-ph>🚘</div>\'">'
+        : '<div class="news-card-img-ph">🚘</div>';
+      return '<a class="news-card" href="' + link + '" target="_blank" rel="noopener" style="animation-delay:' + (idx*0.03) + 's">' +
+        imgHTML +
+        '<div class="news-card-body">' +
+          '<div class="news-source">' + NEWS_SOURCES[activeSource].name + '</div>' +
+          '<div class="news-title">' + escapeHtml(title) + '</div>' +
+          '<div class="news-date">' + escapeHtml(date) + '</div>' +
+        '</div>' +
+      '</a>';
     }).join('');
   } catch(e) {
     el.innerHTML = '<div class="news-error">Could not load news — check your connection.</div>';
+    var hl = document.getElementById('newsHeadliner');
+    if (hl) hl.style.display = 'none';
   }
 }
 
