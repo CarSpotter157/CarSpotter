@@ -1905,8 +1905,8 @@ function _mergeRunHistory(local, cloud) {
   for (const r of local) byId.set(r.id, r);
   for (const r of cloud) {
     const existing = byId.get(r.id);
+    // Prefer local version on conflict — it reflects the user's latest edits/deletions
     if (!existing) byId.set(r.id, r);
-    else if ((r.cars||[]).length > (existing.cars||[]).length) byId.set(r.id, r);
   }
   return [...byId.values()];
 }
