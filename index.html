@@ -2037,7 +2037,9 @@ async function loadFromCloud() {
     const snap = await db.collection('users').doc(currentUser.uid).get();
     if (snap.exists) {
       const d = snap.data();
-      if (d.currentRun && !currentRun.length) currentRun = d.currentRun.slice();
+      // Take cloud currentRun only if it's newer than the last local currentRun save
+      const localCRTs = parseInt(localStorage.getItem('cs_current_ts') || '0');
+      if (d.currentRun && d.updatedAt > localCRTs) currentRun = d.currentRun.slice();
       if (d.allRuns)    allRuns    = _mergeRunHistory(allRuns, d.allRuns.filter((r,i,a) => a.findIndex(x=>x.id===r.id)===i));
       if (d.quickPicks) quickPicks = _mergeQuickPicks(quickPicks, d.quickPicks);
       if (d.notes != null) {
@@ -2774,6 +2776,7 @@ function showUnicornAlert(total) {
 function saveCurrentRun() {
   _lastSave = Date.now();
   localStorage.setItem('cs_current', JSON.stringify(currentRun));
+  localStorage.setItem('cs_current_ts', String(_lastSave));
   saveToCloud();
 }
 
