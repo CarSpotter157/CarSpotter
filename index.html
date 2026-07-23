@@ -2037,7 +2037,7 @@ async function loadFromCloud() {
     const snap = await db.collection('users').doc(currentUser.uid).get();
     if (snap.exists) {
       const d = snap.data();
-      if (d.currentRun) currentRun = d.currentRun.slice();
+      if (d.currentRun && !currentRun.length) currentRun = d.currentRun.slice();
       if (d.allRuns)    allRuns    = _mergeRunHistory(allRuns, d.allRuns.filter((r,i,a) => a.findIndex(x=>x.id===r.id)===i));
       if (d.quickPicks) quickPicks = _mergeQuickPicks(quickPicks, d.quickPicks);
       if (d.notes != null) {
