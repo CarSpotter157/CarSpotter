@@ -9,20 +9,16 @@
 <meta name="theme-color" content="#0a0a0a">
 <title>CarSpotter</title>
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='55%25' font-size='110' text-anchor='middle' dominant-baseline='middle'%3E%F0%9F%9B%B5%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'; this.onload=null">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'; this.onload=null">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
 <script>
-//  FIREBASE CONFIG 
-// This key is intentionally client-side (Firebase design). Protect your data by:
-// 1. Firebase Console → App Check (enable reCAPTCHA enforcement)
-// 2. Firebase Console → Authentication → Authorized Domains (restrict to your GitHub Pages domain)
-// 3. Firestore Security Rules: require auth for all writes, rate-limit with request.time checks
-// The key itself cannot be hidden in a single-file web app — security comes from rules, not key secrecy.
+// Firebase config
 firebase.initializeApp({
   apiKey: "AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug",
   authDomain: "carspotter-d5d82.firebaseapp.com",
@@ -33,7 +29,6 @@ firebase.initializeApp({
 });
 const auth = firebase.auth();
 const db   = firebase.firestore();
-
 </script>
 <style>
 /* ═══════════════════════════════════════════════
@@ -1513,7 +1508,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
   </div>
 </div>
 
-<div class="app-shell" id="appShell" style="display:none">
+<div class="app-shell" id="appShell">
 
   <!-- mobile header -->
   <header class="app-header">
@@ -1558,22 +1553,22 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
             <div class="card-title">Log a Car</div>
             <div class="form-grid">
               <div class="ff">
-                <label>Make / Model</label>
+                <label for="carName">Make / Model</label>
                 <div class="car-ac-wrap" id="carAcWrap">
                   <input id="carName" type="text" placeholder="Ferrari 488" autocomplete="off" oninput="onCarNameInput(this.value)" onblur="setTimeout(closeCarAc,180)" onfocus="onCarNameInput(this.value)">
                   <div class="car-ac-dropdown" id="carAcDropdown"></div>
                 </div>
               </div>
               <div class="ff">
-                <label>Value ($)</label>
+                <label for="carValue">Value ($)</label>
                 <input id="carValue" type="number" placeholder="280000" min="0" inputmode="numeric">
               </div>
               <div class="ff">
-                <label>Color</label>
+                <label for="carColor">Color</label>
                 <input id="carColor" type="text" placeholder="Rosso Corsa" autocomplete="off">
               </div>
               <div class="ff">
-                <label>Type</label>
+                <label for="carType">Type</label>
                 <select id="carType">
                   <option value="" disabled selected>— Select Type —</option>
                   <option value="supercar">Supercar</option>
@@ -2020,20 +2015,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 <div class="toast" id="toast"></div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
 
-<script>
-// 
-//  ALL STATE (must be declared first) 
-// 
-let currentUser  = null;
-let syncUnsub    = null;
-let syncTimer    = null;
-let _lastSave    = 0;
 
-let currentRun   = JSON.parse(localStorage.getItem('cs_current') || '[]');
-let allRuns      = JSON.parse(localStorage.getItem('cs_runs')    || '[]');
-let quickPicks   = JSON.parse(localStorage.getItem('cs_qp')      || '[]');
-let sortMode     = 'desc';
-let qpOpen       = false;
 let qpEditMode   = false;
 let headlinerIdx = -1;
 let favTimer = null;
@@ -2051,7 +2033,7 @@ let bestFromLB = parseInt(localStorage.getItem('cs_best_lb') || '0');
 let favoriteNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
 let currentSpotLocation = JSON.parse(localStorage.getItem('cs_pending_loc') || 'null');
 
-// Garage view — declared here so renderGarage() works before auth fires
+// GARAGE VIEW — declared here so renderGarage() works before auth fires
 let garageFilter = 'all';
 let garageView   = 'list';
 
@@ -2167,9 +2149,9 @@ function importLocalData() {
 
 auth.onAuthStateChanged(async user => {
   currentUser = user;
+  var authOverlay = document.getElementById('authOverlay');
   if (user) {
-    document.getElementById('authOverlay').style.display = 'none';
-    document.getElementById('appShell').style.display    = 'flex';
+    authOverlay.style.display = 'none';
     renderUserPill();
     _lastSave = Date.now();
     await loadFromCloud();
@@ -2179,10 +2161,9 @@ auth.onAuthStateChanged(async user => {
     const localRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
     if (localRuns.length > 0) showImportBanner(localRuns.length);
   } else {
-    document.getElementById('authOverlay').style.display = 'flex';
+    authOverlay.style.display = 'flex';
     document.getElementById('authLoading').style.display = 'none';
     document.getElementById('authContent').style.display = '';
-    document.getElementById('appShell').style.display    = 'none';
     document.getElementById('userPillWrap').innerHTML    = '';
     if (syncUnsub) { syncUnsub(); syncUnsub = null; }
   }
@@ -5850,6 +5831,7 @@ async function loadNews() {
   }
 })();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 </body>
 </html>
 
