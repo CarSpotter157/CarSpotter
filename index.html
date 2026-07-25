@@ -2033,6 +2033,9 @@ let leaderboardLoaded = false;
 let bestFromLB = parseInt(localStorage.getItem('cs_best_lb') || '0');
 let favoriteNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
 let currentSpotLocation = JSON.parse(localStorage.getItem('cs_pending_loc') || 'null');
+let allRuns      = JSON.parse(localStorage.getItem('cs_runs')      || '[]');
+let currentRun   = JSON.parse(localStorage.getItem('cs_current')   || '[]');
+let quickPicks   = JSON.parse(localStorage.getItem('cs_qp')        || '[]');
 
 // GARAGE VIEW — declared here so renderGarage() works before auth fires
 let garageFilter = 'all';
