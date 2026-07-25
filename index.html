@@ -221,7 +221,7 @@ body{
   align-items:center;justify-content:center;gap:3px;
   background:none;border:none;cursor:pointer;
   color:var(--muted);transition:all 0.3s var(--ease);position:relative;
-  padding:4px 0;
+  padding:4px 0;touch-action:manipulation;
 }
 .nav-btn:active{transform:scale(0.88);}
 .nav-btn.active{color:var(--accent);}
@@ -2683,15 +2683,18 @@ function goTo(page) {
   const navEl = document.getElementById('nav-'+page);
   if (navEl) navEl.classList.add('active');
   closeQP();
-  if (page==='garage')       renderGarage();
-  if (page==='history')      renderHistory();
-  if (page==='achievements') renderAchievements();
-  if (page==='settings')     { renderThemeBar(); initSoundToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); initSortPrefBtns(); applyCompactMode(); }
-  if (page==='news')         { if (!newsLoaded) { newsLoaded=true; renderNewsSources(); } loadNews(); }
-  if (page==='leaderboard')  loadLeaderboard(true);
-  if (page==='stats')        renderStats();
-  if (page==='spot')         { renderHomeFav(); setTimeout(startFavRotation, 250); }
   updatePageTransition(page);
+  // Defer heavy rendering to next frame so INP stays fast
+  requestAnimationFrame(() => {
+    if (page==='garage')       renderGarage();
+    if (page==='history')      renderHistory();
+    if (page==='achievements') renderAchievements();
+    if (page==='settings')     { renderThemeBar(); initSoundToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); initSortPrefBtns(); applyCompactMode(); }
+    if (page==='news')         { if (!newsLoaded) { newsLoaded=true; renderNewsSources(); } loadNews(); }
+    if (page==='leaderboard')  loadLeaderboard(true);
+    if (page==='stats')        renderStats();
+    if (page==='spot')         { renderHomeFav(); setTimeout(startFavRotation, 250); }
+  });
 }
 
 //  FORMAT 
