@@ -11,25 +11,11 @@
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='55%25' font-size='110' text-anchor='middle' dominant-baseline='middle'%3E%F0%9F%9B%B5%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'; this.onload=null">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'; this.onload=null">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
-<script>
-// Firebase config
-firebase.initializeApp({
-  apiKey: "AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug",
-  authDomain: "carspotter-d5d82.firebaseapp.com",
-  projectId: "carspotter-d5d82",
-  storageBucket: "carspotter-d5d82.firebasestorage.app",
-  messagingSenderId: "1052055414051",
-  appId: "1:1052055414051:web:cd8ee5100f9e591d739896"
-});
-const auth = firebase.auth();
-const db   = firebase.firestore();
-</script>
 <style>
 /* ═══════════════════════════════════════════════
    CARSPOTTER v24
@@ -2015,7 +2001,21 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 <div class="toast" id="toast"></div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
 
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey: "AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug",
+  authDomain: "carspotter-d5d82.firebaseapp.com",
+  projectId: "carspotter-d5d82",
+  storageBucket: "carspotter-d5d82.firebasestorage.app",
+  messagingSenderId: "1052055414051",
+  appId: "1:1052055414051:web:cd8ee5100f9e591d739896"
+});
+const auth = firebase.auth();
+const db   = firebase.firestore();
+</script>
 <script>
 let qpEditMode   = false;
 let headlinerIdx = -1;
