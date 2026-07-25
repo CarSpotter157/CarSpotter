@@ -199,9 +199,9 @@ body{
 .page.active{
   opacity:1;pointer-events:all;
 }
-.page-enter-forward{animation:pageSlideIn 0.25s ease both;}
-.page-enter-back{animation:pageSlideIn 0.25s ease both reverse;}
-@keyframes pageSlideIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+.page-enter-forward{animation:pageFadeIn 0.15s ease both;}
+.page-enter-back{animation:pageFadeIn 0.15s ease both reverse;}
+@keyframes pageFadeIn{from{opacity:0}to{opacity:1}}
 
 /* ── SCROLLBAR ── */
 ::-webkit-scrollbar{width:4px;height:4px;}
@@ -4648,7 +4648,7 @@ function updatePageTransition(page){
   target.classList.remove('page-enter-forward', 'page-enter-back');
   var dir = pageOrder.indexOf(page) >= pageOrder.indexOf(currentPage) ? 'page-enter-forward' : 'page-enter-back';
   target.classList.add(dir);
-  setTimeout(function(){ target.classList.remove(dir); }, 280);
+  setTimeout(function(){ target.classList.remove(dir); }, 180);
   currentPage = page;
 }
 
