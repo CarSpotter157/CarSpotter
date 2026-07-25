@@ -3765,46 +3765,44 @@ function showCarInstances(car) {
 }
 
 function addPhotoToCar(name) {
-  // Opens file picker and attaches photo to ALL instances of this car everywhere
-  const key = name.toLowerCase();
-  const input = document.createElement('input');
+  var key = name.toLowerCase();
+  var input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/*';
+  input.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
   input.onchange = function(e) {
-    const file = e.target.files[0];
+    var file = e.target.files[0];
     if (!file) return;
-    const reader = new FileReader();
+    var reader = new FileReader();
+    reader.onerror = function() { showToast('Could not read photo'); };
     reader.onload = function(ev) {
-      const raw = ev.target.result;
-      const img = new Image();
+      var raw = ev.target.result;
+      var img = new Image();
+      img.onerror = function() { showToast('Photo could not be loaded'); };
       img.onload = function() {
         try {
-          const MAX = 800;
-          let w = img.width, h = img.height;
+          var MAX = 800;
+          var w = img.width, h = img.height;
           if (w > MAX || h > MAX) {
             if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
             else      { w = Math.round(w * MAX / h); h = MAX; }
           }
-          const c = document.createElement('canvas');
+          var c = document.createElement('canvas');
           c.width = w; c.height = h;
           c.getContext('2d').drawImage(img, 0, 0, w, h);
-          const compressed = c.toDataURL('image/jpeg', 0.6);
-          // Attach to all instances in allRuns
+          var compressed = c.toDataURL('image/jpeg', 0.6);
           allRuns.forEach(function(run) {
             run.cars.forEach(function(car) {
               if (car.name.toLowerCase() === key) car.photo = compressed;
             });
           });
           localStorage.setItem('cs_runs', JSON.stringify(allRuns));
-          // Attach to currentRun
           currentRun.forEach(function(car) {
             if (car.name.toLowerCase() === key) car.photo = compressed;
           });
           saveCurrentRun();
-          // Attach to QP
           var qp = quickPicks.find(function(q) { return q.name.toLowerCase() === key; });
           if (qp) { qp.photo = compressed; localStorage.setItem('cs_qp', JSON.stringify(quickPicks)); }
-          // Close detail modal if open and re-show
           var detailEl = document.getElementById('detailOverlay');
           if (detailEl) detailEl.remove();
           renderSpot();
@@ -3818,7 +3816,9 @@ function addPhotoToCar(name) {
     };
     reader.readAsDataURL(file);
   };
+  document.body.appendChild(input);
   input.click();
+  setTimeout(function() { if (input.parentNode) input.parentNode.removeChild(input); }, 1000);
 }
 const _csCacheK = 'cs_lk_v1';
 function _csGet(k) {
@@ -4489,12 +4489,16 @@ _attachPhotoInput.accept = 'image/*';
 _attachPhotoInput.style.display = 'none';
 _attachPhotoInput.onchange = function(e) {
   const file = e.target.files[0];
-  if (!file || !_photoAttachTarget) return;
+  if (!file) return;
+  const t = _photoAttachTarget;
+  _photoAttachTarget = null;
+  if (!t) return;
   const reader = new FileReader();
+  reader.onerror = function() { showToast('Could not read photo'); };
   reader.onload = function(ev) {
     const raw = ev.target.result;
-    // Compress
     const img = new Image();
+    img.onerror = function() { showToast('Photo could not be loaded'); };
     img.onload = function() {
       try {
         const MAX = 800;
@@ -4508,22 +4512,18 @@ _attachPhotoInput.onchange = function(e) {
         c.getContext('2d').drawImage(img, 0, 0, w, h);
         const compressed = c.toDataURL('image/jpeg', 0.6);
         
-        const t = _photoAttachTarget;
         if (t.type === 'run') {
           if (currentRun[t.index]) {
             currentRun[t.index].photo = compressed;
             saveCurrentRun();
             renderSpot();
-            // Also save the photo to QP for future use
             const qp = quickPicks.find(q => q.name.toLowerCase() === currentRun[t.index].name.toLowerCase());
             if (qp) { qp.photo = compressed; localStorage.setItem('cs_qp', JSON.stringify(quickPicks)); }
           }
         } else if (t.type === 'instance') {
-          // Find and update in allRuns
           const runIdx = allRuns.findIndex(r => r.id === t.runId);
           if (runIdx >= 0 && allRuns[runIdx].cars[t.carIndex]) {
             allRuns[runIdx].cars[t.carIndex].photo = compressed;
-            // Also update the run total if it's a solo spot (doesn't change total but for consistency)
             localStorage.setItem('cs_runs', JSON.stringify(allRuns));
             saveToCloud();
           }
@@ -4531,7 +4531,6 @@ _attachPhotoInput.onchange = function(e) {
         showToast('📷 Photo attached!');
         renderGarage();
         renderHistory();
-        // If the detail modal is open, close and reopen it to show the photo
         const detailEl = document.getElementById('detailOverlay');
         if (detailEl) detailEl.remove();
       } catch(err) { showToast('Photo could not be processed'); }
@@ -4540,7 +4539,6 @@ _attachPhotoInput.onchange = function(e) {
   };
   reader.readAsDataURL(file);
   e.target.value = '';
-  _photoAttachTarget = null;
 };
 document.body.appendChild(_attachPhotoInput);
 
@@ -4553,9 +4551,9 @@ function handlePhotoInput(input) {
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
+  reader.onerror = function() { showToast('Could not read photo'); };
   reader.onload = (e) => {
     const raw = e.target.result;
-    // Store raw photo IMMEDIATELY so getPhotoAndClear() works even if compression is slow
     pendingPhotoDataUrl = raw;
     const wrap = document.getElementById('photoPreviewWrap');
     wrap.style.display = 'block';
@@ -4564,8 +4562,8 @@ function handlePhotoInput(input) {
       <button class="photo-remove" onclick="removePhoto()"></button>
     </div>`;
     showToast(' Photo attached!');
-    // Compress in background — replaces raw with compressed when ready
     const img = new Image();
+    img.onerror = function() { /* keep raw photo on load failure */ };
     img.onload = () => {
       try {
         const MAX = 800;
@@ -4578,7 +4576,6 @@ function handlePhotoInput(input) {
         c.width = w; c.height = h;
         c.getContext('2d').drawImage(img, 0, 0, w, h);
         const compressed = c.toDataURL('image/jpeg', 0.6);
-        // Only replace if still pending (user hasn't saved/removed yet)
         if (pendingPhotoDataUrl === raw) {
           pendingPhotoDataUrl = compressed;
           const imgEl = wrap.querySelector('.photo-preview-img');
