@@ -2016,6 +2016,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
 
 
+<script>
 let qpEditMode   = false;
 let headlinerIdx = -1;
 let favTimer = null;
@@ -2655,7 +2656,7 @@ function renderHomeFav(){
   var el=document.getElementById('favList');var all=getAllCars();
   var favs=all.filter(function(c){ return favoriteNames.has(c.name); }).sort(function(a,b){return b.value-a.value});
   if(!favs.length){document.getElementById('favSection').style.display='none';return}
-  var html=favs.map(function(c){return'<div class="fav-item" onclick="showCarInstances('+JSON.stringify(c).replace(/"/g,'&quot;')+')">'+(c.photo?'<img class="fav-item-img" src="'+c.photo+'" onerror="this.style.display=\'none\'">':'<div class="fav-item-ph"><i class="fas fa-star"></i></div>')+'<div class="fav-item-name">'+c.name.split(' ').pop()+'</div><div class="fav-item-val">$'+((c.value||0).toLocaleString())+'</div></div>'}).join('');el.innerHTML=html;document.getElementById('favSection').style.display='block';
+  var html=favs.map(function(c){var json=JSON.stringify(c).replace(/"/g,'&quot;');var img=c.photo?'<img class="fav-item-img" src="'+c.photo+'" onerror="this.style.display='+"'none'"+'">':'<div class="fav-item-ph"><i class="fas fa-star"></i></div>';return'<div class="fav-item" onclick="showCarInstances('+json+')">'+img+'<div class="fav-item-name">'+c.name.split(' ').pop()+'</div><div class="fav-item-val">$'+((c.value||0).toLocaleString())+'</div></div>'}).join('');el.innerHTML=html;document.getElementById('favSection').style.display='block';
 }
 function startFavRotation(){if(favTimer)clearInterval(favTimer);var all=getAllCars();var favs=all.filter(function(c){return favoriteNames.has(c.name)}).sort(function(a,b){return b.value-a.value});if(favs.length<2)return;favIdx=0;var scroller=document.getElementById('favList');if(!scroller)return;favTimer=setInterval(function(){favIdx=(favIdx+1)%favs.length;var child=scroller.children[favIdx];if(child)child.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'})},4000);}
 function stopFavRotation(){if(favTimer){clearInterval(favTimer);favTimer=null}}
@@ -5597,7 +5598,7 @@ async function loadNews() {
       var hlImg = extractNewsImg(first);
       hl.style.display = hlImg ? 'block' : 'none';
       if (hlImg) {
-        hl.innerHTML = '<img src="' + hlImg + '" alt="" onerror="this.outerHTML=\'<div style=width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var\\(--surf2\\)></div>\'"><div class="hl-overlay"><div class="hl-source">' + NEWS_SOURCES[activeSource].name + '</div><div class="hl-title">' + escapeHtml(first.title || '') + '</div><div class="hl-date">' + (first.pubDate ? new Date(first.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '') + '</div></div>';
+        hl.innerHTML = '<img src="' + hlImg + '" alt="" onerror="this.outerHTML=\'<div style=width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surf2)></div>\'"><div class="hl-overlay"><div class="hl-source">' + NEWS_SOURCES[activeSource].name + '</div><div class="hl-title">' + escapeHtml(first.title || '') + '</div><div class="hl-date">' + (first.pubDate ? new Date(first.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '') + '</div></div>';
       }
       window._hlLink = first.link || '#';
     }
