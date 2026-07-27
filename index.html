@@ -4425,26 +4425,80 @@ const _attachPhotoInput = document.createElement('input');
 _attachPhotoInput.type = 'file';
 _attachPhotoInput.accept = 'image/*';
 _attachPhotoInput.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
+function _freeStorage() {
+  var freed = 0;
+  // Remove photos from oldest 3 runs
+  var runs = [...allRuns].sort(function(a,b){ return a.date > b.date ? 1 : -1; });
+  runs.slice(0, 3).forEach(function(run) {
+    run.cars.forEach(function(car) {
+      if (car.photo) { car.photo = ''; freed++; }
+    });
+  });
+  if (freed) { localStorage.setItem('cs_runs', JSON.stringify(allRuns)); }
+  return freed;
+}
+
+function _safeSet(key, val) {
+  try { localStorage.setItem(key, val); return true; } catch(e) {
+    if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || e.code === 22) {
+      var f = _freeStorage();
+      try { localStorage.setItem(key, val); return true; } catch(e2) {
+        showToast('Storage full — ' + f + ' old photos removed, still full. Clear more data.');
+        return false;
+      }
+    }
+    return false;
+  }
+}
+
+function _savePhoto(compressed) {
+  var t = _photoAttachTarget; _photoAttachTarget = null;
+  if (!t) return;
+  if (t.type === 'run') {
+    if (currentRun[t.index]) {
+      currentRun[t.index].photo = compressed; saveCurrentRun(); renderSpot();
+      var qp = quickPicks.find(q => q.name.toLowerCase() === currentRun[t.index].name.toLowerCase());
+      if (qp) { qp.photo = compressed; _safeSet('cs_qp', JSON.stringify(quickPicks)); }
+    }
+  } else if (t.type === 'instance') {
+    var runIdx = allRuns.findIndex(r => r.id === t.runId);
+    if (runIdx >= 0 && allRuns[runIdx].cars[t.carIndex]) {
+      allRuns[runIdx].cars[t.carIndex].photo = compressed;
+      _safeSet('cs_runs', JSON.stringify(allRuns)); saveToCloud();
+    }
+  } else if (t.type === 'all') {
+    var key = t.name.toLowerCase();
+    allRuns.forEach(function(run) { run.cars.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = compressed; }); });
+    if (!_safeSet('cs_runs', JSON.stringify(allRuns))) { showToast('Storage full — clear some old data'); return; }
+    currentRun.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = compressed; });
+    saveCurrentRun();
+    var qp = quickPicks.find(function(q) { return q.name.toLowerCase() === key; });
+    if (qp) { qp.photo = compressed; _safeSet('cs_qp', JSON.stringify(quickPicks)); }
+    showToast('📷 Photo added to all "' + t.name + '" sightings!');
+  }
+  renderGarage(); renderHistory();
+  var detailEl = document.getElementById('detailOverlay');
+  if (detailEl) detailEl.remove();
+  if (t.type !== 'all') showToast('📷 Photo attached!');
+}
+
 _attachPhotoInput.onchange = function(e) {
   try {
-  showToast('📎 File picker returned');
   const file = e.target.files[0];
-  if (!file) { showToast('No file selected'); return; }
+  if (!file) return;
   const t = _photoAttachTarget;
   _photoAttachTarget = null;
-  if (!t) { showToast('No attach target'); return; }
+  if (!t) return;
   const reader = new FileReader();
   reader.onerror = function() { showToast('Could not read photo'); };
   reader.onload = function(ev) {
     try {
-      showToast('📖 File read: ' + (ev.target.result ? ev.target.result.length + ' chars' : 'empty'));
       const raw = ev.target.result;
       const img = new Image();
       img.onerror = function() { showToast('Photo could not be loaded'); };
       img.onload = function() {
         try {
-          showToast('🖼️ Image decoded: ' + img.width + 'x' + img.height);
-          const MAX = 800;
+          const MAX = 600;
           let w = img.width, h = img.height;
           if (w > MAX || h > MAX) {
             if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
@@ -4453,47 +4507,13 @@ _attachPhotoInput.onchange = function(e) {
           const c = document.createElement('canvas');
           c.width = w; c.height = h;
           c.getContext('2d').drawImage(img, 0, 0, w, h);
-          const compressed = c.toDataURL('image/jpeg', 0.6);
-          
-          if (t.type === 'run') {
-            if (currentRun[t.index]) {
-              currentRun[t.index].photo = compressed;
-              saveCurrentRun();
-              renderSpot();
-              const qp = quickPicks.find(q => q.name.toLowerCase() === currentRun[t.index].name.toLowerCase());
-              if (qp) { qp.photo = compressed; localStorage.setItem('cs_qp', JSON.stringify(quickPicks)); }
-            }
-          } else if (t.type === 'instance') {
-            const runIdx = allRuns.findIndex(r => r.id === t.runId);
-            if (runIdx >= 0 && allRuns[runIdx].cars[t.carIndex]) {
-              allRuns[runIdx].cars[t.carIndex].photo = compressed;
-              localStorage.setItem('cs_runs', JSON.stringify(allRuns));
-              saveToCloud();
-            }
-          } else if (t.type === 'all') {
-            showToast('🔍 Searching for: ' + t.name);
-            var key = t.name.toLowerCase();
-            var matchCount = 0;
-            allRuns.forEach(function(run) {
-              run.cars.forEach(function(car) {
-                if (car.name.toLowerCase() === key) { car.photo = compressed; matchCount++; }
-              });
-            });
-            localStorage.setItem('cs_runs', JSON.stringify(allRuns));
-            currentRun.forEach(function(car) {
-              if (car.name.toLowerCase() === key) { car.photo = compressed; matchCount++; }
-            });
-            saveCurrentRun();
-            showToast('✅ Updated ' + matchCount + ' sightings');
-            var qp = quickPicks.find(function(q) { return q.name.toLowerCase() === key; });
-            if (qp) { qp.photo = compressed; localStorage.setItem('cs_qp', JSON.stringify(quickPicks)); }
-            showToast('📷 Photo added to all "' + t.name + '" sightings!');
+          var quality = 0.4;
+          var compressed = c.toDataURL('image/jpeg', quality);
+          while (compressed.length > 50000 && quality > 0.1) {
+            quality -= 0.1;
+            compressed = c.toDataURL('image/jpeg', quality);
           }
-          renderGarage();
-          renderHistory();
-          const detailEl = document.getElementById('detailOverlay');
-          if (detailEl) detailEl.remove();
-          if (t.type !== 'all') showToast('📷 Photo attached!');
+          _savePhoto(compressed);
         } catch(err) { showToast('Photo error: ' + err.message); }
       };
       img.src = raw;
