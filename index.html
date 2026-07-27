@@ -4437,8 +4437,16 @@ _attachPhotoInput.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
 
 function _idbOpen() {
   return new Promise(function(res, rej) {
-    var r = indexedDB.open('CarSpotterPhotos', 1);
-    r.onupgradeneeded = function(e) { e.target.result.createObjectStore('photos', { keyPath: 'name' }); };
+    var r = indexedDB.open('CarSpotterPhotos', 2);
+    r.onupgradeneeded = function(e) {
+      var db = e.target.result;
+      if (e.oldVersion < 1) db.createObjectStore('photos');
+      // v1 had keyPath, v2 uses out-of-line keys — delete old store if needed
+      if (e.oldVersion < 2 && db.objectStoreNames.contains('photos')) {
+        db.deleteObjectStore('photos');
+        db.createObjectStore('photos');
+      }
+    };
     r.onsuccess = function(e) { res(e.target.result); };
     r.onerror = function(e) { rej(e.target.error); };
   });
@@ -4448,7 +4456,7 @@ function _idbPut(name, data) {
   return _idbOpen().then(function(db) {
     return new Promise(function(res, rej) {
       var tx = db.transaction('photos', 'readwrite');
-      tx.objectStore('photos').put({ name: name.toLowerCase(), data: data });
+      tx.objectStore('photos').put(data, name.toLowerCase());
       tx.oncomplete = function() { _idbPhotoCache[name.toLowerCase()] = data; res(); };
       tx.onerror = function(e) { rej(e.target.error); };
     });
@@ -4459,16 +4467,21 @@ function _idbGetAll() {
   return _idbOpen().then(function(db) {
     return new Promise(function(res, rej) {
       var tx = db.transaction('photos', 'readonly');
-      var r = tx.objectStore('photos').getAll();
-      r.onsuccess = function(e) { res(e.target.result || []); };
-      r.onerror = function(e) { rej(e.target.error); };
+      var cursor = tx.objectStore('photos').openCursor();
+      var results = [];
+      cursor.onsuccess = function(e) {
+        var c = e.target.result;
+        if (c) { results.push({ key: c.key, value: c.value }); c.continue(); }
+        else res(results);
+      };
+      cursor.onerror = function(e) { rej(e.target.error); };
     });
   });
 }
 
 function _loadIDBCache() {
   _idbGetAll().then(function(entries) {
-    entries.forEach(function(e) { _idbPhotoCache[e.name] = e.data; });
+    entries.forEach(function(e) { _idbPhotoCache[e.key] = e.value; });
   }).catch(function(){});
 }
 
