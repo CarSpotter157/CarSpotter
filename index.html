@@ -2043,6 +2043,9 @@ let syncUnsub    = null;
 let syncTimer    = null;
 let qpOpen       = false;
 
+// Load IndexedDB photos into cache
+_loadIDBCache();
+
 // GARAGE VIEW — declared here so renderGarage() works before auth fires
 let garageFilter = 'all';
 let garageView   = 'list';
@@ -3093,6 +3096,7 @@ function getBest() {
 
 //  RENDER SPOT PAGE 
 function renderSpot() {
+  _patchPhotosFromCache();
   var total = currentRun.reduce(function(s,c){ return s + c.value; }, 0);
   var best = getBest();
   animateValue(document.getElementById('runTotal'), runTotalAnimated || 0, total, fmtFull, 420);
@@ -3146,6 +3150,7 @@ function renderSpot() {
 
 //  GARAGE 
 function getAllCars() {
+  _patchPhotosFromCache();
   const seen = new Map();
   // Iterate oldest-first so most recent data wins on update
   [...allRuns].reverse().forEach(run => {
@@ -3351,6 +3356,7 @@ function buildClusterPopup(cluster) {
 }
 
 function renderGarage() {
+  _patchPhotosFromCache();
   var allCars = getAllCars();
   var filtered = applyGarageFilters(sorted(allCars));
   var total = allCars.reduce(function(x,c){ return x + c.value; }, 0);
@@ -3535,6 +3541,7 @@ const HIST_PAGE_SIZE = 30;
 let histPage = 0;
 
 function renderHistory() {
+  _patchPhotosFromCache();
   const best = getBest();
   const rw   = document.getElementById('recordWrap');
   rw.style.display = best>0 ? 'block' : 'none';
@@ -4425,25 +4432,80 @@ const _attachPhotoInput = document.createElement('input');
 _attachPhotoInput.type = 'file';
 _attachPhotoInput.accept = 'image/*';
 _attachPhotoInput.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
-function _freeStorage() {
-  var freed = 0;
-  // Remove photos from oldest 3 runs
-  var runs = [...allRuns].sort(function(a,b){ return a.date > b.date ? 1 : -1; });
-  runs.slice(0, 3).forEach(function(run) {
-    run.cars.forEach(function(car) {
-      if (car.photo) { car.photo = ''; freed++; }
+// IndexedDB photo storage — sidesteps localStorage 5MB limit
+var _idbPhotoCache = {};
+
+function _idbOpen() {
+  return new Promise(function(res, rej) {
+    var r = indexedDB.open('CarSpotterPhotos', 1);
+    r.onupgradeneeded = function(e) { e.target.result.createObjectStore('photos', { keyPath: 'name' }); };
+    r.onsuccess = function(e) { res(e.target.result); };
+    r.onerror = function(e) { rej(e.target.error); };
+  });
+}
+
+function _idbPut(name, data) {
+  return _idbOpen().then(function(db) {
+    return new Promise(function(res, rej) {
+      var tx = db.transaction('photos', 'readwrite');
+      tx.objectStore('photos').put({ name: name.toLowerCase(), data: data });
+      tx.oncomplete = function() { _idbPhotoCache[name.toLowerCase()] = data; res(); };
+      tx.onerror = function(e) { rej(e.target.error); };
     });
   });
-  if (freed) { localStorage.setItem('cs_runs', JSON.stringify(allRuns)); }
-  return freed;
+}
+
+function _idbGetAll() {
+  return _idbOpen().then(function(db) {
+    return new Promise(function(res, rej) {
+      var tx = db.transaction('photos', 'readonly');
+      var r = tx.objectStore('photos').getAll();
+      r.onsuccess = function(e) { res(e.target.result || []); };
+      r.onerror = function(e) { rej(e.target.error); };
+    });
+  });
+}
+
+function _loadIDBCache() {
+  _idbGetAll().then(function(entries) {
+    entries.forEach(function(e) { _idbPhotoCache[e.name] = e.data; });
+  }).catch(function(){});
+}
+
+function _patchPhotosFromCache() {
+  allRuns.forEach(function(run) {
+    run.cars.forEach(function(car) {
+      if (!car.photo && _idbPhotoCache[car.name.toLowerCase()]) {
+        car.photo = _idbPhotoCache[car.name.toLowerCase()];
+      }
+    });
+  });
+  currentRun.forEach(function(car) {
+    if (!car.photo && _idbPhotoCache[car.name.toLowerCase()]) {
+      car.photo = _idbPhotoCache[car.name.toLowerCase()];
+    }
+  });
+}
+
+function _freeStorage() {
+  var moved = 0;
+  allRuns.forEach(function(run) {
+    run.cars.forEach(function(car) {
+      if (car.photo) { _idbPut(car.name, car.photo); car.photo = ''; moved++; }
+    });
+  });
+  currentRun.forEach(function(car) {
+    if (car.photo) { _idbPut(car.name, car.photo); car.photo = ''; moved++; }
+  });
+  return moved;
 }
 
 function _safeSet(key, val) {
   try { localStorage.setItem(key, val); return true; } catch(e) {
     if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || e.code === 22) {
-      var f = _freeStorage();
+      _freeStorage();
       try { localStorage.setItem(key, val); return true; } catch(e2) {
-        showToast('Storage full — ' + f + ' old photos removed, still full. Clear more data.');
+        showToast('Storage still full after moving photos. Clear old data.');
         return false;
       }
     }
