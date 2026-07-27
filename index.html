@@ -4437,15 +4437,12 @@ _attachPhotoInput.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
 
 function _idbOpen() {
   return new Promise(function(res, rej) {
-    var r = indexedDB.open('CarSpotterPhotos', 2);
+    var r = indexedDB.open('CarSpotterPhotos', 3);
     r.onupgradeneeded = function(e) {
       var db = e.target.result;
-      if (e.oldVersion < 1) db.createObjectStore('photos');
-      // v1 had keyPath, v2 uses out-of-line keys — delete old store if needed
-      if (e.oldVersion < 2 && db.objectStoreNames.contains('photos')) {
-        db.deleteObjectStore('photos');
-        db.createObjectStore('photos');
-      }
+      // v1+v2 may have had keyPath 'name' or no keyPath — recreate cleanly
+      if (db.objectStoreNames.contains('photos')) db.deleteObjectStore('photos');
+      db.createObjectStore('photos', { keyPath: 'name' });
     };
     r.onsuccess = function(e) { res(e.target.result); };
     r.onerror = function(e) { rej(e.target.error); };
@@ -4456,7 +4453,7 @@ function _idbPut(name, data) {
   return _idbOpen().then(function(db) {
     return new Promise(function(res, rej) {
       var tx = db.transaction('photos', 'readwrite');
-      tx.objectStore('photos').put(data, name.toLowerCase());
+      tx.objectStore('photos').put({ name: name.toLowerCase(), data: data });
       tx.oncomplete = function() { _idbPhotoCache[name.toLowerCase()] = data; res(); };
       tx.onerror = function(e) { rej(e.target.error); };
     });
@@ -4467,21 +4464,16 @@ function _idbGetAll() {
   return _idbOpen().then(function(db) {
     return new Promise(function(res, rej) {
       var tx = db.transaction('photos', 'readonly');
-      var cursor = tx.objectStore('photos').openCursor();
-      var results = [];
-      cursor.onsuccess = function(e) {
-        var c = e.target.result;
-        if (c) { results.push({ key: c.key, value: c.value }); c.continue(); }
-        else res(results);
-      };
-      cursor.onerror = function(e) { rej(e.target.error); };
+      var r = tx.objectStore('photos').getAll();
+      r.onsuccess = function(e) { res(e.target.result || []); };
+      r.onerror = function(e) { rej(e.target.error); };
     });
   });
 }
 
 function _loadIDBCache() {
   _idbGetAll().then(function(entries) {
-    entries.forEach(function(e) { _idbPhotoCache[e.key] = e.value; });
+    entries.forEach(function(e) { _idbPhotoCache[e.name] = e.data; });
   }).catch(function(){});
 }
 
@@ -4501,27 +4493,11 @@ function _patchPhotosFromCache() {
   });
 }
 
-function _freeStorage() {
-  var moved = 0;
-  allRuns.forEach(function(run) {
-    run.cars.forEach(function(car) {
-      if (car.photo) { _idbPut(car.name, car.photo); car.photo = ''; moved++; }
-    });
-  });
-  currentRun.forEach(function(car) {
-    if (car.photo) { _idbPut(car.name, car.photo); car.photo = ''; moved++; }
-  });
-  return moved;
-}
-
 function _safeSet(key, val) {
   try { localStorage.setItem(key, val); return true; } catch(e) {
     if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || e.code === 22) {
-      _freeStorage();
-      try { localStorage.setItem(key, val); return true; } catch(e2) {
-        showToast('Storage still full after moving photos. Clear old data.');
-        return false;
-      }
+      showToast('Storage full. Delete old cars in settings to free space.');
+      return false;
     }
     return false;
   }
@@ -4544,8 +4520,19 @@ function _savePhoto(compressed, t) {
   } else if (t.type === 'all') {
     var key = t.name.toLowerCase();
     allRuns.forEach(function(run) { run.cars.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = compressed; }); });
-    if (!_safeSet('cs_runs', JSON.stringify(allRuns))) { showToast('Storage full — clear some old data'); return; }
     currentRun.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = compressed; });
+    if (!_safeSet('cs_runs', JSON.stringify(allRuns))) {
+      _idbPut(t.name, compressed);
+      _idbPhotoCache[t.name.toLowerCase()] = compressed;
+      allRuns.forEach(function(run) { run.cars.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = ''; }); });
+      currentRun.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = ''; });
+      try { localStorage.setItem('cs_runs', JSON.stringify(allRuns)); } catch(e) {}
+      try { localStorage.setItem('cs_current', JSON.stringify(currentRun)); } catch(e) {}
+      showToast('📷 Saved to extended storage');
+      renderGarage(); renderHistory();
+      var de2 = document.getElementById('detailOverlay'); if (de2) de2.remove();
+      return;
+    }
     saveCurrentRun();
     var qp = quickPicks.find(function(q) { return q.name.toLowerCase() === key; });
     if (qp) { qp.photo = compressed; _safeSet('cs_qp', JSON.stringify(quickPicks)); }
