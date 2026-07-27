@@ -4427,20 +4427,23 @@ _attachPhotoInput.accept = 'image/*';
 _attachPhotoInput.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
 _attachPhotoInput.onchange = function(e) {
   try {
+  showToast('📎 File picker returned');
   const file = e.target.files[0];
-  if (!file) return;
+  if (!file) { showToast('No file selected'); return; }
   const t = _photoAttachTarget;
   _photoAttachTarget = null;
-  if (!t) return;
+  if (!t) { showToast('No attach target'); return; }
   const reader = new FileReader();
   reader.onerror = function() { showToast('Could not read photo'); };
   reader.onload = function(ev) {
     try {
+      showToast('📖 File read: ' + (ev.target.result ? ev.target.result.length + ' chars' : 'empty'));
       const raw = ev.target.result;
       const img = new Image();
       img.onerror = function() { showToast('Photo could not be loaded'); };
       img.onload = function() {
         try {
+          showToast('🖼️ Image decoded: ' + img.width + 'x' + img.height);
           const MAX = 800;
           let w = img.width, h = img.height;
           if (w > MAX || h > MAX) {
@@ -4468,17 +4471,20 @@ _attachPhotoInput.onchange = function(e) {
               saveToCloud();
             }
           } else if (t.type === 'all') {
+            showToast('🔍 Searching for: ' + t.name);
             var key = t.name.toLowerCase();
+            var matchCount = 0;
             allRuns.forEach(function(run) {
               run.cars.forEach(function(car) {
-                if (car.name.toLowerCase() === key) car.photo = compressed;
+                if (car.name.toLowerCase() === key) { car.photo = compressed; matchCount++; }
               });
             });
             localStorage.setItem('cs_runs', JSON.stringify(allRuns));
             currentRun.forEach(function(car) {
-              if (car.name.toLowerCase() === key) car.photo = compressed;
+              if (car.name.toLowerCase() === key) { car.photo = compressed; matchCount++; }
             });
             saveCurrentRun();
+            showToast('✅ Updated ' + matchCount + ' sightings');
             var qp = quickPicks.find(function(q) { return q.name.toLowerCase() === key; });
             if (qp) { qp.photo = compressed; localStorage.setItem('cs_qp', JSON.stringify(quickPicks)); }
             showToast('📷 Photo added to all "' + t.name + '" sightings!');
