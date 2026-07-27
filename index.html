@@ -2042,6 +2042,7 @@ let _lastSave    = 0;
 let syncUnsub    = null;
 let syncTimer    = null;
 let qpOpen       = false;
+var _idbPhotoCache = {}; // must init early — used by renders before the photo section
 
 // Load IndexedDB photos into cache
 _loadIDBCache();
@@ -4433,7 +4434,6 @@ _attachPhotoInput.type = 'file';
 _attachPhotoInput.accept = 'image/*';
 _attachPhotoInput.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
 // IndexedDB photo storage — sidesteps localStorage 5MB limit
-var _idbPhotoCache = {};
 
 function _idbOpen() {
   return new Promise(function(res, rej) {
@@ -4473,6 +4473,7 @@ function _loadIDBCache() {
 }
 
 function _patchPhotosFromCache() {
+  if (!_idbPhotoCache) return;
   allRuns.forEach(function(run) {
     run.cars.forEach(function(car) {
       if (!car.photo && _idbPhotoCache[car.name.toLowerCase()]) {
