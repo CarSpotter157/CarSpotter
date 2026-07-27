@@ -4426,6 +4426,7 @@ _attachPhotoInput.type = 'file';
 _attachPhotoInput.accept = 'image/*';
 _attachPhotoInput.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
 _attachPhotoInput.onchange = function(e) {
+  try {
   const file = e.target.files[0];
   if (!file) return;
   const t = _photoAttachTarget;
@@ -4434,64 +4435,67 @@ _attachPhotoInput.onchange = function(e) {
   const reader = new FileReader();
   reader.onerror = function() { showToast('Could not read photo'); };
   reader.onload = function(ev) {
-    const raw = ev.target.result;
-    const img = new Image();
-    img.onerror = function() { showToast('Photo could not be loaded'); };
-    img.onload = function() {
-      try {
-        const MAX = 800;
-        let w = img.width, h = img.height;
-        if (w > MAX || h > MAX) {
-          if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
-          else      { w = Math.round(w * MAX / h); h = MAX; }
-        }
-        const c = document.createElement('canvas');
-        c.width = w; c.height = h;
-        c.getContext('2d').drawImage(img, 0, 0, w, h);
-        const compressed = c.toDataURL('image/jpeg', 0.6);
-        
-        if (t.type === 'run') {
-          if (currentRun[t.index]) {
-            currentRun[t.index].photo = compressed;
-            saveCurrentRun();
-            renderSpot();
-            const qp = quickPicks.find(q => q.name.toLowerCase() === currentRun[t.index].name.toLowerCase());
-            if (qp) { qp.photo = compressed; localStorage.setItem('cs_qp', JSON.stringify(quickPicks)); }
+    try {
+      const raw = ev.target.result;
+      const img = new Image();
+      img.onerror = function() { showToast('Photo could not be loaded'); };
+      img.onload = function() {
+        try {
+          const MAX = 800;
+          let w = img.width, h = img.height;
+          if (w > MAX || h > MAX) {
+            if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+            else      { w = Math.round(w * MAX / h); h = MAX; }
           }
-        } else if (t.type === 'instance') {
-          const runIdx = allRuns.findIndex(r => r.id === t.runId);
-          if (runIdx >= 0 && allRuns[runIdx].cars[t.carIndex]) {
-            allRuns[runIdx].cars[t.carIndex].photo = compressed;
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          const compressed = c.toDataURL('image/jpeg', 0.6);
+          
+          if (t.type === 'run') {
+            if (currentRun[t.index]) {
+              currentRun[t.index].photo = compressed;
+              saveCurrentRun();
+              renderSpot();
+              const qp = quickPicks.find(q => q.name.toLowerCase() === currentRun[t.index].name.toLowerCase());
+              if (qp) { qp.photo = compressed; localStorage.setItem('cs_qp', JSON.stringify(quickPicks)); }
+            }
+          } else if (t.type === 'instance') {
+            const runIdx = allRuns.findIndex(r => r.id === t.runId);
+            if (runIdx >= 0 && allRuns[runIdx].cars[t.carIndex]) {
+              allRuns[runIdx].cars[t.carIndex].photo = compressed;
+              localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+              saveToCloud();
+            }
+          } else if (t.type === 'all') {
+            var key = t.name.toLowerCase();
+            allRuns.forEach(function(run) {
+              run.cars.forEach(function(car) {
+                if (car.name.toLowerCase() === key) car.photo = compressed;
+              });
+            });
             localStorage.setItem('cs_runs', JSON.stringify(allRuns));
-            saveToCloud();
-          }
-        } else if (t.type === 'all') {
-          var key = t.name.toLowerCase();
-          allRuns.forEach(function(run) {
-            run.cars.forEach(function(car) {
+            currentRun.forEach(function(car) {
               if (car.name.toLowerCase() === key) car.photo = compressed;
             });
-          });
-          localStorage.setItem('cs_runs', JSON.stringify(allRuns));
-          currentRun.forEach(function(car) {
-            if (car.name.toLowerCase() === key) car.photo = compressed;
-          });
-          saveCurrentRun();
-          var qp = quickPicks.find(function(q) { return q.name.toLowerCase() === key; });
-          if (qp) { qp.photo = compressed; localStorage.setItem('cs_qp', JSON.stringify(quickPicks)); }
-          showToast('📷 Photo added to all "' + t.name + '" sightings!');
-        }
-        renderGarage();
-        renderHistory();
-        const detailEl = document.getElementById('detailOverlay');
-        if (detailEl) detailEl.remove();
-        if (t.type !== 'all') showToast('📷 Photo attached!');
-      } catch(err) { showToast('Photo could not be processed'); }
-    };
-    img.src = raw;
+            saveCurrentRun();
+            var qp = quickPicks.find(function(q) { return q.name.toLowerCase() === key; });
+            if (qp) { qp.photo = compressed; localStorage.setItem('cs_qp', JSON.stringify(quickPicks)); }
+            showToast('📷 Photo added to all "' + t.name + '" sightings!');
+          }
+          renderGarage();
+          renderHistory();
+          const detailEl = document.getElementById('detailOverlay');
+          if (detailEl) detailEl.remove();
+          if (t.type !== 'all') showToast('📷 Photo attached!');
+        } catch(err) { showToast('Photo could not be processed'); }
+      };
+      img.src = raw;
+    } catch(err) { showToast('Photo reader error: ' + err.message); }
   };
   reader.readAsDataURL(file);
   e.target.value = '';
+  } catch(err) { showToast('Photo error: ' + err.message); }
 };
 document.body.appendChild(_attachPhotoInput);
 
