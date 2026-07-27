@@ -4451,8 +4451,7 @@ function _safeSet(key, val) {
   }
 }
 
-function _savePhoto(compressed) {
-  var t = _photoAttachTarget; _photoAttachTarget = null;
+function _savePhoto(compressed, t) {
   if (!t) return;
   if (t.type === 'run') {
     if (currentRun[t.index]) {
@@ -4513,7 +4512,7 @@ _attachPhotoInput.onchange = function(e) {
             quality -= 0.1;
             compressed = c.toDataURL('image/jpeg', quality);
           }
-          _savePhoto(compressed);
+          _savePhoto(compressed, t);
         } catch(err) { showToast('Photo error: ' + err.message); }
       };
       img.src = raw;
