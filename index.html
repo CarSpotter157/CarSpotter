@@ -4494,7 +4494,7 @@ _attachPhotoInput.onchange = function(e) {
           const detailEl = document.getElementById('detailOverlay');
           if (detailEl) detailEl.remove();
           if (t.type !== 'all') showToast('📷 Photo attached!');
-        } catch(err) { showToast('Photo could not be processed'); }
+        } catch(err) { showToast('Photo error: ' + err.message); }
       };
       img.src = raw;
     } catch(err) { showToast('Photo reader error: ' + err.message); }
