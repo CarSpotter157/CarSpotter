@@ -1488,7 +1488,6 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
       <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" height="20" alt="">
       Continue with Google
     </button>
-    <button onclick="skipSignIn()" style="background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--text2);font-size:0.75rem;font-weight:600;padding:12px;cursor:pointer;font-family:'Inter',sans-serif;transition:color .15s,border-color .15s;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text2)'">Continue Without Account</button>
     <div class="auth-note">Your spots, runs &amp; garage sync automatically.<br>Works on any device you sign into.</div>
   </div>
   </div>
@@ -2015,6 +2014,12 @@ firebase.initializeApp({
 });
 const auth = firebase.auth();
 const db   = firebase.firestore();
+// Handle redirect sign-in result on every page load
+auth.getRedirectResult().catch(function(e) {
+  if (e.code !== 'auth/popup-blocked' && e.code !== 'auth/user-cancelled') {
+    console.warn('Redirect auth error:', e.message);
+  }
+});
 </script>
 <script>
 let qpEditMode   = false;
@@ -2112,29 +2117,8 @@ function _mergeQuickPicks(local, cloud) {
 //  FIREBASE AUTH & SYNC 
 
 window.signInGoogle = function() {
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(function() {
-    // Success - auth state change will handle the rest
-  }).catch(function(e) {
-    if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
-      // Popup blocked (COOP, ad blocker, etc.) — try redirect instead
-      auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider()).catch(function(e2) {
-        if (e2.code !== 'auth/user-cancelled') {
-          skipSignIn();
-        }
-      });
-    } else {
-      skipSignIn();
-    }
-  });
+  auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
 };
-function skipSignIn() {
-  document.getElementById('authOverlay').style.display = 'none';
-  document.getElementById('userPillWrap').innerHTML = '<div class="user-pill" style="cursor:default"><span style="font-size:0.6rem;color:var(--muted)">Offline</span><span class="sync-dot" style="background:var(--muted)"></span></div>';
-  renderSpot();
-  renderGarage();
-  renderHistory();
-  setTimeout(showInstall, 2000);
-}
 function signOutUser() {
   if (!confirm('Sign out?')) return;
   if (syncUnsub) { syncUnsub(); syncUnsub = null; }
@@ -2211,12 +2195,6 @@ setTimeout(function(){
     document.getElementById('authOverlay').style.display = 'flex';
   }
 }, 3000);
-// Handle redirect result (from signInWithRedirect)
-auth.getRedirectResult().catch(function(e) {
-  if (e.code !== 'auth/popup-blocked' && e.code !== 'auth/user-cancelled') {
-    console.warn('Redirect auth result:', e.message);
-  }
-});
 
 function showImportBanner(count) {
   if (document.getElementById('importBtn')) return;
