@@ -2111,8 +2111,18 @@ function _mergeQuickPicks(local, cloud) {
 //  FIREBASE AUTH & SYNC 
 
 window.signInGoogle = function() {
-  auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider())
-    .catch(e => alert('Sign-in error: ' + e.message));
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(function() {
+    // Success - auth state change will handle the rest
+  }).catch(function(e) {
+    if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user') {
+      // Popup blocked (COOP, ad blocker, etc.) — try redirect instead
+      auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider()).catch(function(e2) {
+        alert('Sign-in error: ' + e2.message);
+      });
+    } else {
+      alert('Sign-in error: ' + e.message);
+    }
+  });
 };
 function signOutUser() {
   if (!confirm('Sign out?')) return;
