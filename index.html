@@ -2181,6 +2181,15 @@ auth.onAuthStateChanged(async user => {
     if (syncUnsub) { syncUnsub(); syncUnsub = null; }
   }
 });
+// Fallback: if Firebase auth doesn't resolve in 3 seconds, show sign-in
+setTimeout(function(){
+  var loadingEl = document.getElementById('authLoading');
+  if (loadingEl && loadingEl.style.display !== 'none') {
+    loadingEl.style.display = 'none';
+    document.getElementById('authContent').style.display = '';
+    document.getElementById('authOverlay').style.display = 'flex';
+  }
+}, 3000);
 
 function showImportBanner(count) {
   if (document.getElementById('importBtn')) return;
