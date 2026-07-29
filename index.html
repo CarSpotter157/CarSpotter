@@ -2111,7 +2111,7 @@ function _mergeQuickPicks(local, cloud) {
 //  FIREBASE AUTH & SYNC 
 
 window.signInGoogle = function() {
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+  auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider())
     .catch(e => alert('Sign-in error: ' + e.message));
 };
 function signOutUser() {
@@ -2190,6 +2190,12 @@ setTimeout(function(){
     document.getElementById('authOverlay').style.display = 'flex';
   }
 }, 3000);
+// Handle redirect result (from signInWithRedirect)
+auth.getRedirectResult().catch(function(e) {
+  if (e.code !== 'auth/popup-blocked' && e.code !== 'auth/user-cancelled') {
+    console.warn('Redirect auth result:', e.message);
+  }
+});
 
 function showImportBanner(count) {
   if (document.getElementById('importBtn')) return;
