@@ -4681,7 +4681,7 @@ function photoThumbSmall(dataUrl) {
 function viewPhoto(dataUrl) {
   var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;cursor:pointer';o.onclick=function(){o.remove()};var i=document.createElement('img');i.src=dataUrl;i.style.cssText='max-width:95vw;max-height:95vh;object-fit:contain;border-radius:8px;box-shadow:0 4px 40px rgba(0,0,0,0.5)';o.appendChild(i);document.body.appendChild(o);
 }
-function(v){ return String(v || '').replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
+function escapeHtml(v){ return String(v || '').replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
 function jsEscape(v){ return String(v||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
 function locLabel(loc){ return !loc ? '' : (loc.label || [loc.city, loc.region].filter(Boolean).join(', ') || 'Pinned location'); }
 
