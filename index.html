@@ -2014,12 +2014,6 @@ firebase.initializeApp({
 });
 const auth = firebase.auth();
 const db   = firebase.firestore();
-// Handle redirect sign-in result on every page load
-auth.getRedirectResult().catch(function(e) {
-  if (e.code !== 'auth/popup-blocked' && e.code !== 'auth/user-cancelled') {
-    console.warn('Redirect auth error:', e.message);
-  }
-});
 </script>
 <script>
 let qpEditMode   = false;
@@ -2117,7 +2111,19 @@ function _mergeQuickPicks(local, cloud) {
 //  FIREBASE AUTH & SYNC 
 
 window.signInGoogle = function() {
-  auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+  // Link Google account to the current anonymous user, or sign in directly
+  var user = auth.currentUser;
+  if (user && user.isAnonymous) {
+    user.linkWithPopup(new firebase.auth.GoogleAuthProvider()).then(function() {
+      // Linked successfully
+    }).catch(function(e) {
+      if (e.code === 'auth/popup-blocked' || e.code === 'auth/credential-already-in-use') {
+        user.linkWithRedirect(new firebase.auth.GoogleAuthProvider());
+      }
+    });
+  } else {
+    auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+  }
 };
 function signOutUser() {
   if (!confirm('Sign out?')) return;
@@ -2168,6 +2174,8 @@ function importLocalData() {
 auth.onAuthStateChanged(async user => {
   currentUser = user;
   var authOverlay = document.getElementById('authOverlay');
+  var authLoading = document.getElementById('authLoading');
+  var authContent = document.getElementById('authContent');
   if (user) {
     authOverlay.style.display = 'none';
     renderUserPill();
@@ -2178,23 +2186,38 @@ auth.onAuthStateChanged(async user => {
     // Show import button if this device has local data
     const localRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
     if (localRuns.length > 0) showImportBanner(localRuns.length);
+  } else if (authLoading && authLoading.style.display !== 'none') {
+    // Still loading anonymous auth — keep spinner
   } else {
+    // No user, anonymous auth didn't work — check for redirect result
+    auth.getRedirectResult().then(function(result) {
+      if (result && result.user) {
+        return;
+      }
+    }).catch(function(e) {
+      if (e.code === 'auth/unauthorized-domain') {
+        console.error('Firebase redirect domain not authorized:', e.message);
+      }
+    });
     authOverlay.style.display = 'flex';
-    document.getElementById('authLoading').style.display = 'none';
-    document.getElementById('authContent').style.display = '';
+    if (authLoading) authLoading.style.display = 'none';
+    if (authContent) authContent.style.display = '';
     document.getElementById('userPillWrap').innerHTML    = '';
     if (syncUnsub) { syncUnsub(); syncUnsub = null; }
   }
 });
-// Fallback: if Firebase auth doesn't resolve in 3 seconds, show sign-in
+// Fallback: if Firebase auth doesn't resolve in 2 seconds, try anonymous sign-in
 setTimeout(function(){
   var loadingEl = document.getElementById('authLoading');
   if (loadingEl && loadingEl.style.display !== 'none') {
-    loadingEl.style.display = 'none';
-    document.getElementById('authContent').style.display = '';
-    document.getElementById('authOverlay').style.display = 'flex';
+    auth.signInAnonymously().catch(function() {
+      // Anonymous failed too — show Google sign-in
+      loadingEl.style.display = 'none';
+      document.getElementById('authContent').style.display = '';
+      document.getElementById('authOverlay').style.display = 'flex';
+    });
   }
-}, 3000);
+}, 2000);
 
 function showImportBanner(count) {
   if (document.getElementById('importBtn')) return;
