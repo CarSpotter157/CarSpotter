@@ -1477,7 +1477,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 <body>
 
 <!-- AUTH OVERLAY -->
-<div class="auth-overlay" id="authOverlay">
+<div class="auth-overlay" id="authOverlay" style="display:none">
   <div class="auth-loading" id="authLoading"><div class="auth-spinner"></div><div class="auth-loading-text">Initializing CarSpotter...</div></div>
   <div class="auth-content" id="authContent" style="display:none">
   <div class="auth-logo">Car<span>Spotter</span></div>
@@ -2111,14 +2111,14 @@ function _mergeQuickPicks(local, cloud) {
 //  FIREBASE AUTH & SYNC 
 
 window.signInGoogle = function() {
-  // Link Google account to the current anonymous user, or sign in directly
+  // If anonymously signed in, link Google account for cross-device sync
   var user = auth.currentUser;
   if (user && user.isAnonymous) {
     user.linkWithPopup(new firebase.auth.GoogleAuthProvider()).then(function() {
-      // Linked successfully
+      showToast('Google account linked!');
     }).catch(function(e) {
       if (e.code === 'auth/popup-blocked' || e.code === 'auth/credential-already-in-use') {
-        user.linkWithRedirect(new firebase.auth.GoogleAuthProvider());
+        showToast('Popup blocked — try allowing popups for this site');
       }
     });
   } else {
@@ -2174,50 +2174,39 @@ function importLocalData() {
 auth.onAuthStateChanged(async user => {
   currentUser = user;
   var authOverlay = document.getElementById('authOverlay');
-  var authLoading = document.getElementById('authLoading');
-  var authContent = document.getElementById('authContent');
   if (user) {
+    // Auth succeeded — hide overlay, enable cloud sync
     authOverlay.style.display = 'none';
     renderUserPill();
     _lastSave = Date.now();
-    await loadFromCloud();
+    loadFromCloud().catch(function(){});
     subscribeCloud();
     checkNewAchievements();
-    // Show import button if this device has local data
     const localRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
-    if (localRuns.length > 0) showImportBanner(localRuns.length);
-  } else if (authLoading && authLoading.style.display !== 'none') {
-    // Still loading anonymous auth — keep spinner
+    if (localRuns.length > 0 && !user.isAnonymous) showImportBanner(localRuns.length);
   } else {
-    // No user, anonymous auth didn't work — check for redirect result
-    auth.getRedirectResult().then(function(result) {
-      if (result && result.user) {
-        return;
-      }
-    }).catch(function(e) {
-      if (e.code === 'auth/unauthorized-domain') {
-        console.error('Firebase redirect domain not authorized:', e.message);
-      }
-    });
-    authOverlay.style.display = 'flex';
-    if (authLoading) authLoading.style.display = 'none';
-    if (authContent) authContent.style.display = '';
-    document.getElementById('userPillWrap').innerHTML    = '';
+    // No user — hide overlay anyway so app is usable
+    authOverlay.style.display = 'none';
+    document.getElementById('userPillWrap').innerHTML = '<div class="user-pill" onclick="showSignInSheet()">Sign In</div>';
+    // Try anonymous auth in background for potential cloud sync
+    auth.signInAnonymously().catch(function(){});
     if (syncUnsub) { syncUnsub(); syncUnsub = null; }
   }
 });
-// Fallback: if Firebase auth doesn't resolve in 2 seconds, try anonymous sign-in
-setTimeout(function(){
-  var loadingEl = document.getElementById('authLoading');
-  if (loadingEl && loadingEl.style.display !== 'none') {
-    auth.signInAnonymously().catch(function() {
-      // Anonymous failed too — show Google sign-in
-      loadingEl.style.display = 'none';
-      document.getElementById('authContent').style.display = '';
-      document.getElementById('authOverlay').style.display = 'flex';
-    });
-  }
-}, 2000);
+
+window.showSignInSheet = function() {
+  var overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = '<div class="modal-card" onclick="event.stopPropagation()" style="padding:24px 22px 36px;text-align:center">' +
+    '<div class="modal-handle"></div>' +
+    '<div style="font-family:\'Bebas Neue\',cursive;font-size:1.3rem;letter-spacing:2px;color:var(--text);margin-bottom:8px;">Car<span style="color:var(--accent)">Spotter</span></div>' +
+    '<div style="font-size:0.72rem;color:var(--text2);margin-bottom:16px;line-height:1.6;">Sign in to sync your runs, garage,<br>and settings across devices.</div>' +
+    '<button class="btn-google" onclick="this.closest(\'.modal-overlay\').remove();signInGoogle()" style="width:100%;max-width:260px;margin:0 auto 12px;">' +
+    '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" height="20" alt=""> Continue with Google</button>' +
+    '<div style="font-size:0.62rem;color:var(--muted);">Data stays on-device until you sign in.</div></div>';
+  document.body.appendChild(overlay);
+};
 
 function showImportBanner(count) {
   if (document.getElementById('importBtn')) return;
