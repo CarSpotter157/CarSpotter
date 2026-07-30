@@ -2323,6 +2323,28 @@ function subscribeCloud() {
     }
   });
 }
+//  FIRESTORE PHOTO STRIPPER — keeps base64 out of the 1 MB document limit 
+// Ensures every base64 photo is cached locally, then replaces with a key reference
+function _ensurePhotoIndexed(car) {
+  if (!car || !car.photo || car.photo.indexOf('data:') !== 0) return;
+  var key = car.name.toLowerCase();
+  _idbPhotoCache[key] = car.photo;
+  _idbPut(car.name, car.photo);
+}
+function _stripDeepPhotos(obj) {
+  if (Array.isArray(obj)) {
+    obj.forEach(function(item) { _stripDeepPhotos(item); });
+  } else if (obj && typeof obj === 'object') {
+    if (obj.photo && typeof obj.photo === 'string' && obj.photo.indexOf('data:') === 0) {
+      _ensurePhotoIndexed(obj);
+      obj.photo = 'photo:' + obj.name.toLowerCase();
+    }
+    for (var k in obj) {
+      if (typeof obj[k] === 'object') _stripDeepPhotos(obj[k]);
+    }
+  }
+  return obj;
+}
 
 function saveToCloud() {
   console.log('Starting Firestore save');
@@ -2347,13 +2369,42 @@ function saveToCloud() {
   _lastSave = Date.now();
   syncTimer = setTimeout(() => {
     console.log('Firestore save: writing to users/' + currentUser.uid);
-    db.collection('users').doc(currentUser.uid).set(JSON.parse(JSON.stringify({
-      currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
-      notes: localStorage.getItem('cs_notes') || '',
+    // Measure each field's byte size
+    function _size(v) { return new Blob([JSON.stringify(v)]).size; }
+    var _cr = JSON.parse(JSON.stringify(currentRun));
+    var _ar = JSON.parse(JSON.stringify(allRuns));
+    var _qp = JSON.parse(JSON.stringify(quickPicks || []));
+    var _nt = localStorage.getItem('cs_notes') || '';
+    console.log('Field sizes BEFORE strip (bytes):',
+      'currentRun=' + _size(_cr),
+      'allRuns=' + _size(_ar),
+      'quickPicks=' + _size(_qp),
+      'notes=' + _size(_nt),
+      'profileName=' + _size(currentUser?.displayName || 'Spotter'),
+      'profilePhoto=' + _size(currentUser?.photoURL || ''),
+      'total=' + _size({currentRun:_cr, allRuns:_ar, quickPicks:_qp, notes:_nt})
+    );
+    // Count runs and photos inside allRuns
+    var runCount = _ar.length;
+    var photoCount = _ar.filter(function(r){return r.cars}).reduce(function(a,c){return a + c.cars.filter(function(x){return x.photo}).length;}, 0);
+    var photoBytes = _ar.filter(function(r){return r.cars}).reduce(function(a,c){return a + c.cars.filter(function(x){return x.photo}).reduce(function(aa,xx){return aa + _size(xx.photo);}, 0);}, 0);
+    console.log('allRuns breakdown:', runCount + ' runs,', photoCount + ' photos, ' + photoBytes + ' bytes in photos');
+    // Strip base64 photos from a deep clone before writing to Firestore
+    var strippedAllRuns = JSON.parse(JSON.stringify(allRuns));
+    _stripDeepPhotos(strippedAllRuns);
+    var strippedCurrent = JSON.parse(JSON.stringify(currentRun));
+    _stripDeepPhotos(strippedCurrent);
+    var strippedQP = JSON.parse(JSON.stringify(quickPicks || []));
+    _stripDeepPhotos(strippedQP);
+    var strippedSize = _size({currentRun:strippedCurrent, allRuns:strippedAllRuns, quickPicks:strippedQP, notes:_nt});
+    console.log('Firestore payload AFTER strip: ' + strippedSize + ' bytes (was ' + _size({currentRun:_cr, allRuns:_ar, quickPicks:_qp, notes:_nt}) + ')');
+    db.collection('users').doc(currentUser.uid).set({
+      currentRun: strippedCurrent, allRuns: strippedAllRuns, quickPicks: strippedQP,
+      notes: _nt,
       profileName: currentUser?.displayName || 'Spotter',
       profilePhoto: currentUser?.photoURL || '',
       updatedAt: _lastSave
-    }))).then(() => {
+    }).then(() => {
       console.log('Firestore save successful');
       setSyncDot('ok'); leaderboardLoaded = false;
     }).catch(function(err) {
@@ -2372,13 +2423,19 @@ function _flushPendingSave() {
   if (currentUser && navigator.onLine) {
     console.log('Firestore save: writing to users/' + currentUser.uid + ' (flush)');
     _lastSave = Date.now();
-    db.collection('users').doc(currentUser.uid).set(JSON.parse(JSON.stringify({
-      currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
+    var _fsAll = JSON.parse(JSON.stringify(allRuns));
+    _stripDeepPhotos(_fsAll);
+    var _fsCur = JSON.parse(JSON.stringify(currentRun));
+    _stripDeepPhotos(_fsCur);
+    var _fsQp  = JSON.parse(JSON.stringify(quickPicks || []));
+    _stripDeepPhotos(_fsQp);
+    db.collection('users').doc(currentUser.uid).set({
+      currentRun: _fsCur, allRuns: _fsAll, quickPicks: _fsQp,
       notes: localStorage.getItem('cs_notes') || '',
       profileName: currentUser?.displayName || 'Spotter',
       profilePhoto: currentUser?.photoURL || '',
       updatedAt: _lastSave
-    }))).then(() => { console.log('Firestore save: flush successful'); }).catch(function(err) {
+    }).then(() => { console.log('Firestore save: flush successful'); }).catch(function(err) {
       console.error('Firestore save: flush failed:', err.code, err.message, err);
     });
   } else {
@@ -4534,14 +4591,18 @@ function _loadIDBCache() {
 function _patchPhotosFromCache() {
   if (!_idbPhotoCache) return;
   allRuns.forEach(function(run) {
-    run.cars.forEach(function(car) {
-      if (!car.photo && _idbPhotoCache[car.name.toLowerCase()]) {
+    (run.cars||[]).forEach(function(car) {
+      if (car.photo && typeof car.photo === 'string' && car.photo.indexOf('photo:') === 0) {
+        car.photo = _idbPhotoCache[car.photo.slice(6)] || '';
+      } else if (!car.photo && _idbPhotoCache[car.name.toLowerCase()]) {
         car.photo = _idbPhotoCache[car.name.toLowerCase()];
       }
     });
   });
   currentRun.forEach(function(car) {
-    if (!car.photo && _idbPhotoCache[car.name.toLowerCase()]) {
+    if (car.photo && typeof car.photo === 'string' && car.photo.indexOf('photo:') === 0) {
+      car.photo = _idbPhotoCache[car.photo.slice(6)] || '';
+    } else if (!car.photo && _idbPhotoCache[car.name.toLowerCase()]) {
       car.photo = _idbPhotoCache[car.name.toLowerCase()];
     }
   });
