@@ -2111,12 +2111,7 @@ function _mergeQuickPicks(local, cloud) {
 //  FIREBASE AUTH & SYNC 
 
 window.signInGoogle = function() {
-  var provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(function(e) {
-    if (e.code === 'auth/popup-blocked') {
-      auth.signInWithRedirect(provider);
-    }
-  });
+  auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
 };
 function signOutUser() {
   if (!confirm('Sign out?')) return;
