@@ -2160,6 +2160,7 @@ function importLocalData() {
 }
 
 auth.onAuthStateChanged(async user => {
+  console.log('Auth state changed:', user ? user.uid + ' (' + user.displayName + ')' : 'null');
   currentUser = user;
   var authOverlay = document.getElementById('authOverlay');
   if (user) {
@@ -2178,9 +2179,12 @@ auth.onAuthStateChanged(async user => {
   }
 });
 
-// Handle redirect sign-in result and show errors
-auth.getRedirectResult().catch(function(error) {
-  showToast('Sign in failed: ' + (error.message || 'unknown error'));
+// Handle redirect sign-in result
+auth.getRedirectResult().then(function(result) {
+  console.log('getRedirectResult:', result.user ? 'user=' + result.user.uid : 'no user');
+}).catch(function(error) {
+  console.error('getRedirectResult error:', error.code, error.message);
+  showToast('Sign in failed: ' + error.message);
 });
 
 window.showSignInSheet = function() {
