@@ -2111,19 +2111,12 @@ function _mergeQuickPicks(local, cloud) {
 //  FIREBASE AUTH & SYNC 
 
 window.signInGoogle = function() {
-  // If anonymously signed in, link Google account for cross-device sync
-  var user = auth.currentUser;
-  if (user && user.isAnonymous) {
-    user.linkWithPopup(new firebase.auth.GoogleAuthProvider()).then(function() {
-      showToast('Google account linked!');
-    }).catch(function(e) {
-      if (e.code === 'auth/popup-blocked' || e.code === 'auth/credential-already-in-use') {
-        showToast('Popup blocked — try allowing popups for this site');
-      }
-    });
-  } else {
-    auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
-  }
+  var provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(function(e) {
+    if (e.code === 'auth/popup-blocked') {
+      auth.signInWithRedirect(provider);
+    }
+  });
 };
 function signOutUser() {
   if (!confirm('Sign out?')) return;
@@ -2175,7 +2168,6 @@ auth.onAuthStateChanged(async user => {
   currentUser = user;
   var authOverlay = document.getElementById('authOverlay');
   if (user) {
-    // Auth succeeded — hide overlay, enable cloud sync
     authOverlay.style.display = 'none';
     renderUserPill();
     _lastSave = Date.now();
@@ -2185,13 +2177,15 @@ auth.onAuthStateChanged(async user => {
     const localRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
     if (localRuns.length > 0 && !user.isAnonymous) showImportBanner(localRuns.length);
   } else {
-    // No user — hide overlay anyway so app is usable
     authOverlay.style.display = 'none';
     document.getElementById('userPillWrap').innerHTML = '<div class="user-pill" onclick="showSignInSheet()">Sign In</div>';
-    // Try anonymous auth in background for potential cloud sync
-    auth.signInAnonymously().catch(function(){});
     if (syncUnsub) { syncUnsub(); syncUnsub = null; }
   }
+});
+
+// Handle redirect sign-in result and show errors
+auth.getRedirectResult().catch(function(error) {
+  showToast('Sign in failed: ' + (error.message || 'unknown error'));
 });
 
 window.showSignInSheet = function() {
