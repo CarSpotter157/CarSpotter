@@ -2000,6 +2000,29 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 <div class="toast" id="toast"></div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
 
+<script>
+console.log('PAGE URL:', window.location.href, 'HASH:', window.location.hash);
+// Check all sessionStorage keys for Firebase redirect data
+for (var i = 0; i < sessionStorage.length; i++) {
+  var k = sessionStorage.key(i);
+  if (k && k.indexOf('firebase') >= 0) {
+    console.log('sessionStorage[' + k + ']:', sessionStorage.getItem(k));
+  }
+}
+// Check IndexedDB for Firebase auth data
+var idbReq = indexedDB.open('firebaseLocalStorageDb');
+idbReq.onsuccess = function(e) {
+  try {
+    var tx = e.target.result.transaction('firebaseLocalStorage', 'readonly');
+    tx.objectStore('firebaseLocalStorage').getAll().onsuccess = function(ev) {
+      var items = ev.target.result || [];
+      items.forEach(function(item) { console.log('IDB:', item.fbase_key, item.fbase_value && item.fbase_value.slice ? item.fbase_value.slice(0,200) : item.fbase_value); });
+    };
+  } catch(ex) { console.log('IDB read error:', ex.message); }
+};
+idbReq.onerror = function(e) { console.log('IDB open error:', e.target.error); };
+</script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
@@ -2014,6 +2037,21 @@ firebase.initializeApp({
 });
 const auth = firebase.auth();
 const db   = firebase.firestore();
+
+// Find the OAuth client ID from Firebase auth internals
+var oauthClientId = '';
+try {
+  var p = auth._delegate || auth;
+  // Check various possible locations for the client ID
+  oauthClientId = p.config?.oauth?.clientId || p._oauth?.clientId || '';
+  // Try reading from saved provider data
+  var u = p._redirectUser || {};
+  oauthClientId = oauthClientId || u.providerId || '';
+} catch(e) {}
+// Log all possible config properties for debugging
+console.log('Auth config dump:', JSON.stringify({ver: firebase.SDK_VERSION, ...(auth._delegate?.config || {})}, function(k,v){
+  return (typeof v === 'string' || typeof v === 'number') ? v : undefined;
+}));
 </script>
 <script>
 let qpEditMode   = false;
