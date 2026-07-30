@@ -2325,12 +2325,14 @@ function subscribeCloud() {
 }
 
 function saveToCloud() {
+  console.log('Starting Firestore save');
   // Always persist locally first — works offline
   localStorage.setItem('cs_runs',    JSON.stringify(allRuns));
   localStorage.setItem('cs_current', JSON.stringify(currentRun));
   localStorage.setItem('cs_qp',      JSON.stringify(quickPicks));
 
   if (!currentUser || !navigator.onLine) {
+    console.log('Firestore save: skipped —', !currentUser ? 'no user' : 'offline');
     // Queue for when we come back online
     if (!navigator.onLine) {
       offlineQueue.push(Date.now());
@@ -2338,27 +2340,37 @@ function saveToCloud() {
     }
     return;
   }
+  console.log('Firestore save: user=' + currentUser.uid + ', online=' + navigator.onLine);
   setSyncDot('syncing');
   clearTimeout(syncTimer);
   // Raise the gate immediately so incoming snapshots don't overwrite local state
   _lastSave = Date.now();
   syncTimer = setTimeout(() => {
+    console.log('Firestore save: writing to users/' + currentUser.uid);
     db.collection('users').doc(currentUser.uid).set(JSON.parse(JSON.stringify({
       currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
       notes: localStorage.getItem('cs_notes') || '',
       profileName: currentUser?.displayName || 'Spotter',
       profilePhoto: currentUser?.photoURL || '',
       updatedAt: _lastSave
-    }))).then(() => { setSyncDot('ok'); leaderboardLoaded = false; }).catch(() => setSyncDot(''));
+    }))).then(() => {
+      console.log('Firestore save successful');
+      setSyncDot('ok'); leaderboardLoaded = false;
+    }).catch(function(err) {
+      console.error('Firestore save failed:', err.code, err.message, err);
+      setSyncDot('');
+    });
   }, 1500);
 }
 
 //  FLUSH ON PAGE UNLOAD — prevent debounced saves from being lost on tab close 
 function _flushPendingSave() {
   if (!syncTimer) return;
+  console.log('Firestore save: flush on unload');
   clearTimeout(syncTimer);
   syncTimer = null;
   if (currentUser && navigator.onLine) {
+    console.log('Firestore save: writing to users/' + currentUser.uid + ' (flush)');
     _lastSave = Date.now();
     db.collection('users').doc(currentUser.uid).set(JSON.parse(JSON.stringify({
       currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
@@ -2366,7 +2378,11 @@ function _flushPendingSave() {
       profileName: currentUser?.displayName || 'Spotter',
       profilePhoto: currentUser?.photoURL || '',
       updatedAt: _lastSave
-    }))).catch(()=>{});
+    }))).then(() => { console.log('Firestore save: flush successful'); }).catch(function(err) {
+      console.error('Firestore save: flush failed:', err.code, err.message, err);
+    });
+  } else {
+    console.log('Firestore save: flush skipped —', !currentUser ? 'no user' : 'offline');
   }
 }
 window.addEventListener('beforeunload', _flushPendingSave);
