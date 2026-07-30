@@ -2006,7 +2006,6 @@ console.log('PAGE URL:', window.location.href, 'HASH:', window.location.hash, 'P
 console.log('QUERY:', window.location.search);
 // Also check if this page is running in a popup
 console.log('IS POPUP:', window.opener ? 'yes' : 'no');
-// Check all sessionStorage keys for Firebase redirect data
 for (var i = 0; i < sessionStorage.length; i++) {
   var k = sessionStorage.key(i);
   if (k && k.indexOf('firebase') >= 0) {
@@ -2014,6 +2013,7 @@ for (var i = 0; i < sessionStorage.length; i++) {
   }
 }
 </script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
@@ -2140,7 +2140,49 @@ function _mergeQuickPicks(local, cloud) {
 //  FIREBASE AUTH & SYNC 
 
 window.signInGoogle = function() {
+  // Intercept the redirect to extract the OAuth client ID, then use One Tap instead
+  var orig = window.location.assign;
+  window.location.assign = function(url) {
+    window.location.assign = orig; // restore immediately
+    try {
+      var u = new URL(url);
+      if (u.hostname.indexOf('accounts.google.com') >= 0) {
+        var cid = u.searchParams.get('client_id');
+        if (cid && typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+          console.log('OAuth client_id:', cid);
+          // Clear the pending redirect that signInWithRedirect just set
+          var key = 'firebase:pendingRedirect:AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug:[DEFAULT]';
+          sessionStorage.removeItem(key);
+          // Use One Tap to silently sign in (iframe-based, works with COOP)
+          google.accounts.id.initialize({
+            client_id: cid,
+            auto_select: true,
+            cancel_on_tap_outside: false,
+            callback: function(response) {
+              if (response.credential) {
+                var cred = firebase.auth.GoogleAuthProvider.credential(response.credential);
+                auth.signInWithCredential(cred).then(function(r) {
+                  console.log('Signed in via One Tap:', r.user.uid);
+                }).catch(function(e) {
+                  console.error('One Tap signIn failed:', e);
+                  showToast('Sign in failed: ' + e.message);
+                });
+              }
+            },
+          });
+          google.accounts.id.prompt();
+          return; // don't redirect — use One Tap instead
+        }
+      }
+    } catch(e) {}
+    // Fallback to normal redirect
+    orig.call(window.location, url);
+  };
   auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+  // Restore assign if signInWithRedirect doesn't call it synchronously
+  var restoreTimer = setTimeout(function() {
+    window.location.assign = orig;
+  }, 5000);
 };
 function signOutUser() {
   if (!confirm('Sign out?')) return;
