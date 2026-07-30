@@ -2160,7 +2160,7 @@ function importLocalData() {
 }
 
 auth.onAuthStateChanged(async user => {
-  console.log('Auth state changed:', user ? user.uid + ' (' + user.displayName + ')' : 'null');
+  console.log('Auth state changed:', user ? user.uid + ' (' + user.displayName + ')' : 'null', 'URL:', window.location.href);
   currentUser = user;
   var authOverlay = document.getElementById('authOverlay');
   if (user) {
