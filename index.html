@@ -611,8 +611,9 @@ body{
 /* Level bar under score banner */
 .level-bar-wrap{margin:10px 2px 6px;}
 .level-bar-info{display:flex;justify-content:space-between;align-items:baseline;font-size:0.52rem;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:5px;}
-.level-bar-info .level-lbl{font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:2px;color:var(--text);}
-.level-bar-info .level-lbl span{color:var(--accent);}
+.level-bar-info .level-lbl{display:inline-flex;align-items:center;gap:8px;font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:2px;color:var(--text);}
+.level-bar-info .level-num{font-size:0.62rem;letter-spacing:1px;color:var(--muted);}
+.level-bar-info .level-num span{color:var(--accent);}
 .level-bar-info .level-xp{font-variant-numeric:tabular-nums;}
 .level-bar-track{height:5px;border-radius:99px;background:var(--surf3);overflow:hidden;}
 .level-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent-d),var(--accent));transition:width 0.6s var(--ease);}
@@ -1109,6 +1110,14 @@ body{
 .collector-card .gc-xp{font-size:0.52rem;font-weight:700;color:var(--green);letter-spacing:0.5px;flex-shrink:0;}
 .collector-card .gc-date{font-size:0.52rem;color:var(--text2);margin-top:4px;}
 .collector-card .gc-badges{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap;}
+.gc-evo-chip{display:inline-flex;align-items:center;margin-left:4px;font-size:0.6rem;line-height:1;}
+.collector-card.evo-bronze{--evo-ring:#cd7f32;}
+.collector-card.evo-silver{--evo-ring:#c0c0c0;}
+.collector-card.evo-gold{--evo-ring:#f5c842;}
+.collector-card.evo-platinum{--evo-ring:#7fd1f7;}
+.collector-card.evo-diamond{--evo-ring:#9ff2ff;}
+.collector-card.evo-bronze,.collector-card.evo-silver,.collector-card.evo-gold,.collector-card.evo-platinum,.collector-card.evo-diamond{box-shadow:0 0 0 2px var(--evo-ring),0 0 22px var(--evo-ring),var(--shadow);}
+.collector-card.evo-bronze:hover,.collector-card.evo-silver:hover,.collector-card.evo-gold:hover,.collector-card.evo-platinum:hover,.collector-card.evo-diamond:hover{box-shadow:0 0 0 2px var(--evo-ring),0 0 32px var(--evo-ring),var(--shadow-lg);}
 .gc-badge{
   font-size:0.42rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;
   background:var(--surf2);border:1px solid var(--border);border-radius:4px;padding:2px 6px;color:var(--text2);
@@ -1119,11 +1128,12 @@ body{
 .gc-feat{
   width:32px;height:32px;border-radius:50%;flex-shrink:0;
   background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  border:none;color:var(--accent);font-size:0.8rem;display:flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:transform 0.2s;
+  border:none;color:var(--accent);font-size:0.85rem;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:transform 0.2s,filter 0.2s,opacity 0.2s;
+  opacity:0.55;filter:grayscale(0.8);
 }
-.gc-feat.active{color:#f5c842;box-shadow:0 0 12px rgba(245,200,66,0.5);}
-.gc-feat:hover{transform:scale(1.2);}
+.gc-feat.active{color:#f5c842;box-shadow:0 0 12px rgba(245,200,66,0.5);opacity:1;filter:none;}
+.gc-feat:hover{transform:scale(1.2);opacity:1;filter:grayscale(0.3);}
 
 /* Empty garage */
 .garage-empty{text-align:center;padding:56px 20px 48px;color:var(--muted);}
@@ -1325,6 +1335,8 @@ body{
 .ach-badge.unlocked .ach-icon{color:var(--accent);}
 .ach-name{font-size:0.56rem;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;line-height:1.3;color:var(--text);}
 .ach-req{font-size:0.48rem;color:var(--muted);margin-top:3px;line-height:1.4;}
+.ach-xp{font-size:0.5rem;font-weight:700;color:var(--green);margin-top:5px;letter-spacing:1px;}
+.ach-badge.locked .ach-xp{color:var(--muted);opacity:0.6;}
 .ach-count-row{font-size:0.65rem;color:var(--text2);margin-bottom:14px;}
 .ach-count-row span{color:var(--accent);font-family:'Bebas Neue',cursive;font-size:0.95rem;}
 .achievement-toast{
@@ -1945,17 +1957,19 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
 /* ══ PROGRESSION & REWARD EXPANSION ══ */
 
-/* Title chip on the spot page level bar */
-.title-chip-wrap{margin:0 0 2px 2px;}
-.title-chip{display:inline-flex;align-items:center;gap:6px;background:var(--adim);border:1px solid var(--accent);border-radius:99px;padding:4px 12px;font-family:'Inter',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:1px;color:var(--accent);text-transform:uppercase;transition:all 0.25s var(--ease);}
-.title-chip .tc-emoji{font-size:0.8rem;}
-.title-chip.new-title{animation:titlePop 0.6s cubic-bezier(0.34,1.56,0.64,1) both;}
+/* Title chip on the spot page level bar — the spotter identity itself */
+#levelTitleSlot{display:inline-flex;align-items:center;gap:6px;background:var(--adim);border:1px solid var(--accent);border-radius:99px;padding:3px 11px;font-family:'Inter',sans-serif;font-size:0.6rem;font-weight:700;letter-spacing:1.2px;color:var(--accent);text-transform:uppercase;transition:all 0.25s var(--ease);line-height:1;}
+#levelTitleSlot .tc-emoji{font-size:0.8rem;line-height:1;}
+#levelTitleSlot.new-title{animation:titlePop 0.6s cubic-bezier(0.34,1.56,0.64,1) both;}
 @keyframes titlePop{0%{transform:scale(0.6);opacity:0;}60%{transform:scale(1.15);}100%{transform:scale(1);opacity:1;}}
+@media(max-width:480px){#levelTitleSlot{font-size:0.55rem;letter-spacing:1px;padding:3px 9px;}}
 
-/* Title progress preview (next title) */
-.title-next{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:0.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
-.title-next .tn-bar{flex:1;height:4px;border-radius:99px;background:var(--surf3);overflow:hidden;}
-.title-next .tn-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent-d),var(--accent));transition:width 0.6s var(--ease);}
+/* Title progress preview (next title) — thin strip under the level bar */
+.title-next-row{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:0.56rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.title-next-row .tn-next-name{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46%;}
+.title-next-row .tn-bar{flex:1;height:4px;border-radius:99px;background:var(--surf3);overflow:hidden;min-width:40px;}
+.title-next-row .tn-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent-d),var(--accent));transition:width 0.6s var(--ease);}
+.title-next-row .tn-xp{white-space:nowrap;font-variant-numeric:tabular-nums;}
 
 /* Title unlock overlay */
 .titleup-overlay{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.96);cursor:pointer;animation:fadeIn 0.3s ease;}
@@ -2045,6 +2059,9 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 .expo-card .ex-count{font-family:'Bebas Neue',cursive;font-size:0.95rem;color:var(--text);white-space:nowrap;}
 .expo-card .ex-count span{color:var(--muted);font-size:0.75rem;}
 .expo-card .ex-reward{margin-top:10px;font-size:0.58rem;color:var(--accent);letter-spacing:1px;text-transform:uppercase;}
+.ch-kind{display:inline-block;margin-top:5px;font-size:0.42rem;font-weight:800;letter-spacing:1.5px;border-radius:4px;padding:2px 6px;text-transform:uppercase;}
+.ch-kind-ach{color:#7cb3ff;background:rgba(96,165,250,0.12);border:1px solid rgba(96,165,250,0.3);}
+.ch-kind-expo{color:#f5c842;background:rgba(232,184,75,0.12);border:1px solid rgba(232,184,75,0.3);}
 
 /* Road Trips */
 .trip-hero{display:flex;align-items:center;justify-content:space-between;background:var(--glass-card);border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:20px;margin-bottom:16px;box-shadow:var(--shadow-lg);}
@@ -2207,11 +2224,11 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
           <div class="level-bar-wrap">
             <div class="level-bar-info">
-              <span class="level-lbl">Level <span id="levelNum">1</span></span>
+              <span class="level-lbl"><span id="levelTitleSlot"></span><span class="level-num">LV <span id="levelNum">1</span></span></span>
               <span class="level-xp" id="levelXp">0 / 100 XP</span>
             </div>
             <div class="level-bar-track"><div class="level-bar-fill" id="levelFill" style="width:0%"></div></div>
-            <div class="title-chip-wrap" id="titleChipWrap" style="display:none"></div>
+            <div class="title-next-row" id="titleNextRow" style="display:none"></div>
           </div>
 
           <div class="card">
@@ -2426,7 +2443,10 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
     <!-- ACHIEVEMENTS PAGE -->
     <div class="page" id="page-achievements">
       <div class="sec-title" style="margin-bottom:6px">Achievements</div>
-      <div class="ach-count-row" id="achCountRow" style="margin-bottom:14px"><span id="achUnlocked">0</span> / <span id="achTotal">0</span> unlocked</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">
+        <div class="ach-count-row" id="achCountRow" style="margin-bottom:0"><span id="achUnlocked">0</span> / <span id="achTotal">0</span> unlocked</div>
+        <button class="txt-btn" onclick="goTo('expeditions')" style="white-space:nowrap">See all →</button>
+      </div>
       <div class="ach-grid" id="achGrid"></div>
     </div>
 
@@ -2690,13 +2710,13 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
       <div class="mystery-hint-chip">👁 Silhouettes are undiscovered models. Tap to peek at what you're hunting.</div>
     </div>
 
-    <!-- EXPEDITIONS PAGE -->
+    <!-- EXPEDITIONS PAGE (unified challenge collection: expeditions + achievements) -->
     <div class="page" id="page-expeditions">
       <div class="expo-hero">
         <div class="eh-icon">🗺️</div>
         <div>
-          <div class="eh-title">EXPEDITIONS</div>
-          <div class="eh-sub">Themed spotting challenges · claim XP rewards</div>
+          <div class="eh-title">ACHIEVEMENTS & EXPEDITIONS</div>
+          <div class="eh-sub">One collection · auto-earn or claim XP rewards</div>
         </div>
       </div>
       <div id="expoList"></div>
@@ -2855,22 +2875,45 @@ let tutorialStep = 0;
 
 // Achievements — declared here so getUnlockedAchievements() works at any point
 const ACHIEVEMENTS = [
-  { id:'first_car',    icon:'01', name:'First Spot',      desc:'Log your first car',           check:(c,r)=>c.length>=1 },
-  { id:'ten_cars',     icon:'10', name:'Decade',           desc:'Log 10 cars total',            check:(c,r)=>c.length>=10 },
-  { id:'fifty_cars',   icon:'50', name:'Century Half',     desc:'Log 50 cars total',            check:(c,r)=>c.length>=50 },
-  { id:'first_run',    icon:'R1', name:'First Run',        desc:'Complete your first run',      check:(c,r)=>r.filter(x=>!x.spotted).length>=1 },
-  { id:'five_runs',    icon:'R5', name:'Regular',          desc:'Complete 5 runs',              check:(c,r)=>r.filter(x=>!x.spotted).length>=5 },
-  { id:'supercar',     icon:'SC', name:'Supercar Spotter', desc:'Log a Supercar',               check:(c,r)=>c.some(x=>x.type==='supercar'||x.type==='') },
-  { id:'ev_spotter',   icon:'EV', name:'Electric Dreams',  desc:'Log 5 EVs',                   check:(c,r)=>c.filter(x=>x.type==='ev'||x.type==='').length>=5 },
-  { id:'muscle_fan',   icon:'V8', name:'Muscle Head',      desc:'Log 5 Muscle Cars',            check:(c,r)=>c.filter(x=>x.type==='muscle'||x.type==='').length>=5 },
-  { id:'half_mil',     icon:'½M', name:'Half a Milly',     desc:'Single run over $500K',        check:(c,r)=>r.some(x=>!x.spotted&&x.total>=500000) },
-  { id:'millionaire',  icon:'1M', name:'Millionaire Run',  desc:'Single run over $1M',          check:(c,r)=>r.some(x=>!x.spotted&&x.total>=1000000) },
-  { id:'legend_spot',  icon:'LG', name:'Legend Spotter',   desc:'Spot a Legend ($1M+) car',    check:(c,r)=>c.some(x=>x.value>=1000000) },
-  { id:'hypercar',     icon:'HC', name:'Hypercar Hunter',  desc:'Spot a Hypercar ($500K+)',     check:(c,r)=>c.some(x=>x.value>=500000) },
-  { id:'five_makes',   icon:'5M', name:'Make Explorer',    desc:'Spot 5 different makes',       check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=5 },
-  { id:'ten_makes',    icon:'10M',name:'Globe Trotter',    desc:'Spot 10 different makes',      check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=10 },
-  { id:'photographer', icon:'CAM',name:'Photographer',     desc:'Log 5 cars with photos',       check:(c,r)=>c.filter(x=>x.photo).length>=5 },
-  { id:'triple_run',   icon:'x3', name:'Hat Trick',        desc:'Log 3 cars in one run',        check:(c,r)=>r.some(x=>!x.spotted&&(x.cars||[]).length>=3) },
+  { id:'first_car',    icon:'01', name:'First Spot',      desc:'Log your first car',            xp:50,  check:(c,r)=>c.length>=1 },
+  { id:'ten_cars',     icon:'10', name:'Decade',           desc:'Log 10 cars total',             xp:120, check:(c,r)=>c.length>=10 },
+  { id:'twenty_cars',  icon:'20', name:'Showroom Ready',   desc:'Log 20 cars total',             xp:220, check:(c,r)=>c.length>=20 },
+  { id:'fifty_cars',   icon:'50', name:'Century Half',     desc:'Log 50 cars total',             xp:500, check:(c,r)=>c.length>=50 },
+  { id:'hundred_cars', icon:'100',name:'Garage Legend',    desc:'Log 100 cars total',            xp:1000,check:(c,r)=>c.length>=100 },
+  { id:'first_run',    icon:'R1', name:'First Run',        desc:'Complete your first run',       xp:60,  check:(c,r)=>r.filter(x=>!x.spotted).length>=1 },
+  { id:'five_runs',    icon:'R5', name:'Regular',          desc:'Complete 5 runs',               xp:150, check:(c,r)=>r.filter(x=>!x.spotted).length>=5 },
+  { id:'twenty_runs',  icon:'R20',name:'Road Warrior',     desc:'Complete 20 runs',              xp:400, check:(c,r)=>r.filter(x=>!x.spotted).length>=20 },
+  { id:'supercar',     icon:'SC', name:'Supercar Spotter', desc:'Log a Supercar',                xp:80,  check:(c,r)=>c.some(x=>x.type==='supercar'||x.type==='') },
+  { id:'ev_spotter',   icon:'EV', name:'Electric Dreams',  desc:'Log 5 EVs',                    xp:120, check:(c,r)=>c.filter(x=>x.type==='ev'||x.type==='').length>=5 },
+  { id:'muscle_fan',   icon:'V8', name:'Muscle Head',      desc:'Log 5 Muscle Cars',             xp:120, check:(c,r)=>c.filter(x=>x.type==='muscle'||x.type==='').length>=5 },
+  { id:'classic_fan',  icon:'CL', name:'Classic Collector',desc:'Log 3 Classic Cars',            xp:120, check:(c,r)=>c.filter(x=>x.type==='classic'||x.type==='').length>=3 },
+  { id:'suv_driver',   icon:'UV', name:'Utility Player',   desc:'Log 3 SUVs',                   xp:100, check:(c,r)=>c.filter(x=>x.type==='suv'||x.type==='').length>=3 },
+  { id:'half_mil',     icon:'½M', name:'Half a Milly',     desc:'Single run over $500K',         xp:200, check:(c,r)=>r.some(x=>!x.spotted&&x.total>=500000) },
+  { id:'millionaire',  icon:'1M', name:'Millionaire Run',  desc:'Single run over $1M',           xp:400, check:(c,r)=>r.some(x=>!x.spotted&&x.total>=1000000) },
+  { id:'legend_spot',  icon:'LG', name:'Legend Spotter',   desc:'Spot a Legend ($1M+) car',     xp:250, check:(c,r)=>c.some(x=>x.value>=1000000) },
+  { id:'hypercar',     icon:'HC', name:'Hypercar Hunter',  desc:'Spot a Hypercar ($500K+)',      xp:180, check:(c,r)=>c.some(x=>x.value>=500000) },
+  { id:'five_makes',   icon:'5M', name:'Make Explorer',    desc:'Spot 5 different makes',        xp:100, check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=5 },
+  { id:'ten_makes',    icon:'10M',name:'Globe Trotter',    desc:'Spot 10 different makes',       xp:220, check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=10 },
+  { id:'twenty_makes', icon:'20M',name:'Marque Museum',    desc:'Spot 20 different makes',       xp:450, check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=20 },
+  { id:'photographer', icon:'CAM',name:'Photographer',     desc:'Log 5 cars with photos',        xp:100, check:(c,r)=>c.filter(x=>x.photo).length>=5 },
+  { id:'photo_ten',    icon:'CAM',name:'Shutterbug',       desc:'Log 10 cars with photos',       xp:200, check:(c,r)=>c.filter(x=>x.photo).length>=10 },
+  { id:'triple_run',   icon:'x3', name:'Hat Trick',        desc:'Log 3 cars in one run',         xp:90,  check:(c,r)=>r.some(x=>!x.spotted&&(x.cars||[]).length>=3) },
+  { id:'big_run',      icon:'x5', name:'Full Showroom',    desc:'Log 5 cars in one run',         xp:180, check:(c,r)=>r.some(x=>!x.spotted&&(x.cars||[]).length>=5) },
+  { id:'garage_250',   icon:'250',name:'Collector Spec',   desc:'Log 250 cars total',            xp:2500,check:(c,r)=>c.length>=250 },
+  { id:'ten_runs',     icon:'R10',name:'Regular',          desc:'Complete 10 runs',              xp:250, check:(c,r)=>r.filter(x=>!x.spotted).length>=10 },
+  { id:'twentyfive_runs',icon:'R25',name:'Street Veteran', desc:'Complete 25 runs',              xp:500, check:(c,r)=>r.filter(x=>!x.spotted).length>=25 },
+  { id:'marathon_run', icon:'8X', name:'Marathon Run',     desc:'Log 8 cars in a single run',    xp:300, check:(c,r)=>r.some(x=>!x.spotted&&(x.cars||[]).length>=8) },
+  { id:'fifteen_makes',icon:'M15',name:'Globe Trotter',    desc:'Spot 15 different makes',       xp:320, check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=15 },
+  { id:'twentyfive_makes',icon:'M25',name:'World Garage',  desc:'Spot 25 different makes',       xp:600, check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=25 },
+  { id:'ev_collector', icon:'EV', name:'Electric Dreams',  desc:'Log 10 EVs',                    xp:250, check:(c,r)=>c.filter(x=>x.type==='ev').length>=10 },
+  { id:'muscle_master',icon:'MU', name:'Muscle Master',    desc:'Log 10 muscle cars',            xp:250, check:(c,r)=>c.filter(x=>x.type==='muscle').length>=10 },
+  { id:'supercar_stack',icon:'SC',name:'Supercar Stack',   desc:'Log 20 supercars or exotics',   xp:500, check:(c,r)=>c.filter(x=>x.value>=150000).length>=20 },
+  { id:'photo_twenty', icon:'P20',name:'Rolling Gallery',  desc:'Log 20 cars with photos',       xp:400, check:(c,r)=>c.filter(x=>x.photo).length>=20 },
+  { id:'hyper_fleet',  icon:'H8', name:'Hyper Fleet',      desc:'Spot 8 hypercars ($500K+)',     xp:600, check:(c,r)=>c.filter(x=>x.value>=500000).length>=8 },
+  { id:'legend_trio',  icon:'L3', name:'Legend Trio',      desc:'Spot 3 legend cars ($1M+)',     xp:750, check:(c,r)=>c.filter(x=>x.value>=1000000).length>=3 },
+  { id:'two_mil_run',  icon:'2M', name:'Two Million Club', desc:'Complete a run over $2M',       xp:800, check:(c,r)=>r.some(x=>!x.spotted&&x.total>=2000000) },
+  { id:'three_mil_run',icon:'3M', name:'Unicorn Run',      desc:'Complete a run over $3M',       xp:1200,check:(c,r)=>r.some(x=>!x.spotted&&x.total>=3000000) },
+  { id:'double_legend_run',icon:'2L',name:'Royal Convoy',  desc:'Log 2 legend cars in one run',  xp:1000,check:(c,r)=>r.some(x=>!x.spotted&&(x.cars||[]).filter(car=>car.value>=1000000).length>=2) },
 ];
 let _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
 
@@ -3843,10 +3886,11 @@ function logRun() {
   renderSpot();
   if (garageView === 'map') renderGarage();
   playSound('log');
-  rewardLog(car, true, { isFirst: isFirst });
+  rewardLog(car, true, { isFirst: isFirst }).then(function() {
+    if (!document.querySelector('.cc-overlay') && !document.querySelector('.cc-quick')) showSpecsCard({ name:name, value:input.value, color:input.color, type:input.type, photo:photo, location:car.location });
+  });
   pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, input.type + ' ' + name + ' removed');
   showToast(input.type + ' ' + name + ' added to run!');
-  showSpecsCard({ name:name, value:input.value, color:input.color, type:input.type, photo:photo, location:car.location });
   setTimeout(checkNewAchievements, 400);
 }
 
@@ -3869,13 +3913,14 @@ function logSpotted() {
   saveToCloud();
   fetchAndStoreRefImage(car);
   playSound('log');
-  rewardLog(car, false, { mode:'solo', isFirst: isFirst, isBest: input.value > prevBestCar });
+  rewardLog(car, false, { mode:'solo', isFirst: isFirst, isBest: input.value > prevBestCar }).then(function() {
+    if (!document.querySelector('.cc-overlay') && !document.querySelector('.cc-quick')) showSpecsCard({ name:name, value:input.value, color:input.color, type:input.type, photo:photo, location:car.location });
+  });
   pushUndo('history', prevRuns, input.type + ' ' + name + ' removed');
   clearInputs();
   renderQPTrigger();
   renderGarage();
   showToast(input.type + ' ' + name + ' spotted & saved to garage!');
-  showSpecsCard({ name:name, value:input.value, color:input.color, type:input.type, photo:photo, location:car.location });
   setTimeout(checkNewAchievements, 400);
 }
 
@@ -4450,6 +4495,7 @@ function renderGarage() {
   // keeps those taps fast on phones (the page re-renders on navigation).
   var activePg = document.querySelector('.page.active');
   if (!activePg || activePg.id !== 'page-garage') return;
+  renderDiscoveries();
   if (!_garageGreeted) {
     _garageGreeted = true;
     if (_userInteracted) playSound('collect');
@@ -4551,11 +4597,14 @@ function renderGarage() {
       if (car.spotCount > 1) badges += '<span class="gc-badge seen">Seen \u00D7' + car.spotCount + '</span>';
       if (isFav) badges += '<span class="gc-badge fav">\u2605 Fav</span>';
       var isFeat = (featuredName() === car.name);
-      return '<div class="garage-card collector-card" data-tier="' + tier + '" role="button" tabindex="0"' + clickAttr + ' style="--gc-tilt:' + tilt + 'deg;animation-delay:' + (idx * 0.04) + 's">' + shine +
-        '<div class="gc-tier-chip">' + tierEmoji(tier) + ' ' + meta.label + '</div>' +
+      var ev = (typeof evolutionFor === 'function') ? evolutionFor(car.name) : null;
+      var evoTier = (ev && ev.count >= 3) ? ev.tier : null;
+      var evoBadge = evoTier ? '<span class="gc-badge evo" style="color:' + evoTier.color + ';border-color:' + evoTier.color + '44;background:rgba(0,0,0,0.3)">' + evoTier.icon + ' ' + evoTier.name + ' \u00D7' + ev.count + '</span>' : '';
+      return '<div class="garage-card collector-card' + (evoTier ? ' evo-' + evoTier.name.toLowerCase() : '') + '" data-tier="' + tier + '" role="button" tabindex="0"' + clickAttr + ' style="--gc-tilt:' + tilt + 'deg;animation-delay:' + (idx * 0.04) + 's">' + shine +
+        '<div class="gc-tier-chip">' + tierEmoji(tier) + ' ' + meta.label + (evoTier ? '<span class="gc-evo-chip">' + evoTier.icon + '</span>' : '') + '</div>' +
         '<div class="gc-img-wrap">' + media +
           '<div class="gc-actions">' +
-            '<button class="gc-feat' + (isFeat ? ' active' : '') + '" onclick="event.stopPropagation();setFeaturedCar(\'' + jsEscape(car.name) + '\');" title="Feature this car">' + (isFeat ? '\u2605' : '\u2606') + '</button>' +
+            '<button class="gc-feat' + (isFeat ? ' active' : '') + '" onclick="event.stopPropagation();setFeaturedCar(\'' + jsEscape(car.name) + '\');" title="Feature this car">\uD83D\uDC51</button>' +
             '<button class="gc-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');renderGarage();">' + (isFav ? '\u2605' : '\u2606') + '</button>' +
             '<button class="gc-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')">\u270E</button>' +
             '<button class="gc-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')">\u2715</button>' +
@@ -4566,7 +4615,7 @@ function renderGarage() {
           '<div class="gc-name">' + escapeHtml(car.name) + (car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '') + '</div>' +
           '<div class="gc-val-row"><span class="gc-val">' + fmtFull(car.value) + '</span><span class="gc-xp">+' + rarityXP(car.value) + ' XP</span></div>' +
           '<div class="gc-date">\uD83D\uDCCD ' + escapeHtml(car.runDate || 'Saved') + '</div>' +
-          (badges ? '<div class="gc-badges">' + badges + '</div>' : '') +
+          (badges || evoBadge ? '<div class="gc-badges">' + badges + evoBadge + '</div>' : '') +
         '</div>' +
       '</div>';
     }).join('');
@@ -4773,11 +4822,12 @@ async function showSpecsCard(car) {
 
   // Fetch specs from Claude API and image in parallel
   // Race with a timeout so flaky mobile data can't leave the spinner hanging forever
+  var ownPhoto = car.photo && car.photo.indexOf('data:') === 0 ? car.photo : '';
   var pair = await Promise.race([
-    Promise.all([ fetchCarSpecs(car.name), fetchCarImage(car.name) ]),
+    Promise.all([ fetchCarSpecs(car.name), ownPhoto ? Promise.resolve('') : fetchCarImage(car.name) ]),
     new Promise(function(res){ setTimeout(function(){ res([null, null]); }, 8000); })
   ]).catch(function(){ return [null, null]; });
-  var specsData = pair[0], imgUrl = pair[1];
+  var specsData = pair[0], imgUrl = ownPhoto || pair[1];
 
   // Replace content
   const card = overlay.querySelector('.specs-card');
@@ -5252,7 +5302,11 @@ function recordDiscovery(car, xp) {
     var list = [];
     try { list = JSON.parse(localStorage.getItem('cs_discoveries') || '[]'); } catch(e) { list = []; }
     var photoRef = '';
-    if (car.photo && car.photo.indexOf('data:image/') === 0) photoRef = 'photo:' + (car.name || '').toLowerCase();
+    if (car.photo && car.photo.indexOf('data:image/') === 0) {
+      var pKey = (car.name || '').toLowerCase();
+      _idbPhotoCache[pKey] = car.photo;
+      photoRef = 'photo:' + pKey;
+    }
     else if (car.photo) photoRef = car.photo;
     list.unshift({ n: car.name, v: car.value || 0, t: car.type || '', r: tierOf(car.value || 0), xp: xp || 0, d: Date.now(), p: photoRef });
     if (list.length > 10) list.length = 10;
@@ -5260,9 +5314,9 @@ function recordDiscovery(car, xp) {
     renderDiscoveries();
   } catch(e) {}
 }
-function resolveDiscoveryPhoto(p) {
-  if (!p) return '';
-  if (p.indexOf('photo:') === 0) return _idbPhotoCache[p.slice(6)] || '';
+function resolveDiscoveryPhoto(p, name) {
+  if (!p) return _idbPhotoCache[(name || '').toLowerCase()] || '';
+  if (p.indexOf('photo:') === 0) return _idbPhotoCache[p.slice(6)] || _idbPhotoCache[(name || '').toLowerCase()] || '';
   return p;
 }
 function clearDiscoveries() {
@@ -5282,7 +5336,7 @@ function renderDiscoveries() {
   if (clearBtn) clearBtn.style.display = list.length ? '' : 'none';
   listEl.innerHTML = list.map(function(rec) {
     var meta = tierMeta(rec.r);
-    var img = resolveDiscoveryPhoto(rec.p);
+    var img = resolveDiscoveryPhoto(rec.p, rec.n);
     var imgHTML = img
       ? '<img class="disc-img" src="' + img + '" alt="" loading="lazy">'
       : '<div class="disc-img-ph">' + tierEmoji(rec.r) + '</div>';
@@ -5543,6 +5597,7 @@ function rewardLog(car, popTotal, opts) {
     cardDone.then(function() { celebrateLevelUp(after); });
   }
   if (window.updateProgressionAfterLog) setTimeout(function(){ updateProgressionAfterLog(car); }, 900);
+  return cardDone;
 }
 
 function garageBestValue() {
@@ -5810,6 +5865,7 @@ function renderAll() {
   initSortPrefBtns();
   updateAliasCount();
   if (window.renderTitleChip) renderTitleChip();
+  renderDiscoveries();
 }
 
 //  ENTER KEYS 
@@ -6101,7 +6157,7 @@ function _loadIDBCache() {
     // Migrate any base64 photos still baked into localStorage out to IndexedDB as
     // 'photo:' refs — frees the quota so later writes never throw QuotaExceededError.
     _saveRunsLocal(); _saveCurrentLocal(); _saveQPLocal();
-    renderSpot(); renderGarage(); renderHistory();
+    renderSpot(); renderGarage(); renderHistory(); renderDiscoveries();
   }).catch(function(){});
 }
 
@@ -6824,9 +6880,31 @@ function checkNewAchievements() {
     localStorage.setItem('cs_ach', JSON.stringify(now));
     newOnes.forEach((id, i) => {
       const a = ACHIEVEMENTS.find(x=>x.id===id);
-      if (a) setTimeout(() => showAchievementToast(a), i * 3200);
+      if (a) {
+        // Grant the one-time XP reward and bank the claim in the unified collection.
+        if (!_progress.expoClaimed[a.id]) {
+          _progress.expoClaimed[a.id] = Date.now();
+          addXP(a.xp || 0);
+          saveProgress();
+        }
+        setTimeout(() => celebrateAchievement(a), i * 3000);
+      }
     });
   }
+}
+
+// Achievements celebrate through the same moment engine as expeditions/titles.
+function celebrateAchievement(ach) {
+  enqueueMoment({
+    emoji: ach.icon,
+    eyebrow: 'Achievement Unlocked',
+    title: ach.name,
+    desc: '+' + (ach.xp || 0) + ' XP awarded.',
+    sub: ach.desc,
+    colors: ['#60a5fa', '#c084fc', '#fff', '#f5c842'],
+    particles: 14
+  });
+  playSound('end');
 }
 
 function showAchievementToast(ach) {
@@ -6857,6 +6935,7 @@ function renderAchievements() {
       <span class="ach-icon">${a.icon}</span>
       <div class="ach-name">${a.name}</div>
       <div class="ach-req">${a.desc}</div>
+      <div class="ach-xp">+${a.xp||0} XP</div>
     </div>`).join('');
 }
 
@@ -7476,19 +7555,27 @@ function titlePctToNext() {
   return Math.round(got / span * 100);
 }
 function renderTitleChip() {
-  var wrap = document.getElementById('titleChipWrap');
-  if (!wrap) return;
   if (!SPOTTER_TITLES || !SPOTTER_TITLES.length) return;
   var cur = currentTitle();
   var nxt = nextTitleForXP(_xpTotal);
-  wrap.style.display = 'block';
-  wrap.innerHTML =
-    '<div class="title-chip" id="titleChip">' +
-      '<span class="tc-emoji">' + cur.emoji + '</span>' + cur.name +
-    '</div>' +
-    (nxt ? '<div class="title-next"><span>' + nxt.emoji + ' ' + nxt.name + '</span>' +
-      '<div class="tn-bar"><div class="tn-fill" style="width:' + titlePctToNext() + '%"></div></div>' +
-      '<span>' + Math.max(0, nxt.xp - _xpTotal) + ' XP</span></div>' : '');
+  var slot = document.getElementById('levelTitleSlot');
+  if (slot) {
+    slot.style.display = '';
+    slot.innerHTML = '<span class="tc-emoji">' + cur.emoji + '</span>' + cur.name;
+  }
+  var nextRow = document.getElementById('titleNextRow');
+  if (nextRow) {
+    if (nxt) {
+      nextRow.style.display = 'flex';
+      nextRow.innerHTML =
+        '<span class="tn-next-name">' + nxt.emoji + ' ' + nxt.name + '</span>' +
+        '<div class="tn-bar"><div class="tn-fill" style="width:' + titlePctToNext() + '%"></div></div>' +
+        '<span class="tn-xp">' + Math.max(0, nxt.xp - _xpTotal) + ' XP</span>';
+    } else {
+      nextRow.style.display = 'none';
+      nextRow.innerHTML = '';
+    }
+  }
 }
 // Announce newly unlocked titles (fire once per title id)
 function checkTitleUnlock(silent) {
@@ -7497,7 +7584,7 @@ function checkTitleUnlock(silent) {
   _progress.titlesUnlocked[cur.id] = true;
   saveProgress();
   if (silent) return;
-  var chip = document.getElementById('titleChip');
+  var chip = document.getElementById('levelTitleSlot');
   if (chip) { chip.classList.remove('new-title'); void chip.offsetWidth; chip.classList.add('new-title'); }
   showTitleUp(cur);
 }
@@ -7529,13 +7616,31 @@ function _spottedNames() {
 function bookMakeStats() {
   var spotted = _spottedNames();
   var byMake = {};
+  function bucket(mk) {
+    if (!byMake[mk]) byMake[mk] = { make: mk, total: 0, found: 0, models: [] };
+    return byMake[mk];
+  }
   CAR_AC_DB.forEach(function(m){
     var mk = String(m.name.split(' ')[0]).toUpperCase();
-    if (!byMake[mk]) byMake[mk] = { make: mk, total: 0, found: 0, models: [] };
+    var b = bucket(mk);
     var found = spotted.has(_modelKey(m.name));
-    byMake[mk].models.push({ name: m.name, type: m.type, val: m.val, found: found });
-    byMake[mk].total++;
-    if (found) byMake[mk].found++;
+    b.models.push({ name: m.name, type: m.type, val: m.val, found: found, _db: true });
+    b.total++;
+    if (found) b.found++;
+  });
+  // Merge any garage cars that aren't in the built-in DB so the book always
+  // reflects every car the user has actually spotted, grouped by brand.
+  _allSpottedFlat().forEach(function(c){
+    var nm = String(c.name || '').trim();
+    if (!nm) return;
+    var mk = String(nm.split(' ')[0]).toUpperCase();
+    var key = _modelKey(nm);
+    var b = bucket(mk);
+    var dup = b.models.some(function(x){ return _modelKey(x.name) === key; });
+    if (dup) return;
+    b.models.push({ name: nm, type: c.type || '', val: c.value || 0, found: true });
+    b.total++;
+    b.found++;
   });
   return Object.keys(byMake).sort(function(a,b){ return a.localeCompare(b); }).map(function(k){ return byMake[k]; });
 }
@@ -7642,45 +7747,79 @@ function showBookAllShelf() {
 // ---- EXPEDITIONS — themed spotting challenges with one-time XP rewards ----
 var EXPEDITIONS = [
   { id:'italian_3',   name:'Italian Stallions',   icon:'🇮🇹', desc:'Spot 3 Italian exotics',          goal:3,  xp:120, check:function(c){ return c.filter(function(x){ return /^(ferrari|lamborghini|maserati|alfa|pagan)/i.test(x.name); }).length; } },
-  { id:'german_4',    name:'German Precision',    icon:'🇩🇪', desc:'Spot 4 German machines',          goal:4,  xp:120, check:function(c){ return c.filter(function(x){ return /^(porsche|bmw|mercedes|audi|vw|audi)/i.test(x.name); }).length; } },
+  { id:'german_4',    name:'German Precision',    icon:'🇩🇪', desc:'Spot 4 German machines',          goal:4,  xp:120, check:function(c){ return c.filter(function(x){ return /^(porsche|bmw|mercedes|audi|vw)/i.test(x.name); }).length; } },
   { id:'muscle_4',    name:'Muscle Mayhem',       icon:'🇺🇸', desc:'Spot 4 American muscle cars',     goal:4,  xp:120, check:function(c){ return c.filter(function(x){ return x.type === 'muscle'; }).length; } },
   { id:'ev_4',        name:'Electric Dreams',     icon:'⚡',  desc:'Spot 4 EVs',                      goal:4,  xp:120, check:function(c){ return c.filter(function(x){ return x.type === 'ev'; }).length; } },
   { id:'hyper_1',     name:'Hypercar Hunt',       icon:'🔥',  desc:'Spot a $500K+ hypercar',          goal:1,  xp:300, check:function(c){ return c.filter(function(x){ return x.value >= 500000; }).length; } },
   { id:'legend_1',    name:'Legend Seeker',       icon:'👑',  desc:'Spot a $1M+ legend',              goal:1,  xp:500, check:function(c){ return c.filter(function(x){ return x.value >= 1000000; }).length; } },
+  { id:'super_3',     name:'Supercar Squadron',   icon:'🏎️', desc:'Spot 3 Supercars',                 goal:3,  xp:150, check:function(c){ return c.filter(function(x){ return x.type === 'supercar' || (x.value >= 150000 && x.value < 500000); }).length; } },
+  { id:'luxury_2',    name:'First Class',         icon:'🎩',  desc:'Spot 2 Luxury cars',              goal:2,  xp:90,  check:function(c){ return c.filter(function(x){ return x.type === 'luxury'; }).length; } },
+  { id:'classic_2',   name:'Time Machine',        icon:'🕹️', desc:'Spot 2 Classic cars',              goal:2,  xp:90,  check:function(c){ return c.filter(function(x){ return x.type === 'classic'; }).length; } },
+  { id:'exotic_2',    name:'Exotic Rarities',     icon:'💎',  desc:'Spot 2 Exotic cars',              goal:2,  xp:150, check:function(c){ return c.filter(function(x){ return x.type === 'exotic'; }).length; } },
   { id:'six_makes',   name:'Globe Trotter',       icon:'🌍',  desc:'Spot cars from 6 different makes', goal:6,  xp:150, check:function(c){ return new Set(c.map(function(x){ return (x.name || '').split(' ')[0].toLowerCase(); })).size; } },
-  { id:'twelve_cars', name:'Showroom',            icon:'🏢',  desc:'Log 12 cars total',               goal:12, xp:150, check:function(c){ return c.length; } }
+  { id:'ten_makes_x', name:'World Tour',          icon:'✈️', desc:'Spot cars from 10 different makes',goal:10, xp:280, check:function(c){ return new Set(c.map(function(x){ return (x.name || '').split(' ')[0].toLowerCase(); })).size; } },
+  { id:'fifteen_cars',name:'Auto Gallery',        icon:'🖼️', desc:'Log 15 cars total',               goal:15, xp:200, check:function(c){ return c.length; } },
+  { id:'thirty_cars', name:'Full Collection',     icon:'🏛️', desc:'Log 30 cars total',               goal:30, xp:400, check:function(c){ return c.length; } },
+  { id:'photog_3',    name:'Lens Master',         icon:'📷',  desc:'Log 3 cars with photos',          goal:3,  xp:100, check:function(c){ return c.filter(function(x){ return x.photo; }).length; } },
+  { id:'night_owl',   name:'Night Owl',           icon:'🌙',  desc:'Log 4 cars in one run',           goal:4,  xp:160, check:function(c,r){ return (r||[]).some(function(x){ return !x.spotted && (x.cars||[]).length >= 4; }) ? 4 : 0; } }
 ];
+// Unified collection — achievements and expeditions live in one progress list.
+function allChallenges() {
+  var all = _allSpottedFlat();
+  var runs = allRuns;
+  var exps = EXPEDITIONS.map(function(e){
+    var count = e.check(all, runs);
+    return { id: e.id, name: e.name, icon: e.icon, desc: e.desc, goal: e.goal, xp: e.xp, kind: 'expo', count: count, done: count >= e.goal, claimed: !!_progress.expoClaimed[e.id] };
+  });
+  var achs = ACHIEVEMENTS.map(function(a){
+    var done = !!a.check(all, runs);
+    return { id: a.id, name: a.name, icon: a.icon, desc: a.desc, goal: 1, xp: a.xp || 0, kind: 'ach', count: done ? 1 : 0, done: done, claimed: !!_progress.expoClaimed[a.id] };
+  });
+  return exps.concat(achs);
+}
 function expoProgress() {
   var all = _allSpottedFlat();
   return EXPEDITIONS.map(function(e){
-    var count = e.check(all);
-    return { id: e.id, name: e.name, icon: e.icon, desc: e.desc, goal: e.goal, xp: e.xp, count: count, done: count >= e.goal, claimed: !!_progress.expoClaimed[e.id] };
+    var count = e.check(all, allRuns);
+    return { id: e.id, name: e.name, icon: e.icon, desc: e.desc, goal: e.goal, xp: e.xp, kind: 'expo', count: count, done: count >= e.goal, claimed: !!_progress.expoClaimed[e.id] };
   });
 }
 function renderExpeditions() {
   var list = document.getElementById('expoList');
   if (!list) return;
-  var exps = expoProgress();
+  var exps = allChallenges();
+  var kindLabel = function(k){ return k === 'ach' ? '<span class="ch-kind ch-kind-ach">ACHIEVEMENT</span>' : '<span class="ch-kind ch-kind-expo">EXPEDITION</span>'; };
   list.innerHTML = exps.map(function(e, i){
     var pct = Math.min(100, Math.round(e.count / e.goal * 100));
+    var reward;
+    if (e.kind === 'ach') {
+      reward = e.claimed
+        ? '<div class="ex-reward" style="color:var(--green)">✓ +' + e.xp + ' XP earned</div>'
+        : (e.done
+            ? '<button class="ex-reward" style="width:100%;background:#60a5fa;color:#080808;border:none;border-radius:var(--radius-xs);font-family:\'Bebas Neue\',cursive;font-size:0.95rem;letter-spacing:2px;padding:11px;cursor:pointer;margin-top:10px;" onclick="claimExpo(\'' + e.id + '\')">COLLECT +' + e.xp + ' XP</button>'
+            : '<div class="ex-reward">Reward: +' + e.xp + ' XP</div>');
+    } else if (e.done) {
+      reward = e.claimed
+        ? '<div class="ex-reward" style="color:var(--green)">✓ +' + e.xp + ' XP claimed</div>'
+        : '<button class="ex-reward" style="width:100%;background:var(--accent);color:#080808;border:none;border-radius:var(--radius-xs);font-family:\'Bebas Neue\',cursive;font-size:0.95rem;letter-spacing:2px;padding:11px;cursor:pointer;margin-top:10px;" onclick="claimExpo(\'' + e.id + '\')">CLAIM +' + e.xp + ' XP</button>';
+    } else {
+      reward = '<div class="ex-reward">Reward: +' + e.xp + ' XP</div>';
+    }
     return '<div class="expo-card ' + (e.done ? 'done' : '') + '" style="animation-delay:' + (i * 0.04) + 's">' +
       '<div class="ex-head"><div class="ex-ico">' + e.icon + '</div>' +
-      '<div><div class="ex-name">' + e.name + '</div><div class="ex-desc">' + e.desc + '</div></div></div>' +
+      '<div style="min-width:0"><div class="ex-name">' + e.name + '</div><div class="ex-desc">' + e.desc + '</div>' + kindLabel(e.kind) + '</div></div>' +
       '<div class="ex-prog"><div class="ex-bar"><div class="ex-fill" style="width:' + pct + '%"></div></div>' +
       '<div class="ex-count">' + Math.min(e.count, e.goal) + '<span> / ' + e.goal + '</span></div></div>' +
-      (e.done
-        ? (e.claimed
-            ? '<div class="ex-reward" style="color:var(--green)">✓ +' + e.xp + ' XP claimed</div>'
-            : '<button class="ex-reward" style="width:100%;background:var(--accent);color:#080808;border:none;border-radius:var(--radius-xs);font-family:\'Bebas Neue\',cursive;font-size:0.95rem;letter-spacing:2px;padding:11px;cursor:pointer;margin-top:10px;" onclick="claimExpo(\'' + e.id + '\')">CLAIM +' + e.xp + ' XP</button>')
-        : '<div class="ex-reward">Reward: +' + e.xp + ' XP</div>') +
+      reward +
     '</div>';
   }).join('');
 }
 function claimExpo(id) {
   if (_progress.expoClaimed[id]) return;
   _progress.expoClaimed[id] = Date.now();
-  var ex = EXPEDITIONS.find(function(e){ return e.id === id; });
-  if (ex) addXP(ex.xp);
+  var ex = EXPEDITIONS.find(function(e){ return e.id === id; }) ||
+    ACHIEVEMENTS.find(function(a){ return a.id === id; });
+  if (ex) addXP(ex.xp || 0);
   saveProgress();
   renderExpeditions();
   renderLevelBar();
@@ -7688,15 +7827,15 @@ function claimExpo(id) {
   if (ex) {
     enqueueMoment({
       emoji: ex.icon,
-      eyebrow: 'Expedition Complete',
+      eyebrow: ex.name && EXPEDITIONS.some(function(e){ return e.id === id; }) ? 'Expedition Complete' : 'Achievement Unlocked',
       title: ex.name,
-      desc: 'Mission accomplished — +' + ex.xp + ' XP banked.',
+      desc: 'Mission accomplished — +' + (ex.xp || 0) + ' XP banked.',
       sub: ex.desc,
       colors: ['#f5c842', '#ffd75e', '#fff', '#ff5733'],
       particles: 16
     });
   }
-  showToast('🗺️ Expedition complete! +' + (ex ? ex.xp : 0) + ' XP');
+  showToast('🗺️ Challenge complete! +' + (ex ? (ex.xp || 0) : 0) + ' XP');
   playSound('end');
 }
 
@@ -8078,30 +8217,6 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
 
 
 (function(){
-
-  ACHIEVEMENTS.splice(0, ACHIEVEMENTS.length,
-    { id:'first_car', icon:'1', name:'First Spot', desc:'Log your first car', check:(c,r)=>c.length>=1 },
-    { id:'fifty_cars', icon:'50', name:'Half Century', desc:'Log 50 cars total', check:(c,r)=>c.length>=50 },
-    { id:'hundred_cars', icon:'100', name:'Hundred Club', desc:'Log 100 cars total', check:(c,r)=>c.length>=100 },
-    { id:'garage_250', icon:'250', name:'Collector Spec', desc:'Log 250 cars total', check:(c,r)=>c.length>=250 },
-    { id:'first_run', icon:'R1', name:'First Run', desc:'Complete your first run', check:(c,r)=>r.filter(x=>!x.spotted).length>=1 },
-    { id:'ten_runs', icon:'R10', name:'Regular', desc:'Complete 10 runs', check:(c,r)=>r.filter(x=>!x.spotted).length>=10 },
-    { id:'twentyfive_runs', icon:'R25', name:'Street Veteran', desc:'Complete 25 runs', check:(c,r)=>r.filter(x=>!x.spotted).length>=25 },
-    { id:'marathon_run', icon:'8X', name:'Marathon Run', desc:'Log 8 cars in a single run', check:(c,r)=>r.some(x=>!x.spotted&&(x.cars||[]).length>=8) },
-    { id:'five_makes', icon:'M5', name:'Make Explorer', desc:'Spot 5 different makes', check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=5 },
-    { id:'fifteen_makes', icon:'M15', name:'Globe Trotter', desc:'Spot 15 different makes', check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=15 },
-    { id:'twentyfive_makes', icon:'M25', name:'World Garage', desc:'Spot 25 different makes', check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=25 },
-    { id:'ev_collector', icon:'EV', name:'Electric Dreams', desc:'Log 10 EVs', check:(c,r)=>c.filter(x=>x.type==='ev').length>=10 },
-    { id:'muscle_master', icon:'MU', name:'Muscle Master', desc:'Log 10 muscle cars', check:(c,r)=>c.filter(x=>x.type==='muscle').length>=10 },
-    { id:'supercar_stack', icon:'SC', name:'Supercar Stack', desc:'Log 20 supercars or exotics', check:(c,r)=>c.filter(x=>x.value>=150000).length>=20 },
-    { id:'photo_five', icon:'P5', name:'Photographer', desc:'Log 5 cars with photos', check:(c,r)=>c.filter(x=>x.photo).length>=5 },
-    { id:'photo_twenty', icon:'P20', name:'Rolling Gallery', desc:'Log 20 cars with photos', check:(c,r)=>c.filter(x=>x.photo).length>=20 },
-    { id:'hyper_fleet', icon:'H8', name:'Hyper Fleet', desc:'Spot 8 hypercars ($500K+)', check:(c,r)=>c.filter(x=>x.value>=500000).length>=8 },
-    { id:'legend_trio', icon:'L3', name:'Legend Trio', desc:'Spot 3 legend cars ($1M+)', check:(c,r)=>c.filter(x=>x.value>=1000000).length>=3 },
-    { id:'two_mil_run', icon:'2M', name:'Two Million Club', desc:'Complete a run over $2M', check:(c,r)=>r.some(x=>!x.spotted&&x.total>=2000000) },
-    { id:'three_mil_run', icon:'3M', name:'Unicorn Run', desc:'Complete a run over $3M', check:(c,r)=>r.some(x=>!x.spotted&&x.total>=3000000) },
-    { id:'double_legend_run', icon:'2L', name:'Royal Convoy', desc:'Log 2 legend cars in one run', check:(c,r)=>r.some(x=>!x.spotted&&(x.cars||[]).filter(car=>car.value>=1000000).length>=2) }
-  );
   _prevAchievements = (_prevAchievements || []).filter(id => ACHIEVEMENTS.some(a => a.id === id));
   localStorage.setItem('cs_ach', JSON.stringify(_prevAchievements));
 
