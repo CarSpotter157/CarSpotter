@@ -806,6 +806,28 @@ body{
 .photo-btn-sm{background:none;border:none;font-size:0.95rem;color:var(--muted);cursor:pointer;transition:color 0.15s;flex-shrink:0;padding:8px;opacity:0.5;}
 .photo-btn-sm:hover{opacity:1;color:var(--accent);}
 .photo-btn-sm.has-photo{opacity:1;color:var(--accent);}
+/*  CAMERA SHUTTER / FLASH SAVE ANIMATION  */
+#camFlashOverlay{position:fixed;inset:0;z-index:99999;pointer-events:none;}
+#camFlashOverlay .cf-viewfinder{position:absolute;inset:0;background:rgba(8,8,12,0.86);display:flex;align-items:center;justify-content:center;opacity:0;}
+#camFlashOverlay .cf-flash{position:absolute;inset:0;background:#fff;opacity:0;}
+#camFlashOverlay .cf-frame{position:relative;width:min(70vw,290px);height:min(70vw,290px);border-radius:20px;overflow:hidden;background:#111;box-shadow:0 30px 80px rgba(0,0,0,0.6);transform:scale(0.5);opacity:0;}
+#camFlashOverlay .cf-shot{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+#camFlashOverlay .cf-ring{position:absolute;inset:0;border-radius:20px;box-shadow:inset 0 0 0 3px rgba(255,255,255,0.9);opacity:0;}
+#camFlashOverlay .cf-check{position:absolute;top:50%;left:50%;width:62px;height:62px;margin:-31px 0 0 -31px;border-radius:50%;background:rgba(20,230,140,0.96);color:#04231a;font-size:30px;line-height:62px;text-align:center;transform:scale(0);}
+#camFlashOverlay .cf-tag{position:absolute;left:50%;top:calc(50% + 52px);transform:translateX(-50%);white-space:nowrap;color:#fff;font-family:'Bebas Neue',cursive;font-size:0.8rem;letter-spacing:3px;background:rgba(255,255,255,0.14);padding:7px 16px;border-radius:999px;opacity:0;}
+#camFlashOverlay .cf-corner{position:absolute;width:34px;height:34px;border:3px solid rgba(255,255,255,0.92);}
+#camFlashOverlay .cf-tl{top:14px;left:14px;border-right:none;border-bottom:none;border-top-left-radius:10px;}
+#camFlashOverlay .cf-tr{top:14px;right:14px;border-left:none;border-bottom:none;border-top-right-radius:10px;}
+#camFlashOverlay .cf-bl{bottom:14px;left:14px;border-right:none;border-top:none;border-bottom-left-radius:10px;}
+#camFlashOverlay .cf-br{bottom:14px;right:14px;border-left:none;border-top:none;border-bottom-right-radius:10px;}
+#camFlashOverlay.go .cf-viewfinder{transition:opacity 0.22s ease-out;opacity:1;}
+#camFlashOverlay.go .cf-flash{animation:cfFlash 0.55s ease-out 0.2s forwards;}
+#camFlashOverlay.go .cf-frame{transition:transform 0.4s cubic-bezier(0.2,0.9,0.3,1.25),opacity 0.3s;transform:scale(1);opacity:1;}
+#camFlashOverlay.go .cf-ring{transition:opacity 0.4s 0.55s;opacity:1;}
+#camFlashOverlay.go .cf-check{transition:transform 0.35s cubic-bezier(0.2,0.9,0.3,1.45) 0.6s;transform:scale(1);}
+#camFlashOverlay.go .cf-tag{transition:opacity 0.3s 0.85s;opacity:1;}
+#camFlashOverlay.out{opacity:0;transition:opacity 0.35s;}
+@keyframes cfFlash{0%{opacity:0}20%{opacity:0.95}100%{opacity:0}}
 .star-btn.starred{color:var(--accent);}
 .del-btn{
   width:36px;height:36px;border-radius:50%;flex-shrink:0;
@@ -2474,7 +2496,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
 <div class="toast" id="toast"></div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v27.7</div>
+<div class="version-tag" id="versionTag">v27.8</div>
 
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
@@ -3130,6 +3152,19 @@ function playSound(type) {
       g.gain.setValueAtTime(0.2, ctx.currentTime);
       g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
       o.start(); o.stop(ctx.currentTime + 0.18);
+    } else if (type === 'shutter') {
+      // Camera shutter — sharp click + mechanical clack
+      [1800, 700].forEach((freq, i) => {
+        const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+        o2.connect(g2); g2.connect(ctx.destination);
+        o2.type = 'square';
+        o2.frequency.value = freq;
+        g2.gain.setValueAtTime(0.0001, ctx.currentTime + i * 0.16);
+        g2.gain.exponentialRampToValueAtTime(0.1, ctx.currentTime + i * 0.16 + 0.005);
+        g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.16 + 0.05);
+        o2.start(ctx.currentTime + i * 0.16);
+        o2.stop(ctx.currentTime + i * 0.16 + 0.06);
+      });
     }
   } catch(e) {}
 }
@@ -5864,6 +5899,25 @@ function _savePhoto(compressed, t) {
   if (t.type !== 'all') showToast('📷 Photo attached!');
 }
 
+// Cinematic camera flash that plays while a photo saves
+function playPhotoFlash(photoUrl) {
+  if (!photoUrl || photoUrl.indexOf('data:') !== 0) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var old = document.getElementById('camFlashOverlay');
+  if (old && old.parentNode) old.parentNode.removeChild(old);
+  var ov = document.createElement('div');
+  ov.id = 'camFlashOverlay';
+  ov.innerHTML = '<div class="cf-viewfinder"><i class="cf-corner cf-tl"></i><i class="cf-corner cf-tr"></i><i class="cf-corner cf-bl"></i><i class="cf-corner cf-br"></i><div class="cf-frame"><img class="cf-shot" src="' + photoUrl + '" alt=""><div class="cf-ring"></div><div class="cf-check">&#10003;</div><div class="cf-tag">PHOTO SAVED</div></div></div><div class="cf-flash"></div>';
+  document.body.appendChild(ov);
+  void ov.offsetWidth;
+  ov.classList.add('go');
+  playSound('shutter');
+  haptic(25);
+  setTimeout(function() { playSound('shutter'); haptic(18); }, 220);
+  setTimeout(function() { ov.classList.add('out'); }, 1050);
+  setTimeout(function() { if (ov.parentNode) ov.parentNode.removeChild(ov); }, 1500);
+}
+
 _attachPhotoInput.onchange = function(e) {
   try {
   const file = e.target.files[0];
@@ -5896,6 +5950,7 @@ _attachPhotoInput.onchange = function(e) {
             compressed = c.toDataURL('image/jpeg', quality);
           }
           _savePhoto(compressed, t);
+          playPhotoFlash(compressed);
         } catch(err) { showToast('Photo error: ' + err.message); }
       };
       img.src = raw;
