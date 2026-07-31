@@ -414,6 +414,66 @@ body{
 .btn-hint-row span::before{content:'|';position:absolute;left:-10px;color:var(--glass-border);font-size:0.5rem;opacity:0.3;}
 .btn-hint-row span:first-child::before{content:'';}
 
+/* ── SPOT CELEBRATION — the rewarding logging moment ── */
+@keyframes spotCardIn{0%{opacity:0;transform:translateY(18px) scale(0.7)}60%{opacity:1;transform:translateY(-4px) scale(1.06)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes spotCardOut{to{opacity:0;transform:translateY(-10px) scale(0.92)}}
+@keyframes spotParticleBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--px),var(--py)) scale(0);opacity:0}}
+@keyframes spotFlare{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+@keyframes runTotalPop{0%{transform:scale(1)}35%{transform:scale(1.12);color:var(--accent)}100%{transform:scale(1)}}
+@keyframes levelFillGlow{0%{filter:brightness(1)}50%{filter:brightness(1.4)}100%{filter:brightness(1)}}
+
+.spot-celebrate{
+  position:fixed;left:50%;top:34%;transform:translate(-50%,-50%);
+  z-index:99995;pointer-events:none;display:flex;align-items:center;gap:14px;
+  padding:16px 20px;border-radius:20px;
+  background:var(--glass-card);border:1px solid var(--glass-border);
+  box-shadow:var(--shadow-lg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  animation:spotCardIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  min-width:230px;max-width:320px;
+}
+.spot-celebrate.out{animation:spotCardOut 0.25s ease both;}
+.spot-celebrate[data-tier="common"]{border-color:rgba(107,114,128,0.45);}
+.spot-celebrate[data-tier="sports"]{border-color:rgba(96,165,250,0.5);}
+.spot-celebrate[data-tier="super"]{border-color:rgba(192,132,252,0.55);box-shadow:0 0 40px rgba(192,132,252,0.25);}
+.spot-celebrate[data-tier="hyper"]{border-color:rgba(255,87,51,0.6);box-shadow:0 0 48px rgba(255,87,51,0.3);}
+.spot-celebrate[data-tier="legend"]{border-color:rgba(245,200,66,0.7);box-shadow:0 0 60px rgba(245,200,66,0.35);}
+.spot-ce-icon{
+  width:46px;height:46px;border-radius:14px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.5rem;background:var(--surf3);border:1px solid var(--glass-border);
+  animation:popIn 0.3s 0.1s ease both;
+}
+.spot-ce-body{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.spot-ce-tag{font-size:0.46rem;letter-spacing:2px;text-transform:uppercase;font-weight:700;opacity:0.9;}
+.spot-ce-name{font-weight:700;font-size:0.95rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.spot-ce-val{font-size:0.68rem;color:var(--text2);}
+.spot-ce-xp{
+  margin-left:auto;flex-shrink:0;align-self:center;
+  font-family:'Bebas Neue',cursive;font-size:1.1rem;letter-spacing:1px;
+  padding:5px 11px;border-radius:999px;background:var(--adim);color:var(--accent);
+  animation:popIn 0.35s 0.25s ease both;
+}
+.spot-particle{position:absolute;left:50%;top:50%;width:6px;height:6px;border-radius:50%;pointer-events:none;}
+.spot-flare{position:fixed;inset:0;z-index:99994;pointer-events:none;animation:spotFlare 0.7s ease both;
+  background:radial-gradient(circle at 50% 38%, rgba(245,200,66,0.22), transparent 60%);}
+
+/* Level bar under score banner */
+.level-bar-wrap{margin:10px 2px 6px;}
+.level-bar-info{display:flex;justify-content:space-between;align-items:baseline;font-size:0.52rem;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:5px;}
+.level-bar-info .level-lbl{font-family:'Bebas Neue',cursive;font-size:0.85rem;letter-spacing:2px;color:var(--text);}
+.level-bar-info .level-lbl span{color:var(--accent);}
+.level-bar-info .level-xp{font-variant-numeric:tabular-nums;}
+.level-bar-track{height:5px;border-radius:99px;background:var(--surf3);overflow:hidden;}
+.level-bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent-d),var(--accent));transition:width 0.6s var(--ease);}
+.level-bar-fill.glow{animation:levelFillGlow 0.8s ease;}
+
+#runTotal{display:inline-block;}
+#runTotal.pop{animation:runTotalPop 0.45s cubic-bezier(0.34,1.56,0.64,1);}
+@media (prefers-reduced-motion: reduce){
+  .spot-celebrate,.spot-particle,.spot-flare,#runTotal.pop{animation:none !important;}
+}
+
+
 /* Photo + Geo — side by side, slim */
 .photo-btn,.geo-btn{
   display:flex;align-items:center;justify-content:center;gap:8px;
@@ -1534,6 +1594,14 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
             </div>
           </div>
 
+          <div class="level-bar-wrap">
+            <div class="level-bar-info">
+              <span class="level-lbl">Level <span id="levelNum">1</span></span>
+              <span class="level-xp" id="levelXp">0 / 100 XP</span>
+            </div>
+            <div class="level-bar-track"><div class="level-bar-fill" id="levelFill" style="width:0%"></div></div>
+          </div>
+
           <div class="card">
             <div class="card-title">Log a Car</div>
             <div class="form-grid">
@@ -1783,6 +1851,10 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
         <div class="setting-row sound-toggle" style="border-top:none;padding-top:0;margin-top:0;">
           <span style="font-size:0.78rem;color:var(--text2);flex:1;">Play sounds when logging cars</span>
           <button class="toggle-pill" id="soundToggle" onclick="toggleSound()"><div class="toggle-knob"></div></button>
+        </div>
+        <div class="setting-row sound-toggle" style="border-top:none;padding-top:0;margin-top:0;">
+          <span style="font-size:0.78rem;color:var(--text2);flex:1;">Vibrate when logging cars</span>
+          <button class="toggle-pill" id="vibeToggle" onclick="toggleVibe()"><div class="toggle-knob"></div></button>
         </div>
       </div>
 
@@ -2847,7 +2919,7 @@ function goTo(page) {
     if (page==='garage')       renderGarage();
     if (page==='history')      renderHistory();
     if (page==='achievements') renderAchievements();
-    if (page==='settings')     { renderThemeBar(); initSoundToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); initSortPrefBtns(); applyCompactMode(); }
+    if (page==='settings')     { renderThemeBar(); initSoundToggle(); initVibeToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); initSortPrefBtns(); applyCompactMode(); }
     if (page==='news')         { if (!newsLoaded) { newsLoaded=true; renderNewsSources(); } loadNews(); }
     if (page==='leaderboard')  loadLeaderboard(true);
     if (page==='stats')        renderStats();
@@ -3026,6 +3098,7 @@ function logRun() {
   renderSpot();
   if (garageView === 'map') renderGarage();
   playSound('log');
+  rewardLog(car, true);
   pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, input.type + ' ' + name + ' removed');
   showToast(input.type + ' ' + name + ' added to run!');
   showSpecsCard({ name:name, value:input.value, color:input.color, type:input.type, photo:photo, location:car.location });
@@ -3049,6 +3122,7 @@ function logSpotted() {
   saveToCloud();
   fetchAndStoreRefImage(car);
   playSound('log');
+  rewardLog(car, false);
   pushUndo('history', prevRuns, input.type + ' ' + name + ' removed');
   clearInputs();
   renderQPTrigger();
@@ -4162,6 +4236,145 @@ async function fetchCarImage(carName) {
   return null;
 }
 
+//  XP & LEVELS — reward every log so there's always a reason to find the next car
+let _xpTotal = parseInt(localStorage.getItem('cs_xp') || '0');
+function xpInfo(xp) {
+  var level = 1, into = 0, need = 100;
+  var remaining = xp;
+  while (remaining >= need) { remaining -= need; level++; need = 100 * level; }
+  return { level: level, into: remaining, need: need, total: xp };
+}
+function addXP(amount) {
+  _xpTotal += amount;
+  localStorage.setItem('cs_xp', String(_xpTotal));
+  renderLevelBar();
+  return xpInfo(_xpTotal);
+}
+function rarityXP(value) {
+  if (value >= 1000000) return 100;
+  if (value >= 500000)  return 60;
+  if (value >= 150000)  return 35;
+  if (value >= 50000)   return 20;
+  return 10;
+}
+function renderLevelBar() {
+  var info = xpInfo(_xpTotal);
+  var num  = document.getElementById('levelNum');
+  var xp   = document.getElementById('levelXp');
+  var fill = document.getElementById('levelFill');
+  if (num)  num.textContent  = info.level;
+  if (xp)   xp.textContent   = info.into + ' / ' + info.need + ' XP';
+  if (fill) fill.style.width = Math.round((info.into / info.need) * 100) + '%';
+}
+function levelUpPulse() {
+  var fill = document.getElementById('levelFill');
+  if (fill) { fill.classList.remove('glow'); void fill.offsetWidth; fill.classList.add('glow'); }
+}
+
+//  HAPTICS — tasteful buzz on supported devices
+function haptic(pattern) {
+  if (localStorage.getItem('cs_vibe') === 'off') return;
+  try { if (navigator.vibrate) navigator.vibrate(pattern); } catch(e) {}
+}
+function toggleVibe() {
+  var on = localStorage.getItem('cs_vibe') !== 'off';
+  localStorage.setItem('cs_vibe', on ? 'off' : 'on');
+  var btn = document.getElementById('vibeToggle');
+  if (btn) btn.classList.toggle('on', !on);
+  showToast(on ? ' Vibrations off' : ' Vibrations on');
+}
+function initVibeToggle() {
+  var btn = document.getElementById('vibeToggle');
+  if (btn) btn.classList.toggle('on', localStorage.getItem('cs_vibe') !== 'off');
+}
+
+//  SPOT CELEBRATION — the rewarding moment after logging a car
+function celebrateSpot(car, opts) {
+  opts = opts || {};
+  var v = car.value || 0;
+  var tier = v >= 1000000 ? 'legend' : v >= 500000 ? 'hyper' : v >= 150000 ? 'super' : v >= 50000 ? 'sports' : 'common';
+  var meta = {
+    common: { icon: '🚗', label: 'Daily',    color: '#6b7280' },
+    sports: { icon: '🏁', label: 'Sports',   color: '#60a5fa' },
+    super:  { icon: '🏎️', label: 'Supercar', color: '#c084fc' },
+    hyper:  { icon: '🔥', label: 'Hypercar', color: '#ff5733' },
+    legend: { icon: '👑', label: 'Legend',   color: '#f5c842' }
+  }[tier];
+  var xpGain = opts.xpGain || rarityXP(v);
+
+  var old = document.querySelector('.spot-celebrate');
+  if (old) old.remove();
+  var oldFlare = document.querySelector('.spot-flare');
+  if (oldFlare) oldFlare.remove();
+
+  var card = document.createElement('div');
+  card.className = 'spot-celebrate';
+  card.setAttribute('data-tier', tier);
+  card.innerHTML =
+    '<div class="spot-ce-icon" style="color:' + meta.color + '">' + meta.icon + '</div>' +
+    '<div class="spot-ce-body">' +
+      '<div class="spot-ce-tag" style="color:' + meta.color + '">' + meta.label + ' Spotted</div>' +
+      '<div class="spot-ce-name">' + escapeHtml(car.name) + '</div>' +
+      '<div class="spot-ce-val">' + fmtFull(v) + '</div>' +
+    '</div>' +
+    '<div class="spot-ce-xp">+' + xpGain + ' XP</div>';
+  document.body.appendChild(card);
+
+  // Particles for supercar and above
+  if (tier === 'super' || tier === 'hyper' || tier === 'legend') {
+    var count = tier === 'legend' ? 26 : tier === 'hyper' ? 20 : 14;
+    for (var i = 0; i < count; i++) {
+      var p = document.createElement('div');
+      p.className = 'spot-particle';
+      var ang = (Math.PI * 2 * i) / count + Math.random() * 0.5;
+      var dist = 55 + Math.random() * 75;
+      p.style.cssText = '--px:' + (Math.cos(ang) * dist).toFixed(0) + 'px;--py:' + (Math.sin(ang) * dist).toFixed(0) + 'px;' +
+        'background:' + meta.color + ';animation:spotParticleBurst 0.7s cubic-bezier(0.16,0.84,0.44,1) both;' +
+        'animation-delay:' + (0.08 + Math.random() * 0.12) + 's;';
+      card.appendChild(p);
+    }
+  }
+
+  // Screen flare for legendaries
+  if (tier === 'legend') {
+    var flare = document.createElement('div');
+    flare.className = 'spot-flare';
+    document.body.appendChild(flare);
+  }
+
+  var live = 1500 + (tier === 'legend' ? 400 : 0);
+  setTimeout(function() {
+    if (card && document.body.contains(card)) {
+      card.classList.add('out');
+      setTimeout(function() { if (card.parentNode) card.parentNode.removeChild(card); }, 260);
+    }
+  }, live);
+}
+
+function popRunTotal() {
+  var el = document.getElementById('runTotal');
+  if (!el) return;
+  el.classList.remove('pop');
+  void el.offsetWidth;
+  el.classList.add('pop');
+}
+
+//  REWARD — XP + celebration + haptics + total pop in one place
+function rewardLog(car, popTotal) {
+  var before = xpInfo(_xpTotal);
+  var gain   = rarityXP(car.value || 0);
+  var after  = addXP(gain);
+  celebrateSpot(car, { xpGain: gain });
+  haptic((car.value || 0) >= 150000 ? 40 : 12);
+  if (popTotal) popRunTotal();
+  if (after.level > before.level) {
+    levelUpPulse();
+    setTimeout(function() {
+      showToast('🏆 LEVEL UP — You are now Level ' + after.level + ' Spotter!');
+    }, 600);
+  }
+}
+
 function fetchRefImagesForAllCars() {
   var seen = {};
   var all = [];
@@ -4356,6 +4569,8 @@ renderHomeFav();
 applyTheme(activeTheme);
 applyCarbon();
 initSoundToggle();
+initVibeToggle();
+renderLevelBar();
 fetchRefImagesForAllCars();
 
 //  SERVICE WORKER — cache-first for offline support
