@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=optional" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'; this.onload=null">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'; this.onload=null">
 <style>
@@ -2474,7 +2474,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
 <div class="toast" id="toast"></div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v27.5</div>
+<div class="version-tag" id="versionTag">v27.6</div>
 
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
@@ -2536,6 +2536,13 @@ let syncUnsub    = null;
 let syncTimer    = null;
 let qpOpen       = false;
 var _idbPhotoCache = {}; // must init early — used by renders before the photo section
+
+// Track whether the user has actually interacted — gates vibrate/audio so mobile
+// doesn't log "Blocked call to navigator.vibrate" before the first tap.
+var _userInteracted = false;
+['pointerdown','keydown','touchstart'].forEach(function(t){
+  document.addEventListener(t, function(){ _userInteracted = true; }, { passive: true });
+});
 
 // Load IndexedDB photos into cache
 _loadIDBCache();
@@ -3980,6 +3987,7 @@ let garagePage = 0;
 let garageSortHeader = 'allCars';
 let _garageGreeted = false;
 let _featuredIdx = 0;
+var _garageCarByKey = {}; // name -> car, used by attachCarTap instead of embinding photos in DOM
 
 function setGarageSortHeader(h, btn) {
   garageSortHeader = h;
@@ -4124,10 +4132,15 @@ function buildClusterPopup(cluster) {
 
 function renderGarage() {
   _patchPhotosFromCache();
+  // Only do the heavy museum render when the garage is actually on screen.
+  // logSpotted()/deleteCarEverywhere() call this from other pages — skipping
+  // keeps those taps fast on phones (the page re-renders on navigation).
+  var activePg = document.querySelector('.page.active');
+  if (!activePg || activePg.id !== 'page-garage') return;
   if (!_garageGreeted) {
     _garageGreeted = true;
-    playSound('collect');
-    haptic([10,20,10]);
+    if (_userInteracted) playSound('collect');
+    if (_userInteracted) haptic([10,20,10]);
   }
   var pgEl = document.getElementById('page-garage');
   if (pgEl) { pgEl.classList.remove('garage-enter'); void pgEl.offsetWidth; pgEl.classList.add('garage-enter'); }
@@ -4148,6 +4161,8 @@ function renderGarage() {
     countEl.textContent = allCars.length;
   }
   var el = document.getElementById('garageList');
+  _garageCarByKey = {};
+  filtered.forEach(function(c){ _garageCarByKey[c.name.toLowerCase()] = c; });
 
   if (garageView === 'map') {
     el.className = '';
@@ -4212,7 +4227,7 @@ function renderGarage() {
       var rarity = getRarity(car.value);
       var isFav = isFavorite(car.name);
       var tilt = (idx % 2 === 0) ? -0.7 : 0.7;
-      var clickAttr = ' data-inst="1" data-car="' + encodeURIComponent(JSON.stringify(car)) + '"';
+      var clickAttr = ' data-inst="1" data-name="' + escapeHtml(car.name) + '"';
       var photoBadge = car.photo ? (car.photo.indexOf('data:') === 0 ? '<div class="gc-photo-badge">\uD83D\uDCF7 Your Photo</div>' : '<div class="gc-photo-badge">\uD83C\uDF10 Reference</div>') : '';
       var media = car.photo
         ? '<img class="gc-img" loading="lazy" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' + photoBadge
@@ -4251,7 +4266,7 @@ function renderGarage() {
   el.innerHTML = filtered.map(function(car, idx){
     var rarity = getRarity(car.value);
     var nameSuffix = car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '';
-    var clickAttr = ' data-inst="1" data-car="' + encodeURIComponent(JSON.stringify(car)) + '"';
+    var clickAttr = ' data-inst="1" data-name="' + escapeHtml(car.name) + '"';
     return '<div class="garage-row" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');this.textContent=this.textContent===\'★\'?\'☆\':\'★\';">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')">✎</button><button class="g-act-btn g-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')">✕</button></div></div>';
   }).join('');
   el.querySelectorAll('[data-inst]').forEach(function(a){
@@ -4275,7 +4290,10 @@ function attachCarTap(el) {
   });
   el.addEventListener('pointerup', function(e) {
     if (!moved && x0 !== undefined) {
-      try { showCarInstances(JSON.parse(decodeURIComponent(el.dataset.car))); } catch(ex){}
+      try {
+        var car = _garageCarByKey[(el.dataset.name || '').toLowerCase()];
+        if (car) showCarInstances(car);
+      } catch(ex){}
     }
     x0 = y0 = undefined;
   });
@@ -4441,10 +4459,12 @@ async function showSpecsCard(car) {
   document.body.appendChild(overlay);
 
   // Fetch specs from Claude API and image in parallel
-  const [specsData, imgUrl] = await Promise.all([
-    fetchCarSpecs(car.name),
-    fetchCarImage(car.name)
-  ]);
+  // Race with a timeout so flaky mobile data can't leave the spinner hanging forever
+  var pair = await Promise.race([
+    Promise.all([ fetchCarSpecs(car.name), fetchCarImage(car.name) ]),
+    new Promise(function(res){ setTimeout(function(){ res([null, null]); }, 8000); })
+  ]).catch(function(){ return [null, null]; });
+  var specsData = pair[0], imgUrl = pair[1];
 
   // Replace content
   const card = overlay.querySelector('.specs-card');
@@ -4864,6 +4884,7 @@ function levelUpPulse() {
 //  HAPTICS — tasteful buzz on supported devices
 function haptic(pattern) {
   if (localStorage.getItem('cs_vibe') === 'off') return;
+  if (!_userInteracted) return;
   try { if (navigator.vibrate) navigator.vibrate(pattern); } catch(e) {}
 }
 function toggleVibe() {
