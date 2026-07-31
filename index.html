@@ -457,14 +457,14 @@ body{
   perspective:1200px;transform-style:preserve-3d;
   animation:ccCardIn 0.75s cubic-bezier(0.34,1.56,0.64,1) both;
 }
-.cc-card[data-tier="daily"]{--cc-color:#7ec8ff;--cc-glow:rgba(126,200,255,0.4);}
-.cc-card[data-tier="sports"]{--cc-color:#ff7a3d;--cc-glow:rgba(255,122,61,0.45);}
-.cc-card[data-tier="super"]{--cc-color:#f5c842;--cc-glow:rgba(245,200,66,0.5);}
-.cc-card[data-tier="hyper"]{--cc-color:#b26bff;--cc-glow:rgba(178,107,255,0.55);}
+.cc-card[data-tier="daily"]{--cc-color:#9aa3af;--cc-glow:rgba(154,163,175,0.35);}
+.cc-card[data-tier="sports"]{--cc-color:#60a5fa;--cc-glow:rgba(96,165,250,0.4);}
+.cc-card[data-tier="super"]{--cc-color:#c084fc;--cc-glow:rgba(192,132,252,0.45);}
+.cc-card[data-tier="hyper"]{--cc-color:#ff5733;--cc-glow:rgba(255,87,51,0.5);}
 .cc-card[data-tier="legend"]{--cc-color:#f5c842;--cc-glow:rgba(245,200,66,0.6);}
 .cc-rainbow{
   position:absolute;inset:-5px;border-radius:24px;z-index:0;pointer-events:none;opacity:0.75;
-  background:conic-gradient(from 0deg,#f5c842,#ff5733,#b26bff,#7ec8ff,#4ade80,#f5c842);
+  background:conic-gradient(from 0deg,#f5c842,#ff5733,#c084fc,#60a5fa,#4ade80,#f5c842);
   filter:blur(7px);animation:ccRainbowSpin 3.5s linear infinite;
 }
 .cc-inner{
@@ -480,10 +480,10 @@ body{
   box-shadow:0 24px 60px rgba(0,0,0,0.55);
 }
 .cc-front{background:var(--surf2);display:flex;flex-direction:column;}
-.cc-front[data-tier="daily"]{box-shadow:0 24px 60px rgba(126,200,255,0.18);}
-.cc-front[data-tier="sports"]{box-shadow:0 24px 60px rgba(255,122,61,0.22);}
-.cc-front[data-tier="super"]{box-shadow:0 24px 60px rgba(245,200,66,0.28);}
-.cc-front[data-tier="hyper"]{box-shadow:0 24px 60px rgba(178,107,255,0.3);}
+.cc-front[data-tier="daily"]{box-shadow:0 24px 60px rgba(154,163,175,0.16);}
+.cc-front[data-tier="sports"]{box-shadow:0 24px 60px rgba(96,165,250,0.2);}
+.cc-front[data-tier="super"]{box-shadow:0 24px 60px rgba(192,132,252,0.25);}
+.cc-front[data-tier="hyper"]{box-shadow:0 24px 60px rgba(255,87,51,0.3);}
 .cc-front[data-tier="legend"]{box-shadow:0 24px 70px rgba(245,200,66,0.35);}
 .cc-card.anticipate .cc-front{animation:ccBreathe 1.2s ease 0.35s 1 both;}
 .cc-shine{position:absolute;inset:0;border-radius:20px;overflow:hidden;pointer-events:none;z-index:2;}
@@ -660,7 +660,8 @@ body{
 .levelup-dismiss{margin-top:34px;font-size:0.56rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
 
 @media (prefers-reduced-motion: reduce){
-  .recap-card,.recap-flare,.recap-record-tag.pop,.levelup-card,.levelup-star,.levelup-overlay{animation:none !important;}
+  .recap-card,.recap-flare,.recap-record-tag.pop,.recap-p-card,.levelup-card,.levelup-star,.levelup-overlay{animation:none !important;}
+  .recap-p-card{opacity:1 !important;}
 }
 
 
@@ -1278,6 +1279,43 @@ body{
   padding:15px;cursor:pointer;transition:all 0.15s;
 }
 .recap-btn:active{transform:scale(0.98);}
+/* ── RECAP PODIUM — top cars fly in side-by-side ── */
+.recap-podium{display:flex;align-items:flex-end;justify-content:center;gap:12px;margin:12px 0 18px;}
+.recap-p-card{
+  position:relative;flex:0 0 auto;width:min(31%,128px);
+  border-radius:16px;overflow:hidden;
+  background:var(--surf2);border:1px solid var(--glass-border);
+  box-shadow:0 14px 34px rgba(0,0,0,0.45);
+  opacity:0;
+}
+.recap-p-card[data-tier="daily"]{--cc-color:#9aa3af;--cc-glow:rgba(154,163,175,0.4);}
+.recap-p-card[data-tier="sports"]{--cc-color:#60a5fa;--cc-glow:rgba(96,165,250,0.45);}
+.recap-p-card[data-tier="super"]{--cc-color:#c084fc;--cc-glow:rgba(192,132,252,0.5);}
+.recap-p-card[data-tier="hyper"]{--cc-color:#ff5733;--cc-glow:rgba(255,87,51,0.55);}
+.recap-p-card[data-tier="legend"]{--cc-color:#f5c842;--cc-glow:rgba(245,200,66,0.6);}
+.recap-p-card.r1{height:158px;border-color:var(--cc-color);box-shadow:0 0 26px var(--cc-glow),0 14px 34px rgba(0,0,0,0.45);}
+.recap-p-card.r2{height:126px;}
+.recap-p-card.r3{height:126px;}
+.recap-p-card.recap-fly-l{animation:recapFlyL .5s cubic-bezier(.34,1.56,.64,1) var(--p-delay,.1s) both;}
+.recap-p-card.recap-fly-c{animation:recapFlyUp .55s cubic-bezier(.34,1.56,.64,1) var(--p-delay,.24s) both;}
+.recap-p-card.recap-fly-r{animation:recapFlyR .5s cubic-bezier(.34,1.56,.64,1) var(--p-delay,.38s) both;}
+@keyframes recapFlyL{0%{opacity:0;transform:translateX(-90px) scale(.7) rotate(-6deg)}60%{opacity:1}100%{opacity:1;transform:translateX(0) scale(1) rotate(0)}}
+@keyframes recapFlyUp{0%{opacity:0;transform:translateY(60px) scale(.6)}60%{opacity:1}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes recapFlyR{0%{opacity:0;transform:translateX(90px) scale(.7) rotate(6deg)}60%{opacity:1}100%{opacity:1;transform:translateX(0) scale(1) rotate(0)}}
+.recap-p-rank{position:absolute;top:6px;left:6px;z-index:2;font-size:1rem;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.6));}
+.recap-p-media{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(160deg,#232328,#151518);}
+.recap-p-card.r1 .recap-p-media{height:72%;}
+.recap-p-card.r2 .recap-p-media{height:64%;}
+.recap-p-card.r3 .recap-p-media{height:64%;}
+.recap-p-media img{width:100%;height:100%;object-fit:cover;display:block;}
+.recap-p-ph{font-size:2rem;filter:drop-shadow(0 6px 14px rgba(0,0,0,0.5));}
+.recap-p-body{padding:5px 7px 7px;text-align:center;background:var(--surf);}
+.recap-p-name{font-size:.52rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.recap-p-val{font-family:'Bebas Neue',cursive;font-size:.85rem;color:var(--cc-color,var(--accent));line-height:1.1;}
+.recap-stats{display:flex;gap:10px;margin-bottom:18px;}
+.recap-stat{flex:1;background:var(--adim);border:1px solid var(--glass-border);border-radius:12px;padding:8px 6px;text-align:center;}
+.recap-stat-v{font-family:'Bebas Neue',cursive;font-size:1.1rem;color:var(--accent);line-height:1;}
+.recap-stat-l{font-size:.46rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-top:3px;}
 .confetti-piece{position:absolute;top:0;width:8px;height:8px;border-radius:2px;animation:confettiFall linear forwards;}
 
 /* ── UNICORN ── */
@@ -3480,9 +3518,14 @@ function endRun() {
 
 //  RUN RECAP 
 function showRecap({ total, cars, headliner, isRec, prevBest }) {
-  // Build top 3 cars (excluding headliner if set)
+  // Build top 3 cars (headliner prioritized as #1 if present)
   const sorted = [...cars].sort((a,b) => b.value - a.value);
-  const top3   = sorted.slice(0, headliner ? 4 : 3).filter(c => !headliner || c.name !== headliner.name).slice(0,3);
+  let top3 = sorted.slice(0, headliner ? 4 : 3);
+  if (headliner) {
+    top3 = top3.filter(c => c.name !== headliner.name).slice(0,2);
+    top3.unshift(headliner);
+  }
+  top3 = top3.slice(0,3);
 
   // Run tier badge
   const tier = total >= 1000000 ? { label:'Legend Run', icon:'👑', color:'#f5c842' }
@@ -3493,6 +3536,7 @@ function showRecap({ total, cars, headliner, isRec, prevBest }) {
 
   // XP earned across this run
   const xp = cars.reduce((s,c)=>s+rarityXP(c.value||0),0);
+  const bestCar = sorted[0] || null;
 
   // vs best copy
   let vsHTML = '';
@@ -3500,6 +3544,35 @@ function showRecap({ total, cars, headliner, isRec, prevBest }) {
     const diff = total - prevBest;
     vsHTML = `<div class="recap-vs">${diff >= 0 ? '' : ''} <span>${fmtFull(Math.abs(diff))}</span> ${diff >= 0 ? 'above' : 'below'} your best run of ${fmtFull(prevBest)}</div>`;
   }
+
+  // Podium cards — fly in from left / bottom / right, sit next to each other
+  const medals = ['🥇','🥈','🥉'];
+  const flyCls = ['recap-fly-l','recap-fly-c','recap-fly-r'];
+  const delays = ['0.1s','0.24s','0.38s'];
+  const podiumHTML = top3.map((c,i) => {
+    const t  = tierOf(c.value || 0);
+    const ph = c.photo || (_idbPhotoCache[(c.name||'').toLowerCase()] || '');
+    const media = ph
+      ? '<img class="recap-p-img" src="' + ph + '" alt="" loading="lazy">'
+      : '<div class="recap-p-ph">' + tierEmoji(t) + '</div>';
+    const totalCars = Math.max(top3.length,1);
+    const width = totalCars === 1 ? 'min(56%,128px)' : 'min(31%,128px)';
+    return '<div class="recap-p-card r' + (i+1) + ' ' + flyCls[i] + '" data-tier="' + t + '" style="--p-delay:' + delays[i] + ';width:' + width + '">' +
+        '<div class="recap-p-rank">' + medals[i] + '</div>' +
+        '<div class="recap-p-media">' + media + '</div>' +
+        '<div class="recap-p-body">' +
+          '<div class="recap-p-name" title="' + escapeHtml(c.name||'') + '">' + escapeHtml(c.name||'') + '</div>' +
+          '<div class="recap-p-val">' + fmtFull(c.value||0) + '</div>' +
+        '</div>' +
+      '</div>';
+  }).join('');
+
+  const stats = [
+    { v: cars.length, l: 'Cars' },
+    { v: fmtFull(total), l: 'Total' },
+    { v: bestCar ? fmtFull(bestCar.value) : '$0', l: 'Best' },
+    { v: '+'+xp, l: 'XP' }
+  ];
 
   const overlay = document.createElement('div');
   overlay.className = 'recap-overlay';
@@ -3513,26 +3586,13 @@ function showRecap({ total, cars, headliner, isRec, prevBest }) {
       <div class="recap-total" id="recapTotalNum">$0</div>
       ${isRec ? '<div class="recap-record-tag pop">🏆 NEW RECORD</div>' : `<div class="recap-meta">${cars.length} car${cars.length!==1?'s':''} · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>`}
       ${xp ? '<div class="recap-xp">⭐ +' + xp + ' XP earned this run</div>' : ''}
+      ${podiumHTML ? `
+        <div class="recap-section-lbl" style="text-align:center">TOP CARS</div>
+        <div class="recap-podium">${podiumHTML}</div>` : ''}
+      <div class="recap-stats">
+        ${stats.map(s => `<div class="recap-stat"><div class="recap-stat-v">${s.v}</div><div class="recap-stat-l">${s.l}</div></div>`).join('')}
+      </div>
       ${vsHTML}
-      ${headliner ? `
-        <div class="recap-section-lbl"> Headliner</div>
-        <div class="recap-headliner">
-          <div class="recap-hl-type" style="font-family:'Bebas Neue',cursive;font-size:0.7rem;letter-spacing:2px;color:var(--muted);margin-bottom:2px">${carTypeLabel(headliner.type)}</div>
-          <div class="recap-hl-info">
-            <div class="recap-hl-name">${headliner.name}</div>
-            <div class="recap-hl-val">${fmtFull(headliner.value)}</div>
-          </div>
-        </div>` : ''}
-      ${top3.length ? `
-        <div class="recap-section-lbl">TOP CARS</div>
-        <div class="recap-top-list">
-          ${top3.map(c => `
-            <div class="recap-car-row">
-              <span class="recap-car-type" style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:44px">${carTypeLabel(c.type)}</span>
-              <span class="recap-car-name">${c.name}</span>
-              <span class="recap-car-val">${fmtFull(c.value)}</span>
-            </div>`).join('')}
-        </div>` : ''}
       <button class="recap-btn" onclick="document.getElementById('recapOverlay').remove()">Done</button>
     </div>`;
   overlay.onclick = () => overlay.remove();
@@ -4546,12 +4606,12 @@ function tierOf(v) {
 function tierEmoji(t) { return { daily:'🚗', sports:'🏁', super:'🏎️', hyper:'🔥', legend:'👑' }[t] || '🚘'; }
 function tierMeta(t) {
   return {
-    daily:  { label:'Daily Spot',     stars:1, color:'#7ec8ff' },
-    sports: { label:'Sports Spot',    stars:2, color:'#ff7a3d' },
-    super:  { label:'Supercar Spot',  stars:3, color:'#f5c842' },
-    hyper:  { label:'Hypercar Spot',  stars:4, color:'#b26bff' },
+    daily:  { label:'Daily Spot',     stars:1, color:'#9aa3af' },
+    sports: { label:'Sports Spot',    stars:2, color:'#60a5fa' },
+    super:  { label:'Supercar Spot',  stars:3, color:'#c084fc' },
+    hyper:  { label:'Hypercar Spot',  stars:4, color:'#ff5733' },
     legend: { label:'Legendary Spot', stars:5, color:'#f5c842' }
-  }[t] || { label:'Car Spot', stars:1, color:'#7ec8ff' };
+  }[t] || { label:'Car Spot', stars:1, color:'#9aa3af' };
 }
 
 //  DISCOVERY HISTORY — your last 10 spots as a trophy case
