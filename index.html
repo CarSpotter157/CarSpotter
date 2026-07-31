@@ -623,6 +623,8 @@ body{
 @media (prefers-reduced-motion: reduce){
   .cc-card,.cc-inner,.cc-back-stars,.cc-back-xp,.cc-badge,.cc-rainbow,.cc-shine,.cc-quick,.cc-collected,#runTotal.pop{animation:none !important;}
   .cc-inner{transition:none !important;}
+  .moment-overlay,.moment-card,.moment-emoji,.moment-sil,.moment-ring,.moment-sweep,.moment-flash,.moment-antici-txt,.moment-dismiss{animation:none !important;}
+  .moment-overlay.stage-reveal .moment-card,.moment-overlay.stage-celebrate .moment-card{opacity:1;transform:none;}
 }
 
 /* ── RUN RECAP UPGRADES — run finish should feel earned ── */
@@ -1940,6 +1942,206 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 /* ── DESKTOP SIDEBAR LOGO ── */
 .dsk-logo{display:none;}
 @media(min-width:800px){.dsk-logo{display:flex;}}
+
+/* ══ PROGRESSION & REWARD EXPANSION ══ */
+
+/* Title chip on the spot page level bar */
+.title-chip-wrap{margin:0 0 2px 2px;}
+.title-chip{display:inline-flex;align-items:center;gap:6px;background:var(--adim);border:1px solid var(--accent);border-radius:99px;padding:4px 12px;font-family:'Inter',sans-serif;font-size:0.62rem;font-weight:700;letter-spacing:1px;color:var(--accent);text-transform:uppercase;transition:all 0.25s var(--ease);}
+.title-chip .tc-emoji{font-size:0.8rem;}
+.title-chip.new-title{animation:titlePop 0.6s cubic-bezier(0.34,1.56,0.64,1) both;}
+@keyframes titlePop{0%{transform:scale(0.6);opacity:0;}60%{transform:scale(1.15);}100%{transform:scale(1);opacity:1;}}
+
+/* Title progress preview (next title) */
+.title-next{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:0.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.title-next .tn-bar{flex:1;height:4px;border-radius:99px;background:var(--surf3);overflow:hidden;}
+.title-next .tn-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent-d),var(--accent));transition:width 0.6s var(--ease);}
+
+/* Title unlock overlay */
+.titleup-overlay{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.96);cursor:pointer;animation:fadeIn 0.3s ease;}
+.titleup-card{text-align:center;padding:40px 34px;max-width:340px;animation:levelUpIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;}
+.titleup-emoji{font-size:4rem;margin-bottom:12px;animation:levelUpSpin 2.2s ease infinite;}
+.titleup-eyebrow{font-size:0.58rem;color:var(--accent);letter-spacing:4px;font-weight:800;text-transform:uppercase;}
+.titleup-name{font-family:'Bebas Neue',cursive;font-size:3rem;letter-spacing:2px;line-height:1.05;margin:10px 0 12px;color:var(--text);}
+.titleup-desc{font-size:0.72rem;color:var(--text2);line-height:1.5;letter-spacing:0.5px;margin-bottom:6px;}
+.titleup-prev{font-size:0.56rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:22px;}
+.titleup-dismiss{margin-top:28px;font-size:0.58rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+
+/* Collector Book — make shelf cards */
+.book-hero{display:flex;align-items:center;gap:16px;background:var(--glass-card);border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:24px;margin-bottom:18px;box-shadow:var(--shadow-lg);}
+.book-hero-ring{position:relative;width:84px;height:84px;flex-shrink:0;}
+.book-hero-ring svg{transform:rotate(-90deg);}
+.book-hero-ring .ring-bg{stroke:var(--surf3);}
+.book-hero-ring .ring-fill{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset 1s var(--ease);}
+.book-hero-ring .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:1.3rem;color:var(--text);line-height:1;}
+.book-hero-ring .ring-center small{font-size:0.5rem;color:var(--muted);letter-spacing:1px;font-family:'Inter',sans-serif;text-transform:uppercase;}
+.book-hero-copy{flex:1;}
+.book-hero-title{font-family:'Bebas Neue',cursive;font-size:1.5rem;letter-spacing:2px;color:var(--text);}
+.book-hero-sub{font-size:0.62rem;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-top:4px;line-height:1.6;}
+.book-mystery-badge{display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:0.6rem;font-weight:700;letter-spacing:1px;color:var(--accent2);background:rgba(224,82,64,0.12);border:1px solid rgba(224,82,64,0.3);border-radius:99px;padding:4px 10px;}
+
+.book-make-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:8px;}
+.book-make-card{background:var(--glass-card);border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:16px 14px;cursor:pointer;transition:border-color 0.2s,transform 0.2s var(--ease);box-shadow:var(--shadow-sm);position:relative;overflow:hidden;}
+.book-make-card:hover{border-color:rgba(232,184,75,0.35);}
+.book-make-card:active{transform:scale(0.97);}
+.book-make-card .bm-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.book-make-card .bm-logo{font-size:1.5rem;line-height:1;}
+.book-make-card .bm-pct{font-family:'Bebas Neue',cursive;font-size:1.1rem;color:var(--accent);}
+.book-make-card .bm-name{font-family:'Bebas Neue',cursive;font-size:1rem;letter-spacing:1px;color:var(--text);text-transform:uppercase;}
+.book-make-card .bm-count{font-size:0.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.book-make-card .bm-track{height:5px;border-radius:99px;background:var(--surf3);overflow:hidden;margin-top:8px;}
+.book-make-card .bm-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent-d),var(--accent));transition:width 0.8s var(--ease);}
+.book-make-card.complete{border-color:var(--accent);background:linear-gradient(180deg,rgba(232,184,75,0.08),var(--glass-card));}
+.book-make-card.complete::after{content:'COMPLETE';position:absolute;top:10px;right:-24px;transform:rotate(40deg);background:var(--accent);color:#080808;font-size:0.5rem;font-weight:800;letter-spacing:1px;padding:3px 26px;}
+
+/* Make detail sheet */
+.book-make-sheet{position:fixed;inset:0;z-index:99990;background:rgba(0,0,0,0.86);display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.18s ease;}
+.book-make-panel{width:100%;max-width:560px;max-height:88vh;overflow-y:auto;background:var(--surf);border-top:1px solid var(--border);border-radius:24px 24px 0 0;padding:22px 20px 40px;animation:slideUpRecap 0.28s cubic-bezier(0.34,1.56,0.64,1);}
+.book-make-head{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.book-make-head .bml{font-size:2rem;}
+.book-make-head .bmt{flex:1;}
+.book-make-head .bmt .bm-name{font-family:'Bebas Neue',cursive;font-size:1.6rem;letter-spacing:1px;color:var(--text);text-transform:uppercase;}
+.book-make-head .bmt .bm-sub{font-size:0.6rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.book-close{background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:6px;line-height:1;}
+.book-close:hover{color:var(--red);}
+.book-sil-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.book-car-tile{background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;cursor:pointer;transition:all 0.18s;animation:fadeUp 0.25s var(--ease) both;}
+.book-car-tile:hover{border-color:var(--accent);transform:translateY(-2px);}
+.book-car-tile .bct-img{width:100%;height:70px;object-fit:cover;background:var(--surf3);}
+.book-car-tile .bct-ph{width:100%;height:70px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;background:var(--surf3);}
+.book-car-tile .bct-name{font-size:0.6rem;font-weight:600;color:var(--text);padding:7px 8px 3px;letter-spacing:0.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.book-car-tile .bct-meta{font-size:0.52rem;color:var(--muted);padding:0 8px 8px;letter-spacing:0.5px;}
+.book-car-tile.spotted{border-color:rgba(232,184,75,0.4);}
+.book-car-tile.spotted .bct-name{color:var(--accent);}
+
+/* Mystery silhouette tiles */
+.book-sil{aspect-ratio:3/4;background:linear-gradient(180deg,var(--surf3),#101013);border:1px solid var(--border2);border-radius:var(--radius-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:all 0.18s;overflow:hidden;position:relative;}
+.book-sil:hover{border-color:var(--accent2);box-shadow:0 0 0 1px var(--accent2) inset;}
+.book-sil .sil-car{filter:brightness(0);opacity:0.5;font-size:2.2rem;}
+.book-sil .sil-q{font-family:'Bebas Neue',cursive;font-size:1rem;color:var(--muted);letter-spacing:2px;}
+.book-sil .sil-val{font-size:0.5rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.book-sil.revealed{border-color:var(--accent);animation:titlePop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;}
+.book-sil.revealed .sil-car{filter:none;opacity:1;}
+.book-sil.revealed .sil-q{color:var(--accent);}
+.book-sil.revealed .sil-name{font-size:0.6rem;font-weight:700;color:var(--text);letter-spacing:0.5px;text-align:center;padding:0 6px;}
+.book-sil.revealed .sil-val{color:var(--accent);}
+.mystery-hint-chip{margin-top:14px;font-size:0.6rem;color:var(--text2);letter-spacing:0.5px;line-height:1.6;text-align:center;}
+
+/* Expeditions */
+.expo-hero{display:flex;align-items:center;gap:14px;background:var(--glass-card);border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:20px;margin-bottom:16px;box-shadow:var(--shadow-lg);}
+.expo-hero .eh-icon{font-size:2.4rem;}
+.expo-hero .eh-title{font-family:'Bebas Neue',cursive;font-size:1.3rem;letter-spacing:1px;color:var(--text);}
+.expo-hero .eh-sub{font-size:0.6rem;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-top:3px;}
+.expo-card{background:var(--glass-card);border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:18px;margin-bottom:12px;box-shadow:var(--shadow-sm);transition:border-color 0.2s;animation:fadeUp 0.3s var(--ease) both;}
+.expo-card.done{border-color:var(--accent);background:linear-gradient(180deg,rgba(232,184,75,0.07),var(--glass-card));}
+.expo-card .ex-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.expo-card .ex-ico{font-size:1.8rem;flex-shrink:0;}
+.expo-card .ex-name{font-family:'Bebas Neue',cursive;font-size:1.1rem;letter-spacing:0.5px;color:var(--text);}
+.expo-card .ex-desc{font-size:0.62rem;color:var(--muted);letter-spacing:0.5px;line-height:1.5;margin-top:2px;}
+.expo-card .ex-prog{display:flex;align-items:center;gap:10px;margin-top:12px;}
+.expo-card .ex-bar{flex:1;height:6px;border-radius:99px;background:var(--surf3);overflow:hidden;}
+.expo-card .ex-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent-d),var(--accent));transition:width 0.7s var(--ease);}
+.expo-card.done .ex-fill{background:var(--green);}
+.expo-card .ex-count{font-family:'Bebas Neue',cursive;font-size:0.95rem;color:var(--text);white-space:nowrap;}
+.expo-card .ex-count span{color:var(--muted);font-size:0.75rem;}
+.expo-card .ex-reward{margin-top:10px;font-size:0.58rem;color:var(--accent);letter-spacing:1px;text-transform:uppercase;}
+
+/* Road Trips */
+.trip-hero{display:flex;align-items:center;justify-content:space-between;background:var(--glass-card);border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:20px;margin-bottom:16px;box-shadow:var(--shadow-lg);}
+.trip-hero .th-title{font-family:'Bebas Neue',cursive;font-size:1.4rem;letter-spacing:1px;color:var(--text);}
+.trip-hero .th-sub{font-size:0.6rem;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-top:3px;}
+.trip-hero .th-stats{display:flex;gap:18px;}
+.trip-hero .th-stat{text-align:center;}
+.trip-hero .th-stat .ts-v{font-family:'Bebas Neue',cursive;font-size:1.5rem;color:var(--accent);}
+.trip-hero .th-stat .ts-l{font-size:0.5rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.trip-create{background:var(--glass-card);border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:20px;margin-bottom:16px;box-shadow:var(--shadow-sm);}
+.trip-create .tc-title{font-family:'Bebas Neue',cursive;font-size:1rem;letter-spacing:1px;color:var(--text);margin-bottom:12px;}
+.trip-form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.trip-form-row input,.trip-form-row select{width:100%;background:var(--surf2);border:1px solid var(--border2);border-radius:var(--radius-xs);color:var(--text);font-size:0.85rem;padding:10px 12px;outline:none;font-family:'Inter',sans-serif;transition:border-color 0.15s;}
+.trip-form-row input:focus,.trip-form-row select:focus{border-color:var(--accent);}
+.trip-create-btn{width:100%;background:var(--accent);color:#080808;border:none;border-radius:var(--radius-xs);font-family:'Bebas Neue',cursive;font-size:0.95rem;letter-spacing:2px;padding:13px;cursor:pointer;transition:all 0.15s;}
+.trip-create-btn:active{transform:scale(0.98);}
+.trip-list{display:flex;flex-direction:column;gap:10px;}
+.trip-card{background:var(--glass-card);border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:18px;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color 0.2s;animation:fadeUp 0.3s var(--ease) both;}
+.trip-card:hover{border-color:rgba(232,184,75,0.3);}
+.trip-card .tr-ico{font-size:1.8rem;flex-shrink:0;}
+.trip-card .tr-body{flex:1;min-width:0;}
+.trip-card .tr-name{font-family:'Bebas Neue',cursive;font-size:1.1rem;letter-spacing:0.5px;color:var(--text);}
+.trip-card .tr-meta{font-size:0.6rem;color:var(--muted);letter-spacing:0.5px;margin-top:2px;}
+.trip-card .tr-val{font-family:'Bebas Neue',cursive;font-size:1.2rem;color:var(--accent);white-space:nowrap;}
+.trip-card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
+.trip-card .tr-active-tag{font-size:0.5rem;font-weight:800;letter-spacing:1px;color:#080808;background:var(--accent);border-radius:99px;padding:2px 8px;margin-top:4px;display:inline-block;}
+.trip-empty{text-align:center;padding:36px 16px;color:var(--muted);font-size:0.72rem;letter-spacing:1px;line-height:1.8;}
+
+/* Trip detail sheet */
+.trip-detail-sheet{position:fixed;inset:0;z-index:99990;background:rgba(0,0,0,0.86);display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.18s ease;}
+.trip-detail-panel{width:100%;max-width:560px;max-height:86vh;overflow-y:auto;background:var(--surf);border-top:1px solid var(--border);border-radius:24px 24px 0 0;padding:22px 20px 40px;animation:slideUpRecap 0.28s cubic-bezier(0.34,1.56,0.64,1);}
+.trip-detail-panel .td-name{font-family:'Bebas Neue',cursive;font-size:1.7rem;letter-spacing:1px;color:var(--text);}
+.trip-detail-panel .td-stats{display:flex;gap:20px;margin:14px 0 18px;}
+.trip-detail-panel .td-stat .ts-v{font-family:'Bebas Neue',cursive;font-size:1.4rem;color:var(--accent);}
+.trip-detail-panel .td-stat .ts-l{font-size:0.5rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.trip-run-row{background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-xs);padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.trip-run-row .trr-name{font-size:0.75rem;color:var(--text);font-weight:600;}
+.trip-run-row .trr-meta{font-size:0.58rem;color:var(--muted);letter-spacing:0.5px;margin-top:2px;}
+.trip-run-row .trr-val{font-family:'Bebas Neue',cursive;font-size:0.95rem;color:var(--accent);}
+
+/* Car story in specs card */
+.specs-story{margin-top:16px;background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;}
+.specs-story .ss-label{font-size:0.5rem;font-weight:800;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:6px;}
+.specs-story .ss-text{font-size:0.74rem;color:var(--text2);line-height:1.6;}
+
+/* Evolution badge */
+.evol-badge{display:inline-flex;align-items:center;gap:5px;font-size:0.56rem;font-weight:800;letter-spacing:1px;border-radius:99px;padding:3px 9px;text-transform:uppercase;font-family:'Inter',sans-serif;border:1px solid;}
+.evol-pips{display:flex;gap:4px;margin-top:8px;}
+.evol-pip{width:22px;height:8px;border-radius:99px;background:var(--surf3);}
+.evol-pip.lit{background:var(--accent);box-shadow:0 0 8px rgba(232,184,75,0.5);}
+
+/* Milestone / rare moment banner */
+.milestone-toast{position:fixed;top:18px;left:50%;transform:translateX(-50%) translateY(-120%);z-index:99998;width:min(92vw,400px);background:linear-gradient(135deg,var(--surf2),var(--surf));border:1px solid var(--accent);border-radius:16px;padding:14px 16px;display:flex;gap:12px;align-items:center;box-shadow:0 10px 40px rgba(0,0,0,0.6);transition:transform 0.45s cubic-bezier(0.34,1.56,0.64,1);}
+.milestone-toast.show{transform:translateX(-50%) translateY(0);}
+.milestone-toast .ms-ico{font-size:1.8rem;flex-shrink:0;}
+.milestone-toast .ms-body{flex:1;min-width:0;}
+.milestone-toast .ms-label{font-size:0.5rem;font-weight:800;letter-spacing:2px;color:var(--accent);text-transform:uppercase;}
+.milestone-toast .ms-title{font-family:'Bebas Neue',cursive;font-size:1.15rem;letter-spacing:0.5px;color:var(--text);margin-top:2px;}
+.milestone-toast .ms-desc{font-size:0.62rem;color:var(--text2);line-height:1.4;margin-top:2px;}
+
+/* ── 3-STAGE UNLOCK MOMENTS — Anticipation → Reveal → Celebration ── */
+.moment-overlay{position:fixed;inset:0;z-index:100000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.97);cursor:pointer;overflow:hidden;animation:fadeIn 0.25s ease;}
+.moment-antici{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:1;transition:opacity 0.35s ease,transform 0.45s cubic-bezier(0.34,1.56,0.64,1);}
+.moment-overlay.stage-reveal .moment-antici{opacity:0;transform:scale(1.08);}
+.moment-ring{position:absolute;width:190px;height:190px;border-radius:50%;border:1.5px solid var(--accent);animation:momentRingPulse 1.5s cubic-bezier(0.16,0.84,0.44,1) infinite;}
+.moment-ring::before,.moment-ring::after{content:'';position:absolute;inset:-1.5px;border-radius:50%;border:1.5px solid var(--accent);opacity:0;}
+.moment-ring::before{animation:momentRingPulse 1.5s 0.5s cubic-bezier(0.16,0.84,0.44,1) infinite;}
+.moment-ring::after{animation:momentRingPulse 1.5s 1s cubic-bezier(0.16,0.84,0.44,1) infinite;}
+@keyframes momentRingPulse{0%{transform:scale(0.55);opacity:0;}25%{opacity:0.85;}100%{transform:scale(1.35);opacity:0;}}
+.moment-sil{font-size:3.4rem;filter:blur(4px) brightness(0.5) saturate(0.8);animation:momentSilBreath 1.4s ease-in-out infinite;}
+@keyframes momentSilBreath{0%,100%{transform:scale(1);filter:blur(4px) brightness(0.5);}50%{transform:scale(1.12);filter:blur(2px) brightness(0.85);}}
+.moment-antici-txt{position:absolute;bottom:20%;font-size:0.58rem;letter-spacing:4px;text-transform:uppercase;color:var(--muted);animation:momentAnticiBlink 1.2s ease infinite;}
+@keyframes momentAnticiBlink{0%,100%{opacity:0.45;}50%{opacity:1;}}
+.moment-sweep{position:absolute;top:0;bottom:0;width:44%;left:-50%;background:linear-gradient(100deg,transparent,rgba(245,200,66,0.05),rgba(245,200,66,0.09),transparent);animation:momentSweep 1.7s ease-in-out infinite;pointer-events:none;}
+@keyframes momentSweep{0%{left:-50%;}100%{left:150%;}}
+.moment-card{position:relative;text-align:center;padding:42px 34px;max-width:min(88vw,360px);opacity:0;transform:scale(0.6) translateY(26px);}
+.moment-overlay.stage-reveal .moment-card{animation:momentCardIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;}
+.moment-overlay.stage-celebrate .moment-card{animation:momentCardIn 0.6s cubic-bezier(0.34,1.56,0.64,1) both;}
+@keyframes momentCardIn{0%{opacity:0;transform:scale(0.6) translateY(26px) rotate(-3deg);}65%{opacity:1;transform:scale(1.07) translateY(-5px) rotate(1deg);}100%{opacity:1;transform:scale(1) translateY(0) rotate(0);}}
+.moment-flash{position:absolute;inset:0;background:radial-gradient(circle at 50% 42%, rgba(245,200,66,0.16), transparent 60%);opacity:0;pointer-events:none;}
+.moment-overlay.stage-celebrate .moment-flash{animation:momentFlash 0.9s ease both;}
+@keyframes momentFlash{0%{opacity:0;}25%{opacity:1;}100%{opacity:0;}}
+.moment-emoji{font-size:3.6rem;margin-bottom:12px;display:inline-block;}
+.moment-overlay.stage-celebrate .moment-emoji{animation:momentEmojiBurst 0.7s cubic-bezier(0.34,1.56,0.64,1) both;}
+@keyframes momentEmojiBurst{0%{transform:scale(0.4) rotate(-18deg);}60%{transform:scale(1.3) rotate(8deg);}100%{transform:scale(1) rotate(0);}}
+.moment-eyebrow{font-size:0.58rem;color:var(--accent);letter-spacing:4px;font-weight:800;text-transform:uppercase;}
+.moment-title{font-family:'Bebas Neue',cursive;font-size:2.5rem;letter-spacing:2px;line-height:1.05;margin:10px 0 12px;color:var(--text);}
+.moment-desc{font-size:0.72rem;color:var(--text2);line-height:1.5;letter-spacing:0.5px;margin-bottom:6px;}
+.moment-sub{font-size:0.56rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:22px;}
+.moment-dismiss{margin-top:26px;font-size:0.56rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;animation:momentAnticiBlink 1.4s ease infinite;}
+.moment-confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.moment-particle{position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:50%;pointer-events:none;}
+
+/* Rarity shimmer on book tiles */
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.book-sil.locked-shimmer{background-image:linear-gradient(90deg,var(--surf3) 0%,var(--surf2) 40%,var(--surf3) 80%);background-size:200% 100%;animation:shimmer 2.4s linear infinite;}
+
 </style>
 
 </head>
@@ -2009,6 +2211,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
               <span class="level-xp" id="levelXp">0 / 100 XP</span>
             </div>
             <div class="level-bar-track"><div class="level-bar-fill" id="levelFill" style="width:0%"></div></div>
+            <div class="title-chip-wrap" id="titleChipWrap" style="display:none"></div>
           </div>
 
           <div class="card">
@@ -2401,6 +2604,18 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
     <div class="page" id="page-more">
       <div class="sec-title" style="margin-bottom:16px">More</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <button class="more-page-tile" onclick="goTo('book')">
+          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+          <span class="more-tile-label">Collector Book</span>
+        </button>
+        <button class="more-page-tile" onclick="goTo('expeditions')">
+          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
+          <span class="more-tile-label">Expeditions</span>
+        </button>
+        <button class="more-page-tile" onclick="goTo('trips')">
+          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6"/><path d="M4.93 10.93a1.43 1.43 0 0 0-2.85 0 1.43 1.43 0 0 0 0 2.85 1.43 1.43 0 0 0 0 2.85 1.43 1.43 0 0 0 0 2.85 1.43 1.43 0 0 0 2.85 0"/><path d="M19.07 10.93a1.43 1.43 0 0 1 2.85 0 1.43 1.43 0 0 1 0 2.85 1.43 1.43 0 0 1 0 2.85 1.43 1.43 0 0 1 0 2.85 1.43 1.43 0 0 1-2.85 0"/><path d="M14 22l-5-3 5-3v6z"/><path d="M14 2v3"/><path d="M12 2h4"/><path d="M12 5H9.5a2.5 2.5 0 0 0 0 5H12"/></svg></span>
+          <span class="more-tile-label">Road Trips</span>
+        </button>
         <button class="more-page-tile" onclick="goTo('history')">
           <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg></span>
           <span class="more-tile-label">History</span>
@@ -2462,6 +2677,55 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
         <div class="card-title">Best Day of Week</div>
         <div id="st-days"></div>
       </div>
+    </div>
+
+    <!-- COLLECTOR BOOK PAGE -->
+    <div class="page" id="page-book">
+      <div class="book-hero" id="bookHero"></div>
+      <div class="sec-row" style="margin-bottom:10px">
+        <div class="sec-title">MANUFACTURER SHELVES</div>
+        <button class="txt-btn" onclick="showBookAllShelf()">View All</button>
+      </div>
+      <div class="book-make-grid" id="bookMakeGrid"></div>
+      <div class="mystery-hint-chip">👁 Silhouettes are undiscovered models. Tap to peek at what you're hunting.</div>
+    </div>
+
+    <!-- EXPEDITIONS PAGE -->
+    <div class="page" id="page-expeditions">
+      <div class="expo-hero">
+        <div class="eh-icon">🗺️</div>
+        <div>
+          <div class="eh-title">EXPEDITIONS</div>
+          <div class="eh-sub">Themed spotting challenges · claim XP rewards</div>
+        </div>
+      </div>
+      <div id="expoList"></div>
+    </div>
+
+    <!-- ROAD TRIPS PAGE -->
+    <div class="page" id="page-trips">
+      <div class="trip-hero" id="tripHero"></div>
+      <div class="trip-create" id="tripCreateCard">
+        <div class="tc-title">START A ROAD TRIP</div>
+        <div class="trip-form-row">
+          <input type="text" id="tripNameInput" placeholder="Trip name (e.g. Tail of the Dragon)" autocomplete="off">
+          <select id="tripEmojiSelect">
+            <option value="🛣️">🛣️ Highway</option>
+            <option value="⛰️">⛰️ Mountains</option>
+            <option value="🌊">🌊 Coast</option>
+            <option value="🌆">🌆 City</option>
+            <option value="🏜️">🏜️ Desert</option>
+            <option value="🌲">🌲 Forest</option>
+            <option value="🔥">🔥 Canyon</option>
+            <option value="🎢">🎢 Twisty Road</option>
+          </select>
+        </div>
+        <button class="trip-create-btn" onclick="createTrip()">LAUNCH TRIP</button>
+      </div>
+      <div class="sec-row" style="margin-bottom:10px">
+        <div class="sec-title">YOUR TRIPS</div>
+      </div>
+      <div class="trip-list" id="tripList"></div>
     </div>
 
   </div><!-- /pages -->
@@ -2581,7 +2845,7 @@ let garageFilter = 'all';
 let garageView   = 'list';
 
 // Navigation & page transition state
-let pageOrder = ['spot','garage','voice','history','achievements','settings','news','leaderboard','more'];
+let pageOrder = ['spot','garage','voice','history','achievements','settings','news','leaderboard','book','expeditions','trips','more'];
 let currentPage = 'spot';
 let runTotalAnimated = 0;
 
@@ -2791,6 +3055,7 @@ async function loadFromCloud() {
         const a = document.getElementById('notesArea');
         if (a) a.value = d.notes;
       }
+      if (d.progression && window.mergeCloudProgression) window.mergeCloudProgression(d.progression);
       _saveCurrentLocal();
       _saveRunsLocal();
       _saveQPLocal();
@@ -2821,6 +3086,7 @@ function subscribeCloud() {
         const a = document.getElementById('notesArea');
         if (a && document.activeElement !== a) a.value = d.notes;
       }
+      if (d.progression && window.mergeCloudProgression) window.mergeCloudProgression(d.progression);
       _saveCurrentLocal();
       _saveRunsLocal();
       _saveQPLocal();
@@ -2937,6 +3203,7 @@ function _buildCloudPayload() {
     notes: localStorage.getItem('cs_notes') || '',
     profileName: currentUser?.displayName || 'Spotter',
     profilePhoto: currentUser?.photoURL || '',
+    progression: _progress || null,
     updatedAt: _lastSave
   };
   var san = JSON.parse(JSON.stringify(payload));
@@ -3397,6 +3664,9 @@ function goTo(page) {
     if (page==='news')         { if (!newsLoaded) { newsLoaded=true; renderNewsSources(); } loadNews(); }
     if (page==='leaderboard')  loadLeaderboard(true);
     if (page==='stats')        renderStats();
+    if (page==='book')         renderBook();
+    if (page==='expeditions')  renderExpeditions();
+    if (page==='trips')        renderTrips();
     if (page==='spot')         { renderHomeFav(); setTimeout(startFavRotation, 250); }
   });
 }
@@ -3716,6 +3986,7 @@ function endRun() {
   playSound('end');
   showRecap({ total, cars: runCars, headliner, isRec: isRec || isFirstRec, prevBest });
   setTimeout(checkNewAchievements, 1200);
+  if (window.attachRunToTrip) window.attachRunToTrip(run);
 }
 
 //  RUN RECAP 
@@ -4576,8 +4847,12 @@ async function showSpecsCard(car) {
           <div class="specs-cell-unit">lbs</div>
         </div>` : ''}
       </div>
+      <div id="specsStorySlot"></div>
+      <div id="specsEvolSlot"></div>
       <button class="specs-close-btn" onclick="document.getElementById('specsOverlay').remove()">Got it</button>
     </div>`;
+  if (window.renderSpecsStory) renderSpecsStory(car, card);
+  if (window.renderSpecsEvolution) renderSpecsEvolution(car, card);
 }
 
 function showCarInstances(car) {
@@ -4917,6 +5192,7 @@ function renderLevelBar() {
   if (num)  num.textContent  = info.level;
   if (xp)   xp.textContent   = info.into + ' / ' + info.need + ' XP';
   if (fill) fill.style.width = Math.round((info.into / info.need) * 100) + '%';
+  if (window.renderTitleChip) renderTitleChip();
 }
 function levelUpPulse() {
   var fill = document.getElementById('levelFill');
@@ -5266,6 +5542,7 @@ function rewardLog(car, popTotal, opts) {
     levelUpPulse();
     cardDone.then(function() { celebrateLevelUp(after); });
   }
+  if (window.updateProgressionAfterLog) setTimeout(function(){ updateProgressionAfterLog(car); }, 900);
 }
 
 function garageBestValue() {
@@ -5486,6 +5763,11 @@ function importFromFile(input) {
       aliases    = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
       bestFromLB = parseInt(localStorage.getItem('cs_best_lb')   || '0');
       _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
+      // Reload progression state (cs_progress) so trips/titles/etc. reflect the import
+      try {
+        var impP = JSON.parse(localStorage.getItem('cs_progress') || 'null');
+        if (impP && impP.v === _progressV) { Object.keys(_progress).forEach(function(k){ delete _progress[k]; }); Object.assign(_progress, _defaultProgress(), impP); }
+      } catch(e){}
 
       // Re-apply settings
       const theme = parseInt(localStorage.getItem('cs_theme') || '0');
@@ -5527,6 +5809,7 @@ function renderAll() {
   refreshOfflineStatus();
   initSortPrefBtns();
   updateAliasCount();
+  if (window.renderTitleChip) renderTitleChip();
 }
 
 //  ENTER KEYS 
@@ -7123,6 +7406,675 @@ async function loadNews() {
   }
 }
 
+// ══════════════════════════════════════════════════════════════════
+//  PROGRESSION & REWARD SYSTEM EXPANSION — Foundation layer
+//  Spotter Titles · Collector Book · Mystery Cars · Expeditions
+//  Road Trips · Car Stories · Collector Card Evolution
+//  Rare Discovery Moments
+// ══════════════════════════════════════════════════════════════════
+
+// ---- persisted progression state (cs_progress) ----
+var _progressV = 1;
+function _defaultProgress() {
+  return {
+    v: _progressV,
+    titlesUnlocked: {},      // { titleId: true }
+    trips: [],               // [{ id, name, emoji, created, runIds[], total, carCount }]
+    activeTripId: null,
+    expoClaimed: {},         // { expeditionId: ts }
+    mysteryPeeked: {},       // { modelKey: true }
+    storiesRead: {},         // { modelKey: true }
+    milestones: {}           // { milestoneId: ts }
+  };
+}
+var _progress = (function(){
+  try {
+    var p = JSON.parse(localStorage.getItem('cs_progress') || 'null');
+    if (!p || p.v !== _progressV) return _defaultProgress();
+    return Object.assign(_defaultProgress(), p);
+  } catch(e){ return _defaultProgress(); }
+})();
+function saveProgress() {
+  try { localStorage.setItem('cs_progress', JSON.stringify(_progress)); } catch(e){}
+}
+function getProgression() { return _progress; }
+
+// ---- SPOTTER TITLES — the ladder that replaces "Level" as the identity ----
+var SPOTTER_TITLES = [
+  { id:'rookie',        name:'Rookie Spotter',      emoji:'🔰', xp:0,     desc:'Every legend starts with one spot.' },
+  { id:'roadrunner',    name:'Road Runner',         emoji:'🏁', xp:300,   desc:'You log cars like you own the road.' },
+  { id:'gearhead',      name:'Gearhead',            emoji:'🔧', xp:750,   desc:'You know your way around horsepower.' },
+  { id:'spotter',       name:'Spotter',             emoji:'🔭', xp:1400,  desc:'Your eyes are trained on the road ahead.' },
+  { id:'marque_master', name:'Marque Master',       emoji:'🏎️', xp:2300, desc:'You can name a brand by its exhaust note.' },
+  { id:'collector',     name:'Collector',           emoji:'📦', xp:3400,  desc:'Your garage is becoming a museum.' },
+  { id:'connoisseur',   name:'Connoisseur',         emoji:'🎩', xp:4700,  desc:'You spot the details others miss.' },
+  { id:'road_legend',   name:'Road Legend',         emoji:'🏆', xp:6200,  desc:'Legends are made one spot at a time.' },
+  { id:'hyper_hunter',  name:'Hypercar Hunter',     emoji:'🔥', xp:7900,  desc:'You chase the rarest metal on four wheels.' },
+  { id:'trophy_hunter', name:'Trophy Hunter',       emoji:'🥇', xp:9800,  desc:'Your trophy case rivals the cars.' },
+  { id:'supreme',       name:'Supreme Spotter',     emoji:'👑', xp:12000, desc:'There is no road you cannot read.' }
+];
+function titleForXP(xp) {
+  var t = SPOTTER_TITLES[0];
+  for (var i = 0; i < SPOTTER_TITLES.length; i++) {
+    if (xp >= SPOTTER_TITLES[i].xp) t = SPOTTER_TITLES[i];
+  }
+  return t;
+}
+function nextTitleForXP(xp) {
+  for (var i = 0; i < SPOTTER_TITLES.length; i++) {
+    if (xp < SPOTTER_TITLES[i].xp) return SPOTTER_TITLES[i];
+  }
+  return null;
+}
+function currentTitle() { return titleForXP(_xpTotal); }
+function titlePctToNext() {
+  var cur = currentTitle();
+  var nxt = nextTitleForXP(_xpTotal);
+  if (!nxt) return 100;
+  var span = nxt.xp - cur.xp;
+  var got  = _xpTotal - cur.xp;
+  return Math.round(got / span * 100);
+}
+function renderTitleChip() {
+  var wrap = document.getElementById('titleChipWrap');
+  if (!wrap) return;
+  if (!SPOTTER_TITLES || !SPOTTER_TITLES.length) return;
+  var cur = currentTitle();
+  var nxt = nextTitleForXP(_xpTotal);
+  wrap.style.display = 'block';
+  wrap.innerHTML =
+    '<div class="title-chip" id="titleChip">' +
+      '<span class="tc-emoji">' + cur.emoji + '</span>' + cur.name +
+    '</div>' +
+    (nxt ? '<div class="title-next"><span>' + nxt.emoji + ' ' + nxt.name + '</span>' +
+      '<div class="tn-bar"><div class="tn-fill" style="width:' + titlePctToNext() + '%"></div></div>' +
+      '<span>' + Math.max(0, nxt.xp - _xpTotal) + ' XP</span></div>' : '');
+}
+// Announce newly unlocked titles (fire once per title id)
+function checkTitleUnlock(silent) {
+  var cur = currentTitle();
+  if (_progress.titlesUnlocked[cur.id]) return;
+  _progress.titlesUnlocked[cur.id] = true;
+  saveProgress();
+  if (silent) return;
+  var chip = document.getElementById('titleChip');
+  if (chip) { chip.classList.remove('new-title'); void chip.offsetWidth; chip.classList.add('new-title'); }
+  showTitleUp(cur);
+}
+function showTitleUp(title) {
+  enqueueMoment({
+    emoji: title.emoji,
+    eyebrow: 'New Spotter Title Unlocked',
+    title: title.name,
+    desc: title.desc,
+    sub: 'Your rank in the spotters\u2019 guild',
+    colors: ['#f5c842', '#ffd75e', '#fff', '#ff5733'],
+    particles: 16
+  });
+}
+
+// ---- COLLECTOR BOOK — built from CAR_AC_DB + the user's garage ----
+function _modelKey(name) { return String(name || '').toLowerCase().trim(); }
+function _allSpottedFlat() {
+  var out = [];
+  allRuns.forEach(function(r){ (r.cars || []).forEach(function(c){ out.push(c); }); });
+  currentRun.forEach(function(c){ out.push(c); });
+  return out;
+}
+function _spottedNames() {
+  var s = new Set();
+  _allSpottedFlat().forEach(function(c){ s.add(_modelKey(c.name)); });
+  return s;
+}
+function bookMakeStats() {
+  var spotted = _spottedNames();
+  var byMake = {};
+  CAR_AC_DB.forEach(function(m){
+    var mk = String(m.name.split(' ')[0]).toUpperCase();
+    if (!byMake[mk]) byMake[mk] = { make: mk, total: 0, found: 0, models: [] };
+    var found = spotted.has(_modelKey(m.name));
+    byMake[mk].models.push({ name: m.name, type: m.type, val: m.val, found: found });
+    byMake[mk].total++;
+    if (found) byMake[mk].found++;
+  });
+  return Object.keys(byMake).sort(function(a,b){ return a.localeCompare(b); }).map(function(k){ return byMake[k]; });
+}
+function bookTotals() {
+  var stats = bookMakeStats();
+  var total = 0, found = 0;
+  stats.forEach(function(s){ total += s.total; found += s.found; });
+  return { total: total, found: found, pct: total ? Math.round(found / total * 100) : 0, makes: stats.length };
+}
+function renderBook() {
+  var t = bookTotals();
+  var hero = document.getElementById('bookHero');
+  var circ = 2 * Math.PI * 38;
+  var filled = circ * (t.pct / 100);
+  hero.innerHTML =
+    '<div class="book-hero-ring">' +
+      '<svg width="84" height="84" viewBox="0 0 84 84">' +
+        '<circle class="ring-bg" cx="42" cy="42" r="38" fill="none" stroke-width="7"/>' +
+        '<circle class="ring-fill" cx="42" cy="42" r="38" fill="none" stroke-width="7" stroke-dasharray="' + circ + '" stroke-dashoffset="' + (circ - filled) + '"/>' +
+      '</svg>' +
+      '<div class="ring-center">' + t.pct + '%<small>complete</small></div>' +
+    '</div>' +
+    '<div class="book-hero-copy">' +
+      '<div class="book-hero-title">COLLECTOR BOOK</div>' +
+      '<div class="book-hero-sub">' + t.found + ' of ' + t.total + ' models discovered across ' + t.makes + ' marques</div>' +
+      '<div class="book-mystery-badge">👁 ' + mysteryCount() + ' mystery car' + (mysteryCount() === 1 ? '' : 's') + ' on the road</div>' +
+    '</div>';
+  var grid = document.getElementById('bookMakeGrid');
+  var stats = bookMakeStats();
+  grid.innerHTML = stats.map(function(s, i){
+    var pct = Math.round(s.found / s.total * 100);
+    var logo = '🏁';
+    return '<div class="book-make-card ' + (s.found === s.total ? 'complete' : '') + '" style="animation-delay:' + (i * 0.03) + 's" onclick="openMakeSheet(\'' + jsEscape(s.make) + '\')">' +
+      '<div class="bm-top"><div class="bm-logo">' + logo + '</div><div class="bm-pct">' + pct + '%</div></div>' +
+      '<div class="bm-name">' + s.make + '</div>' +
+      '<div class="bm-count">' + s.found + ' / ' + s.total + ' models</div>' +
+      '<div class="bm-track"><div class="bm-fill" style="width:' + pct + '%"></div></div>' +
+    '</div>';
+  }).join('');
+}
+function mysteryCount() {
+  var spotted = _spottedNames();
+  return CAR_AC_DB.filter(function(m){ return !spotted.has(_modelKey(m.name)); }).length;
+}
+function openMakeSheet(make) {
+  var stats = bookMakeStats();
+  var s = stats.find(function(x){ return x.make === make; });
+  if (!s) return;
+  var overlay = document.createElement('div');
+  overlay.className = 'book-make-sheet';
+  overlay.onclick = function(e){ if (e.target === overlay) overlay.remove(); };
+  var tiles = s.models.map(function(m, i){
+    var key = _modelKey(m.name);
+    var peeking = _progress.mysteryPeeked[key];
+    if (m.found) {
+      var photo = _idbPhotoCache[key] || '';
+      return '<div class="book-car-tile spotted" style="animation-delay:' + (i * 0.02) + 's" onclick="openDiscovery(\'' + jsEscape(m.name) + '\',' + m.val + ',\'' + (m.type || '') + '\')">' +
+        (photo ? '<img class="bct-img" src="' + photo + '" alt="">' : '<div class="bct-ph">' + tierEmoji(tierOf(m.val)) + '</div>') +
+        '<div class="bct-name">' + m.name + '</div>' +
+        '<div class="bct-meta">' + fmt(m.val) + ' · spotted</div>' +
+      '</div>';
+    }
+    return '<div class="book-sil ' + (peeking ? 'revealed' : '') + '" style="animation-delay:' + (i * 0.02) + 's" onclick="peekMystery(\'' + jsEscape(m.name) + '\')">' +
+      (peeking
+        ? '<div class="sil-car">' + tierEmoji(tierOf(m.val)) + '</div><div class="sil-name">' + m.name + '</div><div class="sil-val">' + fmt(m.val) + '</div>'
+        : '<div class="sil-car">🚘</div><div class="sil-q">?</div><div class="sil-val">' + fmt(m.val) + ' tier</div>') +
+    '</div>';
+  }).join('');
+  overlay.innerHTML =
+    '<div class="book-make-panel">' +
+      '<div class="book-make-head">' +
+        '<div class="bml">🏁</div>' +
+        '<div class="bmt"><div class="bm-name">' + s.make + '</div><div class="bm-sub">' + s.found + ' / ' + s.total + ' discovered · tap a silhouette to peek</div></div>' +
+        '<button class="book-close" onclick="this.closest(\'.book-make-sheet\').remove()">&times;</button>' +
+      '</div>' +
+      '<div class="book-sil-grid">' + tiles + '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+}
+function peekMystery(name) {
+  var key = _modelKey(name);
+  _progress.mysteryPeeked[key] = true;
+  saveProgress();
+  playSound('shutter');
+  haptic(20);
+  // Rebuild the sheet that contains this tile
+  var sheet = document.querySelector('.book-make-sheet');
+  if (sheet) {
+    var make = '';
+    var stats = bookMakeStats();
+    for (var i = 0; i < stats.length; i++) {
+      if (stats[i].models.some(function(m){ return _modelKey(m.name) === key; })) { make = stats[i].make; break; }
+    }
+    sheet.remove();
+    openMakeSheet(make);
+  }
+}
+function showBookAllShelf() {
+  // Opens a combined sheet with every make stacked — foundation: reuse per-make grid via prompt-less nav
+  renderBook();
+  showToast('📖 Collector Book refreshed');
+}
+
+// ---- EXPEDITIONS — themed spotting challenges with one-time XP rewards ----
+var EXPEDITIONS = [
+  { id:'italian_3',   name:'Italian Stallions',   icon:'🇮🇹', desc:'Spot 3 Italian exotics',          goal:3,  xp:120, check:function(c){ return c.filter(function(x){ return /^(ferrari|lamborghini|maserati|alfa|pagan)/i.test(x.name); }).length; } },
+  { id:'german_4',    name:'German Precision',    icon:'🇩🇪', desc:'Spot 4 German machines',          goal:4,  xp:120, check:function(c){ return c.filter(function(x){ return /^(porsche|bmw|mercedes|audi|vw|audi)/i.test(x.name); }).length; } },
+  { id:'muscle_4',    name:'Muscle Mayhem',       icon:'🇺🇸', desc:'Spot 4 American muscle cars',     goal:4,  xp:120, check:function(c){ return c.filter(function(x){ return x.type === 'muscle'; }).length; } },
+  { id:'ev_4',        name:'Electric Dreams',     icon:'⚡',  desc:'Spot 4 EVs',                      goal:4,  xp:120, check:function(c){ return c.filter(function(x){ return x.type === 'ev'; }).length; } },
+  { id:'hyper_1',     name:'Hypercar Hunt',       icon:'🔥',  desc:'Spot a $500K+ hypercar',          goal:1,  xp:300, check:function(c){ return c.filter(function(x){ return x.value >= 500000; }).length; } },
+  { id:'legend_1',    name:'Legend Seeker',       icon:'👑',  desc:'Spot a $1M+ legend',              goal:1,  xp:500, check:function(c){ return c.filter(function(x){ return x.value >= 1000000; }).length; } },
+  { id:'six_makes',   name:'Globe Trotter',       icon:'🌍',  desc:'Spot cars from 6 different makes', goal:6,  xp:150, check:function(c){ return new Set(c.map(function(x){ return (x.name || '').split(' ')[0].toLowerCase(); })).size; } },
+  { id:'twelve_cars', name:'Showroom',            icon:'🏢',  desc:'Log 12 cars total',               goal:12, xp:150, check:function(c){ return c.length; } }
+];
+function expoProgress() {
+  var all = _allSpottedFlat();
+  return EXPEDITIONS.map(function(e){
+    var count = e.check(all);
+    return { id: e.id, name: e.name, icon: e.icon, desc: e.desc, goal: e.goal, xp: e.xp, count: count, done: count >= e.goal, claimed: !!_progress.expoClaimed[e.id] };
+  });
+}
+function renderExpeditions() {
+  var list = document.getElementById('expoList');
+  if (!list) return;
+  var exps = expoProgress();
+  list.innerHTML = exps.map(function(e, i){
+    var pct = Math.min(100, Math.round(e.count / e.goal * 100));
+    return '<div class="expo-card ' + (e.done ? 'done' : '') + '" style="animation-delay:' + (i * 0.04) + 's">' +
+      '<div class="ex-head"><div class="ex-ico">' + e.icon + '</div>' +
+      '<div><div class="ex-name">' + e.name + '</div><div class="ex-desc">' + e.desc + '</div></div></div>' +
+      '<div class="ex-prog"><div class="ex-bar"><div class="ex-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="ex-count">' + Math.min(e.count, e.goal) + '<span> / ' + e.goal + '</span></div></div>' +
+      (e.done
+        ? (e.claimed
+            ? '<div class="ex-reward" style="color:var(--green)">✓ +' + e.xp + ' XP claimed</div>'
+            : '<button class="ex-reward" style="width:100%;background:var(--accent);color:#080808;border:none;border-radius:var(--radius-xs);font-family:\'Bebas Neue\',cursive;font-size:0.95rem;letter-spacing:2px;padding:11px;cursor:pointer;margin-top:10px;" onclick="claimExpo(\'' + e.id + '\')">CLAIM +' + e.xp + ' XP</button>')
+        : '<div class="ex-reward">Reward: +' + e.xp + ' XP</div>') +
+    '</div>';
+  }).join('');
+}
+function claimExpo(id) {
+  if (_progress.expoClaimed[id]) return;
+  _progress.expoClaimed[id] = Date.now();
+  var ex = EXPEDITIONS.find(function(e){ return e.id === id; });
+  if (ex) addXP(ex.xp);
+  saveProgress();
+  renderExpeditions();
+  renderLevelBar();
+  checkTitleUnlock();
+  if (ex) {
+    enqueueMoment({
+      emoji: ex.icon,
+      eyebrow: 'Expedition Complete',
+      title: ex.name,
+      desc: 'Mission accomplished — +' + ex.xp + ' XP banked.',
+      sub: ex.desc,
+      colors: ['#f5c842', '#ffd75e', '#fff', '#ff5733'],
+      particles: 16
+    });
+  }
+  showToast('🗺️ Expedition complete! +' + (ex ? ex.xp : 0) + ' XP');
+  playSound('end');
+}
+
+// ---- ROAD TRIPS — journal runs into named journeys ----
+function tripById(id) { return _progress.trips.find(function(t){ return String(t.id) === String(id); }); }
+function createTrip() {
+  var nameEl = document.getElementById('tripNameInput');
+  var emoEl  = document.getElementById('tripEmojiSelect');
+  var name = (nameEl.value || '').trim();
+  if (!name) { showToast('Give your trip a name!'); nameEl.focus(); return; }
+  var trip = { id: Date.now(), name: name, emoji: emoEl.value, created: Date.now(), runIds: [], total: 0, carCount: 0 };
+  _progress.trips.unshift(trip);
+  saveProgress();
+  nameEl.value = '';
+  renderTrips();
+  showToast('🛣️ ' + name + ' launched! Runs will be added to it.');
+  playSound('log');
+}
+function attachRunToTrip(run) {
+  if (!run || !run.id) return;
+  var trip = _progress.activeTripId ? tripById(_progress.activeTripId) : null;
+  if (!trip) return;
+  if (trip.runIds.indexOf(run.id) === -1) {
+    trip.runIds.push(run.id);
+    trip.total += (run.total || 0);
+    trip.carCount += (run.cars || []).length;
+    saveProgress();
+  }
+}
+function setActiveTrip(id) {
+  _progress.activeTripId = (id === _progress.activeTripId) ? null : id;
+  saveProgress();
+  renderTrips();
+}
+function deleteTrip(id) {
+  if (!confirm('Delete this trip? Runs stay in your history.')) return;
+  _progress.trips = _progress.trips.filter(function(t){ return String(t.id) !== String(id); });
+  if (_progress.activeTripId === id) _progress.activeTripId = null;
+  saveProgress();
+  renderTrips();
+}
+function renderTrips() {
+  var hero = document.getElementById('tripHero');
+  var totalTrips = _progress.trips.length;
+  var totalVal = _progress.trips.reduce(function(s,t){ return s + (t.total || 0); }, 0);
+  var totalCars = _progress.trips.reduce(function(s,t){ return s + (t.carCount || 0); }, 0);
+  hero.innerHTML =
+    '<div><div class="th-title">ROAD TRIPS</div><div class="th-sub">' + totalTrips + ' journey' + (totalTrips === 1 ? '' : 's') + ' logged</div></div>' +
+    '<div class="th-stats">' +
+      '<div class="th-stat"><div class="ts-v">' + fmt(totalVal) + '</div><div class="ts-l">Total</div></div>' +
+      '<div class="th-stat"><div class="ts-v">' + totalCars + '</div><div class="ts-l">Cars</div></div>' +
+    '</div>';
+  var list = document.getElementById('tripList');
+  if (!_progress.trips.length) {
+    list.innerHTML = '<div class="trip-empty">No trips yet.<br>Launch one, then every completed run is journaled into it automatically.</div>';
+    return;
+  }
+  list.innerHTML = _progress.trips.map(function(t, i){
+    var active = String(_progress.activeTripId) === String(t.id);
+    return '<div class="trip-card ' + (active ? 'active' : '') + '" style="animation-delay:' + (i * 0.04) + 's" onclick="openTripDetail(\'' + t.id + '\')">' +
+      '<div class="tr-ico">' + t.emoji + '</div>' +
+      '<div class="tr-body">' +
+        '<div class="tr-name">' + escapeHtml(t.name) + '</div>' +
+        '<div class="tr-meta">' + (t.runIds.length) + ' run' + (t.runIds.length === 1 ? '' : 's') + ' · ' + (t.carCount || 0) + ' cars' + (active ? ' · collecting now' : '') + '</div>' +
+        (active ? '<div class="tr-active-tag">ACTIVE — ADDING RUNS</div>' : '') +
+      '</div>' +
+      '<div class="tr-val">' + fmt(t.total || 0) + '</div>' +
+    '</div>';
+  }).join('');
+}
+function openTripDetail(id) {
+  var t = tripById(id);
+  if (!t) return;
+  var overlay = document.createElement('div');
+  overlay.className = 'trip-detail-sheet';
+  overlay.onclick = function(e){ if (e.target === overlay) overlay.remove(); };
+  var runs = t.runIds.map(function(rid){
+    var r = allRuns.find(function(x){ return x.id === rid; });
+    if (!r) return null;
+    var head = r.headliner && r.headliner.name ? ' · ⭐ ' + r.headliner.name : '';
+    return '<div class="trip-run-row">' +
+      '<div><div class="trr-name">' + escapeHtml(r.date || 'Run') + head + '</div>' +
+      '<div class="trr-meta">' + (r.cars || []).length + ' cars</div></div>' +
+      '<div class="trr-val">' + fmtFull(r.total || 0) + '</div>' +
+    '</div>';
+  }).filter(Boolean).join('');
+  overlay.innerHTML =
+    '<div class="trip-detail-panel">' +
+      '<div class="book-make-head">' +
+        '<div class="bml">' + t.emoji + '</div>' +
+        '<div class="bmt"><div class="td-name">' + escapeHtml(t.name) + '</div>' +
+        '<div class="bm-sub">' + new Date(t.created).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) + '</div></div>' +
+        '<button class="book-close" onclick="this.closest(\'.trip-detail-sheet\').remove()">&times;</button>' +
+      '</div>' +
+      '<div class="td-stats">' +
+        '<div class="td-stat"><div class="ts-v">' + fmt(t.total || 0) + '</div><div class="ts-l">Total</div></div>' +
+        '<div class="td-stat"><div class="ts-v">' + (t.carCount || 0) + '</div><div class="ts-l">Cars</div></div>' +
+        '<div class="td-stat"><div class="ts-v">' + (t.runIds.length) + '</div><div class="ts-l">Runs</div></div>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px;margin-bottom:16px;">' +
+        '<button style="flex:1;background:var(--surf2);border:1px solid var(--border2);border-radius:var(--radius-xs);color:var(--text);font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:11px;cursor:pointer;" onclick="setActiveTrip(\'' + t.id + '\');document.querySelector(\'.trip-detail-sheet\').remove();renderTrips()">' + (String(_progress.activeTripId) === String(t.id) ? 'STOP ADDING RUNS' : 'ADD RUNS TO THIS') + '</button>' +
+        '<button style="flex:1;background:rgba(224,82,64,0.12);border:1px solid rgba(224,82,64,0.35);border-radius:var(--radius-xs);color:#ff6b5b;font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:11px;cursor:pointer;" onclick="deleteTrip(\'' + t.id + '\');document.querySelector(\'.trip-detail-sheet\').remove();renderTrips()">DELETE</button>' +
+      '</div>' +
+      (runs || '<div class="trip-empty">No runs journaled yet — complete a run while this trip is active.</div>') +
+    '</div>';
+  document.body.appendChild(overlay);
+}
+
+// ---- CAR STORIES — a short history blurb surfaced in the specs card ----
+var CAR_STORIES = {
+  'ferrari 488 gtb':   'The 488 replaced the 458 with twin turbos — a move purists doubted until the lap times proved it. It redefined what a \u201Csensible\u201D Ferrari could be.',
+  'ferrari laferrari': 'LaFerrari was Ferrari\u2019s first hybrid hypercar, built as one of the holy trinity alongside the P1 and 918. Each one was sold to a loyal owner before it was shown.',
+  'lamborghini aventador': 'The Aventador revived the Lamborghini flagship V12 tradition. Its carbon monocoque and scissor doors made every arrival a spectacle.',
+  'lamborghini huracan':   'Named after a fighting bull, the Huracan\u2019s naturally aspirated V10 is one of the last great NA engines in a supercar.',
+  'porsche 911 gt3':       'The GT3 exists because Porsche keeps listening to purists who demand a manual, naturally aspirated track weapon you can drive home.',
+  'porsche 911 turbo s':   'The Turbo S is the 911 the engineers hide in plain sight — huge power, all-weather grip, and surprisingly livable.',
+  'mclaren p1':            'The P1 pioneered active aero that could change downforce on the fly, letting it corner harder than its weight suggested possible.',
+  'bugatti chiron':        'The Chiron is built around a single number: 1,500 horsepower from a quad-turbo W16. It can empty a fuel tank in about nine minutes at full tilt.',
+  'ford gt':               'The 2017 Ford GT was born from Le Mans — Ford\u2019s way of answering the Ferrari rivalry, engineered from the track outward.',
+  'dodge challenger hellcat': 'The Hellcat threw a 707-horsepower supercharged V8 into a muscle car with zero pretense. It made drag-strip noise on every street.',
+  'tesla model s plaid':   'Plaid stands for a tri-motor setup that shattered expectations for what a four-door sedan could do, cracking the 2-second sprint.',
+  'rimac nevera':          'The Nevera is named after a Croatian Mediterranean wind — fitting for the electric hypercar that set 23 records in a single day.',
+  'toyota supra gr':       'The A90 Supra revived a legend with BMW DNA and a cult following that treats every sighting like a pilgrimage.',
+  'nissan gt-r':           'The R35 GT-R earned the nickname Godzilla by humbling far more expensive supercars with AWD launch control.'
+};
+function storyFor(name) {
+  var key = _modelKey(name);
+  if (CAR_STORIES[key]) return CAR_STORIES[key];
+  return '';
+}
+function renderSpecsStory(car, card) {
+  var slot = card && card.querySelector('#specsStorySlot');
+  if (!slot) return;
+  var text = storyFor(car.name);
+  if (!text) { slot.innerHTML = ''; return; }
+  var key = _modelKey(car.name);
+  _progress.storiesRead[key] = true;
+  saveProgress();
+  slot.innerHTML = '<div class="specs-story"><div class="ss-label">Car Story</div><div class="ss-text">' + text + '</div></div>';
+}
+
+// ---- COLLECTOR CARD EVOLUTION — cards grade up the more you spot a model ----
+var EVOLUTION_TIERS = [
+  { min: 1,  name:'Bronze',  icon:'🥉', color:'#cd7f32' },
+  { min: 3,  name:'Silver',  icon:'🥈', color:'#c0c0c0' },
+  { min: 5,  name:'Gold',    icon:'🥇', color:'#f5c842' },
+  { min: 8,  name:'Platinum',icon:'💎', color:'#7fd1f7' },
+  { min: 12, name:'Diamond', icon:'💠', color:'#9ff2ff' }
+];
+function evolutionFor(name) {
+  var all = _allSpottedFlat();
+  var count = all.filter(function(c){ return _modelKey(c.name) === _modelKey(name); }).length;
+  var tier = EVOLUTION_TIERS[0];
+  for (var i = 0; i < EVOLUTION_TIERS.length; i++) {
+    if (count >= EVOLUTION_TIERS[i].min) tier = EVOLUTION_TIERS[i];
+  }
+  return { count: count, tier: tier };
+}
+function renderSpecsEvolution(car, card) {
+  var slot = card && card.querySelector('#specsEvolSlot');
+  if (!slot) return;
+  var ev = evolutionFor(car.name);
+  var lit = 0;
+  for (var i = 0; i < EVOLUTION_TIERS.length; i++) {
+    if (ev.count >= EVOLUTION_TIERS[i].min) lit = i + 1;
+  }
+  var pips = '';
+  for (var j = 0; j < EVOLUTION_TIERS.length; j++) pips += '<div class="evol-pip ' + (j < lit ? 'lit' : '') + '"></div>';
+  slot.innerHTML =
+    '<div style="margin-top:14px;background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">' +
+        '<div class="ss-label" style="margin-bottom:0">Card Evolution</div>' +
+        '<span class="evol-badge" style="color:' + ev.tier.color + ';border-color:' + ev.tier.color + '44;background:rgba(0,0,0,0.3)">' + ev.tier.icon + ' ' + ev.tier.name + ' · ×' + ev.count + '</span>' +
+      '</div>' +
+      '<div class="evol-pips">' + pips + '</div>' +
+    '</div>';
+}
+
+// ---- RARE DISCOVERY MOMENTS — milestone moments beyond the standard card ----
+function checkMilestones(car) {
+  var all = _allSpottedFlat();
+  var fired = [];
+  // First-ever spot
+  if (!_progress.milestones.first_spot && all.length >= 1) {
+    _progress.milestones.first_spot = Date.now();
+    fired.push({ id:'first_spot', icon:'🚀', title:'First Spot!', desc:'Your journey begins.' });
+  }
+  // 10 / 25 / 50 total
+  if (!_progress.milestones.cars_10 && all.length >= 10) { _progress.milestones.cars_10 = Date.now(); fired.push({ id:'cars_10', icon:'🎉', title:'Double Digits', desc:'10 cars in your book.' }); }
+  if (!_progress.milestones.cars_25 && all.length >= 25) { _progress.milestones.cars_25 = Date.now(); fired.push({ id:'cars_25', icon:'🎉', title:'Quarter Century', desc:'25 cars spotted.' }); }
+  if (!_progress.milestones.cars_50 && all.length >= 50) { _progress.milestones.cars_50 = Date.now(); fired.push({ id:'cars_50', icon:'🎖️', title:'Half Century', desc:'50 cars — a serious collection.' }); }
+  // First legend
+  if (!_progress.milestones.first_legend && car && car.value >= 1000000) { _progress.milestones.first_legend = Date.now(); fired.push({ id:'first_legend', icon:'👑', title:'Legend Sighted!', desc:'A $1M+ masterpiece joins the garage.' }); }
+  // First hyper
+  if (!_progress.milestones.first_hyper && car && car.value >= 500000 && car.value < 1000000) { _progress.milestones.first_hyper = Date.now(); fired.push({ id:'first_hyper', icon:'🔥', title:'Hypercar Down!', desc:'$500K+ spotted in the wild.' }); }
+  // First completed make
+  var stats = bookMakeStats();
+  var completed = stats.filter(function(s){ return s.found === s.total && s.total > 0; }).length;
+  if (!_progress.milestones.first_make_complete && completed >= 1) { _progress.milestones.first_make_complete = Date.now(); fired.push({ id:'first_make_complete', icon:'🏁', title:'Marque Completed!', desc:'You finished a full manufacturer shelf.' }); }
+  if (fired.length) {
+    saveProgress();
+    fired.forEach(function(m, i){ setTimeout(function(){ showMilestoneToast(m); }, i * 2200); });
+  }
+}
+function showMilestoneToast(m) {
+  enqueueMoment({
+    emoji: m.icon,
+    eyebrow: 'Rare Discovery',
+    title: m.title,
+    desc: m.desc,
+    colors: ['#f5c842', '#ffd75e', '#fff', '#ff5733'],
+    particles: 20
+  });
+}
+
+// ---- 3-STAGE UNLOCK MOMENT ENGINE — Anticipation → Reveal → Celebration ----
+var _momentQueue = [];
+var _momentBusy = false;
+function enqueueMoment(cfg) {
+  _momentQueue.push(cfg);
+  pumpMoment();
+}
+function pumpMoment() {
+  if (_momentBusy || !_momentQueue.length) return;
+  // Let the collector card / quick chip finish first — moments queue behind it
+  if (document.querySelector('.cc-overlay') || document.querySelector('.cc-quick')) {
+    setTimeout(pumpMoment, 250);
+    return;
+  }
+  _momentBusy = true;
+  var cfg = _momentQueue.shift();
+  var done = function(){ _momentBusy = false; setTimeout(pumpMoment, 400); };
+  showMoment(cfg, done);
+}
+function showMoment(cfg, done) {
+  cfg = cfg || {};
+  var overlay = document.createElement('div');
+  overlay.className = 'moment-overlay';
+  overlay.innerHTML =
+    '<div class="moment-antici">' +
+      '<div class="moment-sweep"></div>' +
+      '<div class="moment-ring"></div>' +
+      '<div class="moment-sil">' + (cfg.emoji || '✦') + '</div>' +
+      '<div class="moment-antici-txt">' + (cfg.anticipateTxt || 'Something remarkable\u2026') + '</div>' +
+    '</div>' +
+    '<div class="moment-flash"></div>' +
+    '<div class="moment-card">' +
+      '<div class="moment-emoji">' + (cfg.emoji || '✦') + '</div>' +
+      '<div class="moment-eyebrow">' + (cfg.eyebrow || 'Unlocked') + '</div>' +
+      '<div class="moment-title">' + (cfg.title || '') + '</div>' +
+      (cfg.desc ? '<div class="moment-desc">' + cfg.desc + '</div>' : '') +
+      (cfg.sub ? '<div class="moment-sub">' + cfg.sub + '</div>' : '') +
+      '<div class="moment-dismiss">Tap anywhere to continue</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  var closed = false;
+  function close() {
+    if (closed) return;
+    closed = true;
+    overlay.style.transition = 'opacity 0.3s ease';
+    overlay.style.opacity = '0';
+    setTimeout(function() {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      done();
+    }, 320);
+  }
+  overlay.onclick = close;
+  playSound('level');
+  haptic([40, 60, 40, 30, 80]);
+  // Stage 2 — reveal
+  setTimeout(function(){ overlay.classList.add('stage-reveal'); }, 1100);
+  // Stage 3 — celebration: confetti + particle burst + flash
+  setTimeout(function() {
+    overlay.classList.add('stage-celebrate');
+    confettiBurst(overlay, 60, cfg.colors || ['#f5c842', '#ffd75e', '#fff', '#ff5733']);
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var pCount = reduced ? 0 : (cfg.particles || 16);
+    for (var i = 0; i < pCount; i++) {
+      var p = document.createElement('div');
+      p.className = 'moment-particle';
+      var ang = (Math.PI * 2 * i) / pCount + Math.random() * 0.5;
+      var dist = 90 + Math.random() * 110;
+      p.style.cssText = '--px:' + (Math.cos(ang) * dist).toFixed(0) + 'px;--py:' + (Math.sin(ang) * dist).toFixed(0) + 'px;' +
+        'background:' + (cfg.colors || ['#f5c842', '#ffd75e', '#fff', '#ff5733'])[i % 4] + ';animation:spotParticleBurst 0.9s cubic-bezier(0.16,0.84,0.44,1) both;' +
+        'animation-delay:' + (0.1 + Math.random() * 0.2) + 's;';
+      overlay.appendChild(p);
+    }
+    playSound('end');
+    haptic([50, 40, 90]);
+  }, 2100);
+  // Auto-dismiss if the user doesn't tap
+  setTimeout(close, 6500);
+}
+
+// ---- COLLECTOR CARD EVOLUTION — celebrate each tier-up once per model ----
+function checkEvolutionUnlock(car) {
+  if (!car || !car.name) return;
+  var key = 'evo_' + _modelKey(car.name);
+  var ev = evolutionFor(car.name);
+  var lit = 0;
+  for (var i = 0; i < EVOLUTION_TIERS.length; i++) {
+    if (ev.count >= EVOLUTION_TIERS[i].min) lit = i + 1;
+  }
+  var prev = parseInt(_progress.milestones[key] || '0', 10);
+  if (lit > prev && lit > 1) {
+    _progress.milestones[key] = lit;
+    saveProgress();
+    var tier = EVOLUTION_TIERS[lit - 1];
+    enqueueMoment({
+      emoji: tier.icon,
+      eyebrow: 'Collector Card Evolution',
+      title: tier.name + ' Card',
+      desc: car.name + ' now grades at ' + tier.name + ' — spotted ' + ev.count + ' times.',
+      sub: 'Your collector card is grading up',
+      colors: [tier.color, '#ffffff', '#f5c842'],
+      particles: 18
+    });
+  }
+}
+
+// ---- Hooks: run once after each log ----
+function updateProgressionAfterLog(car) {
+  checkTitleUnlock();
+  checkMilestones(car);
+  checkEvolutionUnlock(car);
+  renderTitleChip();
+  renderLevelBar();
+  // Refresh book/expedition/trip pages if they are the active page
+  var pg = document.querySelector('.page.active');
+  if (pg) {
+    if (pg.id === 'page-book') renderBook();
+    if (pg.id === 'page-expeditions') renderExpeditions();
+  }
+}
+window.renderSpecsStory = renderSpecsStory;
+window.renderSpecsEvolution = renderSpecsEvolution;
+window.getProgression = getProgression;
+// Merge progression state from another device (union of trips, latest flags)
+window.mergeCloudProgression = function(cloud) {
+  if (!cloud || typeof cloud !== 'object') return;
+  try {
+    // Trips: union by id, prefer local on conflict
+    var localTrips = {};
+    _progress.trips.forEach(function(t){ localTrips[String(t.id)] = t; });
+    (cloud.trips || []).forEach(function(t){
+      if (t && t.id && !localTrips[String(t.id)]) { localTrips[String(t.id)] = t; }
+    });
+    _progress.trips = Object.keys(localTrips).map(function(k){ return localTrips[k]; });
+    // Flags: union (a milestone/claim/peek that happened anywhere stays true)
+    ['expoClaimed','mysteryPeeked','storiesRead','milestones','titlesUnlocked'].forEach(function(key){
+      var src = cloud[key];
+      if (src && typeof src === 'object') {
+        Object.keys(src).forEach(function(k){ _progress[key][k] = src[k]; });
+      }
+    });
+    // Active trip: prefer local if it exists locally, else cloud
+    if (cloud.activeTripId && !_progress.activeTripId) _progress.activeTripId = cloud.activeTripId;
+    else if (cloud.activeTripId && !tripById(cloud.activeTripId)) _progress.activeTripId = cloud.activeTripId;
+    saveProgress();
+    renderTitleChip();
+  } catch(e) {}
+};
+window.renderBook = renderBook;
+window.renderExpeditions = renderExpeditions;
+window.renderTrips = renderTrips;
+window.createTrip = createTrip;
+window.openTripDetail = openTripDetail;
+window.setActiveTrip = setActiveTrip;
+window.deleteTrip = deleteTrip;
+window.openMakeSheet = openMakeSheet;
+window.peekMystery = peekMystery;
+window.showBookAllShelf = showBookAllShelf;
+window.claimExpo = claimExpo;
+window.updateProgressionAfterLog = updateProgressionAfterLog;
+window.attachRunToTrip = attachRunToTrip;
+window.enqueueMoment = enqueueMoment;
+window.checkEvolutionUnlock = checkEvolutionUnlock;
+
 
 
 (function(){
@@ -7323,6 +8275,9 @@ async function loadNews() {
   renderGarage();
   renderAchievements();
   refreshOfflineStatus();
+  // Progression expansion init
+  if (window.renderTitleChip) renderTitleChip();
+  if (window.checkTitleUnlock) setTimeout(function(){ checkTitleUnlock(true); }, 600);
   // One-shot tutorial check after auth resolves
   if (currentUser && !localStorage.getItem('cs_tutorial_done') && !document.getElementById('tutorialOverlay')) {
     setTimeout(function(){ openTutorial(false); }, 2500);
