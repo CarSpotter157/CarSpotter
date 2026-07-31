@@ -2764,9 +2764,9 @@ async function loadFromCloud() {
         const a = document.getElementById('notesArea');
         if (a) a.value = d.notes;
       }
-      localStorage.setItem('cs_current', JSON.stringify(currentRun));
-      localStorage.setItem('cs_runs',    JSON.stringify(allRuns));
-      localStorage.setItem('cs_qp',      JSON.stringify(quickPicks));
+      _saveCurrentLocal();
+      _saveRunsLocal();
+      _saveQPLocal();
       // Save merged result back to cloud so other devices see it
       _lastSave = Date.now();
       var sanCloud = _diagAndSanitize('loadFromCloud(set)', _buildCloudPayload(), 'write');
@@ -2794,9 +2794,9 @@ function subscribeCloud() {
         const a = document.getElementById('notesArea');
         if (a && document.activeElement !== a) a.value = d.notes;
       }
-      localStorage.setItem('cs_current', JSON.stringify(currentRun));
-      localStorage.setItem('cs_runs',    JSON.stringify(allRuns));
-      localStorage.setItem('cs_qp',      JSON.stringify(quickPicks));
+      _saveCurrentLocal();
+      _saveRunsLocal();
+      _saveQPLocal();
       renderQPTrigger(); renderSpot();
       const pg = document.querySelector('.page.active')?.id;
       if (pg === 'page-garage')  renderGarage();
@@ -2920,9 +2920,9 @@ function _buildCloudPayload() {
 function saveToCloud() {
   console.log('Starting Firestore save');
   // Always persist locally first — works offline
-  localStorage.setItem('cs_runs',    JSON.stringify(allRuns));
-  localStorage.setItem('cs_current', JSON.stringify(currentRun));
-  localStorage.setItem('cs_qp',      JSON.stringify(quickPicks));
+  _saveRunsLocal();
+  _saveCurrentLocal();
+  _saveQPLocal();
 
   if (!currentUser || !navigator.onLine) {
     console.log('Firestore save: skipped —', !currentUser ? 'no user' : 'offline');
@@ -3172,7 +3172,7 @@ function doUndo() {
     renderQPTrigger();
   } else if (type === 'history') {
     allRuns = data;
-    localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+    _saveRunsLocal();
     saveToCloud();
     renderHistory();
     renderGarage();
@@ -3180,7 +3180,7 @@ function doUndo() {
     allRuns = data.prevRuns;
     currentRun = data.prevRun;
     headlinerIdx = data.prevHL;
-    localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+    _saveRunsLocal();
     saveCurrentRun();
     renderSpot();
     renderGarage();
@@ -3214,7 +3214,7 @@ function bulkDelete() {
   const prev = [...allRuns];
   const count = bulkSelected.size;
   allRuns = allRuns.filter(r => !bulkSelected.has(r.id));
-  localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+  _saveRunsLocal();
   saveToCloud();
   pushUndo('history', prev, count + ' entr' + (count===1?'y':'ies') + ' deleted');
   bulkSelected.clear();
@@ -3403,7 +3403,7 @@ function cleanQPAfterRemoval(name) {
   const key = name.toLowerCase();
   if (!carExistsAnywhere(key)) {
     quickPicks = quickPicks.filter(q => q.name.toLowerCase() !== key);
-    localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
+    _saveQPLocal();
   }
 }
 function saveToQP(car) {
@@ -3411,7 +3411,7 @@ function saveToQP(car) {
   const photo = car.photo || (existing && existing.photo) || '';
   quickPicks = quickPicks.filter(q => q.name.toLowerCase() !== car.name.toLowerCase());
   quickPicks.unshift({ name:car.name, value:car.value, color:car.color, type:car.type, ...(photo ? {photo} : {}) });
-  localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
+  _saveQPLocal();
   saveToCloud();
 }
 
@@ -3444,7 +3444,7 @@ function updateQPEditUI() {
 }
 function removeQP(name) {
   quickPicks = quickPicks.filter(q => q.name.toLowerCase() !== name.toLowerCase());
-  localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
+  _saveQPLocal();
   renderQPList(document.getElementById('qpSearch')?.value || '');
   updateQPEditUI();
   renderQPTrigger();
@@ -3453,7 +3453,7 @@ function clearAllQP() {
   if (!quickPicks.length) return;
   if (!confirm('Remove all ' + quickPicks.length + ' quick pick' + (quickPicks.length !== 1 ? 's' : '') + '?')) return;
   quickPicks = [];
-  localStorage.setItem('cs_qp', JSON.stringify(quickPicks));
+  _saveQPLocal();
   qpEditMode = false;
   renderQPList('');
   updateQPEditUI();
@@ -3555,7 +3555,7 @@ function logSpotted() {
   var isFirst = !carExistsAnywhere(name);
   var entry = { id:Date.now(), date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), total:input.value, spotted:true, cars:[car] };
   allRuns.unshift(entry);
-  localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+  _saveRunsLocal();
   saveToCloud();
   fetchAndStoreRefImage(car);
   playSound('log');
@@ -3636,7 +3636,7 @@ function showUnicornAlert(total) {
 
 function saveCurrentRun() {
   _lastSave = Date.now();
-  _safeSet('cs_current', JSON.stringify(currentRun));
+  _saveCurrentLocal();
   _safeSet('cs_current_ts', String(_lastSave));
   saveToCloud();
 }
@@ -3660,7 +3660,7 @@ function endRun() {
   };
   const runCars = [...currentRun]; // snapshot before clearing
   allRuns.unshift(run);
-  localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+  _saveRunsLocal();
   // Update leaderboard cache if this is the new best
   if (total > bestFromLB) {
     bestFromLB = total;
@@ -3905,7 +3905,7 @@ function deleteCarEverywhere(name) {
     const headliner = (run.headliner && run.headliner.name.toLowerCase()===key) ? null : run.headliner;
     return { ...run, cars: remaining, total: newTotal, headliner };
   }).filter(run=>run.cars.length>0);
-  localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+  _saveRunsLocal();
   // Fix headlinerIdx: check index in OLD currentRun BEFORE filtering
   const carIdx = prevRun.findIndex(c=>c.name.toLowerCase()===key);
   if (headlinerIdx >= 0) {
@@ -4341,7 +4341,7 @@ function toggleHistoryHeadliner(runId, carName, carType, carValue) {
   if (!run || run.spotted) return;
   const isAlready = run.headliner && run.headliner.name === carName;
   run.headliner = isAlready ? null : { name: carName, type: carType, value: carValue };
-  localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+  _saveRunsLocal();
   saveToCloud();
   renderHistory();
   showToast(isAlready ? 'Headliner removed' : '⭐ ' + carName + ' set as headliner!');
@@ -4353,7 +4353,7 @@ function deleteRun(id) {
   const prev = JSON.parse(JSON.stringify(allRuns));
   const entry = allRuns.find(r => r.id === id);
   allRuns = allRuns.filter(r => r.id !== id);
-  localStorage.setItem('cs_runs', JSON.stringify(allRuns));
+  _saveRunsLocal();
   saveToCloud();
   playSound('delete');
   pushUndo('history', prev, (entry?.spotted ? 'Spot' : 'Run') + ' deleted');
@@ -5704,14 +5704,21 @@ _attachPhotoInput.accept = 'image/*';
 _attachPhotoInput.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
 // IndexedDB photo storage — sidesteps localStorage 5MB limit
 
+var _idbConn = null;
 function _idbOpen() {
+  if (_idbConn) return Promise.resolve(_idbConn);
   return new Promise(function(res, rej) {
     var r = indexedDB.open('CarSpotterPhotos', 3);
     r.onupgradeneeded = function(e) {
       var db = e.target.result;
       if (e.oldVersion < 1) db.createObjectStore('photos', { keyPath: 'name' });
     };
-    r.onsuccess = function(e) { res(e.target.result); };
+    r.onsuccess = function(e) {
+      var db = e.target.result;
+      _idbConn = db;
+      db.onversionchange = function() { db.close(); _idbConn = null; };
+      res(db);
+    };
     r.onerror = function(e) { rej(e.target.error); };
   });
 }
@@ -5721,8 +5728,8 @@ function _idbPut(name, data) {
     return new Promise(function(res, rej) {
       var tx = db.transaction('photos', 'readwrite');
       tx.objectStore('photos').put({ name: name.toLowerCase(), data: data });
-      tx.oncomplete = function() { _idbPhotoCache[name.toLowerCase()] = data; db.close(); res(); };
-      tx.onerror = function(e) { db.close(); rej(e.target.error); };
+      tx.oncomplete = function() { _idbPhotoCache[name.toLowerCase()] = data; res(); };
+      tx.onerror = function(e) { rej(e.target.error); };
     });
   });
 }
@@ -5742,6 +5749,9 @@ function _loadIDBCache() {
   if (typeof indexedDB === 'undefined') return;
   _idbGetAll().then(function(entries) {
     entries.forEach(function(e) { _idbPhotoCache[e.name] = e.data; });
+    // Migrate any base64 photos still baked into localStorage out to IndexedDB as
+    // 'photo:' refs — frees the quota so later writes never throw QuotaExceededError.
+    _saveRunsLocal(); _saveCurrentLocal(); _saveQPLocal();
     renderSpot(); renderGarage(); renderHistory();
   }).catch(function(){});
 }
@@ -5764,6 +5774,13 @@ function _patchPhotosFromCache() {
       car.photo = _idbPhotoCache[car.name.toLowerCase()];
     }
   });
+  quickPicks.forEach(function(car) {
+    if (car.photo && typeof car.photo === 'string' && car.photo.indexOf('photo:') === 0) {
+      car.photo = _idbPhotoCache[car.photo.slice(6)] || '';
+    } else if (!car.photo && _idbPhotoCache[car.name.toLowerCase()]) {
+      car.photo = _idbPhotoCache[car.name.toLowerCase()];
+    }
+  });
 }
 
 function _safeSet(key, val) {
@@ -5776,6 +5793,29 @@ function _safeSet(key, val) {
   }
 }
 
+// Build a deep copy of run data with base64 photos replaced by tiny 'photo:' refs
+// (mirroring the image into IndexedDB), so localStorage never stores large images.
+function _stripCopy(obj) {
+  if (Array.isArray(obj)) return obj.map(function(x) { return _stripCopy(x); });
+  if (obj && typeof obj === 'object') {
+    var c = {};
+    for (var k in obj) {
+      var v = obj[k];
+      if (k === 'photo' && typeof v === 'string' && v.indexOf('data:') === 0) {
+        _idbPut(String(obj.name || ''), v).catch(function() {});
+        c[k] = 'photo:' + String(obj.name || '').toLowerCase();
+      } else if (v && typeof v === 'object') {
+        c[k] = _stripCopy(v);
+      } else c[k] = v;
+    }
+    return c;
+  }
+  return obj;
+}
+function _saveRunsLocal()    { return _safeSet('cs_runs',    JSON.stringify(_stripCopy(allRuns))); }
+function _saveCurrentLocal() { return _safeSet('cs_current', JSON.stringify(_stripCopy(currentRun))); }
+function _saveQPLocal()      { return _safeSet('cs_qp',      JSON.stringify(_stripCopy(quickPicks))); }
+
 function _savePhoto(compressed, t) {
   if (!t) return;
   if (t.type === 'run') {
@@ -5784,42 +5824,39 @@ function _savePhoto(compressed, t) {
       _idbPut(currentRun[t.index].name, compressed).catch(function(){});
       saveCurrentRun(); renderSpot();
       var qp = quickPicks.find(q => q.name.toLowerCase() === currentRun[t.index].name.toLowerCase());
-      if (qp) { qp.photo = compressed; _safeSet('cs_qp', JSON.stringify(quickPicks)); }
+      if (qp) { qp.photo = compressed; _saveQPLocal(); }
     }
   } else if (t.type === 'instance') {
     var runIdx = allRuns.findIndex(r => r.id === t.runId);
     if (runIdx >= 0 && allRuns[runIdx].cars[t.carIndex]) {
       allRuns[runIdx].cars[t.carIndex].photo = compressed;
       _idbPut(allRuns[runIdx].cars[t.carIndex].name, compressed).catch(function(){});
-      _safeSet('cs_runs', JSON.stringify(allRuns)); saveToCloud();
+      _saveRunsLocal(); saveToCloud();
     }
   } else if (t.type === 'all') {
     var key = t.name.toLowerCase();
     allRuns.forEach(function(run) { run.cars.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = compressed; }); });
     currentRun.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = compressed; });
-    if (!_safeSet('cs_runs', JSON.stringify(allRuns))) {
-      // localStorage full — persist to IndexedDB FIRST, only then strip the base64
-      // from the persisted copies (kept as 'photo:' refs) so reload can restore.
-      var idbW = _idbPut(t.name, compressed);
-      _idbPhotoCache[key] = compressed;
-      idbW.then(function() {
-        allRuns.forEach(function(run) { run.cars.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = 'photo:' + key; }); });
-        currentRun.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = 'photo:' + key; });
-        _safeSet('cs_runs', JSON.stringify(allRuns));
-        _safeSet('cs_current', JSON.stringify(currentRun));
-        showToast('📷 Saved to extended storage');
-        renderGarage(); renderHistory();
-        var de2 = document.getElementById('detailOverlay'); if (de2) de2.remove();
-      }).catch(function() {
-        showToast("⚠ Photo couldn't be saved permanently. Export a backup soon!");
-        renderGarage(); renderHistory();
-      });
-      return;
-    }
-    saveCurrentRun();
     var qp = quickPicks.find(function(q) { return q.name.toLowerCase() === key; });
-    if (qp) { qp.photo = compressed; _safeSet('cs_qp', JSON.stringify(quickPicks)); }
-    showToast('📷 Photo added to all "' + t.name + '" sightings!');
+    if (qp) { qp.photo = compressed; }
+    // Persist the image in IndexedDB first, then write tiny 'photo:' refs to
+    // localStorage so the 5MB quota is never consumed by images.
+    _idbPut(t.name, compressed).then(function() {
+      _idbPhotoCache[key] = compressed;
+      _saveRunsLocal(); _saveCurrentLocal(); _saveQPLocal();
+      saveToCloud();
+      showToast('📷 Photo added to all "' + t.name + '" sightings!');
+      renderGarage(); renderHistory();
+      var de2 = document.getElementById('detailOverlay'); if (de2) de2.remove();
+    }).catch(function() {
+      _idbPhotoCache[key] = compressed;
+      _safeSet('cs_runs', JSON.stringify(allRuns));
+      _safeSet('cs_current', JSON.stringify(currentRun));
+      _saveQPLocal();
+      showToast("⚠ Photo couldn't be saved permanently. Export a backup soon!");
+      renderGarage(); renderHistory();
+    });
+    return;
   }
   renderGarage(); renderHistory();
   var detailEl = document.getElementById('detailOverlay');
@@ -6151,8 +6188,8 @@ window.saveEditCar = function(originalName) {
     return { ...c, name: newName, value: newValue, color: newColor, type: newType };
   });
 
-  localStorage.setItem('cs_runs', JSON.stringify(allRuns));
-  localStorage.setItem('cs_qp',   JSON.stringify(quickPicks));
+  _saveRunsLocal();
+  _saveQPLocal();
   saveCurrentRun();
   document.getElementById('editCarModal')?.remove();
   renderGarage(); renderSpot(); renderQPTrigger();
