@@ -663,6 +663,9 @@ body{
   .recap-card,.recap-flare,.recap-record-tag.pop,.recap-p-card,.levelup-card,.levelup-star,.levelup-overlay{animation:none !important;}
   .recap-p-card{opacity:1 !important;}
 }
+@media (prefers-reduced-motion: reduce){
+  .featured-hero,.collector-card,.journey-card,.garage-empty .ge-scene,.garage-card .gc-shine,.page.garage-enter{animation:none !important;}
+}
 
 
 /* Photo + Geo — side by side, slim */
@@ -985,6 +988,147 @@ body{
 .gc-meta-chip{background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:5px 7px;}
 .gc-meta-label{font-size:0.38rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:1px;}
 .gc-meta-val{font-size:0.58rem;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ── GARAGE COLLECTION EXPERIENCE ── */
+.garage-sort-row{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px;scroll-snap-type:x mandatory;}
+.garage-sort-row::-webkit-scrollbar{display:none;}
+.gs-pill{
+  flex-shrink:0;background:rgba(32,32,36,0.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:1px solid var(--glass-border);border-radius:20px;color:var(--text2);
+  font-size:0.6rem;font-weight:600;letter-spacing:0.3px;padding:6px 14px;cursor:pointer;
+  transition:all 0.2s var(--ease);font-family:'Inter',sans-serif;white-space:nowrap;scroll-snap-align:start;
+}
+.gs-pill.active,.gs-pill:hover{border-color:rgba(232,184,75,0.3);color:var(--accent);}
+
+/* Featured Spot hero */
+#featuredSpot{margin-bottom:6px;}
+.featured-hero{
+  position:relative;border-radius:var(--radius-xl);overflow:hidden;margin-bottom:14px;
+  background:var(--surf2);border:1px solid var(--glass-border);cursor:pointer;
+  animation:featuredIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.featured-hero[data-tier="daily"]{--cc-color:#9aa3af;--cc-glow:rgba(154,163,175,0.35);}
+.featured-hero[data-tier="sports"]{--cc-color:#60a5fa;--cc-glow:rgba(96,165,250,0.4);}
+.featured-hero[data-tier="super"]{--cc-color:#c084fc;--cc-glow:rgba(192,132,252,0.45);}
+.featured-hero[data-tier="hyper"]{--cc-color:#ff5733;--cc-glow:rgba(255,87,51,0.5);}
+.featured-hero[data-tier="legend"]{--cc-color:#f5c842;--cc-glow:rgba(245,200,66,0.6);}
+.featured-hero::after{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  box-shadow:inset 0 0 0 1px var(--cc-color), 0 0 30px var(--cc-glow);}
+.featured-hero .fh-media{position:relative;width:100%;height:190px;overflow:hidden;background:linear-gradient(160deg,#232328,#151518);}
+.featured-hero .fh-media img{width:100%;height:100%;object-fit:cover;display:block;}
+.featured-hero .fh-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:4.5rem;}
+.featured-hero .fh-floor{position:absolute;left:0;right:0;bottom:0;height:40%;pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,0.78));}
+.featured-hero .fh-info{position:absolute;left:0;right:0;bottom:0;padding:18px 16px 14px;z-index:2;}
+.featured-hero .fh-lbl{font-size:0.48rem;color:var(--cc-color);letter-spacing:3px;text-transform:uppercase;font-weight:800;margin-bottom:4px;}
+.featured-hero .fh-name{font-family:'Bebas Neue',cursive;font-size:1.5rem;line-height:1;letter-spacing:0.5px;color:#fff;}
+.featured-hero .fh-meta{font-size:0.62rem;color:var(--text2);margin-top:4px;}
+.featured-hero .fh-badges{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.fh-badge{
+  font-size:0.44rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border:1px solid var(--glass-border);border-radius:999px;padding:3px 9px;
+}
+.fh-cycle{
+  position:absolute;top:12px;right:12px;z-index:3;width:34px;height:34px;border-radius:50%;
+  background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border:1px solid var(--glass-border);color:#fff;font-size:0.95rem;cursor:pointer;transition:transform 0.25s;
+  display:flex;align-items:center;justify-content:center;
+}
+.fh-cycle:active{transform:rotate(180deg);}
+
+/* Your Journey */
+#journeySection{margin-bottom:4px;}
+.journey-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.journey-card{
+  background:var(--glass-card);border:1px solid var(--glass-border);border-radius:var(--radius-sm);
+  padding:12px;animation:fadeUp 0.3s var(--ease) both;position:relative;overflow:hidden;
+}
+.journey-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0.15;}
+.journey-ico{font-size:0.95rem;margin-bottom:5px;}
+.journey-lbl{font-size:0.42rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;}
+.journey-val{font-size:0.74rem;font-weight:600;color:var(--text);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.journey-val b{color:var(--accent);font-weight:700;}
+.journey-sub{font-size:0.55rem;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* Collector cards in grid */
+.garage-grid .garage-card.collector-card{animation:gcCardIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both;transform-style:preserve-3d;}
+.collector-card[data-tier="daily"]{--cc-color:#9aa3af;--cc-glow:rgba(154,163,175,0.3);}
+.collector-card[data-tier="sports"]{--cc-color:#60a5fa;--cc-glow:rgba(96,165,250,0.35);}
+.collector-card[data-tier="super"]{--cc-color:#c084fc;--cc-glow:rgba(192,132,252,0.4);}
+.collector-card[data-tier="hyper"]{--cc-color:#ff5733;--cc-glow:rgba(255,87,51,0.45);}
+.collector-card[data-tier="legend"]{--cc-color:#f5c842;--cc-glow:rgba(245,200,66,0.55);}
+.collector-card{border-color:var(--cc-color) !important;box-shadow:0 0 18px var(--cc-glow),var(--shadow);}
+.collector-card:hover{border-color:var(--cc-color) !important;box-shadow:0 0 30px var(--cc-glow),var(--shadow-lg);transform:translateY(-3px) rotate(var(--gc-tilt,0deg));}
+.collector-card:active{transform:scale(0.96) !important;}
+.collector-card .gc-tier-chip{
+  position:absolute;top:8px;left:8px;z-index:2;display:inline-flex;align-items:center;gap:4px;
+  font-size:0.44rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#fff;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border:1px solid var(--cc-color);border-radius:999px;padding:3px 8px;
+}
+.collector-card .gc-shine{position:absolute;top:0;left:-80%;width:50%;height:100%;z-index:2;pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,0.25),transparent);
+  transform:skewX(-18deg);animation:gcShine 3.2s ease 1.2s infinite;}
+.collector-card[data-tier="super"] .gc-shine,.collector-card[data-tier="hyper"] .gc-shine,.collector-card[data-tier="legend"] .gc-shine{animation:gcShine 2.6s ease 0.9s infinite;}
+.collector-card .gc-img-wrap{position:relative;}
+.collector-card .gc-img{transition:transform 0.6s var(--ease);}
+.collector-card:hover .gc-img{transform:scale(1.1);}
+.collector-card .gc-make{font-size:0.46rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--cc-color);margin-bottom:2px;}
+.collector-card .gc-val-row{display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin-top:3px;}
+.collector-card .gc-xp{font-size:0.52rem;font-weight:700;color:var(--green);letter-spacing:0.5px;flex-shrink:0;}
+.collector-card .gc-date{font-size:0.52rem;color:var(--text2);margin-top:4px;}
+.collector-card .gc-badges{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap;}
+.gc-badge{
+  font-size:0.42rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  background:var(--surf2);border:1px solid var(--border);border-radius:4px;padding:2px 6px;color:var(--text2);
+}
+.gc-badge.first{background:rgba(96,165,250,0.12);color:#7cb3ff;border:1px solid rgba(96,165,250,0.3);}
+.gc-badge.seen{background:rgba(232,184,75,0.1);color:var(--accent);border:1px solid rgba(232,184,75,0.25);}
+.gc-badge.fav{background:rgba(245,200,66,0.12);color:#f5c842;border:1px solid rgba(245,200,66,0.3);}
+.gc-feat{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border:none;color:var(--accent);font-size:0.8rem;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:transform 0.2s;
+}
+.gc-feat.active{color:#f5c842;box-shadow:0 0 12px rgba(245,200,66,0.5);}
+.gc-feat:hover{transform:scale(1.2);}
+
+/* Empty garage */
+.garage-empty{text-align:center;padding:56px 20px 48px;color:var(--muted);}
+.garage-empty .ge-scene{font-size:3.2rem;margin-bottom:16px;animation:emptyBob 2.8s ease-in-out infinite;}
+.garage-empty .ge-title{font-family:'Bebas Neue',cursive;font-size:1.5rem;letter-spacing:1px;color:var(--text);margin-bottom:6px;}
+.garage-empty .ge-sub{font-size:0.7rem;color:var(--text2);margin-bottom:22px;}
+.ge-btn{
+  background:var(--accent);color:#080808;border:none;border-radius:999px;
+  font-family:'Bebas Neue',cursive;font-size:0.9rem;letter-spacing:2px;padding:13px 34px;cursor:pointer;
+  box-shadow:0 8px 24px rgba(232,184,75,0.3);transition:transform 0.15s, box-shadow 0.15s;
+}
+.ge-btn:active{transform:scale(0.95);}
+
+@keyframes gcCardIn{from{opacity:0;transform:translateY(18px) scale(0.94) rotate(var(--gc-tilt,0deg))}to{opacity:1;transform:translateY(0) scale(1) rotate(0)}}
+@keyframes featuredIn{from{opacity:0;transform:translateY(-14px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes gcShine{0%{left:-80%;opacity:0}12%{opacity:1}30%{left:130%;opacity:0}100%{left:130%;opacity:0}}
+@keyframes emptyBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* Museum entrance fade/dim */
+.page.garage-enter{animation:garageEnter 0.5s var(--ease);}
+@keyframes garageEnter{0%{opacity:0.55;filter:brightness(0.75) saturate(0.9)}100%{opacity:1;filter:none}}
+
+.gc-badge.xp{background:rgba(76,175,80,0.12);color:#66bb6a;border:1px solid rgba(76,175,80,0.3);}
+.detail-tier-chip{
+  position:absolute;top:12px;left:12px;z-index:2;display:inline-flex;align-items:center;gap:4px;
+  font-size:0.46rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#fff;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border:1px solid var(--cc-color);border-radius:999px;padding:3px 9px;
+}
+
+/* Version tag more visible on desktop */
+@media (min-width:900px){
+  .version-tag{opacity:0.9;font-size:0.5rem;color:var(--text2);}
+}
 
 /* ── DETAIL MODAL ── */
 .detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:99991;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.2s var(--ease);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
@@ -1955,11 +2099,20 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
           <button class="txt-btn" onclick="openCarSearch()" title="Search car specs">🔍 Search</button>
         </div>
       </div>
+      <div class="garage-sort-row">
+        <button class="gs-pill active" data-sort="allCars" onclick="setGarageSortHeader('allCars',this)">All Cars</button>
+        <button class="gs-pill" data-sort="recent" onclick="setGarageSortHeader('recent',this)">Recent</button>
+        <button class="gs-pill" data-sort="rarest" onclick="setGarageSortHeader('rarest',this)">Rarest</button>
+        <button class="gs-pill" data-sort="highestXp" onclick="setGarageSortHeader('highestXp',this)">Highest XP</button>
+        <button class="gs-pill" data-sort="favorites" onclick="setGarageSortHeader('favorites',this)">★ Favorites</button>
+      </div>
       <div class="stats-row">
         <div class="stat-box"><div class="stat-v" id="gCars">0</div><div class="stat-l">Cars</div></div>
         <div class="stat-box"><div class="stat-v" id="gTotal">$0</div><div class="stat-l">Total</div></div>
         <div class="stat-box"><div class="stat-v" id="gAvg">&#8212;</div><div class="stat-l">Avg</div></div>
       </div>
+      <div id="featuredSpot" style="display:none"></div>
+      <div id="journeySection" style="display:none"></div>
       <div id="discSection" style="display:none">
         <div class="sec-row" style="margin:4px 0 8px;">
           <div class="sec-title">RECENT DISCOVERIES</div>
@@ -2321,7 +2474,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
 <div class="toast" id="toast"></div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v27.4</div>
+<div class="version-tag" id="versionTag">v27.5</div>
 
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
@@ -3824,6 +3977,99 @@ function applyGarageFilters(cars) {
 //  GARAGE PAGINATION 
 const GARAGE_PAGE_SIZE = 40;
 let garagePage = 0;
+let garageSortHeader = 'allCars';
+let _garageGreeted = false;
+let _featuredIdx = 0;
+
+function setGarageSortHeader(h, btn) {
+  garageSortHeader = h;
+  garagePage = 0;
+  document.querySelectorAll('.gs-pill').forEach(p => p.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderGarage();
+}
+function tierRank(v) { return v >= 1000000 ? 5 : v >= 500000 ? 4 : v >= 150000 ? 3 : v >= 50000 ? 2 : 1; }
+function applyHeaderSort(cars) {
+  var arr = cars.slice();
+  if (garageSortHeader === 'favorites') {
+    arr = arr.filter(function(c){ return isFavorite(c.name); });
+    return arr.sort(function(a,b){ return b.value-a.value; });
+  }
+  if (garageSortHeader === 'recent') {
+    var rec = new Map();
+    allRuns.forEach(function(run, i){ run.cars.forEach(function(c){ rec.set(c.name.toLowerCase(), i); }); });
+    return arr.sort(function(a,b){ return (rec.get(b.name.toLowerCase()) || 0) - (rec.get(a.name.toLowerCase()) || 0); });
+  }
+  if (garageSortHeader === 'rarest') {
+    return arr.sort(function(a,b){ return tierRank(b.value)-tierRank(a.value) || b.value-a.value; });
+  }
+  if (garageSortHeader === 'highestXp') {
+    return arr.sort(function(a,b){ return rarityXP(b.value)-rarityXP(a.value) || b.value-a.value; });
+  }
+  var favs = arr.filter(function(c){ return isFavorite(c.name); }).sort(function(a,b){ return b.value-a.value; });
+  var rest = sorted(arr.filter(function(c){ return !isFavorite(c.name); }));
+  return favs.concat(rest);
+}
+function featuredName() {
+  try { return localStorage.getItem('cs_featured') || ''; } catch(e) { return ''; }
+}
+function setFeaturedCar(name) {
+  try {
+    var cur = localStorage.getItem('cs_featured') || '';
+    localStorage.setItem('cs_featured', cur === name ? '' : name);
+  } catch(e) {}
+  renderGarage();
+}
+function featuredPool(cars) {
+  var ordered = cars.slice().sort(function(a,b){ return b.value-a.value; });
+  var favs = ordered.filter(function(c){ return isFavorite(c.name); });
+  var rest = ordered.filter(function(c){ return !isFavorite(c.name); });
+  var fn = featuredName();
+  if (fn) {
+    var found = ordered.filter(function(c){ return c.name === fn; });
+    if (found.length) return found.concat(favs.filter(function(c){ return c.name !== fn; }), rest.filter(function(c){ return c.name !== fn; })).slice(0, 5);
+  }
+  return favs.concat(rest).slice(0, 5);
+}
+function renderFeatured(cars) {
+  var spot = document.getElementById('featuredSpot');
+  if (!spot) return;
+  if (!cars.length) { spot.style.display = 'none'; return; }
+  var pool = featuredPool(cars);
+  if (_featuredIdx >= pool.length) _featuredIdx = 0;
+  var car = pool[_featuredIdx];
+  var tier = tierOf(car.value);
+  var meta = tierMeta(tier);
+  var rarity = getRarity(car.value);
+  var media = car.photo
+    ? '<img src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">'
+    : '<div class="fh-ph">' + tierEmoji(tier) + '</div>';
+  var badges = '<div class="fh-badge">' + rarity.label + '</div>';
+  if (car.spotCount > 1) badges += '<div class="fh-badge">Seen \u00D7' + car.spotCount + '</div>';
+  if (isFavorite(car.name)) badges += '<div class="fh-badge">\u2605 Favorite</div>';
+  spot.style.display = 'block';
+  spot.innerHTML = '<div class="featured-hero" data-tier="' + tier + '" onclick="openFeatured(decodeURIComponent(\'' + encodeURIComponent(JSON.stringify({ name: car.name, value: car.value, type: car.type, color: car.color, photo: car.photo, location: car.location, runDate: car.runDate, spotCount: car.spotCount })).replace(/'/g, '%27') + '\'))"><div class="fh-media">' + media + '<div class="fh-floor"></div></div><div class="fh-info"><div class="fh-lbl">\u2605 Featured \u00B7 ' + meta.label + '</div><div class="fh-name">' + escapeHtml(car.name) + '</div><div class="fh-meta">' + fmtFull(car.value) + ' \u00B7 ' + escapeHtml(car.runDate || '') + '</div><div class="fh-badges">' + badges + '</div></div><button class="fh-cycle" onclick="event.stopPropagation();cycleFeatured();return false;" title="Cycle featured">\u21BB</button></div>';
+}
+function cycleFeatured() { _featuredIdx++; renderGarage(); }
+function openFeatured(json) { try { showCarInstances(JSON.parse(json)); } catch(e) {} }
+function renderJourney(cars) {
+  var sec = document.getElementById('journeySection');
+  if (!sec) return;
+  if (!cars.length) { sec.style.display = 'none'; return; }
+  var total = cars.reduce(function(s,c){ return s + c.value; }, 0);
+  var best = cars.slice().sort(function(a,b){ return b.value-a.value; })[0];
+  var favCount = cars.filter(function(c){ return isFavorite(c.name); }).length;
+  var info = xpInfo(_xpTotal);
+  sec.style.display = 'block';
+  sec.innerHTML =
+    '<div class="sec-row" style="margin:6px 0 8px;"><div class="sec-title">YOUR JOURNEY</div></div>' +
+    '<div class="journey-grid">' +
+    '<div class="journey-card" style="animation-delay:0.05s"><div class="journey-ico">\uD83C\uDFC1</div><div class="journey-lbl">Collection</div><div class="journey-val"><b>' + cars.length + '</b> car' + (cars.length !== 1 ? 's' : '') + '</div><div class="journey-sub">' + favCount + ' favorite' + (favCount !== 1 ? 's' : '') + '</div></div>' +
+    '<div class="journey-card" style="animation-delay:0.1s"><div class="journey-ico">\uD83D\uDCB0</div><div class="journey-lbl">Value</div><div class="journey-val">' + fmt(total) + '</div><div class="journey-sub">' + fmtFull(total) + '</div></div>' +
+    '<div class="journey-card" style="animation-delay:0.15s"><div class="journey-ico">\uD83D\uDC51</div><div class="journey-lbl">Crown Jewel</div><div class="journey-val">' + escapeHtml(best.name) + '</div><div class="journey-sub">' + fmtFull(best.value) + ' \u00B7 ' + getRarity(best.value).label + '</div></div>' +
+    '<div class="journey-card" style="animation-delay:0.2s"><div class="journey-ico">\u26A1</div><div class="journey-lbl">Rarity XP</div><div class="journey-val"><b>' + _xpTotal + '</b> XP</div><div class="journey-sub">Level ' + info.level + '</div></div>' +
+    '</div>';
+}
 
 function clusterCars(cars) {
   var THRESHOLD = 0.00015;
@@ -3878,15 +4124,23 @@ function buildClusterPopup(cluster) {
 
 function renderGarage() {
   _patchPhotosFromCache();
+  if (!_garageGreeted) {
+    _garageGreeted = true;
+    playSound('collect');
+    haptic([10,20,10]);
+  }
+  var pgEl = document.getElementById('page-garage');
+  if (pgEl) { pgEl.classList.remove('garage-enter'); void pgEl.offsetWidth; pgEl.classList.add('garage-enter'); }
   var allCars = getAllCars();
-  var filtered = applyGarageFilters(sorted(allCars));
+  var filtered = applyHeaderSort(applyGarageFilters(sorted(allCars)));
   var total = allCars.reduce(function(x,c){ return x + c.value; }, 0);
-  document.getElementById('gCars').textContent = allCars.length;
   document.getElementById('gTotal').textContent = fmt(total);
   document.getElementById('gAvg').textContent = allCars.length ? fmt(total / allCars.length) : '';
+  renderFeatured(allCars);
+  renderJourney(allCars);
   // Show filtered count if filter/search is active
   var filterEl = document.getElementById('garageSearch');
-  var showFiltered = (garageFilter !== 'all' || (filterEl && filterEl.value.trim()));
+  var showFiltered = (garageFilter !== 'all' || (filterEl && filterEl.value.trim()) || garageSortHeader !== 'allCars');
   var countEl = document.getElementById('gCars');
   if (showFiltered && filtered.length !== allCars.length) {
     countEl.textContent = filtered.length + '/' + allCars.length;
@@ -3945,17 +4199,48 @@ function renderGarage() {
 
   if (!filtered.length) {
     el.className = '';
-    el.innerHTML='<div class="empty-garage"><div style="font-size:2.2rem;margin-bottom:12px;opacity:0.6">🔍</div><strong style="color:var(--text2);font-size:0.85rem;display:block;margin-bottom:4px">'+(allCars.length?'No matches found':'Your garage is empty')+'</strong>'+(allCars.length?'Try a different filter or search term':'Head to the Spot tab to log your first car!')+'</div>';
+    el.innerHTML = allCars.length
+      ? '<div class="garage-empty"><div class="ge-scene">\uD83D\uDD0D</div><div class="ge-title">NO MATCHES</div><div class="ge-sub">Try a different filter or search term.</div></div>'
+      : '<div class="garage-empty"><div class="ge-scene">\uD83D\uDE97</div><div class="ge-title">YOUR GARAGE IS EMPTY</div><div class="ge-sub">Spot your first car and it becomes the crown jewel of your collection.</div><button class="ge-btn" onclick="goTo(\'spot\')">LOG YOUR FIRST CAR</button></div>';
     return;
   }
   if (garageView === 'grid') {
     el.className = 'garage-grid';
     el.innerHTML = filtered.map(function(car, idx){
+      var tier = tierOf(car.value);
+      var meta = tierMeta(tier);
       var rarity = getRarity(car.value);
-      var nameSuffix = car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '';
+      var isFav = isFavorite(car.name);
+      var tilt = (idx % 2 === 0) ? -0.7 : 0.7;
       var clickAttr = ' data-inst="1" data-car="' + encodeURIComponent(JSON.stringify(car)) + '"';
-      var photoBadge = car.photo ? (car.photo.indexOf('data:') === 0 ? '<div class="gc-photo-badge">📷 Your Photo</div>' : '<div class="gc-photo-badge">🌐 Reference</div>') : '';
-      return '<div class="garage-card" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="gc-img-wrap">' + (car.photo ? '<img class="gc-img" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' + photoBadge : '<div class="gc-img-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="gc-actions"><button class="gc-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');this.textContent=this.textContent===\'★\'?\'☆\':\'★\';">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="gc-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')">✎</button><button class="gc-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')">✕</button></div></div><div class="gc-body"><div class="gc-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="gc-val">' + fmtFull(car.value) + '</div><span class="gc-rarity" style="color:' + rarity.color + '">' + rarity.label + '</span><div class="gc-meta"><div class="gc-meta-chip"><div class="gc-meta-label">Color</div><div class="gc-meta-val">' + escapeHtml(car.color || 'Unknown') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Type</div><div class="gc-meta-val">' + escapeHtml(carTypeLabel(car.type)) + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Seen</div><div class="gc-meta-val">' + escapeHtml(car.runDate || 'Saved') + '</div></div><div class="gc-meta-chip"><div class="gc-meta-label">Place</div><div class="gc-meta-val">' + escapeHtml((car.location && car.location.label) || 'No pin') + '</div></div></div></div></div>';
+      var photoBadge = car.photo ? (car.photo.indexOf('data:') === 0 ? '<div class="gc-photo-badge">\uD83D\uDCF7 Your Photo</div>' : '<div class="gc-photo-badge">\uD83C\uDF10 Reference</div>') : '';
+      var media = car.photo
+        ? '<img class="gc-img" loading="lazy" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' + photoBadge
+        : '<div class="gc-img-ph">' + tierEmoji(tier) + '</div>';
+      var shine = (tier === 'super' || tier === 'hyper' || tier === 'legend') ? '<div class="gc-shine"></div>' : '';
+      var make = (car.name.split(' ')[0] || '').toUpperCase();
+      var badges = '';
+      if (car.spotCount > 1) badges += '<span class="gc-badge seen">Seen \u00D7' + car.spotCount + '</span>';
+      if (isFav) badges += '<span class="gc-badge fav">\u2605 Fav</span>';
+      var isFeat = (featuredName() === car.name);
+      return '<div class="garage-card collector-card" data-tier="' + tier + '" role="button" tabindex="0"' + clickAttr + ' style="--gc-tilt:' + tilt + 'deg;animation-delay:' + (idx * 0.04) + 's">' + shine +
+        '<div class="gc-tier-chip">' + tierEmoji(tier) + ' ' + meta.label + '</div>' +
+        '<div class="gc-img-wrap">' + media +
+          '<div class="gc-actions">' +
+            '<button class="gc-feat' + (isFeat ? ' active' : '') + '" onclick="event.stopPropagation();setFeaturedCar(\'' + jsEscape(car.name) + '\');" title="Feature this car">' + (isFeat ? '\u2605' : '\u2606') + '</button>' +
+            '<button class="gc-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');renderGarage();">' + (isFav ? '\u2605' : '\u2606') + '</button>' +
+            '<button class="gc-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')">\u270E</button>' +
+            '<button class="gc-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')">\u2715</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="gc-body">' +
+          '<div class="gc-make">' + make + '</div>' +
+          '<div class="gc-name">' + escapeHtml(car.name) + (car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '') + '</div>' +
+          '<div class="gc-val-row"><span class="gc-val">' + fmtFull(car.value) + '</span><span class="gc-xp">+' + rarityXP(car.value) + ' XP</span></div>' +
+          '<div class="gc-date">\uD83D\uDCCD ' + escapeHtml(car.runDate || 'Saved') + '</div>' +
+          (badges ? '<div class="gc-badges">' + badges + '</div>' : '') +
+        '</div>' +
+      '</div>';
     }).join('');
     el.querySelectorAll('[data-inst]').forEach(function(a){
       attachCarTap(a);
@@ -4245,6 +4530,8 @@ function showCarInstances(car) {
   var heroHtml = heroPhoto
     ? '<img class="detail-hero-img" src="' + heroPhoto + '" alt="' + escapeHtml(car.name) + '">' + (heroBadge ? '<div class="detail-hero-badge">' + heroBadge + '</div>' : '')
     : '<div class="detail-hero-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
+  var tier = tierOf(car.value);
+  var tierChip = '<div class="detail-tier-chip" style="--cc-color:' + rarity.color + '">' + tierEmoji(tier) + ' ' + rarity.label + '</div>';
   var sorted = instances.slice().reverse();
   var sightingsHtml = sorted.map(function(inst) {
     var thumbHtml = inst.photo ? '<img class="detail-sighting-thumb" src="' + inst.photo + '" alt="">' : '<div class="detail-sighting-nophoto">' + escapeHtml(carTypeLabel(inst.type)) + '</div>';
@@ -4252,6 +4539,12 @@ function showCarInstances(car) {
     var loc = (inst.location && inst.location.label) ? '<div class="detail-sighting-loc">\uD83D\uDCCD ' + escapeHtml(inst.location.label) + '</div>' : '';
     return '<div class="detail-sighting">' + thumbHtml + '<div class="detail-sighting-info"><div class="detail-sighting-date">' + escapeHtml(inst.runDate || 'Unknown') + '</div>' + loc + '</div>' + badge + '</div>';
   }).join('');
+  var chipRow = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">' +
+    '<span class="gc-badge" style="color:' + rarity.color + ';border-color:' + rarity.color + '44;background:' + rarity.bg + '">' + tierEmoji(tier) + ' ' + rarity.label + '</span>' +
+    '<span class="gc-badge xp">+' + rarityXP(car.value) + ' XP</span>' +
+    (isFavorite(car.name) ? '<span class="gc-badge fav">\u2605 Favorite</span>' : '') +
+    (car.spotCount > 1 ? '<span class="gc-badge seen">Seen \u00D7' + car.spotCount + '</span>' : '') +
+    '</div>';
   var overlay = document.createElement('div');
   overlay.className = 'detail-overlay';
   overlay.id = 'detailOverlay';
@@ -4259,8 +4552,8 @@ function showCarInstances(car) {
   var card = document.createElement('div');
   card.className = 'detail-card';
   card.innerHTML =
-    '<div class="detail-hero">' + heroHtml + '<button class="detail-close" onclick="this.closest(\'.detail-overlay\').remove()">&times;</button></div>' +
-    '<div class="detail-info"><div class="detail-name">' + escapeHtml(car.name) + '</div>' +
+    '<div class="detail-hero">' + heroHtml + tierChip + '<button class="detail-close" onclick="this.closest(\'.detail-overlay\').remove()">&times;</button></div>' +
+    '<div class="detail-info"><div class="detail-name">' + escapeHtml(car.name) + '</div>' + chipRow +
     '<div class="detail-stats">' +
     '<div class="detail-stat"><div class="detail-stat-label">Value</div><div class="detail-stat-val" style="color:var(--accent)">' + fmtFull(car.value) + '</div></div>' +
     '<div class="detail-stat"><div class="detail-stat-label">Rarity</div><div class="detail-stat-val" style="color:' + rarity.color + '">' + rarity.label + '</div></div>' +
