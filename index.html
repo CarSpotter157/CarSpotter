@@ -2474,7 +2474,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
 <div class="toast" id="toast"></div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v27.6</div>
+<div class="version-tag" id="versionTag">v27.7</div>
 
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
@@ -2546,6 +2546,8 @@ var _userInteracted = false;
 
 // Load IndexedDB photos into cache
 _loadIDBCache();
+// Ask the browser to keep IndexedDB photo storage persistent (avoids eviction)
+if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().catch(function(){}); }
 
 // GARAGE VIEW — declared here so renderGarage() works before auth fires
 let garageFilter = 'all';
@@ -2808,7 +2810,7 @@ function _ensurePhotoIndexed(car) {
   if (!car || !car.photo || car.photo.indexOf('data:') !== 0) return;
   var key = car.name.toLowerCase();
   _idbPhotoCache[key] = car.photo;
-  _idbPut(car.name, car.photo);
+  _idbPut(car.name, car.photo).catch(function(){});
 }
 function _stripDeepPhotos(obj) {
   if (Array.isArray(obj)) {
@@ -3634,8 +3636,8 @@ function showUnicornAlert(total) {
 
 function saveCurrentRun() {
   _lastSave = Date.now();
-  localStorage.setItem('cs_current', JSON.stringify(currentRun));
-  localStorage.setItem('cs_current_ts', String(_lastSave));
+  _safeSet('cs_current', JSON.stringify(currentRun));
+  _safeSet('cs_current_ts', String(_lastSave));
   saveToCloud();
 }
 
@@ -5719,8 +5721,8 @@ function _idbPut(name, data) {
     return new Promise(function(res, rej) {
       var tx = db.transaction('photos', 'readwrite');
       tx.objectStore('photos').put({ name: name.toLowerCase(), data: data });
-      tx.oncomplete = function() { _idbPhotoCache[name.toLowerCase()] = data; res(); };
-      tx.onerror = function(e) { rej(e.target.error); };
+      tx.oncomplete = function() { _idbPhotoCache[name.toLowerCase()] = data; db.close(); res(); };
+      tx.onerror = function(e) { db.close(); rej(e.target.error); };
     });
   });
 }
@@ -5737,6 +5739,7 @@ function _idbGetAll() {
 }
 
 function _loadIDBCache() {
+  if (typeof indexedDB === 'undefined') return;
   _idbGetAll().then(function(entries) {
     entries.forEach(function(e) { _idbPhotoCache[e.name] = e.data; });
     renderSpot(); renderGarage(); renderHistory();
@@ -5777,7 +5780,9 @@ function _savePhoto(compressed, t) {
   if (!t) return;
   if (t.type === 'run') {
     if (currentRun[t.index]) {
-      currentRun[t.index].photo = compressed; saveCurrentRun(); renderSpot();
+      currentRun[t.index].photo = compressed;
+      _idbPut(currentRun[t.index].name, compressed).catch(function(){});
+      saveCurrentRun(); renderSpot();
       var qp = quickPicks.find(q => q.name.toLowerCase() === currentRun[t.index].name.toLowerCase());
       if (qp) { qp.photo = compressed; _safeSet('cs_qp', JSON.stringify(quickPicks)); }
     }
@@ -5785,6 +5790,7 @@ function _savePhoto(compressed, t) {
     var runIdx = allRuns.findIndex(r => r.id === t.runId);
     if (runIdx >= 0 && allRuns[runIdx].cars[t.carIndex]) {
       allRuns[runIdx].cars[t.carIndex].photo = compressed;
+      _idbPut(allRuns[runIdx].cars[t.carIndex].name, compressed).catch(function(){});
       _safeSet('cs_runs', JSON.stringify(allRuns)); saveToCloud();
     }
   } else if (t.type === 'all') {
@@ -5792,15 +5798,22 @@ function _savePhoto(compressed, t) {
     allRuns.forEach(function(run) { run.cars.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = compressed; }); });
     currentRun.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = compressed; });
     if (!_safeSet('cs_runs', JSON.stringify(allRuns))) {
-      _idbPut(t.name, compressed);
-      _idbPhotoCache[t.name.toLowerCase()] = compressed;
-      allRuns.forEach(function(run) { run.cars.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = ''; }); });
-      currentRun.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = ''; });
-      _safeSet('cs_runs', JSON.stringify(allRuns));
-      _safeSet('cs_current', JSON.stringify(currentRun));
-      showToast('📷 Saved to extended storage');
-      renderGarage(); renderHistory();
-      var de2 = document.getElementById('detailOverlay'); if (de2) de2.remove();
+      // localStorage full — persist to IndexedDB FIRST, only then strip the base64
+      // from the persisted copies (kept as 'photo:' refs) so reload can restore.
+      var idbW = _idbPut(t.name, compressed);
+      _idbPhotoCache[key] = compressed;
+      idbW.then(function() {
+        allRuns.forEach(function(run) { run.cars.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = 'photo:' + key; }); });
+        currentRun.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = 'photo:' + key; });
+        _safeSet('cs_runs', JSON.stringify(allRuns));
+        _safeSet('cs_current', JSON.stringify(currentRun));
+        showToast('📷 Saved to extended storage');
+        renderGarage(); renderHistory();
+        var de2 = document.getElementById('detailOverlay'); if (de2) de2.remove();
+      }).catch(function() {
+        showToast("⚠ Photo couldn't be saved permanently. Export a backup soon!");
+        renderGarage(); renderHistory();
+      });
       return;
     }
     saveCurrentRun();
