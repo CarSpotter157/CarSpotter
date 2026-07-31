@@ -590,7 +590,8 @@ body{
 .cc-quick-xp{font-family:'Bebas Neue',cursive;color:var(--accent);letter-spacing:1px;flex-shrink:0;}
 
 /* ── RECENT DISCOVERIES — your personal trophy case ── */
-.disc-scroll{display:flex;gap:10px;overflow-x:auto;padding:2px 1px 8px;scrollbar-width:thin;-webkit-overflow-scrolling:touch;}
+.disc-scroll{display:flex;gap:10px;overflow-x:auto;padding:2px 1px 4px;margin-bottom:6px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.disc-scroll::-webkit-scrollbar{display:none;}
 .disc-card{
   flex:0 0 118px;border-radius:14px;overflow:hidden;cursor:pointer;
   background:var(--surf2);border:1px solid var(--glass-border);position:relative;
@@ -949,6 +950,18 @@ body{
 .garage-row:active{transform:scale(0.985);}
 .garage-row:hover{border-color:var(--border2);background:var(--surf2);}
 .garage-row:hover .g-val{color:var(--accent-d);}
+.garage-row.evo-bronze{--evo-ring:#cd7f32;--evo-tint:rgba(205,127,50,0.1);}
+.garage-row.evo-silver{--evo-ring:#c0c0c0;--evo-tint:rgba(192,192,192,0.1);}
+.garage-row.evo-gold{--evo-ring:#f5c842;--evo-tint:rgba(245,200,66,0.12);}
+.garage-row.evo-platinum{--evo-ring:#7fd1f7;--evo-tint:rgba(127,209,247,0.12);}
+.garage-row.evo-diamond{--evo-ring:#9ff2ff;--evo-tint:rgba(159,242,255,0.12);}
+.garage-row.evo-bronze,.garage-row.evo-silver,.garage-row.evo-gold,.garage-row.evo-platinum,.garage-row.evo-diamond{
+  border-color:var(--evo-ring);
+  background:linear-gradient(var(--glass-card),var(--glass-card)) padding-box,
+    linear-gradient(90deg,var(--evo-ring),rgba(255,255,255,0.5) 50%,var(--evo-ring)) border-box;
+  box-shadow:0 0 0 1px var(--evo-ring),0 0 18px -6px var(--evo-ring),var(--shadow-sm);
+}
+.garage-row.evo-bronze:hover,.garage-row.evo-silver:hover,.garage-row.evo-gold:hover,.garage-row.evo-platinum:hover,.garage-row.evo-diamond:hover{border-color:var(--evo-ring);box-shadow:0 0 0 1px var(--evo-ring),0 0 24px -6px var(--evo-ring),var(--shadow);}
 .g-rank{font-family:'Bebas Neue',cursive;font-size:0.7rem;color:var(--muted);min-width:26px;}
 .g-emoji{
   width:38px;height:38px;border-radius:9px;
@@ -1111,13 +1124,38 @@ body{
 .collector-card .gc-date{font-size:0.52rem;color:var(--text2);margin-top:4px;}
 .collector-card .gc-badges{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap;}
 .gc-evo-chip{display:inline-flex;align-items:center;margin-left:4px;font-size:0.6rem;line-height:1;}
-.collector-card.evo-bronze{--evo-ring:#cd7f32;}
-.collector-card.evo-silver{--evo-ring:#c0c0c0;}
-.collector-card.evo-gold{--evo-ring:#f5c842;}
-.collector-card.evo-platinum{--evo-ring:#7fd1f7;}
-.collector-card.evo-diamond{--evo-ring:#9ff2ff;}
-.collector-card.evo-bronze,.collector-card.evo-silver,.collector-card.evo-gold,.collector-card.evo-platinum,.collector-card.evo-diamond{box-shadow:0 0 0 2px var(--evo-ring),0 0 22px var(--evo-ring),var(--shadow);}
-.collector-card.evo-bronze:hover,.collector-card.evo-silver:hover,.collector-card.evo-gold:hover,.collector-card.evo-platinum:hover,.collector-card.evo-diamond:hover{box-shadow:0 0 0 2px var(--evo-ring),0 0 32px var(--evo-ring),var(--shadow-lg);}
+.collector-card.evo-bronze{--evo-ring:#cd7f32;--evo-tint:rgba(205,127,50,0.14);}
+.collector-card.evo-silver{--evo-ring:#c0c0c0;--evo-tint:rgba(192,192,192,0.14);}
+.collector-card.evo-gold{--evo-ring:#f5c842;--evo-tint:rgba(245,200,66,0.16);}
+.collector-card.evo-platinum{--evo-ring:#7fd1f7;--evo-tint:rgba(127,209,247,0.16);}
+.collector-card.evo-diamond{--evo-ring:#9ff2ff;--evo-tint:rgba(159,242,255,0.16);}
+.collector-card.evo-bronze,.collector-card.evo-silver,.collector-card.evo-gold,.collector-card.evo-platinum,.collector-card.evo-diamond{
+  border-color:var(--evo-ring);
+  background:linear-gradient(var(--glass-card),var(--glass-card)) padding-box,
+    linear-gradient(135deg,var(--evo-ring),rgba(255,255,255,0.55) 45%,var(--evo-ring)) border-box;
+  box-shadow:0 0 0 1px var(--evo-ring),0 0 26px -4px var(--evo-ring),var(--shadow);
+  animation:evoCardIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.collector-card.evo-bronze::before,.collector-card.evo-silver::before,.collector-card.evo-gold::before,.collector-card.evo-platinum::before,.collector-card.evo-diamond::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;opacity:0.4;
+  background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,0.28) 50%,transparent 60%);
+  background-size:220% 100%;background-repeat:no-repeat;
+  animation:evoShimmer 4.5s ease-in-out infinite;
+}
+.collector-card.evo-bronze::after,.collector-card.evo-silver::after,.collector-card.evo-gold::after,.collector-card.evo-platinum::after,.collector-card.evo-diamond::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:inherit;z-index:3;pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--evo-ring),transparent);
+  opacity:0.85;
+}
+.collector-card.evo-bronze .gc-tier-chip,.collector-card.evo-silver .gc-tier-chip,.collector-card.evo-gold .gc-tier-chip,.collector-card.evo-platinum .gc-tier-chip,.collector-card.evo-diamond .gc-tier-chip{border-color:var(--evo-ring);color:var(--evo-ring);background:var(--evo-tint);}
+.collector-card.evo-bronze .gc-evo-chip,.collector-card.evo-silver .gc-evo-chip,.collector-card.evo-gold .gc-evo-chip,.collector-card.evo-platinum .gc-evo-chip,.collector-card.evo-diamond .gc-evo-chip{
+  background:var(--evo-tint);border:1px solid var(--evo-ring);border-radius:999px;padding:2px 6px;margin-left:5px;
+  animation:evoChipPulse 2.4s ease-in-out infinite;
+}
+.collector-card.evo-bronze:hover,.collector-card.evo-silver:hover,.collector-card.evo-gold:hover,.collector-card.evo-platinum:hover,.collector-card.evo-diamond:hover{border-color:var(--evo-ring);box-shadow:0 0 0 2px var(--evo-ring),0 0 40px -4px var(--evo-ring),var(--shadow-lg);}
+@keyframes evoCardIn{0%{opacity:0;transform:translateY(16px) scale(0.94)}60%{opacity:1;transform:translateY(-3px) scale(1.02)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes evoShimmer{0%{background-position:220% 0}100%{background-position:-120% 0}}
+@keyframes evoChipPulse{0%,100%{box-shadow:0 0 2px var(--evo-ring)}50%{box-shadow:0 0 10px var(--evo-ring)}}
 .gc-badge{
   font-size:0.42rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;
   background:var(--surf2);border:1px solid var(--border);border-radius:4px;padding:2px 6px;color:var(--text2);
@@ -1125,6 +1163,7 @@ body{
 .gc-badge.first{background:rgba(96,165,250,0.12);color:#7cb3ff;border:1px solid rgba(96,165,250,0.3);}
 .gc-badge.seen{background:rgba(232,184,75,0.1);color:var(--accent);border:1px solid rgba(232,184,75,0.25);}
 .gc-badge.fav{background:rgba(245,200,66,0.12);color:#f5c842;border:1px solid rgba(245,200,66,0.3);}
+.gc-badge.evo{background:rgba(0,0,0,0.35);border-width:1px;font-weight:800;}
 .gc-feat{
   width:32px;height:32px;border-radius:50%;flex-shrink:0;
   background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
@@ -1964,13 +2003,6 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 @keyframes titlePop{0%{transform:scale(0.6);opacity:0;}60%{transform:scale(1.15);}100%{transform:scale(1);opacity:1;}}
 @media(max-width:480px){#levelTitleSlot{font-size:0.55rem;letter-spacing:1px;padding:3px 9px;}}
 
-/* Title progress preview (next title) — thin strip under the level bar */
-.title-next-row{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:0.56rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
-.title-next-row .tn-next-name{display:inline-flex;align-items:center;gap:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46%;}
-.title-next-row .tn-bar{flex:1;height:4px;border-radius:99px;background:var(--surf3);overflow:hidden;min-width:40px;}
-.title-next-row .tn-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent-d),var(--accent));transition:width 0.6s var(--ease);}
-.title-next-row .tn-xp{white-space:nowrap;font-variant-numeric:tabular-nums;}
-
 /* Title unlock overlay */
 .titleup-overlay{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.96);cursor:pointer;animation:fadeIn 0.3s ease;}
 .titleup-card{text-align:center;padding:40px 34px;max-width:340px;animation:levelUpIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;}
@@ -2228,7 +2260,6 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
               <span class="level-xp" id="levelXp">0 / 100 XP</span>
             </div>
             <div class="level-bar-track"><div class="level-bar-fill" id="levelFill" style="width:0%"></div></div>
-            <div class="title-next-row" id="titleNextRow" style="display:none"></div>
           </div>
 
           <div class="card">
@@ -3886,9 +3917,7 @@ function logRun() {
   renderSpot();
   if (garageView === 'map') renderGarage();
   playSound('log');
-  rewardLog(car, true, { isFirst: isFirst }).then(function() {
-    if (!document.querySelector('.cc-overlay') && !document.querySelector('.cc-quick')) showSpecsCard({ name:name, value:input.value, color:input.color, type:input.type, photo:photo, location:car.location });
-  });
+  rewardLog(car, true, { isFirst: isFirst });
   pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, input.type + ' ' + name + ' removed');
   showToast(input.type + ' ' + name + ' added to run!');
   setTimeout(checkNewAchievements, 400);
@@ -3913,9 +3942,7 @@ function logSpotted() {
   saveToCloud();
   fetchAndStoreRefImage(car);
   playSound('log');
-  rewardLog(car, false, { mode:'solo', isFirst: isFirst, isBest: input.value > prevBestCar }).then(function() {
-    if (!document.querySelector('.cc-overlay') && !document.querySelector('.cc-quick')) showSpecsCard({ name:name, value:input.value, color:input.color, type:input.type, photo:photo, location:car.location });
-  });
+  rewardLog(car, false, { mode:'solo', isFirst: isFirst, isBest: input.value > prevBestCar });
   pushUndo('history', prevRuns, input.type + ' ' + name + ' removed');
   clearInputs();
   renderQPTrigger();
@@ -4599,7 +4626,7 @@ function renderGarage() {
       var isFeat = (featuredName() === car.name);
       var ev = (typeof evolutionFor === 'function') ? evolutionFor(car.name) : null;
       var evoTier = (ev && ev.count >= 3) ? ev.tier : null;
-      var evoBadge = evoTier ? '<span class="gc-badge evo" style="color:' + evoTier.color + ';border-color:' + evoTier.color + '44;background:rgba(0,0,0,0.3)">' + evoTier.icon + ' ' + evoTier.name + ' \u00D7' + ev.count + '</span>' : '';
+      var evoBadge = evoTier ? '<span class="gc-badge evo" style="color:' + evoTier.color + ';border-color:' + evoTier.color + '44">' + evoTier.icon + ' ' + evoTier.name + ' \u00D7' + ev.count + '</span>' : '';
       return '<div class="garage-card collector-card' + (evoTier ? ' evo-' + evoTier.name.toLowerCase() : '') + '" data-tier="' + tier + '" role="button" tabindex="0"' + clickAttr + ' style="--gc-tilt:' + tilt + 'deg;animation-delay:' + (idx * 0.04) + 's">' + shine +
         '<div class="gc-tier-chip">' + tierEmoji(tier) + ' ' + meta.label + (evoTier ? '<span class="gc-evo-chip">' + evoTier.icon + '</span>' : '') + '</div>' +
         '<div class="gc-img-wrap">' + media +
@@ -4627,9 +4654,12 @@ function renderGarage() {
   el.className = '';
   el.innerHTML = filtered.map(function(car, idx){
     var rarity = getRarity(car.value);
+    var ev = (typeof evolutionFor === 'function') ? evolutionFor(car.name) : null;
+    var evoTier = (ev && ev.count >= 3) ? ev.tier : null;
     var nameSuffix = car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '';
     var clickAttr = ' data-inst="1" data-name="' + escapeHtml(car.name) + '"';
-    return '<div class="garage-row" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');this.textContent=this.textContent===\'★\'?\'☆\':\'★\';">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')">✎</button><button class="g-act-btn g-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')">✕</button></div></div>';
+    var evoBadge = evoTier ? '<span class="gc-badge evo" style="color:' + evoTier.color + ';border-color:' + evoTier.color + '44">' + evoTier.icon + ' ' + evoTier.name + ' \u00D7' + ev.count + '</span>' : '';
+    return '<div class="garage-row' + (evoTier ? ' evo-row evo-' + evoTier.name.toLowerCase() : '') + '" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + evoBadge + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');this.textContent=this.textContent===\'★\'?\'☆\':\'★\';">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')">✎</button><button class="g-act-btn g-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')">✕</button></div></div>';
   }).join('');
   el.querySelectorAll('[data-inst]').forEach(function(a){
     attachCarTap(a);
@@ -7557,24 +7587,10 @@ function titlePctToNext() {
 function renderTitleChip() {
   if (!SPOTTER_TITLES || !SPOTTER_TITLES.length) return;
   var cur = currentTitle();
-  var nxt = nextTitleForXP(_xpTotal);
   var slot = document.getElementById('levelTitleSlot');
   if (slot) {
     slot.style.display = '';
     slot.innerHTML = '<span class="tc-emoji">' + cur.emoji + '</span>' + cur.name;
-  }
-  var nextRow = document.getElementById('titleNextRow');
-  if (nextRow) {
-    if (nxt) {
-      nextRow.style.display = 'flex';
-      nextRow.innerHTML =
-        '<span class="tn-next-name">' + nxt.emoji + ' ' + nxt.name + '</span>' +
-        '<div class="tn-bar"><div class="tn-fill" style="width:' + titlePctToNext() + '%"></div></div>' +
-        '<span class="tn-xp">' + Math.max(0, nxt.xp - _xpTotal) + ' XP</span>';
-    } else {
-      nextRow.style.display = 'none';
-      nextRow.innerHTML = '';
-    }
   }
 }
 // Announce newly unlocked titles (fire once per title id)
