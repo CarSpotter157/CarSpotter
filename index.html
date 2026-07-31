@@ -2268,6 +2268,7 @@ async function loadFromCloud() {
     const snap = await db.collection('users').doc(currentUser.uid).get();
     if (snap.exists) {
       const d = snap.data();
+      _diagRead('loadFromCloud(get)', d);
       // Take cloud currentRun only if it's newer than the last local currentRun save
       const localCRTs = parseInt(localStorage.getItem('cs_current_ts') || '0');
       if (d.currentRun && d.updatedAt > localCRTs) currentRun = d.currentRun.slice();
@@ -2283,13 +2284,8 @@ async function loadFromCloud() {
       localStorage.setItem('cs_qp',      JSON.stringify(quickPicks));
       // Save merged result back to cloud so other devices see it
       _lastSave = Date.now();
-      db.collection('users').doc(currentUser.uid).set(JSON.parse(JSON.stringify({
-        currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
-        notes: localStorage.getItem('cs_notes') || '',
-        profileName: currentUser?.displayName || 'Spotter',
-        profilePhoto: currentUser?.photoURL || '',
-        updatedAt: _lastSave
-      }))).then(() => setSyncDot('ok')).catch(() => setSyncDot(''));
+      var sanCloud = _diagAndSanitize('loadFromCloud(set)', _buildCloudPayload(), 'write');
+      db.collection('users').doc(currentUser.uid).set(sanCloud).then(() => setSyncDot('ok')).catch(() => setSyncDot(''));
     }
     if (!_lastSave) setSyncDot('ok');
   } catch(e) { setSyncDot(''); console.error(e); }
@@ -2345,6 +2341,96 @@ function _stripDeepPhotos(obj) {
   }
   return obj;
 }
+function _scanForBase64(obj, path, out) {
+  if (Array.isArray(obj)) {
+    obj.forEach(function(item, i) { _scanForBase64(item, path + '[' + i + ']', out); });
+  } else if (obj && typeof obj === 'object') {
+    for (var k in obj) {
+      var v = obj[k];
+      if (typeof v === 'string') {
+        if (v.indexOf('data:image/') === 0) out.push({ path: path + '.' + k, chars: v.length, kind: 'data-url' });
+        else if (v.length > 500 && /^[A-Za-z0-9+/=]+$/.test(v)) out.push({ path: path + '.' + k, chars: v.length, kind: 'bare-base64' });
+      } else if (v && typeof v === 'object') {
+        _scanForBase64(v, path + '.' + k, out);
+      }
+    }
+  }
+}
+function _sizeOf(v) {
+  try { return new Blob([JSON.stringify(v)]).size; } catch(e) { return 0; }
+}
+function _diagRead(tag, obj) {
+  var rawSize = _sizeOf(obj);
+  console.log('===== FIRESTORE DIAGNOSTIC [' + tag + '] (READ FROM FIRESTORE) =====');
+  ['allRuns','currentRun','quickPicks','notes','profileName','profilePhoto','settings','updatedAt'].forEach(function(k) {
+    console.log('  ' + k + ' = ' + (obj && Object.prototype.hasOwnProperty.call(obj, k) ? _sizeOf(obj[k]) + ' bytes' : '<absent>'));
+  });
+  console.log('  TOTAL = ' + rawSize + ' bytes' + (rawSize > 1048576 ? '  *** EXCEEDS 1 MB LIMIT ***' : ''));
+  var found = [];
+  _scanForBase64(obj, 'doc', found);
+  console.log('  base64 image strings in read doc: ' + found.length);
+  found.slice(0, 10).forEach(function(f) { console.log('    ' + f.path + '  (' + f.chars + ' chars, ' + f.kind + ')'); });
+  if (found.length > 10) console.log('    ... and ' + (found.length - 10) + ' more');
+}
+function _diagAndSanitize(tag, obj, mode) {
+  var rawSize = _sizeOf(obj);
+  console.log('===== FIRESTORE DIAGNOSTIC [' + tag + '] (' + (mode || '') + ') =====');
+  ['allRuns','currentRun','quickPicks','notes','profileName','profilePhoto','settings','updatedAt'].forEach(function(k) {
+    if (obj && Object.prototype.hasOwnProperty.call(obj, k)) {
+      console.log('  ' + k + ' = ' + _sizeOf(obj[k]) + ' bytes');
+    } else {
+      console.log('  ' + k + ' = <absent>');
+    }
+  });
+  if (obj) {
+    console.log('  additional keys: ' + (Object.keys(obj).filter(function(k){return ['allRuns','currentRun','quickPicks','notes','profileName','profilePhoto','settings','updatedAt'].indexOf(k) < 0;}).join(', ') || 'none'));
+  }
+  console.log('  TOTAL = ' + rawSize + ' bytes' + (rawSize > 1048576 ? '  *** EXCEEDS 1 MB LIMIT ***' : ''));
+  var runs = (obj && obj.allRuns) || [];
+  var carCount = 0, photoCount = 0, photoChars = 0;
+  runs.forEach(function(r) {
+    (r.cars || []).forEach(function(c) {
+      carCount++;
+      if (c.photo && typeof c.photo === 'string' && c.photo.indexOf('data:image/') === 0) {
+        photoCount++; photoChars += c.photo.length;
+      }
+    });
+  });
+  console.log('  allRuns: ' + runs.length + ' runs, ' + carCount + ' cars, ' + photoCount + ' base64 photos (' + photoChars + ' chars)');
+  var foundRaw = [];
+  _scanForBase64(obj, 'payload', foundRaw);
+  console.log('  base64 image strings: ' + foundRaw.length);
+  foundRaw.slice(0, 10).forEach(function(f) {
+    console.log('    ' + f.path + '  (' + f.chars + ' chars, ' + f.kind + ')');
+  });
+  if (foundRaw.length > 10) console.log('    ... and ' + (foundRaw.length - 10) + ' more');
+  if (mode === 'write') {
+    console.log('  OBJECT PASSED TO set():');
+    console.log(obj);
+  }
+  var san = JSON.parse(JSON.stringify(obj));
+  _stripDeepPhotos(san);
+  var foundSan = [];
+  _scanForBase64(san, 'sanitized', foundSan);
+  console.log('  SANITIZED: ' + (foundSan.length === 0 ? 'YES (0 base64 strings remain)' : 'NO (' + foundSan.length + ' base64 strings remain)') + '   FINAL SIZE = ' + _sizeOf(san) + ' bytes' + (_sizeOf(san) > 1048576 ? '  *** EXCEEDS 1 MB ***' : ''));
+  if (foundSan.length) {
+    console.log('  WHERE IT REMAINS:');
+    foundSan.slice(0, 10).forEach(function(f) { console.log('    ' + f.path + ' -> ' + f.chars + ' chars (' + f.kind + ')'); });
+  }
+  return san;
+}
+function _buildCloudPayload() {
+  var payload = {
+    currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
+    notes: localStorage.getItem('cs_notes') || '',
+    profileName: currentUser?.displayName || 'Spotter',
+    profilePhoto: currentUser?.photoURL || '',
+    updatedAt: _lastSave
+  };
+  var san = JSON.parse(JSON.stringify(payload));
+  _stripDeepPhotos(san);
+  return san;
+}
 
 function saveToCloud() {
   console.log('Starting Firestore save');
@@ -2369,42 +2455,8 @@ function saveToCloud() {
   _lastSave = Date.now();
   syncTimer = setTimeout(() => {
     console.log('Firestore save: writing to users/' + currentUser.uid);
-    // Measure each field's byte size
-    function _size(v) { return new Blob([JSON.stringify(v)]).size; }
-    var _cr = JSON.parse(JSON.stringify(currentRun));
-    var _ar = JSON.parse(JSON.stringify(allRuns));
-    var _qp = JSON.parse(JSON.stringify(quickPicks || []));
-    var _nt = localStorage.getItem('cs_notes') || '';
-    console.log('Field sizes BEFORE strip (bytes):',
-      'currentRun=' + _size(_cr),
-      'allRuns=' + _size(_ar),
-      'quickPicks=' + _size(_qp),
-      'notes=' + _size(_nt),
-      'profileName=' + _size(currentUser?.displayName || 'Spotter'),
-      'profilePhoto=' + _size(currentUser?.photoURL || ''),
-      'total=' + _size({currentRun:_cr, allRuns:_ar, quickPicks:_qp, notes:_nt})
-    );
-    // Count runs and photos inside allRuns
-    var runCount = _ar.length;
-    var photoCount = _ar.filter(function(r){return r.cars}).reduce(function(a,c){return a + c.cars.filter(function(x){return x.photo}).length;}, 0);
-    var photoBytes = _ar.filter(function(r){return r.cars}).reduce(function(a,c){return a + c.cars.filter(function(x){return x.photo}).reduce(function(aa,xx){return aa + _size(xx.photo);}, 0);}, 0);
-    console.log('allRuns breakdown:', runCount + ' runs,', photoCount + ' photos, ' + photoBytes + ' bytes in photos');
-    // Strip base64 photos from a deep clone before writing to Firestore
-    var strippedAllRuns = JSON.parse(JSON.stringify(allRuns));
-    _stripDeepPhotos(strippedAllRuns);
-    var strippedCurrent = JSON.parse(JSON.stringify(currentRun));
-    _stripDeepPhotos(strippedCurrent);
-    var strippedQP = JSON.parse(JSON.stringify(quickPicks || []));
-    _stripDeepPhotos(strippedQP);
-    var strippedSize = _size({currentRun:strippedCurrent, allRuns:strippedAllRuns, quickPicks:strippedQP, notes:_nt});
-    console.log('Firestore payload AFTER strip: ' + strippedSize + ' bytes (was ' + _size({currentRun:_cr, allRuns:_ar, quickPicks:_qp, notes:_nt}) + ')');
-    db.collection('users').doc(currentUser.uid).set({
-      currentRun: strippedCurrent, allRuns: strippedAllRuns, quickPicks: strippedQP,
-      notes: _nt,
-      profileName: currentUser?.displayName || 'Spotter',
-      profilePhoto: currentUser?.photoURL || '',
-      updatedAt: _lastSave
-    }).then(() => {
+    var san = _diagAndSanitize('saveToCloud(set)', _buildCloudPayload(), 'write');
+    db.collection('users').doc(currentUser.uid).set(san).then(() => {
       console.log('Firestore save successful');
       setSyncDot('ok'); leaderboardLoaded = false;
     }).catch(function(err) {
@@ -2423,19 +2475,8 @@ function _flushPendingSave() {
   if (currentUser && navigator.onLine) {
     console.log('Firestore save: writing to users/' + currentUser.uid + ' (flush)');
     _lastSave = Date.now();
-    var _fsAll = JSON.parse(JSON.stringify(allRuns));
-    _stripDeepPhotos(_fsAll);
-    var _fsCur = JSON.parse(JSON.stringify(currentRun));
-    _stripDeepPhotos(_fsCur);
-    var _fsQp  = JSON.parse(JSON.stringify(quickPicks || []));
-    _stripDeepPhotos(_fsQp);
-    db.collection('users').doc(currentUser.uid).set({
-      currentRun: _fsCur, allRuns: _fsAll, quickPicks: _fsQp,
-      notes: localStorage.getItem('cs_notes') || '',
-      profileName: currentUser?.displayName || 'Spotter',
-      profilePhoto: currentUser?.photoURL || '',
-      updatedAt: _lastSave
-    }).then(() => { console.log('Firestore save: flush successful'); }).catch(function(err) {
+    var sanFs = _diagAndSanitize('flush(set)', _buildCloudPayload(), 'write');
+    db.collection('users').doc(currentUser.uid).set(sanFs).then(() => { console.log('Firestore save: flush successful'); }).catch(function(err) {
       console.error('Firestore save: flush failed:', err.code, err.message, err);
     });
   } else {
@@ -3346,13 +3387,8 @@ function deleteCarEverywhere(name) {
   clearTimeout(syncTimer);
   if (currentUser && navigator.onLine) {
     _lastSave = Date.now();
-    var data = { currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
-      notes: localStorage.getItem('cs_notes') || '',
-      profileName: currentUser?.displayName || 'Spotter',
-      profilePhoto: currentUser?.photoURL || '',
-      updatedAt: _lastSave
-    };
-    db.collection('users').doc(currentUser.uid).set(JSON.parse(JSON.stringify(data)))
+    var sanDel = _diagAndSanitize('deleteCarEverywhere(set)', _buildCloudPayload(), 'write');
+    db.collection('users').doc(currentUser.uid).set(sanDel)
       .then(function(){ setSyncDot('ok'); leaderboardLoaded = false; }).catch(function(){ setSyncDot(''); });
   }
   // Only remove from QP if no instances remain anywhere
