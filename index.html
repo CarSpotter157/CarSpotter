@@ -82,6 +82,11 @@ body.theme-retro80s {
 /* ── RESET ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;width:100%;overflow:hidden;background:var(--bg);}
+/* On mobile, height:100% can push the bottom nav below the visible viewport
+   when the browser toolbar collapses; dvh tracks the actual visible area. */
+@supports (height:100dvh){
+  html,body{height:100dvh;}
+}
 body{
   font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
   color:var(--text);
@@ -2496,7 +2501,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
 <div class="toast" id="toast"></div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v27.8</div>
+<div class="version-tag" id="versionTag">v27.9</div>
 
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
@@ -5414,6 +5419,11 @@ function exportAllData() {
       data[key] = localStorage.getItem(key);
     }
   }
+  // Resolve 'photo:' refs back to their base64 data so the backup really contains
+  // every image (IndexedDB stores the data, localStorage only keeps refs).
+  ['cs_runs','cs_current','cs_qp'].forEach(function(k) {
+    try { data[k] = JSON.stringify(_resolvePhotosIn(JSON.parse(data[k] || '[]'))); } catch(e) {}
+  });
   // Add computed garage data with photos
   try {
     const garage = getAllCars().map(c => ({ name: c.name, value: c.value, type: c.type, color: c.color, photo: c.photo, location: c.location, spotCount: c.spotCount, runDate: c.runDate }));
@@ -5435,18 +5445,33 @@ function importFromFile(input) {
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = (e) => {
+  reader.onload = async (e) => {
     try {
       const data = JSON.parse(e.target.result);
       const hasPhotos = data.includePhotos === true;
 
       let restored = 0;
       for (const key of Object.keys(data)) {
-        if (key.startsWith('cs_')) {
-          localStorage.setItem(key, data[key]);
-          restored++;
+        if (!key.startsWith('cs_')) continue;
+        if (key === 'cs_garage') continue; // computed convenience field — never read
+        if (key === 'cs_runs' || key === 'cs_current' || key === 'cs_qp') {
+          // Move base64 photos into IndexedDB and store tiny 'photo:' refs in
+          // localStorage so a photo-heavy backup fits within the storage quota.
+          try {
+            _safeSet(key, JSON.stringify(_stripCopy(JSON.parse(data[key]))));
+          } catch(err2) {
+            _safeSet(key, data[key]);
+          }
+        } else {
+          _safeSet(key, data[key]);
         }
+        restored++;
       }
+
+      // Ensure every imported photo is committed to IndexedDB before finishing.
+      try {
+        await Promise.all(Object.keys(_idbPhotoCache).map(k => _idbPut(k, _idbPhotoCache[k]).catch(function(){})));
+      } catch(e) {}
 
       // Reload all runtime state from localStorage
       allRuns    = JSON.parse(localStorage.getItem('cs_runs')    || '[]');
@@ -5837,6 +5862,7 @@ function _stripCopy(obj) {
     for (var k in obj) {
       var v = obj[k];
       if (k === 'photo' && typeof v === 'string' && v.indexOf('data:') === 0) {
+        _idbPhotoCache[String(obj.name || '').toLowerCase()] = v;
         _idbPut(String(obj.name || ''), v).catch(function() {});
         c[k] = 'photo:' + String(obj.name || '').toLowerCase();
       } else if (v && typeof v === 'object') {
@@ -5850,6 +5876,25 @@ function _stripCopy(obj) {
 function _saveRunsLocal()    { return _safeSet('cs_runs',    JSON.stringify(_stripCopy(allRuns))); }
 function _saveCurrentLocal() { return _safeSet('cs_current', JSON.stringify(_stripCopy(currentRun))); }
 function _saveQPLocal()      { return _safeSet('cs_qp',      JSON.stringify(_stripCopy(quickPicks))); }
+
+// Deep copy with 'photo:' refs resolved back to their base64 from the IDB cache —
+// used by exports so backups contain the actual image data.
+function _resolvePhotosIn(obj) {
+  if (Array.isArray(obj)) return obj.map(function(x) { return _resolvePhotosIn(x); });
+  if (obj && typeof obj === 'object') {
+    var c = {};
+    for (var k in obj) {
+      var v = obj[k];
+      if (k === 'photo' && typeof v === 'string' && v.indexOf('photo:') === 0) {
+        c[k] = _idbPhotoCache[v.slice(6)] || v;
+      } else if (v && typeof v === 'object') {
+        c[k] = _resolvePhotosIn(v);
+      } else c[k] = v;
+    }
+    return c;
+  }
+  return obj;
+}
 
 function _savePhoto(compressed, t) {
   if (!t) return;
