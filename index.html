@@ -1348,6 +1348,16 @@ body{
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 @media(min-width:800px){.toast{bottom:20px;left:calc(80px + 50%);}}
 
+/* ── VERSION TAG ── */
+.version-tag{
+  position:fixed;
+  bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px) + 2px);
+  right:10px;z-index:90;pointer-events:none;
+  font-size:0.42rem;font-weight:600;letter-spacing:1px;
+  color:var(--muted);opacity:0.55;text-transform:uppercase;
+  font-family:'Inter',sans-serif;
+}
+
 /* ── UNDO BAR ── */
 .undo-bar{
   position:fixed;
@@ -2273,6 +2283,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
 <div class="toast" id="toast"></div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
+<div class="version-tag" id="versionTag">v27.4</div>
 
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
