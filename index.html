@@ -415,11 +415,32 @@ body{
 .btn-hint-row span:first-child::before{content:'';}
 
 /* ── COLLECTOR CARD — the car itself becomes the reward ── */
-@keyframes ccCardIn{0%{opacity:0;transform:translateY(46px) scale(0.6) rotate(-4deg)}60%{opacity:1;transform:translateY(-6px) scale(1.05) rotate(1deg)}100%{opacity:1;transform:translateY(0) scale(1) rotate(0)}}
+@keyframes ccCardIn{
+  0%{opacity:0;transform:translateY(70px) rotateX(-22deg) rotateZ(-7deg) scale(0.65)}
+  55%{opacity:1;transform:translateY(-12px) rotateX(7deg) rotateZ(3deg) scale(1.06)}
+  75%{transform:translateY(5px) rotateX(-3deg) rotateZ(-1deg) scale(0.99)}
+  100%{opacity:1;transform:translateY(0) rotateX(0) rotateZ(0) scale(1)}
+}
 @keyframes ccStarPop{0%{opacity:0;transform:scale(0) rotate(-30deg)}70%{opacity:1;transform:scale(1.4) rotate(8deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
-@keyframes ccXPIn{0%{opacity:0;transform:translateY(12px) scale(0.8)}100%{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes ccBadgeIn{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes ccFadeUp{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes ccXPUp{0%{opacity:0;transform:translateY(16px) scale(0.8)}70%{opacity:1;transform:translateY(-5px) scale(1.1)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes ccShineSweep{0%{left:-70%}100%{left:140%}}
+@keyframes ccBreathe{0%{filter:brightness(1) saturate(1)}50%{filter:brightness(1.18) saturate(1.15)}100%{filter:brightness(1) saturate(1)}}
+@keyframes ccRainbowSpin{to{transform:rotate(360deg)}}
+@keyframes ccGoldShimmer{to{background-position:200% 0}}
+@keyframes ccFlyOut{
+  0%{transform:translate(0,0) scale(1) rotate(0);opacity:1}
+  45%{transform:translate(calc(var(--fx,0px)*0.45), calc(var(--fy,0px)*0.4)) scale(0.55) rotate(-7deg);opacity:1}
+  100%{transform:translate(var(--fx,0px), var(--fy,0px)) scale(0.04) rotate(-12deg);opacity:0.35}
+}
+@keyframes ccTrailDot{
+  0%{opacity:0.85;transform:translate(-50%,-50%) scale(1)}
+  100%{opacity:0;transform:translate(calc(-50% + var(--fx,0px)), calc(-50% + var(--fy,0px))) scale(0.25)}
+}
 @keyframes ccGaragePulse{0%{box-shadow:0 0 0 0 rgba(232,184,75,0.55)}100%{box-shadow:0 0 0 18px transparent}}
+@keyframes ccGaragePop{0%{transform:scale(1)}45%{transform:scale(1.22)}100%{transform:scale(1)}}
+@keyframes ccCollectedIn{0%{opacity:0;transform:translate(-50%,6px) scale(0.8)}100%{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes ccBadgePop{0%{transform:scale(1)}45%{transform:scale(1.5)}100%{transform:scale(1)}}
 @keyframes spotParticleBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--px),var(--py)) scale(0);opacity:0}}
 @keyframes spotFlare{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
 @keyframes runTotalPop{0%{transform:scale(1)}35%{transform:scale(1.12);color:var(--accent)}100%{transform:scale(1)}}
@@ -428,20 +449,26 @@ body{
 .cc-overlay{
   position:fixed;inset:0;z-index:99997;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
-  background:rgba(0,0,0,0.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  animation:fadeIn 0.25s ease;cursor:pointer;
+  background:rgba(0,0,0,0.66);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  animation:fadeIn 0.3s ease;cursor:pointer;
 }
 .cc-card{
-  width:min(268px,76vw);aspect-ratio:3/4;perspective:1200px;
-  animation:ccCardIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  width:min(272px,78vw);aspect-ratio:3/4;
+  perspective:1200px;transform-style:preserve-3d;
+  animation:ccCardIn 0.75s cubic-bezier(0.34,1.56,0.64,1) both;
 }
-.cc-card[data-tier="legend"]{--cc-color:#f5c842;--cc-glow:rgba(245,200,66,0.55);}
-.cc-card[data-tier="hyper"]{--cc-color:#ff5733;--cc-glow:rgba(255,87,51,0.45);}
-.cc-card[data-tier="super"]{--cc-color:#c084fc;--cc-glow:rgba(192,132,252,0.45);}
-.cc-card[data-tier="sports"]{--cc-color:#60a5fa;--cc-glow:rgba(96,165,250,0.4);}
-.cc-card[data-tier="common"]{--cc-color:#9aa3af;--cc-glow:rgba(154,163,175,0.3);}
+.cc-card[data-tier="daily"]{--cc-color:#7ec8ff;--cc-glow:rgba(126,200,255,0.4);}
+.cc-card[data-tier="sports"]{--cc-color:#ff7a3d;--cc-glow:rgba(255,122,61,0.45);}
+.cc-card[data-tier="super"]{--cc-color:#f5c842;--cc-glow:rgba(245,200,66,0.5);}
+.cc-card[data-tier="hyper"]{--cc-color:#b26bff;--cc-glow:rgba(178,107,255,0.55);}
+.cc-card[data-tier="legend"]{--cc-color:#f5c842;--cc-glow:rgba(245,200,66,0.6);}
+.cc-rainbow{
+  position:absolute;inset:-5px;border-radius:24px;z-index:0;pointer-events:none;opacity:0.75;
+  background:conic-gradient(from 0deg,#f5c842,#ff5733,#b26bff,#7ec8ff,#4ade80,#f5c842);
+  filter:blur(7px);animation:ccRainbowSpin 3.5s linear infinite;
+}
 .cc-inner{
-  position:relative;width:100%;height:100%;
+  position:relative;width:100%;height:100%;z-index:1;
   transform-style:preserve-3d;
   transition:transform 0.65s cubic-bezier(0.4,0.2,0.2,1);
 }
@@ -453,9 +480,16 @@ body{
   box-shadow:0 24px 60px rgba(0,0,0,0.55);
 }
 .cc-front{background:var(--surf2);display:flex;flex-direction:column;}
+.cc-front[data-tier="daily"]{box-shadow:0 24px 60px rgba(126,200,255,0.18);}
+.cc-front[data-tier="sports"]{box-shadow:0 24px 60px rgba(255,122,61,0.22);}
+.cc-front[data-tier="super"]{box-shadow:0 24px 60px rgba(245,200,66,0.28);}
+.cc-front[data-tier="hyper"]{box-shadow:0 24px 60px rgba(178,107,255,0.3);}
 .cc-front[data-tier="legend"]{box-shadow:0 24px 70px rgba(245,200,66,0.35);}
-.cc-front[data-tier="hyper"]{box-shadow:0 24px 60px rgba(255,87,51,0.3);}
-.cc-front[data-tier="super"]{box-shadow:0 24px 60px rgba(192,132,252,0.3);}
+.cc-card.anticipate .cc-front{animation:ccBreathe 1.2s ease 0.35s 1 both;}
+.cc-shine{position:absolute;inset:0;border-radius:20px;overflow:hidden;pointer-events:none;z-index:2;}
+.cc-shine::before{content:'';position:absolute;top:-25%;bottom:-25%;left:-70%;width:40%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,0.4),transparent);
+  transform:rotate(16deg);animation:ccShineSweep 1.3s ease 0.95s both;}
 .cc-front-img{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;
   background:linear-gradient(160deg,#232328,#151518);}
 .cc-front-img img{width:100%;height:100%;object-fit:cover;display:block;}
@@ -470,30 +504,104 @@ body{
   display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
   padding:22px;gap:5px;
 }
-.cc-back::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:0.35;
+.cc-back::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:0.4;
   background:radial-gradient(circle at 50% -10%, var(--cc-glow,transparent), transparent 70%);}
-.cc-back-stars{font-size:1.35rem;letter-spacing:4px;animation:ccStarPop 0.45s 0.15s cubic-bezier(0.34,1.56,0.64,1) both;}
+.cc-back .cc-star,.cc-back-rarity,.cc-back-name,.cc-back-value,.cc-back-xp,.cc-badge{opacity:0;}
+.cc-back-stars{display:flex;justify-content:center;gap:3px;font-size:1.3rem;margin-bottom:8px;}
+.cc-card.revealed .cc-star{animation:ccStarPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;}
+.cc-card.revealed .cc-star:nth-child(1){animation-delay:0.05s}
+.cc-card.revealed .cc-star:nth-child(2){animation-delay:0.2s}
+.cc-card.revealed .cc-star:nth-child(3){animation-delay:0.35s}
+.cc-card.revealed .cc-star:nth-child(4){animation-delay:0.5s}
+.cc-card.revealed .cc-star:nth-child(5){animation-delay:0.65s}
+.cc-card.revealed .cc-back-rarity{animation:ccFadeUp 0.45s 0.75s ease both;}
+.cc-card.revealed[data-tier="legend"] .cc-back-rarity{animation:ccFadeUp 0.45s 0.75s ease both, ccGoldShimmer 2.5s linear infinite;}
+.cc-card.revealed .cc-back-name{animation:ccFadeUp 0.45s 0.9s ease both;}
+.cc-card.revealed .cc-back-value{animation:ccFadeUp 0.4s 1.0s ease both;}
+.cc-card.revealed .cc-back-xp{animation:ccXPUp 0.55s 1.15s cubic-bezier(0.34,1.56,0.64,1) both;}
+.cc-card.revealed .cc-badge{animation:ccFadeUp 0.4s ease both;}
+.cc-card.revealed .cc-badge:nth-child(1){animation-delay:1.35s}
+.cc-card.revealed .cc-badge:nth-child(2){animation-delay:1.5s}
+.cc-card.revealed .cc-badge:nth-child(3){animation-delay:1.65s}
 .cc-back-rarity{font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;font-weight:800;color:var(--cc-color,#f5c842);margin-bottom:7px;}
+.cc-card[data-tier="legend"] .cc-back-rarity{
+  background:linear-gradient(90deg,#ffe9a8,#f5c842,#ffd75e,#ffe9a8);
+  background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+}
 .cc-back-name{font-family:'Bebas Neue',cursive;font-size:1.4rem;line-height:1.1;}
 .cc-back-value{font-size:0.72rem;color:var(--text2);margin-bottom:10px;}
 .cc-back-xp{
   font-family:'Bebas Neue',cursive;font-size:1.4rem;letter-spacing:1px;color:var(--accent);
   background:var(--adim);border:1px solid var(--glass-border);border-radius:999px;padding:7px 18px;
-  animation:ccXPIn 0.4s 0.25s ease both;
 }
 .cc-back-badges{display:flex;flex-direction:column;gap:6px;margin-top:11px;align-items:center;}
 .cc-badge{
-  font-size:0.58rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
-  padding:5px 13px;border-radius:99px;background:var(--surf3);color:var(--text2);
-  animation:ccBadgeIn 0.35s ease both;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-size:0.6rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  padding:6px 13px;border-radius:12px;background:var(--surf3);color:var(--text2);
 }
+.cc-badge-sub{font-size:0.52rem;font-weight:500;letter-spacing:0.3px;text-transform:none;opacity:0.8;margin-top:1px;}
 .cc-badge.first{background:rgba(96,165,250,0.14);color:#7cb3ff;border:1px solid rgba(96,165,250,0.35);}
 .cc-badge.best{background:var(--adim);color:var(--accent);border:1px solid var(--accent);}
 .cc-badge.saved{background:rgba(52,199,89,0.12);color:#4cd964;border:1px solid rgba(52,199,89,0.35);}
 .cc-dismiss{margin-top:28px;font-size:0.56rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
 .cc-particle{position:absolute;left:50%;top:50%;width:7px;height:7px;border-radius:50%;pointer-events:none;}
-.cc-card.collecting{animation:none;transition:transform 0.55s cubic-bezier(0.6,0,0.8,0.4),opacity 0.5s ease;}
-.cc-garage-pulse{animation:ccGaragePulse 0.7s ease;}
+.cc-card.collecting{animation:ccFlyOut 0.65s cubic-bezier(0.5,0,0.8,0.3) both;}
+.cc-trail-dot{position:absolute;left:50%;top:50%;width:16px;height:16px;border-radius:50%;pointer-events:none;z-index:1;
+  background:radial-gradient(circle, var(--cc-color,#f5c842), transparent 70%);
+  animation:ccTrailDot 0.7s ease both;}
+.cc-garage-pulse{animation:ccGaragePulse 0.75s ease;}
+.cc-garage-collect{animation:ccGaragePop 0.6s cubic-bezier(0.34,1.56,0.64,1);color:var(--accent);}
+.cc-collected{position:fixed;z-index:99998;pointer-events:none;
+  font-size:0.7rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--green);background:var(--glass-card);border:1px solid rgba(52,199,89,0.4);
+  border-radius:999px;padding:9px 16px;box-shadow:var(--shadow-lg);
+  animation:ccCollectedIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both;}
+.cc-collected.out{transition:opacity 0.3s,transform 0.3s;opacity:0;transform:translate(-50%,8px) scale(0.9);}
+.nav-badge{
+  position:absolute;top:5px;right:calc(50% - 26px);min-width:16px;height:16px;padding:0 4px;
+  border-radius:8px;background:var(--accent);color:#080808;
+  font-size:0.52rem;font-weight:800;display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(0,0,0,0.4);box-shadow:0 2px 6px rgba(0,0,0,0.35);
+}
+.nav-badge.pop{animation:ccBadgePop 0.55s cubic-bezier(0.34,1.56,0.64,1);}
+
+/* ── QUICK COLLECTOR MODE — subtle reward when animations are off ── */
+.cc-quick{
+  position:fixed;left:50%;top:max(84px,calc(env(safe-area-inset-top,0px) + 16px));
+  transform:translateX(-50%) translateY(-8px);z-index:99995;pointer-events:none;
+  animation:ccQuickIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes ccQuickIn{0%{opacity:0;transform:translateX(-50%) translateY(-14px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}
+.cc-quick.out{transition:opacity 0.3s,transform 0.3s;opacity:0;transform:translateX(-50%) translateY(-8px);}
+.cc-quick-chip{
+  display:flex;align-items:center;gap:9px;
+  background:var(--glass-card);border:1px solid var(--glass-border);border-radius:999px;
+  padding:9px 16px;box-shadow:var(--shadow-lg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  font-size:0.78rem;font-weight:600;white-space:nowrap;max-width:88vw;
+}
+.cc-quick-icon{font-size:1rem;flex-shrink:0;}
+.cc-quick-name{overflow:hidden;text-overflow:ellipsis;}
+.cc-quick-xp{font-family:'Bebas Neue',cursive;color:var(--accent);letter-spacing:1px;flex-shrink:0;}
+
+/* ── RECENT DISCOVERIES — your personal trophy case ── */
+.disc-scroll{display:flex;gap:10px;overflow-x:auto;padding:2px 1px 8px;scrollbar-width:thin;-webkit-overflow-scrolling:touch;}
+.disc-card{
+  flex:0 0 118px;border-radius:14px;overflow:hidden;cursor:pointer;
+  background:var(--surf2);border:1px solid var(--glass-border);position:relative;
+  transition:transform 0.15s ease;
+}
+.disc-card:active{transform:scale(0.96);}
+.disc-img{width:100%;height:82px;object-fit:cover;display:block;background:linear-gradient(160deg,#232328,#151518);}
+.disc-img-ph{width:100%;height:82px;display:flex;align-items:center;justify-content:center;font-size:1.7rem;
+  background:linear-gradient(160deg,#232328,#151518);}
+.disc-body{padding:7px 9px 9px;}
+.disc-name{font-size:0.68rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.disc-meta{display:flex;align-items:center;justify-content:space-between;margin-top:3px;}
+.disc-rarity{font-size:0.56rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+.disc-xp{font-family:'Bebas Neue',cursive;font-size:0.8rem;color:var(--accent);letter-spacing:1px;}
+.disc-date{font-size:0.52rem;color:var(--muted);margin-top:3px;}
+.disc-empty{font-size:0.72rem;color:var(--muted);padding:14px 2px;}
 
 /* Level bar under score banner */
 .level-bar-wrap{margin:10px 2px 6px;}
@@ -508,7 +616,7 @@ body{
 #runTotal{display:inline-block;}
 #runTotal.pop{animation:runTotalPop 0.45s cubic-bezier(0.34,1.56,0.64,1);}
 @media (prefers-reduced-motion: reduce){
-  .cc-card,.cc-inner,.cc-back-stars,.cc-back-xp,.cc-badge,#runTotal.pop{animation:none !important;}
+  .cc-card,.cc-inner,.cc-back-stars,.cc-back-xp,.cc-badge,.cc-rainbow,.cc-shine,.cc-quick,.cc-collected,#runTotal.pop{animation:none !important;}
   .cc-inner{transition:none !important;}
 }
 
@@ -1804,6 +1912,13 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
         <div class="stat-box"><div class="stat-v" id="gTotal">$0</div><div class="stat-l">Total</div></div>
         <div class="stat-box"><div class="stat-v" id="gAvg">&#8212;</div><div class="stat-l">Avg</div></div>
       </div>
+      <div id="discSection" style="display:none">
+        <div class="sec-row" style="margin:4px 0 8px;">
+          <div class="sec-title">RECENT DISCOVERIES</div>
+          <button class="txt-btn" id="discClearBtn" onclick="clearDiscoveries()" style="display:none">Clear</button>
+        </div>
+        <div class="disc-scroll" id="discoveriesList"></div>
+      </div>
       <div class="garage-search-wrap">
         <input type="text" id="garageSearch" placeholder="Search cars..." oninput="onGarageSearch()" autocomplete="off">
         <button class="garage-search-clear" onclick="clearGarageSearch()" id="garageSearchClear" style="display:none">✕</button>
@@ -1937,6 +2052,10 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
         <div class="setting-row sound-toggle" style="border-top:none;padding-top:0;margin-top:0;">
           <span style="font-size:0.78rem;color:var(--text2);flex:1;">Vibrate when logging cars</span>
           <button class="toggle-pill" id="vibeToggle" onclick="toggleVibe()"><div class="toggle-knob"></div></button>
+        </div>
+        <div class="setting-row sound-toggle" style="border-top:none;padding-top:0;margin-top:0;">
+          <span style="font-size:0.78rem;color:var(--text2);flex:1;">Collector card animations</span>
+          <button class="toggle-pill" id="ccAnimToggle" onclick="toggleCCAnim()"><div class="toggle-knob"></div></button>
         </div>
       </div>
 
@@ -2134,6 +2253,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
     <button class="nav-btn" onclick="goTo('garage')" id="nav-garage">
       <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></span>
       <span class="nav-label">Garage</span>
+      <span class="nav-badge" id="navGarageBadge" style="display:none">0</span>
     </button>
     <button class="nav-btn" onclick="goTo('voice')" id="nav-voice">
       <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span>
@@ -4394,18 +4514,118 @@ function initVibeToggle() {
   if (btn) btn.classList.toggle('on', localStorage.getItem('cs_vibe') !== 'off');
 }
 
-//  COLLECTOR CARD — dim the screen, slide the car in, flip it, fly it into your garage
+//  COLLECTOR CARD SETTINGS — keep the reward moment configurable
+function ccAnimEnabled() { return localStorage.getItem('cs_cc_anim') !== 'off'; }
+function toggleCCAnim() {
+  var on = localStorage.getItem('cs_cc_anim') !== 'off';
+  localStorage.setItem('cs_cc_anim', on ? 'off' : 'on');
+  var btn = document.getElementById('ccAnimToggle');
+  if (btn) btn.classList.toggle('on', !on);
+  showToast(on ? ' Collector animations off' : ' Collector animations on');
+}
+function initCCAnimToggle() {
+  var btn = document.getElementById('ccAnimToggle');
+  if (btn) btn.classList.toggle('on', localStorage.getItem('cs_cc_anim') !== 'off');
+}
+
+//  TIER HELPERS — shared by card, discovery history and quick mode
+function tierOf(v) {
+  return v >= 1000000 ? 'legend' : v >= 500000 ? 'hyper' : v >= 150000 ? 'super' : v >= 50000 ? 'sports' : 'daily';
+}
+function tierEmoji(t) { return { daily:'🚗', sports:'🏁', super:'🏎️', hyper:'🔥', legend:'👑' }[t] || '🚘'; }
+function tierMeta(t) {
+  return {
+    daily:  { label:'Daily Spot',     stars:1, color:'#7ec8ff' },
+    sports: { label:'Sports Spot',    stars:2, color:'#ff7a3d' },
+    super:  { label:'Supercar Spot',  stars:3, color:'#f5c842' },
+    hyper:  { label:'Hypercar Spot',  stars:4, color:'#b26bff' },
+    legend: { label:'Legendary Spot', stars:5, color:'#f5c842' }
+  }[t] || { label:'Car Spot', stars:1, color:'#7ec8ff' };
+}
+
+//  DISCOVERY HISTORY — your last 10 spots as a trophy case
+function recordDiscovery(car, xp) {
+  try {
+    var list = [];
+    try { list = JSON.parse(localStorage.getItem('cs_discoveries') || '[]'); } catch(e) { list = []; }
+    var photoRef = '';
+    if (car.photo && car.photo.indexOf('data:image/') === 0) photoRef = 'photo:' + (car.name || '').toLowerCase();
+    else if (car.photo) photoRef = car.photo;
+    list.unshift({ n: car.name, v: car.value || 0, t: car.type || '', r: tierOf(car.value || 0), xp: xp || 0, d: Date.now(), p: photoRef });
+    if (list.length > 10) list.length = 10;
+    localStorage.setItem('cs_discoveries', JSON.stringify(list));
+    renderDiscoveries();
+  } catch(e) {}
+}
+function resolveDiscoveryPhoto(p) {
+  if (!p) return '';
+  if (p.indexOf('photo:') === 0) return _idbPhotoCache[p.slice(6)] || '';
+  return p;
+}
+function clearDiscoveries() {
+  if (!confirm('Clear your recent discoveries?')) return;
+  try { localStorage.removeItem('cs_discoveries'); } catch(e) {}
+  renderDiscoveries();
+}
+function renderDiscoveries() {
+  var section = document.getElementById('discSection');
+  var listEl  = document.getElementById('discoveriesList');
+  if (!section || !listEl) return;
+  var list = [];
+  try { list = JSON.parse(localStorage.getItem('cs_discoveries') || '[]'); } catch(e) { list = []; }
+  if (!list.length) { section.style.display = 'none'; return; }
+  section.style.display = '';
+  var clearBtn = document.getElementById('discClearBtn');
+  if (clearBtn) clearBtn.style.display = list.length ? '' : 'none';
+  listEl.innerHTML = list.map(function(rec) {
+    var meta = tierMeta(rec.r);
+    var img = resolveDiscoveryPhoto(rec.p);
+    var imgHTML = img
+      ? '<img class="disc-img" src="' + img + '" alt="" loading="lazy">'
+      : '<div class="disc-img-ph">' + tierEmoji(rec.r) + '</div>';
+    var date = new Date(rec.d).toLocaleDateString('en-US', { month:'short', day:'numeric' });
+    var safeName = escapeHtml(rec.n);
+    return '<div class="disc-card" onclick="openDiscovery(\'' + jsEscape(rec.n) + '\',' + (rec.v || 0) + ',\'' + jsEscape(rec.t || '') + '\')">' +
+      imgHTML +
+      '<div class="disc-body">' +
+        '<div class="disc-name" title="' + safeName + '">' + safeName + '</div>' +
+        '<div class="disc-meta">' +
+          '<span class="disc-rarity" style="color:' + meta.color + '">' + tierEmoji(rec.r) + ' ' + meta.label.replace(' Spot','') + '</span>' +
+          '<span class="disc-xp">+' + rec.xp + '</span>' +
+        '</div>' +
+        '<div class="disc-date">' + date + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+function openDiscovery(name, value, type) {
+  showSpecsCard({ name:name, value:value, type:type, color:'', photo:'' });
+}
+
+//  MODE SELECTION — full experience first, then dial back after repetition
+var _ccFullCount = 0;
+function wantsFullCollectorCard(tier) {
+  if (localStorage.getItem('cs_cc_anim') === 'off') return false;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  if (tier === 'hyper' || tier === 'legend') return true;
+  _ccFullCount++;
+  return _ccFullCount <= 3;
+}
+
+//  COLLECTOR CARD — the core reward moment
 function celebrateCollectorCard(car, opts) {
   opts = opts || {};
+  var xp = opts.xpGain || rarityXP(car.value || 0);
+  recordDiscovery(car, xp);
+  if (!wantsFullCollectorCard(tierOf(car.value || 0))) return celebrateQuick(car, opts);
+  return celebrateFullCollectorCard(car, opts);
+}
+
+function celebrateFullCollectorCard(car, opts) {
+  opts = opts || {};
   var v = car.value || 0;
-  var tier = v >= 1000000 ? 'legend' : v >= 500000 ? 'hyper' : v >= 150000 ? 'super' : v >= 50000 ? 'sports' : 'common';
-  var meta = {
-    common: { label:'Daily Spot',    stars:1, color:'#9aa3af' },
-    sports: { label:'Sports Spot',   stars:2, color:'#60a5fa' },
-    super:  { label:'Supercar Spot', stars:3, color:'#c084fc' },
-    hyper:  { label:'Hypercar Spot', stars:4, color:'#ff5733' },
-    legend: { label:'Legendary Spot',stars:5, color:'#f5c842' }
-  }[tier];
+  var tier = tierOf(v);
+  var meta = tierMeta(tier);
   var xpGain = opts.xpGain || rarityXP(v);
   var typeName = ({
     supercar:'Supercar', sports:'Sports Car', muscle:'Muscle', track:'Track',
@@ -4421,6 +4641,14 @@ function celebrateCollectorCard(car, opts) {
     ? '<img src="' + photo + '" alt="" onerror="this.outerHTML=\'<div class=&quot;cc-front-ph&quot;>' + typeEmoji + '</div>\'">'
     : '<div class="cc-front-ph">' + typeEmoji + '</div>';
 
+  var starsHTML = '';
+  for (var s = 0; s < meta.stars; s++) starsHTML += '<span class="cc-star">⭐</span>';
+
+  var badgesHTML = '';
+  if (opts.isFirst) badgesHTML += '<div class="cc-badge first"><span>🔍 First Discovery</span><span class="cc-badge-sub">You\u2019re the first to log this car</span></div>';
+  if (opts.isBest)  badgesHTML += '<div class="cc-badge best"><span>🏆 Personal Record</span><span class="cc-badge-sub">Your most valuable spot yet</span></div>';
+  if (opts.saved)   badgesHTML += '<div class="cc-badge saved"><span>✓ Saved to garage</span><span class="cc-badge-sub">Now part of your collection</span></div>';
+
   return new Promise(function(resolve) {
     var old = document.querySelector('.cc-overlay');
     if (old) { if (old._ccResolve) old._ccResolve(); old.remove(); }
@@ -4433,6 +4661,7 @@ function celebrateCollectorCard(car, opts) {
     card.className = 'cc-card';
     card.setAttribute('data-tier', tier);
     card.innerHTML =
+      (tier === 'legend' ? '<div class="cc-rainbow"></div>' : '') +
       '<div class="cc-inner">' +
         '<div class="cc-face cc-front" data-tier="' + tier + '">' +
           '<div class="cc-front-img">' + frontImg + '</div>' +
@@ -4440,23 +4669,23 @@ function celebrateCollectorCard(car, opts) {
             '<div class="cc-front-type">' + typeName + '</div>' +
             '<div class="cc-front-name">' + escapeHtml(car.name) + '</div>' +
           '</div>' +
+          '<div class="cc-shine"></div>' +
         '</div>' +
         '<div class="cc-face cc-back">' +
-          '<div class="cc-back-stars">' + '⭐'.repeat(meta.stars) + '</div>' +
+          '<div class="cc-back-stars">' + starsHTML + '</div>' +
           '<div class="cc-back-rarity">' + meta.label + '</div>' +
           '<div class="cc-back-name">' + escapeHtml(car.name) + '</div>' +
           '<div class="cc-back-value">' + fmtFull(v) + '</div>' +
           '<div class="cc-back-xp">+' + xpGain + ' XP</div>' +
-          '<div class="cc-back-badges">' +
-            (opts.isFirst ? '<div class="cc-badge first">🔍 First one spotted!</div>' : '') +
-            (opts.isBest  ? '<div class="cc-badge best">🏆 New Best Car</div>' : '') +
-            (opts.saved   ? '<div class="cc-badge saved">✓ Saved to garage</div>' : '') +
-          '</div>' +
+          (badgesHTML ? '<div class="cc-back-badges">' + badgesHTML + '</div>' : '') +
         '</div>' +
       '</div>' +
       '<div class="cc-dismiss">Tap to flip · tap again to collect</div>';
     overlay.appendChild(card);
     document.body.appendChild(overlay);
+
+    // Anticipation glow while the photo holds
+    card.classList.add('anticipate');
 
     // Swap in a reference image later if we only had a placeholder
     if (!photo) {
@@ -4468,11 +4697,23 @@ function celebrateCollectorCard(car, opts) {
       }).catch(function(){});
     }
 
-    var flipped = false, done = false;
+    var phase = 0; // 0 front · 1 flipped (not revealed) · 2 revealed
+    var revealed = false;
+    function revealNow() {
+      if (revealed) return;
+      revealed = true;
+      phase = 2;
+      card.classList.add('revealed');
+    }
+    function flipNow() {
+      if (phase >= 1) return;
+      phase = 1;
+      card.classList.add('flipped');
+      setTimeout(revealNow, 700);
+    }
     function collect() {
-      if (done) return;
-      if (!flipped) { flipped = true; card.classList.add('flipped'); return; }
-      done = true;
+      if (phase < 2) { revealNow(); setTimeout(collect, 900); return; }
+      if (card.classList.contains('collecting')) return;
       card.classList.add('collecting');
       var navEl = document.getElementById('nav-garage');
       if (navEl) {
@@ -4480,12 +4721,37 @@ function celebrateCollectorCard(car, opts) {
         var cr = card.getBoundingClientRect();
         var dx = (nr.left + nr.width/2) - (cr.left + cr.width/2);
         var dy = (nr.top + nr.height/2) - (cr.top + cr.height/2);
-        card.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(0.05) rotate(-8deg)';
-        card.style.opacity = '0.4';
+        card.style.setProperty('--fx', dx + 'px');
+        card.style.setProperty('--fy', dy + 'px');
+        // comet trail toward the garage
+        for (var t = 0; t < 3; t++) {
+          var dot = document.createElement('div');
+          dot.className = 'cc-trail-dot';
+          dot.style.setProperty('--fx', dx + 'px');
+          dot.style.setProperty('--fy', dy + 'px');
+          dot.style.animationDelay = (t * 0.12) + 's';
+          overlay.appendChild(dot);
+        }
+        // garage button arrival: pulse + scale pop + count badge bump
         navEl.classList.add('cc-garage-pulse');
-        setTimeout(function(){ navEl.classList.remove('cc-garage-pulse'); }, 750);
-        haptic(18);
+        setTimeout(function(){ navEl.classList.remove('cc-garage-pulse'); }, 800);
+        setTimeout(function(){ navEl.classList.add('cc-garage-collect'); }, 500);
+        setTimeout(function(){ navEl.classList.remove('cc-garage-collect'); }, 1150);
+        var badgeEl = document.getElementById('navGarageBadge');
+        if (badgeEl && badgeEl.style.display !== 'none') {
+          badgeEl.classList.remove('pop'); void badgeEl.offsetWidth; badgeEl.classList.add('pop');
+        }
+        haptic([14, 30, 60]);
         playSound('collect');
+        // "Collected!" confirmation above the garage tab
+        var conf = document.createElement('div');
+        conf.className = 'cc-collected';
+        conf.textContent = '✓ Collected!';
+        conf.style.left = (nr.left + nr.width/2) + 'px';
+        conf.style.top  = (nr.top - 38) + 'px';
+        document.body.appendChild(conf);
+        setTimeout(function(){ conf.classList.add('out'); }, 1250);
+        setTimeout(function(){ if (conf.parentNode) conf.parentNode.removeChild(conf); }, 1600);
       }
       setTimeout(function() {
         overlay.style.transition = 'opacity 0.3s';
@@ -4494,29 +4760,56 @@ function celebrateCollectorCard(car, opts) {
           if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
           resolve();
         }, 320);
-      }, 560);
+      }, 660);
     }
 
-    overlay.onclick = function() { collect(); };
+    overlay.onclick = function() { if (phase === 0) flipNow(); else if (phase === 1) revealNow(); else collect(); };
 
-    // Auto-timeline: photo slides in → flip to details → fly to garage
-    setTimeout(function() { if (!done && !flipped) { flipped = true; card.classList.add('flipped'); } }, 1100);
-    setTimeout(collect, 3600);
+    // Auto-timeline: anticipation → flip → reveal stars → collect
+    setTimeout(function() { if (phase === 0) flipNow(); }, 1600);
+    setTimeout(collect, 4300);
 
-    // Particle burst for supercars and above
-    if (tier === 'super' || tier === 'hyper' || tier === 'legend') {
-      var count = tier === 'legend' ? 22 : tier === 'hyper' ? 16 : 12;
-      for (var i = 0; i < count; i++) {
+    // Particle burst by rarity
+    var pCount = tier === 'legend' ? 24 : tier === 'hyper' ? 16 : tier === 'super' ? 10 : 0;
+    if (pCount) {
+      for (var i = 0; i < pCount; i++) {
         var p = document.createElement('div');
         p.className = 'cc-particle';
-        var ang = (Math.PI * 2 * i) / count + Math.random() * 0.5;
-        var dist = 90 + Math.random() * 110;
+        var ang = (Math.PI * 2 * i) / pCount + Math.random() * 0.5;
+        var dist = 90 + Math.random() * (tier === 'legend' ? 130 : 100);
         p.style.cssText = '--px:' + (Math.cos(ang) * dist).toFixed(0) + 'px;--py:' + (Math.sin(ang) * dist).toFixed(0) + 'px;' +
           'background:' + meta.color + ';animation:spotParticleBurst 0.8s cubic-bezier(0.16,0.84,0.44,1) both;' +
           'animation-delay:' + (0.15 + Math.random() * 0.15) + 's;';
         overlay.appendChild(p);
       }
     }
+  });
+}
+
+//  QUICK COLLECTOR MODE — non-blocking chip when animations are dialed back
+function celebrateQuick(car, opts) {
+  opts = opts || {};
+  var v = car.value || 0;
+  var tier = tierOf(v);
+  var meta = tierMeta(tier);
+  var xpGain = opts.xpGain || rarityXP(v);
+  return new Promise(function(resolve) {
+    var old = document.querySelector('.cc-quick');
+    if (old) { if (old._ccResolve) old._ccResolve(); old.remove(); }
+    var el = document.createElement('div');
+    el.className = 'cc-quick';
+    el._ccResolve = resolve;
+    el.innerHTML =
+      '<div class="cc-quick-chip">' +
+        '<span class="cc-quick-icon" style="color:' + meta.color + '">' + tierEmoji(tier) + '</span>' +
+        '<span class="cc-quick-name">' + escapeHtml(car.name) + '</span>' +
+        '<span class="cc-quick-xp">+' + xpGain + ' XP</span>' +
+      '</div>';
+    document.body.appendChild(el);
+    setTimeout(function() {
+      el.classList.add('out');
+      setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); resolve(); }, 300);
+    }, 1500);
   });
 }
 
