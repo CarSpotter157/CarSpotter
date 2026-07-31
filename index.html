@@ -2501,7 +2501,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
 <div class="toast" id="toast"></div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v27.9</div>
+<div class="version-tag" id="versionTag">v27.10</div>
 
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
@@ -5449,6 +5449,12 @@ function importFromFile(input) {
     try {
       const data = JSON.parse(e.target.result);
       const hasPhotos = data.includePhotos === true;
+
+      // Free the storage quota BEFORE writing anything: the photo-bearing keys are
+      // rebuilt from the backup with images moved into IndexedDB as tiny refs.
+      ['cs_runs','cs_current','cs_qp'].forEach(function(k) {
+        try { localStorage.removeItem(k); } catch(e) {}
+      });
 
       let restored = 0;
       for (const key of Object.keys(data)) {
