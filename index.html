@@ -2191,6 +2191,222 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 .book-sil.locked-shimmer{background-image:linear-gradient(90deg,var(--surf3) 0%,var(--surf2) 40%,var(--surf3) 80%);background-size:200% 100%;animation:shimmer 2.4s linear infinite;}
 
+/* ── CARD EVOLUTION CEREMONY — dim world, charge, crack, regrow, foil, land ── */
+.evo-overlay{position:fixed;inset:0;z-index:100001;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:rgba(0,0,0,0.98);animation:evoDimIn 0.8s ease both;}
+@keyframes evoDimIn{0%{background:rgba(0,0,0,0);}100%{background:rgba(0,0,0,0.98);}}
+.evo-aura{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 0.6s ease;}
+.evo-overlay.stage-charge .evo-aura,.evo-overlay.stage-levitate .evo-aura,.evo-overlay.stage-grow .evo-aura{opacity:1;}
+.evo-aura{background:radial-gradient(circle at 50% 46%, var(--evo-ring,rgba(245,200,66,0.35)), transparent 62%);}
+.evo-aura::after{content:'';position:absolute;inset:0;background:conic-gradient(from 0deg,transparent 0%,var(--evo-ring,transparent) 12%,transparent 26%);opacity:0.5;animation:evoAuraSpin 2.4s linear infinite;}
+@keyframes evoAuraSpin{to{transform:rotate(360deg)}}
+.evo-card-wrap{position:relative;width:min(252px,70vw);aspect-ratio:3/4;perspective:1400px;z-index:2;transition:transform 0.9s cubic-bezier(0.34,1.56,0.64,1);}
+.evo-overlay.stage-levitate .evo-card-wrap{transform:translateY(-36px);}
+.evo-overlay.stage-land .evo-card-wrap{transform:translateY(0) scale(1);transition:transform 0.5s cubic-bezier(0.6,-0.28,0.74,0.05);}
+.evo-card{position:absolute;inset:0;border-radius:22px;overflow:hidden;background:var(--surf2);border:3px solid var(--evo-old,var(--glass-border));box-shadow:0 0 0 1px var(--evo-old,var(--glass-border)),0 24px 60px rgba(0,0,0,0.55);transition:border-color 0.4s ease,box-shadow 0.4s ease;}
+.evo-overlay.stage-grow .evo-card{border-color:var(--evo-ring,#f5c842);box-shadow:0 0 0 3px var(--evo-ring,#f5c842),0 0 44px -6px var(--evo-ring,#f5c842),0 24px 60px rgba(0,0,0,0.55);}
+.evo-overlay.stage-levitate .evo-card{animation:evoBreathe 0.9s ease-in-out infinite;}
+@keyframes evoBreathe{0%,100%{transform:scale(1) rotate(-1deg);}50%{transform:scale(1.04) rotate(1deg);}}
+.evo-card-img{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:4.2rem;background:linear-gradient(160deg,#232328,#151518);}
+.evo-card-img img{width:100%;height:100%;object-fit:cover;display:block;}
+.evo-card-label{position:absolute;left:0;right:0;bottom:0;padding:20px 16px 14px;text-align:left;background:linear-gradient(180deg,transparent,rgba(0,0,0,0.9));}
+.evo-card-type{font-size:0.5rem;color:#bbb;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:3px;}
+.evo-card-name{font-family:'Bebas Neue',cursive;font-size:1.5rem;line-height:1.05;color:#fff;}
+.evo-badge{position:absolute;top:12px;right:12px;font-size:0.52rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:5px 11px;border-radius:999px;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:var(--evo-old,#ccc);border:1px solid var(--evo-old,var(--glass-border));transition:all 0.4s ease;}
+.evo-overlay.stage-grow .evo-badge{color:var(--evo-ring,#f5c842);border-color:var(--evo-ring,#f5c842);}
+/* crack layer */
+.evo-cracks{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:3;}
+.evo-overlay.stage-levitate .evo-cracks{opacity:1;}
+.evo-cracks span{position:absolute;top:50%;left:50%;width:2px;height:0;background:linear-gradient(180deg,rgba(255,255,255,0.9),rgba(255,255,255,0.15));transform-origin:center;animation:evoCrackGrow 0.35s ease-out forwards;}
+@keyframes evoCrackGrow{0%{height:0;opacity:1;}100%{height:130%;opacity:0.6;}}
+/* energy particles */
+.evo-spark{position:absolute;left:50%;top:50%;width:6px;height:6px;border-radius:50%;pointer-events:none;background:var(--evo-ring,#f5c842);box-shadow:0 0 12px var(--evo-ring,#f5c842);opacity:0;}
+.evo-overlay.stage-charge .evo-spark{animation:evoSparkIn 0.7s ease forwards;}
+@keyframes evoSparkIn{0%{transform:translate(0,0) scale(0.4);opacity:1;}100%{transform:translate(var(--sx,0px),var(--sy,0px)) scale(1);opacity:0;}}
+/* growing ring that bursts outward on impact */
+.evo-ring-burst{position:absolute;left:50%;top:50%;width:0;height:0;border-radius:50%;pointer-events:none;opacity:0;border:3px solid var(--evo-ring,#f5c842);}
+.evo-overlay.stage-burst .evo-ring-burst{animation:evoRingBurst 0.8s cubic-bezier(0.16,0.84,0.44,1) both;}
+@keyframes evoRingBurst{0%{width:0;height:0;opacity:1;}100%{width:520px;height:520px;margin:-260px 0 0 -260px;opacity:0;}}
+/* holographic foil sweep */
+.evo-foil{position:absolute;inset:0;border-radius:22px;overflow:hidden;pointer-events:none;opacity:0;z-index:4;
+  background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,0.35) 40%,rgba(245,200,66,0.5) 50%,rgba(255,87,51,0.4) 55%,rgba(192,132,252,0.4) 60%,rgba(96,165,250,0.4) 65%,rgba(74,222,128,0.35) 70%,transparent 85%);
+  background-size:300% 100%;filter:saturate(1.6);}
+.evo-overlay.stage-foil .evo-foil{animation:evoFoilSweep 1.1s cubic-bezier(0.4,0,0.2,1) both;}
+@keyframes evoFoilSweep{0%{opacity:0;background-position:120% 0;}15%{opacity:1;}85%{opacity:1;}100%{opacity:0.9;background-position:-80% 0;}}
+/* impact flash + land shadow */
+.evo-flash{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 46%,rgba(255,255,255,0.95),transparent 55%);}
+.evo-overlay.stage-burst .evo-flash{animation:evoFlashPop 0.55s ease both;}
+@keyframes evoFlashPop{0%{opacity:0;}20%{opacity:1;}100%{opacity:0;}}
+/* title / header text */
+.evo-eyebrow{position:relative;z-index:3;font-size:0.58rem;letter-spacing:5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;text-align:center;opacity:0;transition:opacity 0.5s ease;}
+.evo-overlay.stage-charge .evo-eyebrow{opacity:1;}
+.evo-title{position:relative;z-index:3;font-family:'Bebas Neue',cursive;font-size:2.2rem;letter-spacing:2px;text-align:center;margin-top:22px;color:var(--evo-ring,#f5c842);opacity:0;transform:scale(0.6);}
+.evo-overlay.stage-celebrate .evo-title{animation:evoTitleStamp 0.5s cubic-bezier(0.34,1.56,0.64,1) both;}
+@keyframes evoTitleStamp{0%{opacity:0;transform:scale(0.4) rotate(-6deg);}60%{opacity:1;transform:scale(1.18) rotate(3deg);}100%{opacity:1;transform:scale(1) rotate(0);}}
+.evo-sub{position:relative;z-index:3;font-size:0.6rem;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;margin-top:8px;text-align:center;opacity:0;}
+.evo-overlay.stage-celebrate .evo-sub{animation:evoFadeUp 0.5s 0.2s ease both;}
+@keyframes evoFadeUp{0%{opacity:0;transform:translateY(10px);}100%{opacity:1;transform:translateY(0);}}
+.evo-land-dust{position:absolute;bottom:26%;left:50%;width:220px;height:18px;border-radius:50%;pointer-events:none;opacity:0;background:radial-gradient(ellipse at center,var(--evo-ring,rgba(245,200,66,0.6)),transparent 65%);filter:blur(6px);}
+.evo-overlay.stage-land .evo-land-dust{animation:evoDustPuff 0.7s ease both;}
+@keyframes evoDustPuff{0%{opacity:0;transform:translate(-50%,0) scale(0.5);}40%{opacity:0.9;transform:translate(-50%,8px) scale(1.1);}100%{opacity:0;transform:translate(-50%,18px) scale(1.3);}}
+.evo-particle{position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:50%;pointer-events:none;opacity:0;}
+.evo-overlay.stage-burst .evo-particle{animation:evoParticleFly 0.95s cubic-bezier(0.16,0.84,0.44,1) both;}
+@keyframes evoParticleFly{0%{opacity:1;transform:translate(0,0) scale(1);}100%{opacity:0;transform:translate(var(--px,0px),var(--py,0px)) scale(0.2);}}
+@media (prefers-reduced-motion:reduce){.evo-overlay *{animation:none !important;transition:none !important;}.evo-overlay{background:rgba(0,0,0,0.97);}}
+
+/* ── TITLE PROMOTION CEREMONY — old title fades, new crest stamps, seal — ── */
+.title-overlay{position:fixed;inset:0;z-index:100002;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:rgba(0,0,0,0.96);animation:titleDimIn 0.6s ease both;}
+@keyframes titleDimIn{0%{background:rgba(0,0,0,0);}100%{background:rgba(0,0,0,0.96);}}
+.title-halo{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 0.8s ease;background:radial-gradient(circle at 50% 42%,rgba(245,200,66,0.28),transparent 55%);}
+.title-overlay.stage-2 .title-halo{opacity:1;}
+.title-halo::after{content:'';position:absolute;inset:0;background:conic-gradient(from 0deg,transparent 0%,rgba(245,200,66,0.25) 10%,transparent 22%);opacity:0.6;animation:evoAuraSpin 5s linear infinite;}
+.title-old{position:relative;z-index:2;display:flex;align-items:center;gap:8px;font-size:0.8rem;color:var(--text2);letter-spacing:1px;text-transform:uppercase;opacity:0.9;margin-bottom:20px;transition:all 0.6s ease;}
+.title-overlay.stage-2 .title-old{opacity:0;transform:translateY(-18px) scale(0.8);filter:blur(4px);}
+.title-crest{position:relative;z-index:3;width:112px;height:112px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:3.4rem;background:radial-gradient(circle at 35% 30%,#3a3a26,#17170f);border:2px solid rgba(245,200,66,0.5);box-shadow:0 0 0 8px rgba(245,200,66,0.08),0 0 60px rgba(245,200,66,0.25),inset 0 0 30px rgba(0,0,0,0.6);transform:scale(0.4);opacity:0;}
+.title-overlay.stage-1 .title-crest{animation:crestStamp 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.15s both;}
+@keyframes crestStamp{0%{opacity:0;transform:scale(0.4) rotate(-20deg);}55%{opacity:1;transform:scale(1.12) rotate(6deg);}100%{opacity:1;transform:scale(1) rotate(0);}}
+.title-crest-glow{position:absolute;inset:-18px;border-radius:50%;border:1px solid rgba(245,200,66,0.35);animation:crestPing 2.2s cubic-bezier(0.16,0.84,0.44,1) infinite;}
+@keyframes crestPing{0%{transform:scale(0.7);opacity:0;}40%{opacity:0.7;}100%{transform:scale(1.5);opacity:0;}}
+.title-youve{position:relative;z-index:3;margin-top:26px;font-size:0.62rem;letter-spacing:4px;text-transform:uppercase;color:var(--muted);opacity:0;}
+.title-overlay.stage-2 .title-youve{animation:titleFadeUp 0.6s ease both;}
+@keyframes titleFadeUp{0%{opacity:0;transform:translateY(12px);}100%{opacity:1;transform:translateY(0);}}
+.title-name{position:relative;z-index:3;font-family:'Bebas Neue',cursive;font-size:3rem;letter-spacing:3px;line-height:1.05;margin-top:6px;text-align:center;opacity:0;transform:scale(0.7);}
+.title-overlay.stage-2 .title-name{
+  background:linear-gradient(90deg,#ffe9a8,#f5c842,#ffd75e,#ffe9a8);background-size:200% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:titleStamp 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.1s both, ccGoldShimmer 2.5s linear infinite;
+}
+@keyframes titleStamp{0%{opacity:0;transform:scale(0.6) rotate(-4deg);}60%{opacity:1;transform:scale(1.15) rotate(2deg);}100%{opacity:1;transform:scale(1) rotate(0);}}
+.title-desc{position:relative;z-index:3;font-size:0.78rem;color:var(--text2);max-width:300px;text-align:center;margin-top:12px;opacity:0;}
+.title-overlay.stage-2 .title-desc{animation:titleFadeUp 0.6s 0.35s ease both;}
+.title-dismiss{position:relative;z-index:3;margin-top:34px;font-size:0.56rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;opacity:0;}
+.title-overlay.stage-2 .title-dismiss{animation:titleFadeUp 0.6s 0.6s ease both;}
+.title-seal{position:relative;z-index:3;margin-top:22px;width:74px;height:74px;opacity:0;}
+.title-overlay.stage-2 .title-seal{animation:titleStamp 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.5s both;}
+.title-seal::before{content:'★';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2rem;color:#f5c842;border-radius:50%;border:2px solid rgba(245,200,66,0.7);background:radial-gradient(circle at 35% 30%,#3a3a26,#17170f);box-shadow:0 0 26px rgba(245,200,66,0.3);}
+.title-seal::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid rgba(245,200,66,0.4);animation:crestPing 1.8s cubic-bezier(0.16,0.84,0.44,1) 0.5s 1;}
+.title-pflag{position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:50%;pointer-events:none;background:#f5c842;box-shadow:0 0 14px #f5c842;opacity:0;z-index:2;}
+.title-overlay.stage-2 .title-pflag{animation:evoParticleFly 1.3s cubic-bezier(0.16,0.84,0.44,1) both;}
+@media (prefers-reduced-motion:reduce){.title-overlay *{animation:none !important;transition:none !important;}.title-overlay{background:rgba(0,0,0,0.96);}}
+
+/* ── EXPEDITION COMPLETE — dossier slides in, objectives check off, wax seal ── */
+.expo-cer{position:fixed;inset:0;z-index:100003;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,0.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);animation:fadeIn 0.4s ease;}
+.expo-cer-paper{position:relative;width:min(330px,88vw);border-radius:22px;padding:26px 22px 30px;text-align:center;background:linear-gradient(170deg,var(--surf),#141417);border:1px solid var(--glass-border);box-shadow:0 30px 80px rgba(0,0,0,0.6);transform:translateY(46px) scale(0.9);opacity:0;}
+.expo-cer.stage-paper .expo-cer-paper{animation:expoPaperIn 0.55s cubic-bezier(0.34,1.56,0.64,1) both;}
+@keyframes expoPaperIn{0%{opacity:0;transform:translateY(60px) scale(0.85) rotate(2deg);}100%{opacity:1;transform:translateY(0) scale(1) rotate(0);}}
+.expo-cer-eyebrow{font-size:0.55rem;letter-spacing:4px;text-transform:uppercase;color:var(--muted);}
+.expo-cer-ico{font-size:2.6rem;margin:12px 0 6px;filter:drop-shadow(0 6px 18px rgba(0,0,0,0.5));}
+.expo-cer-name{font-family:'Bebas Neue',cursive;font-size:1.8rem;letter-spacing:1.5px;color:var(--accent);}
+.expo-cer-desc{font-size:0.7rem;color:var(--text2);margin-top:4px;}
+.expo-cer-goals{display:flex;flex-direction:column;gap:8px;margin:22px 6px 0;text-align:left;max-height:150px;overflow:hidden;}
+.expo-cer-goal{display:flex;align-items:center;gap:10px;font-size:0.72rem;color:var(--text2);opacity:0;transform:translateX(-14px);}
+.expo-cer.stage-tick .expo-cer-goal{animation:expoGoalIn 0.35s cubic-bezier(0.34,1.56,0.64,1) both;}
+@keyframes expoGoalIn{0%{opacity:0;transform:translateX(-14px);}100%{opacity:1;transform:translateX(0);}}
+.expo-cer-goal .gchk{width:20px;height:20px;flex:0 0 20px;border-radius:50%;border:2px solid var(--glass-border);display:flex;align-items:center;justify-content:center;font-size:0.66rem;color:#0a0a0a;font-weight:800;}
+.expo-cer.stage-tick .expo-cer-goal .gchk{background:var(--accent);border-color:var(--accent);}
+.expo-cer-seal{position:relative;width:74px;height:74px;margin:24px auto 0;opacity:0;transform:scale(0.3) rotate(-30deg);}
+.expo-cer.stage-seal .expo-cer-seal{animation:expoSealStamp 0.6s cubic-bezier(0.34,1.56,0.64,1) both;}
+@keyframes expoSealStamp{0%{opacity:0;transform:scale(0.3) rotate(-30deg);}55%{opacity:1;transform:scale(1.25) rotate(8deg);}100%{opacity:1;transform:scale(1) rotate(0);}}
+.expo-cer-seal::before{content:'★';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:#fff;border-radius:50%;background:radial-gradient(circle at 35% 30%,#e07b3a,#b3201c);border:2px solid rgba(255,255,255,0.35);box-shadow:0 6px 24px rgba(179,32,28,0.5),inset 0 2px 4px rgba(255,255,255,0.25);}
+.expo-cer-seal::after{content:'';position:absolute;inset:-14px;border-radius:50%;border:2px dashed rgba(245,200,66,0.6);animation:expoSealRing 2s linear infinite;}
+@keyframes expoSealRing{to{transform:rotate(360deg);}}
+.expo-cer-xp{font-family:'Bebas Neue',cursive;font-size:1.7rem;letter-spacing:1px;color:var(--accent);margin-top:14px;opacity:0;}
+.expo-cer.stage-seal .expo-cer-xp{animation:titleFadeUp 0.5s 0.4s ease both;}
+.expo-cer-archived{font-size:0.58rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:6px;opacity:0;}
+.expo-cer.stage-seal .expo-cer-archived{animation:titleFadeUp 0.5s 0.8s ease both;}
+.expo-cer-dismiss{font-size:0.56rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:24px;opacity:0;}
+.expo-cer.stage-seal .expo-cer-dismiss{animation:titleFadeUp 0.5s 1.0s ease both;}
+.expo-cer-pflag{position:absolute;width:8px;height:8px;border-radius:50%;pointer-events:none;background:var(--accent);box-shadow:0 0 14px var(--accent);opacity:0;}
+.expo-cer.stage-seal .expo-cer-pflag{animation:evoParticleFly 1.2s cubic-bezier(0.16,0.84,0.44,1) both;}
+@media (prefers-reduced-motion:reduce){.expo-cer *{animation:none !important;transition:none !important;}.expo-cer-paper{transform:none;opacity:1;}}
+
+/* ── MANUFACTURER (MARQUE) COMPLETE — gold seal ceremony, finish anim ── */
+.make-cer{position:fixed;inset:0;z-index:100004;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:rgba(0,0,0,0.96);animation:fadeIn 0.4s ease;}
+.make-cer::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1s ease;background:radial-gradient(circle at 50% 45%,rgba(245,200,66,0.3),transparent 55%);}
+.make-cer.stage-2::before{opacity:1;}
+.make-cer::after{content:'';position:absolute;inset:-40%;pointer-events:none;opacity:0;background:conic-gradient(from 0deg,transparent 0%,rgba(245,200,66,0.12) 10%,transparent 24%);animation:evoAuraSpin 8s linear infinite;}
+.make-cer.stage-2::after{opacity:1;}
+.make-cer-panel{position:relative;width:min(320px,86vw);text-align:center;padding:30px 24px 34px;border-radius:24px;background:linear-gradient(170deg,var(--surf),#151208);border:1px solid rgba(245,200,66,0.5);box-shadow:0 0 60px rgba(245,200,66,0.18),0 30px 80px rgba(0,0,0,0.6);transform:translateY(60px) scale(0.86) rotate(-2deg);opacity:0;}
+.make-cer.stage-1 .make-cer-panel{animation:makePanelIn 0.7s cubic-bezier(0.34,1.56,0.64,1) both;}
+@keyframes makePanelIn{0%{opacity:0;transform:translateY(60px) scale(0.86) rotate(-3deg);}60%{opacity:1;transform:translateY(-8px) scale(1.04) rotate(1.5deg);}100%{opacity:1;transform:translateY(0) scale(1) rotate(0);}}
+.make-cer-eyebrow{font-size:0.56rem;letter-spacing:4px;text-transform:uppercase;color:var(--muted);}
+.make-cer-crest{position:relative;width:96px;height:96px;margin:18px auto 8px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.6rem;background:radial-gradient(circle at 35% 30%,#3f3a20,#181305);border:2px solid rgba(245,200,66,0.7);box-shadow:0 0 0 9px rgba(245,200,66,0.08),0 0 40px rgba(245,200,66,0.3),inset 0 0 24px rgba(0,0,0,0.6);}
+.make-cer.stage-2 .make-cer-crest{animation:crestStamp 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;}
+.make-cer-name{font-family:'Bebas Neue',cursive;font-size:2.4rem;letter-spacing:3px;margin-top:6px;opacity:0;transform:scale(0.7);}
+.make-cer.stage-2 .make-cer-name{animation:titleStamp 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.2s both, ccGoldShimmer 2.5s linear infinite;
+  background:linear-gradient(90deg,#ffe9a8,#f5c842,#ffd75e,#ffe9a8);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;}
+.make-cer-stamp{display:inline-block;margin-top:12px;font-size:0.62rem;font-weight:800;letter-spacing:3px;color:#080808;background:linear-gradient(90deg,#f5c842,#ffd75e);padding:7px 20px;border-radius:99px;opacity:0;transform:rotate(-6deg) scale(0.5);}
+.make-cer.stage-2 .make-cer-stamp{animation:titleStamp 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.4s both;}
+.make-cer-pct{font-family:'Bebas Neue',cursive;font-size:3.4rem;letter-spacing:2px;color:#f5c842;line-height:1;margin-top:18px;opacity:0;}
+.make-cer.stage-2 .make-cer-pct{animation:titleFadeUp 0.6s 0.55s ease both;}
+.make-cer-pct small{font-size:1rem;color:var(--muted);letter-spacing:1px;font-family:'Inter',sans-serif;}
+.make-cer-sub{font-size:0.66rem;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-top:8px;opacity:0;}
+.make-cer.stage-2 .make-cer-sub{animation:titleFadeUp 0.6s 0.75s ease both;}
+.make-cer-dismiss{font-size:0.56rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:26px;opacity:0;}
+.make-cer.stage-2 .make-cer-dismiss{animation:titleFadeUp 0.6s 0.95s ease both;}
+.make-cer-pflag{position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:50%;pointer-events:none;background:#f5c842;box-shadow:0 0 14px #f5c842;opacity:0;}
+.make-cer.stage-2 .make-cer-pflag{animation:evoParticleFly 1.3s cubic-bezier(0.16,0.84,0.44,1) both;}
+/* binder slide-in + complete glow for make cards */
+.book-make-card{animation:bookCardIn 0.45s var(--ease) both;}
+@keyframes bookCardIn{0%{opacity:0;transform:translateX(26px) scale(0.96);}100%{opacity:1;transform:none;}}
+.book-make-card.complete{animation:bookCardIn 0.45s var(--ease) both, makeGoldPulse 2.6s ease-in-out 0.6s infinite;}
+@keyframes makeGoldPulse{0%,100%{box-shadow:var(--shadow-sm);}50%{box-shadow:0 0 0 1px rgba(245,200,66,0.5),0 0 26px rgba(245,200,66,0.2);}}
+.book-car-tile.just-spotted{animation:titlePop 0.5s cubic-bezier(0.34,1.56,0.64,1) both, tileGoldFlash 1.4s ease 0.4s 1;}
+@keyframes tileGoldFlash{0%{box-shadow:0 0 0 2px rgba(245,200,66,0.85),0 0 30px rgba(245,200,66,0.45);}100%{box-shadow:0 0 0 0 transparent;}}
+@media (prefers-reduced-motion:reduce){.make-cer *{animation:none !important;transition:none !important;}.make-cer-panel{transform:none;opacity:1;}}
+
+/* ── MYSTERY CAR REVEAL — silhouette glows, cracks, light bursts, card flies in ── */
+.mys-overlay{position:fixed;inset:0;z-index:100005;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:rgba(0,0,0,0.93);animation:fadeIn 0.35s ease;}
+.mys-sil{position:relative;font-size:5rem;filter:brightness(0) drop-shadow(0 0 0 rgba(245,200,66,0));transition:filter 0.6s ease;animation:mysBreath 1.3s ease-in-out infinite;}
+@keyframes mysBreath{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+.mys-overlay.stage-2 .mys-sil{filter:none;animation:mysPop 0.55s cubic-bezier(0.34,1.56,0.64,1) both;}
+@keyframes mysPop{0%{transform:scale(0.5) rotate(-8deg);opacity:0.4;}60%{transform:scale(1.15) rotate(3deg);}100%{transform:scale(1) rotate(0);}}
+.mys-ring{position:absolute;left:50%;top:50%;width:0;height:0;border-radius:50%;border:2px solid rgba(245,200,66,0.7);opacity:0;pointer-events:none;}
+.mys-overlay.stage-2 .mys-ring{animation:mysRing 0.8s cubic-bezier(0.16,0.84,0.44,1) both;}
+@keyframes mysRing{0%{width:0;height:0;opacity:1;}100%{width:300px;height:300px;margin:-150px 0 0 -150px;opacity:0;}}
+.mys-glow{position:absolute;left:50%;top:50%;width:180px;height:180px;margin:-90px 0 0 -90px;border-radius:50%;pointer-events:none;opacity:0;background:radial-gradient(circle,rgba(245,200,66,0.4),transparent 65%);}
+.mys-overlay.stage-1 .mys-glow{animation:mysGlowPulse 1.4s ease-in-out infinite;}
+@keyframes mysGlowPulse{0%,100%{opacity:0.5;transform:scale(1);}50%{opacity:0.9;transform:scale(1.25);}}
+.mys-spark{position:absolute;left:50%;top:50%;width:5px;height:5px;border-radius:50%;pointer-events:none;background:#f5c842;box-shadow:0 0 12px #f5c842;opacity:0;}
+.mys-overlay.stage-1 .mys-spark{animation:evoSparkIn 0.8s ease forwards;}
+.mys-name{position:relative;margin-top:26px;font-family:'Bebas Neue',cursive;font-size:1.7rem;letter-spacing:2px;text-align:center;opacity:0;transform:translateY(14px);}
+.mys-overlay.stage-2 .mys-name{animation:titleFadeUp 0.5s 0.35s ease both;}
+.mys-val{position:relative;font-size:0.66rem;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;text-align:center;margin-top:6px;opacity:0;}
+.mys-overlay.stage-2 .mys-val{animation:titleFadeUp 0.5s 0.5s ease both;}
+.mys-dismiss{position:relative;margin-top:30px;font-size:0.56rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;text-align:center;opacity:0;}
+.mys-overlay.stage-2 .mys-dismiss{animation:titleFadeUp 0.5s 0.7s ease both;}
+.mys-confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.mys-confetti i{position:absolute;top:-12px;width:7px;height:12px;border-radius:2px;opacity:0;}
+.mys-overlay.stage-2 .mys-confetti i{animation:mysFall linear forwards;}
+@keyframes mysFall{0%{opacity:1;transform:translateY(0) rotate(0);}100%{opacity:0.4;transform:translateY(110vh) rotate(540deg);}}
+@media (prefers-reduced-motion:reduce){.mys-overlay *{animation:none !important;transition:none !important;}.mys-sil{filter:none;}}
+
+/* ── ROAD TRIP LAUNCH — ticket tears off, route unrolls, journaled ── */
+.trip-cer{position:fixed;inset:0;z-index:100006;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,0.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);animation:fadeIn 0.4s ease;}
+.trip-cer-ticket{position:relative;width:min(320px,86vw);background:linear-gradient(170deg,var(--surf),#141417);border:1px solid var(--glass-border);border-radius:18px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.6);transform:translateY(40px) rotate(-3deg);opacity:0;}
+.trip-cer.stage-1 .trip-cer-ticket{animation:ticketIn 0.55s cubic-bezier(0.34,1.56,0.64,1) both;}
+@keyframes ticketIn{0%{opacity:0;transform:translateY(60px) rotate(-5deg) scale(0.9);}60%{opacity:1;transform:translateY(-6px) rotate(1.5deg) scale(1.02);}100%{opacity:1;transform:translateY(0) rotate(0) scale(1);}}
+.trip-cer-head{display:flex;align-items:center;gap:14px;padding:20px 20px 16px;background:linear-gradient(180deg,rgba(96,165,250,0.08),transparent);border-bottom:1px dashed var(--border2);}
+.trip-cer-ico{font-size:2.4rem;filter:drop-shadow(0 6px 16px rgba(0,0,0,0.5));}
+.trip-cer-eyebrow{font-size:0.5rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);}
+.trip-cer-name{font-family:'Bebas Neue',cursive;font-size:1.6rem;letter-spacing:1.5px;color:#7cb3ff;}
+.trip-cer-ticket::after{content:'';position:absolute;left:0;right:0;bottom:0;height:16px;opacity:0.7;
+  background-image:radial-gradient(circle at 8px -2px,transparent 8px,var(--surf2) 8.5px);background-size:16px 16px;background-position:0 6px;}
+.trip-cer-body{padding:18px 20px 30px;text-align:center;}
+.trip-cer-route{display:flex;align-items:center;justify-content:center;gap:10px;font-size:0.72rem;color:var(--text2);letter-spacing:1px;}
+.trip-cer-route .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);animation:crestPing 1.6s ease-in-out infinite;}
+.trip-cer-line{height:2px;width:70px;background:var(--border2);position:relative;overflow:hidden;}
+.trip-cer-line::after{content:'';position:absolute;inset:0;background:var(--accent);transform:translateX(-100%);animation:tripUnroll 0.8s ease 0.5s both;}
+@keyframes tripUnroll{0%{transform:translateX(-100%);}100%{transform:translateX(0);}}
+.trip-cer-sub{font-size:0.62rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:16px;opacity:0;}
+.trip-cer.stage-2 .trip-cer-sub{animation:titleFadeUp 0.5s 0.2s ease both;}
+.trip-cer-dismiss{font-size:0.56rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:14px;opacity:0;}
+.trip-cer.stage-2 .trip-cer-dismiss{animation:titleFadeUp 0.5s 0.5s ease both;}
+/* scrapbook detail sheet polish */
+.trip-detail-panel{animation:tripSheetIn 0.4s var(--ease) both;}
+@keyframes tripSheetIn{0%{opacity:0;transform:translateY(18px);}100%{opacity:1;transform:translateY(0);}}
+.trip-run-row{animation:fadeUp 0.3s var(--ease) both;}
+@media (prefers-reduced-motion:reduce){.trip-cer *{animation:none !important;transition:none !important;}.trip-cer-ticket{transform:none;opacity:1;}}
+
 </style>
 
 </head>
@@ -3511,6 +3727,69 @@ function playSound(type) {
         o2.start(ctx.currentTime + i * 0.16);
         o2.stop(ctx.currentTime + i * 0.16 + 0.06);
       });
+    } else if (type === 'charge') {
+      // Rising energy charge — two climbing oscillators
+      [220, 330, 440, 660].forEach((freq, i) => {
+        const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+        o2.connect(g2); g2.connect(ctx.destination);
+        o2.type = 'sine';
+        o2.frequency.value = freq;
+        g2.gain.setValueAtTime(0, ctx.currentTime + i * 0.16);
+        g2.gain.linearRampToValueAtTime(0.1, ctx.currentTime + i * 0.16 + 0.08);
+        g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.16 + 0.5);
+        o2.start(ctx.currentTime + i * 0.16);
+        o2.stop(ctx.currentTime + i * 0.16 + 0.5);
+      });
+    } else if (type === 'crack') {
+      // Glass / border shatter — noisy square gliss down
+      [1400, 950, 620, 320].forEach((freq, i) => {
+        const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+        o2.connect(g2); g2.connect(ctx.destination);
+        o2.type = 'square';
+        o2.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.02);
+        o2.frequency.exponentialRampToValueAtTime(freq * 0.4, ctx.currentTime + i * 0.02 + 0.12);
+        g2.gain.setValueAtTime(0, ctx.currentTime + i * 0.02);
+        g2.gain.linearRampToValueAtTime(0.11, ctx.currentTime + i * 0.02 + 0.005);
+        g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.02 + 0.14);
+        o2.start(ctx.currentTime + i * 0.02);
+        o2.stop(ctx.currentTime + i * 0.02 + 0.15);
+      });
+    } else if (type === 'tick') {
+      // Sharp checkbox blip
+      const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+      o2.connect(g2); g2.connect(ctx.destination);
+      o2.type = 'square';
+      o2.frequency.setValueAtTime(1250, ctx.currentTime);
+      o2.frequency.exponentialRampToValueAtTime(1650, ctx.currentTime + 0.04);
+      g2.gain.setValueAtTime(0, ctx.currentTime);
+      g2.gain.linearRampToValueAtTime(0.08, ctx.currentTime + 0.008);
+      g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
+      o2.start(ctx.currentTime);
+      o2.stop(ctx.currentTime + 0.08);
+    } else if (type === 'promote') {
+      // Triumphant fanfare — ascending major arpeggio + shimmer
+      [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+        const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+        o2.connect(g2); g2.connect(ctx.destination);
+        o2.type = 'triangle';
+        o2.frequency.value = freq;
+        g2.gain.setValueAtTime(0, ctx.currentTime + i * 0.14);
+        g2.gain.linearRampToValueAtTime(0.13, ctx.currentTime + i * 0.14 + 0.02);
+        g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.14 + 0.5);
+        o2.start(ctx.currentTime + i * 0.14);
+        o2.stop(ctx.currentTime + i * 0.14 + 0.5);
+      });
+      [1046.5, 1318.5].forEach((freq, i) => {
+        const o2 = ctx.createOscillator(), g2 = ctx.createGain();
+        o2.connect(g2); g2.connect(ctx.destination);
+        o2.type = 'sine';
+        o2.frequency.value = freq;
+        g2.gain.setValueAtTime(0, ctx.currentTime + 0.62 + i * 0.1);
+        g2.gain.linearRampToValueAtTime(0.06, ctx.currentTime + 0.62 + i * 0.1 + 0.02);
+        g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.62 + i * 0.1 + 0.8);
+        o2.start(ctx.currentTime + 0.62 + i * 0.1);
+        o2.stop(ctx.currentTime + 0.62 + i * 0.1 + 0.8);
+      });
     }
   } catch(e) {}
 }
@@ -3712,7 +3991,7 @@ function renderHomeFav(){
   if(!favs.length){document.getElementById('favSection').style.display='none';return}
   var html=favs.map(function(c){var json=JSON.stringify(c).replace(/"/g,'&quot;');var img=c.photo?'<img class="fav-item-img" src="'+c.photo+'" onerror="this.style.display='+"'none'"+'">':'<div class="fav-item-ph"><i class="fas fa-star"></i></div>';return'<div class="fav-item" onclick="showCarInstances('+json+')">'+img+'<div class="fav-item-name">'+c.name.split(' ').pop()+'</div><div class="fav-item-val">$'+((c.value||0).toLocaleString())+'</div></div>'}).join('');el.innerHTML=html;document.getElementById('favSection').style.display='block';
 }
-function startFavRotation(){if(favTimer)clearInterval(favTimer);var all=getAllCars();var favs=all.filter(function(c){return favoriteNames.has(c.name)}).sort(function(a,b){return b.value-a.value});if(favs.length<2)return;favIdx=0;var scroller=document.getElementById('favList');if(!scroller)return;favTimer=setInterval(function(){favIdx=(favIdx+1)%favs.length;var child=scroller.children[favIdx];if(child)child.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'})},4000);}
+function startFavRotation(){if(favTimer)clearInterval(favTimer);var all=getAllCars();var favs=all.filter(function(c){return favoriteNames.has(c.name)}).sort(function(a,b){return b.value-a.value});if(favs.length<2)return;favIdx=0;var scroller=document.getElementById('favList');if(!scroller)return;favTimer=setInterval(function(){favIdx=(favIdx+1)%favs.length;var child=scroller.children[favIdx];if(child){var target=child.offsetLeft-scroller.clientWidth/2+child.clientWidth/2;scroller.scrollTo({left:Math.max(0,target),behavior:'smooth'});}},4000);}
 function stopFavRotation(){if(favTimer){clearInterval(favTimer);favTimer=null}}
 
 //  NAV 
@@ -3909,6 +4188,7 @@ function logRun() {
   var photo = getPhotoAndClear();
   var car = attachPendingLocation({ name:name, value:input.value, color:input.color, type:input.type, ts:Date.now(), ...(photo ? {photo} : {}) });
   currentRun.push(car);
+  _lastSpottedName = name;
   saveToQP(car);
   saveCurrentRun();
   fetchAndStoreRefImage(car);
@@ -3938,6 +4218,7 @@ function logSpotted() {
   var isFirst = !carExistsAnywhere(name);
   var entry = { id:Date.now(), date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), total:input.value, spotted:true, cars:[car] };
   allRuns.unshift(entry);
+  _lastSpottedName = name;
   _saveRunsLocal();
   saveToCloud();
   fetchAndStoreRefImage(car);
@@ -7602,18 +7883,61 @@ function checkTitleUnlock(silent) {
   if (silent) return;
   var chip = document.getElementById('levelTitleSlot');
   if (chip) { chip.classList.remove('new-title'); void chip.offsetWidth; chip.classList.add('new-title'); }
-  showTitleUp(cur);
+  enqueueCeremony(function(done){ showTitleUp(cur, done); });
 }
-function showTitleUp(title) {
-  enqueueMoment({
-    emoji: title.emoji,
-    eyebrow: 'New Spotter Title Unlocked',
-    title: title.name,
-    desc: title.desc,
-    sub: 'Your rank in the spotters\u2019 guild',
-    colors: ['#f5c842', '#ffd75e', '#fff', '#ff5733'],
-    particles: 16
-  });
+function showTitleUp(title, done) {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    enqueueMoment({
+      emoji: title.emoji,
+      eyebrow: 'New Spotter Title Unlocked',
+      title: title.name,
+      desc: title.desc,
+      sub: 'Your rank in the spotters\u2019 guild',
+      colors: ['#f5c842', '#ffd75e', '#fff', '#ff5733'],
+      particles: 16
+    });
+    if (done) done();
+    return;
+  }
+  var overlay = document.createElement('div');
+  overlay.className = 'title-overlay';
+  overlay.innerHTML =
+    '<div class="title-halo"></div>' +
+    '<div class="title-old">' + (SPOTTER_TITLES[0].emoji) + ' ' + SPOTTER_TITLES[0].name + ' &#8594; ' + title.emoji + ' ' + title.name + '</div>' +
+    '<div class="title-crest">' + title.emoji + '<div class="title-crest-glow"></div></div>' +
+    '<div class="title-youve">Promotion Earned</div>' +
+    '<div class="title-name">' + title.name + '</div>' +
+    '<div class="title-desc">' + title.desc + '</div>' +
+    '<div class="title-seal"></div>' +
+    '<div class="title-dismiss">Tap to continue</div>';
+  document.body.appendChild(overlay);
+
+  // golden particles bursting from the crest
+  for (var p = 0; p < 18; p++) {
+    var pt = document.createElement('div');
+    pt.className = 'title-pflag';
+    var a = (Math.PI * 2 * p) / 18 + Math.random() * 0.5;
+    var d = 90 + Math.random() * 130;
+    pt.style.setProperty('--px', (Math.cos(a) * d).toFixed(0) + 'px');
+    pt.style.setProperty('--py', (Math.sin(a) * d).toFixed(0) + 'px');
+    pt.style.animationDelay = (0.5 + Math.random() * 0.8) + 's';
+    overlay.appendChild(pt);
+  }
+
+  var closed = false;
+  function close() {
+    if (closed) return;
+    closed = true;
+    overlay.style.transition = 'opacity 0.35s ease';
+    overlay.style.opacity = '0';
+    setTimeout(function(){ if (overlay.parentNode) overlay.parentNode.removeChild(overlay); if (done) done(); }, 360);
+  }
+  overlay.onclick = function(){ if (overlay.classList.contains('stage-2')) close(); else overlay.classList.add('stage-2'); };
+
+  setTimeout(function(){ playSound('promote'); haptic([30, 40, 30, 60]); }, 250);
+  setTimeout(function(){ overlay.classList.add('stage-1'); }, 500);
+  setTimeout(function(){ overlay.classList.add('stage-2'); playSound('collect'); haptic([50, 60, 80]); }, 1500);
+  setTimeout(close, 8200);
 }
 
 // ---- COLLECTOR BOOK — built from CAR_AC_DB + the user's garage ----
@@ -7629,9 +7953,9 @@ function _spottedNames() {
   _allSpottedFlat().forEach(function(c){ s.add(_modelKey(c.name)); });
   return s;
 }
+var _lastSpottedName = '';
 function bookMakeStats() {
-  var spotted = _spottedNames();
-  var byMake = {};
+  var spotted = _spottedNames();  var byMake = {};
   function bucket(mk) {
     if (!byMake[mk]) byMake[mk] = { make: mk, total: 0, found: 0, models: [] };
     return byMake[mk];
@@ -7711,9 +8035,10 @@ function openMakeSheet(make) {
   var tiles = s.models.map(function(m, i){
     var key = _modelKey(m.name);
     var peeking = _progress.mysteryPeeked[key];
+    var just = _lastSpottedName && _modelKey(m.name) === _modelKey(_lastSpottedName) ? ' just-spotted' : '';
     if (m.found) {
       var photo = _idbPhotoCache[key] || '';
-      return '<div class="book-car-tile spotted" style="animation-delay:' + (i * 0.02) + 's" onclick="openDiscovery(\'' + jsEscape(m.name) + '\',' + m.val + ',\'' + (m.type || '') + '\')">' +
+      return '<div class="book-car-tile spotted' + just + '" style="animation-delay:' + (i * 0.02) + 's" onclick="openDiscovery(\'' + jsEscape(m.name) + '\',' + m.val + ',\'' + (m.type || '') + '\')">' +
         (photo ? '<img class="bct-img" src="' + photo + '" alt="">' : '<div class="bct-ph">' + tierEmoji(tierOf(m.val)) + '</div>') +
         '<div class="bct-name">' + m.name + '</div>' +
         '<div class="bct-meta">' + fmt(m.val) + ' · spotted</div>' +
@@ -7735,29 +8060,156 @@ function openMakeSheet(make) {
       '<div class="book-sil-grid">' + tiles + '</div>' +
     '</div>';
   document.body.appendChild(overlay);
+  _lastSpottedName = '';
 }
 function peekMystery(name) {
   var key = _modelKey(name);
+  if (_progress.mysteryPeeked[key]) {
+    _progress.mysteryPeeked[key] = true;
+    saveProgress();
+    playSound('shutter');
+    haptic(20);
+    // Rebuild the sheet that contains this tile
+    var sheet = document.querySelector('.book-make-sheet');
+    if (sheet) {
+      var make = '';
+      var stats = bookMakeStats();
+      for (var i = 0; i < stats.length; i++) {
+        if (stats[i].models.some(function(m){ return _modelKey(m.name) === key; })) { make = stats[i].make; break; }
+      }
+      sheet.remove();
+      openMakeSheet(make);
+    }
+    return;
+  }
+  var info = _mysteryInfo(name);
+  if (!info) return;
   _progress.mysteryPeeked[key] = true;
   saveProgress();
-  playSound('shutter');
-  haptic(20);
-  // Rebuild the sheet that contains this tile
-  var sheet = document.querySelector('.book-make-sheet');
-  if (sheet) {
-    var make = '';
-    var stats = bookMakeStats();
-    for (var i = 0; i < stats.length; i++) {
-      if (stats[i].models.some(function(m){ return _modelKey(m.name) === key; })) { make = stats[i].make; break; }
-    }
-    sheet.remove();
-    openMakeSheet(make);
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    playSound('shutter');
+    haptic(20);
+    var sheet2 = document.querySelector('.book-make-sheet');
+    if (sheet2) { sheet2.remove(); openMakeSheet(info.make); }
+    return;
   }
+  enqueueCeremony(function(done){ celebrateMystery(name, info, done); });
+}
+function _mysteryInfo(name) {  var stats = bookMakeStats();
+  for (var i = 0; i < stats.length; i++) {
+    var mk = stats[i];
+    for (var j = 0; j < mk.models.length; j++) {
+      if (_modelKey(mk.models[j].name) === _modelKey(name)) {
+        return { make: mk.make, name: mk.models[j].name, val: mk.models[j].val, type: mk.models[j].type };
+      }
+    }
+  }
+  return null;
+}
+function celebrateMystery(name, info, done) {
+  if (document.querySelector('.mys-overlay')) return;
+  var overlay = document.createElement('div');
+  overlay.className = 'mys-overlay';
+  overlay.innerHTML =
+    '<div class="mys-glow"></div>' +
+    '<div class="mys-sil">' + tierEmoji(tierOf(info.val)) + '</div>' +
+    '<div class="mys-ring"></div>' +
+    '<div class="mys-name">' + info.name + '</div>' +
+    '<div class="mys-val">' + fmt(info.val) + ' · ' + info.make + '</div>' +
+    '<div class="mys-confetti"></div>' +
+    '<div class="mys-dismiss">Tap to continue</div>';
+  document.body.appendChild(overlay);
+
+  // charging sparks
+  for (var s = 0; s < 12; s++) {
+    var sp = document.createElement('div');
+    sp.className = 'mys-spark';
+    var a = (Math.PI * 2 * s) / 12 + Math.random() * 0.4;
+    var d = 70 + Math.random() * 50;
+    sp.style.setProperty('--sx', (Math.cos(a) * d).toFixed(0) + 'px');
+    sp.style.setProperty('--sy', (Math.sin(a) * d).toFixed(0) + 'px');
+    sp.style.animationDelay = (Math.random() * 0.6) + 's';
+    overlay.appendChild(sp);
+  }
+  // confetti rain after reveal
+  var confetti = overlay.querySelector('.mys-confetti');
+  var cols = ['#f5c842','#ffd75e','#ff5733','#60a5fa','#4ade80'];
+  for (var c = 0; c < 26; c++) {
+    var fl = document.createElement('i');
+    fl.style.left = (Math.random() * 100) + '%';
+    fl.style.background = cols[c % cols.length];
+    fl.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
+    fl.style.animationDelay = (Math.random() * 1.2) + 's';
+    confetti.appendChild(fl);
+  }
+
+  var closed = false;
+  function close() {
+    if (closed) return;
+    closed = true;
+    overlay.style.transition = 'opacity 0.35s ease';
+    overlay.style.opacity = '0';
+    setTimeout(function(){ if (overlay.parentNode) overlay.parentNode.removeChild(overlay); if (done) done(); }, 360);
+    var sheet = document.querySelector('.book-make-sheet');
+    if (sheet) sheet.remove();
+    openMakeSheet(info.make);
+  }
+  overlay.onclick = function(){ if (overlay.classList.contains('stage-2')) close(); else overlay.classList.add('stage-2'); };
+
+  setTimeout(function(){ overlay.classList.add('stage-1'); playSound('charge'); haptic([15, 25, 35]); }, 200);
+  setTimeout(function(){ overlay.classList.add('stage-2'); playSound('shutter'); playSound('collect'); haptic([40, 60, 45]); }, 1600);
+  setTimeout(close, 5600);
 }
 function showBookAllShelf() {
   // Opens a combined sheet with every make stacked — foundation: reuse per-make grid via prompt-less nav
   renderBook();
   showToast('📖 Collector Book refreshed');
+}
+
+function celebrateMakeComplete(stats, done) {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    showMilestoneToast({ icon:'🏁', title:'Marque Completed!', desc:'You finished ' + stats.make + ' — all ' + stats.total + ' models.' });
+    if (done) done();
+    return;
+  }
+  var overlay = document.createElement('div');
+  overlay.className = 'make-cer';
+  overlay.innerHTML =
+    '<div class="make-cer-panel">' +
+      '<div class="make-cer-eyebrow">Manufacturer Complete</div>' +
+      '<div class="make-cer-crest">🏁</div>' +
+      '<div class="make-cer-name">' + stats.make + '</div>' +
+      '<div class="make-cer-stamp">100% COMPLETE</div>' +
+      '<div class="make-cer-pct">' + stats.total + '<small> models found</small></div>' +
+      '<div class="make-cer-sub">Every ' + stats.make + ' is now in your collector book</div>' +
+      '<div class="make-cer-dismiss">Tap to continue</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+
+  for (var p = 0; p < 26; p++) {
+    var pt = document.createElement('div');
+    pt.className = 'make-cer-pflag';
+    var a = (Math.PI * 2 * p) / 26 + Math.random() * 0.5;
+    var d = 90 + Math.random() * 150;
+    pt.style.setProperty('--px', (Math.cos(a) * d).toFixed(0) + 'px');
+    pt.style.setProperty('--py', (Math.sin(a) * d).toFixed(0) + 'px');
+    pt.style.animationDelay = (0.6 + Math.random() * 0.6) + 's';
+    overlay.appendChild(pt);
+  }
+
+  var closed = false;
+  function close() {
+    if (closed) return;
+    closed = true;
+    overlay.style.transition = 'opacity 0.35s ease';
+    overlay.style.opacity = '0';
+    setTimeout(function(){ if (overlay.parentNode) overlay.parentNode.removeChild(overlay); if (done) done(); }, 360);
+  }
+  overlay.onclick = function(){ if (overlay.classList.contains('stage-2')) close(); else overlay.classList.add('stage-2'); };
+
+  setTimeout(function(){ overlay.classList.add('stage-1'); playSound('collect'); haptic([25]); }, 150);
+  setTimeout(function(){ overlay.classList.add('stage-2'); playSound('promote'); haptic([40, 60, 50]); }, 1200);
+  setTimeout(close, 8500);
 }
 
 // ---- EXPEDITIONS — themed spotting challenges with one-time XP rewards ----
@@ -7840,10 +8292,13 @@ function claimExpo(id) {
   renderExpeditions();
   renderLevelBar();
   checkTitleUnlock();
-  if (ex) {
+  var isExpo = !!(ex && EXPEDITIONS.some(function(e){ return e.id === id; }));
+  if (ex && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    enqueueCeremony(function(done){ celebrateExpo(ex, isExpo, done); });
+  } else if (ex) {
     enqueueMoment({
       emoji: ex.icon,
-      eyebrow: ex.name && EXPEDITIONS.some(function(e){ return e.id === id; }) ? 'Expedition Complete' : 'Achievement Unlocked',
+      eyebrow: isExpo ? 'Expedition Complete' : 'Achievement Unlocked',
       title: ex.name,
       desc: 'Mission accomplished — +' + (ex.xp || 0) + ' XP banked.',
       sub: ex.desc,
@@ -7853,6 +8308,81 @@ function claimExpo(id) {
   }
   showToast('🗺️ Challenge complete! +' + (ex ? (ex.xp || 0) : 0) + ' XP');
   playSound('end');
+}
+
+function celebrateExpo(ex, isExpo, done) {
+  if (document.querySelector('.expo-cer')) return;
+  var overlay = document.createElement('div');
+  overlay.className = 'expo-cer';
+  var goalLabel = isExpo ? 'EXPEDITION COMPLETE' : 'ACHIEVEMENT UNLOCKED';
+  var goals = '';
+  var goalN = Math.min(ex.goal || 1, 8);
+  for (var i = 0; i < goalN; i++) {
+    goals += '<div class="expo-cer-goal"><div class="gchk">✓</div><span>' + (isExpo ? 'Objective ' + (i + 1) : 'Complete') + '</span></div>';
+  }
+  overlay.innerHTML =
+    '<div class="expo-cer-paper">' +
+      '<div class="expo-cer-eyebrow">' + goalLabel + '</div>' +
+      '<div class="expo-cer-ico">' + ex.icon + '</div>' +
+      '<div class="expo-cer-name">' + ex.name + '</div>' +
+      '<div class="expo-cer-desc">' + ex.desc + '</div>' +
+      '<div class="expo-cer-goals">' + goals + '</div>' +
+      '<div class="expo-cer-seal"></div>' +
+      '<div class="expo-cer-xp" data-goal="' + (ex.xp || 0) + '">+0 XP</div>' +
+      '<div class="expo-cer-archived">Added to your archive</div>' +
+      '<div class="expo-cer-dismiss">Tap to continue</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+
+  for (var p = 0; p < 22; p++) {
+    var pt = document.createElement('div');
+    pt.className = 'expo-cer-pflag';
+    var a = (Math.PI * 2 * p) / 22 + Math.random() * 0.5;
+    var d = 80 + Math.random() * 120;
+    pt.style.setProperty('--px', (Math.cos(a) * d).toFixed(0) + 'px');
+    pt.style.setProperty('--py', (Math.sin(a) * d).toFixed(0) + 'px');
+    pt.style.animationDelay = (Math.random() * 0.4) + 's';
+    overlay.appendChild(pt);
+  }
+
+  var closed = false;
+  function close() {
+    if (closed) return;
+    closed = true;
+    overlay.style.transition = 'opacity 0.35s ease';
+    overlay.style.opacity = '0';
+    setTimeout(function(){ if (overlay.parentNode) overlay.parentNode.removeChild(overlay); if (done) done(); }, 360);
+  }
+  overlay.onclick = function(){ if (overlay.classList.contains('stage-seal')) close(); else overlay.classList.add('stage-seal'); };
+
+  setTimeout(function(){ overlay.classList.add('stage-paper'); playSound('collect'); }, 150);
+  setTimeout(function(){ overlay.classList.add('stage-tick'); }, 550);
+  var goalEls = overlay.querySelectorAll('.expo-cer-goal');
+  goalEls.forEach(function(g, i){
+    setTimeout(function(){
+      g.style.animationDelay = '0s';
+      playSound('tick');
+      haptic([12]);
+    }, 700 + i * 320);
+  });
+  var tickDone = 700 + goalEls.length * 320;
+  setTimeout(function(){
+    overlay.classList.add('stage-seal');
+    playSound('end');
+    haptic([40, 50, 30]);
+    var xpEl = overlay.querySelector('.expo-cer-xp');
+    if (xpEl) {
+      var target = parseInt(xpEl.getAttribute('data-goal') || '0', 10);
+      var start = Date.now();
+      var xpTimer = setInterval(function(){
+        var t = Math.min(1, (Date.now() - start) / 900);
+        var val = Math.round(target * (t * (2 - t)));
+        xpEl.textContent = '+' + val + ' XP';
+        if (t >= 1) clearInterval(xpTimer);
+      }, 40);
+    }
+  }, tickDone + 200);
+  setTimeout(close, tickDone + 4500);
 }
 
 // ---- ROAD TRIPS — journal runs into named journeys ----
@@ -7867,8 +8397,47 @@ function createTrip() {
   saveProgress();
   nameEl.value = '';
   renderTrips();
-  showToast('🛣️ ' + name + ' launched! Runs will be added to it.');
   playSound('log');
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    showToast('🛣️ ' + name + ' launched! Runs will be added to it.');
+    return;
+  }
+  enqueueCeremony(function(done){ celebrateTripLaunch(trip, done); });
+}
+function celebrateTripLaunch(trip, done) {
+  if (document.querySelector('.trip-cer')) return;
+  var overlay = document.createElement('div');
+  overlay.className = 'trip-cer';
+  overlay.innerHTML =
+    '<div class="trip-cer-ticket">' +
+      '<div class="trip-cer-head">' +
+        '<div class="trip-cer-ico">' + trip.emoji + '</div>' +
+        '<div>' +
+          '<div class="trip-cer-eyebrow">Road Trip Launched</div>' +
+          '<div class="trip-cer-name">' + escapeHtml(trip.name) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="trip-cer-body">' +
+        '<div class="trip-cer-route"><span class="dot"></span><div class="trip-cer-line"></div><span class="trip-cer-route-end">🏁</span></div>' +
+        '<div class="trip-cer-sub">Every completed run is now journaled into this trip</div>' +
+        '<div class="trip-cer-dismiss">Tap to continue</div>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+
+  var closed = false;
+  function close() {
+    if (closed) return;
+    closed = true;
+    overlay.style.transition = 'opacity 0.35s ease';
+    overlay.style.opacity = '0';
+    setTimeout(function(){ if (overlay.parentNode) overlay.parentNode.removeChild(overlay); if (done) done(); }, 360);
+  }
+  overlay.onclick = function(){ if (overlay.classList.contains('stage-2')) close(); else overlay.classList.add('stage-2'); };
+
+  setTimeout(function(){ overlay.classList.add('stage-1'); playSound('charge'); haptic([20, 30]); }, 150);
+  setTimeout(function(){ overlay.classList.add('stage-2'); playSound('collect'); haptic([30, 40, 30]); }, 1150);
+  setTimeout(close, 6500);
 }
 function attachRunToTrip(run) {
   if (!run || !run.id) return;
@@ -8047,10 +8616,19 @@ function checkMilestones(car) {
   if (!_progress.milestones.first_legend && car && car.value >= 1000000) { _progress.milestones.first_legend = Date.now(); fired.push({ id:'first_legend', icon:'👑', title:'Legend Sighted!', desc:'A $1M+ masterpiece joins the garage.' }); }
   // First hyper
   if (!_progress.milestones.first_hyper && car && car.value >= 500000 && car.value < 1000000) { _progress.milestones.first_hyper = Date.now(); fired.push({ id:'first_hyper', icon:'🔥', title:'Hypercar Down!', desc:'$500K+ spotted in the wild.' }); }
-  // First completed make
+  // First completed make — each marque gets its own full ceremony
   var stats = bookMakeStats();
   var completed = stats.filter(function(s){ return s.found === s.total && s.total > 0; }).length;
-  if (!_progress.milestones.first_make_complete && completed >= 1) { _progress.milestones.first_make_complete = Date.now(); fired.push({ id:'first_make_complete', icon:'🏁', title:'Marque Completed!', desc:'You finished a full manufacturer shelf.' }); }
+  if (completed >= 1) {
+    stats.forEach(function(s){
+      if (s.found !== s.total || s.total <= 0) return;
+      var mkKey = 'make_done_' + s.make.toLowerCase().replace(/[^a-z0-9]/g,'_');
+      if (!_progress.milestones[mkKey]) {
+        _progress.milestones[mkKey] = Date.now();
+        (function(st){ setTimeout(function(){ enqueueCeremony(function(done){ celebrateMakeComplete(st, done); }); }, 1200); })(s);
+      }
+    });
+  }
   if (fired.length) {
     saveProgress();
     fired.forEach(function(m, i){ setTimeout(function(){ showMilestoneToast(m); }, i * 2200); });
@@ -8076,8 +8654,10 @@ function enqueueMoment(cfg) {
 }
 function pumpMoment() {
   if (_momentBusy || !_momentQueue.length) return;
-  // Let the collector card / quick chip finish first — moments queue behind it
-  if (document.querySelector('.cc-overlay') || document.querySelector('.cc-quick')) {
+  // Let the collector card / quick chip / ceremonies finish first — moments queue behind
+  if (document.querySelector('.cc-overlay') || document.querySelector('.cc-quick') ||
+      document.querySelector('.evo-overlay') || document.querySelector('.title-overlay') ||
+      document.querySelector('.expo-cer') || document.querySelector('.make-cer')) {
     setTimeout(pumpMoment, 250);
     return;
   }
@@ -8146,6 +8726,26 @@ function showMoment(cfg, done) {
   setTimeout(close, 6500);
 }
 
+// ---- CEREMONY QUEUE — big overlays chain one-at-a-time behind cards/moments ----
+var _cerQueue = [];
+var _cerBusy = false;
+function enqueueCeremony(fn) {
+  _cerQueue.push(fn);
+  pumpCeremony();
+}
+function pumpCeremony() {
+  if (_cerBusy || !_cerQueue.length) return;
+  var blockers = ['.cc-overlay', '.cc-quick', '.moment-overlay', '.levelup-overlay',
+    '.evo-overlay', '.title-overlay', '.expo-cer', '.make-cer', '.mys-overlay', '.trip-cer'];
+  var blocked = blockers.some(function(sel){ return document.querySelector(sel); });
+  if (blocked) { setTimeout(pumpCeremony, 250); return; }
+  _cerBusy = true;
+  var fn = _cerQueue.shift();
+  var done = function(){ _cerBusy = false; setTimeout(pumpCeremony, 400); };
+  try { fn(done); } catch(e) { _cerBusy = false; setTimeout(pumpCeremony, 400); }
+}
+window.enqueueCeremony = enqueueCeremony;
+
 // ---- COLLECTOR CARD EVOLUTION — celebrate each tier-up once per model ----
 function checkEvolutionUnlock(car) {
   if (!car || !car.name) return;
@@ -8160,16 +8760,129 @@ function checkEvolutionUnlock(car) {
     _progress.milestones[key] = lit;
     saveProgress();
     var tier = EVOLUTION_TIERS[lit - 1];
-    enqueueMoment({
-      emoji: tier.icon,
-      eyebrow: 'Collector Card Evolution',
-      title: tier.name + ' Card',
-      desc: car.name + ' now grades at ' + tier.name + ' — spotted ' + ev.count + ' times.',
-      sub: 'Your collector card is grading up',
-      colors: [tier.color, '#ffffff', '#f5c842'],
-      particles: 18
-    });
+    var oldTier = (lit > 1) ? EVOLUTION_TIERS[lit - 2] : EVOLUTION_TIERS[0];
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      enqueueMoment({
+        emoji: tier.icon,
+        eyebrow: 'Collector Card Evolution',
+        title: tier.name + ' Card',
+        desc: car.name + ' now grades at ' + tier.name + ' — spotted ' + ev.count + ' times.',
+        sub: 'Your collector card is grading up',
+        colors: [tier.color, '#ffffff', '#f5c842'],
+        particles: 18
+      });
+      return;
+    }
+    enqueueCeremony(function(done){ celebrateEvolution(car, oldTier, tier, ev.count, done); });
   }
+}
+
+function celebrateEvolution(car, oldTier, newTier, count, done) {
+  if (document.querySelector('.evo-overlay')) return;
+  var photo = car.photo || (_idbPhotoCache[car.name.toLowerCase()] || '');
+  var imgHTML = photo
+    ? '<img src="' + photo + '" alt="" onerror="this.parentElement.innerHTML=\'' + tierEmoji(tierOf(car.value || 0)) + '\'">'
+    : tierEmoji(tierOf(car.value || 0));
+  var typeName = ({
+    supercar:'Supercar', sports:'Sports Car', muscle:'Muscle', track:'Track',
+    exotic:'Exotic', ev:'EV', luxury:'Luxury', suv:'SUV', classic:'Classic', hotrod:'Hot Rod'
+  }[car.type] || 'Car').toUpperCase();
+
+  var overlay = document.createElement('div');
+  overlay.className = 'evo-overlay';
+  overlay.style.setProperty('--evo-ring', newTier.color);
+  overlay.style.setProperty('--evo-old', oldTier.color);
+  overlay.innerHTML =
+    '<div class="evo-aura"></div>' +
+    '<div class="evo-eyebrow">Collector Card Evolution</div>' +
+    '<div class="evo-card-wrap"><div class="evo-card">' +
+      '<div class="evo-card-img">' + imgHTML + '</div>' +
+      '<div class="evo-badge">' + oldTier.icon + ' ' + oldTier.name + '</div>' +
+      '<div class="evo-card-label">' +
+        '<div class="evo-card-type">' + typeName + '</div>' +
+        '<div class="evo-card-name">' + escapeHtml(car.name) + '</div>' +
+      '</div>' +
+      '<div class="evo-foil"></div>' +
+      '<div class="evo-cracks"></div>' +
+    '</div></div>' +
+    '<div class="evo-flash"></div>' +
+    '<div class="evo-ring-burst"></div>' +
+    '<div class="evo-land-dust"></div>' +
+    '<div class="evo-title">' + newTier.icon + ' ' + newTier.name.toUpperCase() + ' CARD</div>' +
+    '<div class="evo-sub">' + car.name + ' · spotted ' + count + 'x · +1 tier</div>';
+  document.body.appendChild(overlay);
+
+  var closed = false;
+  function close() {
+    if (closed) return;
+    closed = true;
+    overlay.style.transition = 'opacity 0.35s ease';
+    overlay.style.opacity = '0';
+    setTimeout(function(){ if (overlay.parentNode) overlay.parentNode.removeChild(overlay); if (done) done(); }, 360);
+  }
+  overlay.onclick = function(){ if (overlay.classList.contains('stage-celebrate')) close(); else { overlay.classList.add('stage-celebrate'); } };
+
+  // Cracks: lightning strokes from the card edge
+  var cracksEl = overlay.querySelector('.evo-cracks');
+  for (var c = 0; c < 7; c++) {
+    var cr = document.createElement('span');
+    var ang = (360 / 7) * c + Math.random() * 30;
+    var len = 42 + Math.random() * 58;
+    cr.style.transform = 'rotate(' + ang + 'deg)';
+    cr.style.animationDuration = (0.2 + Math.random() * 0.25) + 's';
+    cr.style.animationDelay = (0.05 + Math.random() * 0.2) + 's';
+    cracksEl.appendChild(cr);
+  }
+  // Charge sparks converging on the card
+  for (var s = 0; s < 14; s++) {
+    var sp = document.createElement('div');
+    sp.className = 'evo-spark';
+    var a = (Math.PI * 2 * s) / 14 + Math.random() * 0.4;
+    var d = 130 + Math.random() * 70;
+    sp.style.setProperty('--sx', (Math.cos(a) * d).toFixed(0) + 'px');
+    sp.style.setProperty('--sy', (Math.sin(a) * d).toFixed(0) + 'px');
+    sp.style.animationDelay = (Math.random() * 0.5) + 's';
+    overlay.appendChild(sp);
+  }
+  // Burst particles at impact
+  var colors = [newTier.color, '#ffffff', '#f5c842', '#ffd75e'];
+  for (var p = 0; p < 26; p++) {
+    var pt = document.createElement('div');
+    pt.className = 'evo-particle';
+    var aa = (Math.PI * 2 * p) / 26 + Math.random() * 0.5;
+    var dd = 90 + Math.random() * 150;
+    pt.style.setProperty('--px', (Math.cos(aa) * dd).toFixed(0) + 'px');
+    pt.style.setProperty('--py', (Math.sin(aa) * dd).toFixed(0) + 'px');
+    pt.style.background = colors[p % 4];
+    pt.style.boxShadow = '0 0 12px ' + colors[p % 4];
+    overlay.appendChild(pt);
+  }
+
+  // Timeline: dim → charge → levitate/crack → grow → foil → burst → land → celebrate
+  setTimeout(function(){ playSound('charge'); haptic([20, 30, 40]); }, 200);
+  setTimeout(function(){ overlay.classList.add('stage-charge'); }, 700);
+  setTimeout(function(){
+    overlay.classList.add('stage-levitate');
+    playSound('crack');
+    haptic([30, 60, 90]);
+  }, 1900);
+  setTimeout(function(){ overlay.classList.add('stage-grow'); }, 2550);
+  setTimeout(function(){
+    overlay.classList.add('stage-foil');
+    playSound('level');
+  }, 3150);
+  setTimeout(function(){
+    overlay.classList.add('stage-burst');
+    playSound('end');
+    haptic([50, 80, 120]);
+  }, 3900);
+  setTimeout(function(){
+    overlay.classList.add('stage-land');
+    playSound('collect');
+    haptic([60, 40, 20]);
+  }, 4650);
+  setTimeout(function(){ overlay.classList.add('stage-celebrate'); playSound('log'); }, 5100);
+  setTimeout(close, 9000);
 }
 
 // ---- Hooks: run once after each log ----
