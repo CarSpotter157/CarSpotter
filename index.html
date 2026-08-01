@@ -20,10 +20,10 @@
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    CARSPOTTER v24
    Vibe: Apple-clean meets car dashboard
-   â€” Generous whitespace, clear hierarchy
-   â€” Bebas Neue for numbers, Inter for text
-   â€” Dark surfaces, warm gold accent
-   â€” Buttons have room to breathe
+   - Generous whitespace, clear hierarchy
+   - Bebas Neue for numbers, Inter for text
+   - Dark surfaces, warm gold accent
+   - Buttons have room to breathe
 â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 /* â”€â”€ TOKENS â”€â”€ */
@@ -314,7 +314,7 @@ body{
 }
 .txt-btn:hover{color:var(--accent);}
 
-/* â”€â”€ SCORE BANNER â€” MASSIVE HERO PANEL â”€â”€ */
+/* â”€â”€ SCORE BANNER - MASSIVE HERO PANEL â”€â”€ */
 .score-banner{
   background:var(--glass-card);
   backdrop-filter:blur(24px) saturate(1.4);
@@ -475,7 +475,7 @@ body{
 .btn-hint-row span::before{content:'|';position:absolute;left:-10px;color:var(--glass-border);font-size:0.5rem;opacity:0.3;}
 .btn-hint-row span:first-child::before{content:'';}
 
-/* â”€â”€ COLLECTOR CARD â€” the car itself becomes the reward â”€â”€ */
+/* â”€â”€ COLLECTOR CARD - the car itself becomes the reward â”€â”€ */
 @keyframes ccCardIn{
   0%{opacity:0;transform:translateY(70px) rotateX(-22deg) rotateZ(-7deg) scale(0.65)}
   55%{opacity:1;transform:translateY(-12px) rotateX(7deg) rotateZ(3deg) scale(1.06)}
@@ -627,7 +627,7 @@ body{
 }
 .nav-badge.pop{animation:ccBadgePop 0.55s cubic-bezier(0.34,1.56,0.64,1);}
 
-/* â”€â”€ QUICK COLLECTOR MODE â€” subtle reward when animations are off â”€â”€ */
+/* â”€â”€ QUICK COLLECTOR MODE - subtle reward when animations are off â”€â”€ */
 .cc-quick{
   position:fixed;left:50%;top:max(84px,calc(env(safe-area-inset-top,0px) + 16px));
   transform:translateX(-50%) translateY(-8px);z-index:99995;pointer-events:none;
@@ -645,7 +645,7 @@ body{
 .cc-quick-name{overflow:hidden;text-overflow:ellipsis;}
 .cc-quick-xp{font-family:'Bebas Neue',cursive;color:var(--accent);letter-spacing:1px;flex-shrink:0;}
 
-/* â”€â”€ RECENT DISCOVERIES â€” your personal trophy case â”€â”€ */
+/* â”€â”€ RECENT DISCOVERIES - your personal trophy case â”€â”€ */
 .disc-scroll{display:flex;gap:10px;overflow-x:auto;padding:2px 1px 4px;margin-bottom:6px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
 .disc-scroll::-webkit-scrollbar{display:none;}
 .disc-card{
@@ -691,7 +691,7 @@ body{
   .levelup-overlay::before,.levelup-ring,.levelup-sweep{animation:none !important;opacity:0 !important;}
 }
 
-/* â”€â”€ RUN RECAP UPGRADES â€” run finish should feel earned â”€â”€ */
+/* â”€â”€ RUN RECAP UPGRADES - run finish should feel earned â”€â”€ */
 .recap-tier{font-size:0.66rem;letter-spacing:3px;text-transform:uppercase;font-weight:800;margin-bottom:4px;}
 .recap-xp{
   display:inline-flex;align-items:center;gap:7px;
@@ -706,7 +706,7 @@ body{
 .recap-flare{position:fixed;inset:0;z-index:99998;pointer-events:none;animation:spotFlare 1.4s ease both;
   background:radial-gradient(circle at 50% 45%, rgba(245,200,66,0.3), transparent 55%);}
 
-/* â”€â”€ LEVEL UP â€” the big milestone moment â”€â”€ */
+/* â”€â”€ LEVEL UP - the big milestone moment â”€â”€ */
 .levelup-overlay{
   position:fixed;inset:0;z-index:99999;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -751,7 +751,7 @@ body{
 }
 
 
-/* Photo + Geo â€” side by side, slim */
+/* Photo + Geo - side by side, slim */
 .photo-btn,.geo-btn{
   display:flex;align-items:center;justify-content:center;gap:8px;
   width:100%;background:rgba(32,32,36,0.5);
@@ -1647,7 +1647,7 @@ body{
   padding:15px;cursor:pointer;transition:all 0.15s;
 }
 .recap-btn:active{transform:scale(0.98);}
-/* â”€â”€ RECAP PODIUM â€” top cars fly in side-by-side â”€â”€ */
+/* â”€â”€ RECAP PODIUM - top cars fly in side-by-side â”€â”€ */
 .recap-podium{display:flex;align-items:flex-end;justify-content:center;gap:12px;margin:12px 0 18px;}
 .recap-p-card{
   position:relative;flex:0 0 auto;width:min(31%,128px);
@@ -2140,7 +2140,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
 /* â•â• PROGRESSION & REWARD EXPANSION â•â• */
 
-/* Title chip on the spot page level bar â€” the spotter identity itself */
+/* Title chip on the spot page level bar - the spotter identity itself */
 #levelTitleSlot{display:inline-flex;align-items:center;gap:6px;background:var(--adim);border:1px solid var(--accent);border-radius:99px;padding:3px 11px;font-family:'Inter',sans-serif;font-size:0.6rem;font-weight:700;letter-spacing:1.2px;color:var(--accent);text-transform:uppercase;transition:all 0.25s var(--ease);line-height:1;}
 #levelTitleSlot .tc-emoji{font-size:0.8rem;line-height:1;}
 #levelTitleSlot.new-title{animation:titlePop 0.6s cubic-bezier(0.34,1.56,0.64,1) both;}
@@ -2157,7 +2157,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 .titleup-prev{font-size:0.56rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:22px;}
 .titleup-dismiss{margin-top:28px;font-size:0.58rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
 
-/* Collector Book â€” make shelf cards */
+/* Collector Book - make shelf cards */
 .book-hero{display:flex;align-items:center;gap:16px;background:var(--glass-card);border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:24px;margin-bottom:18px;box-shadow:var(--shadow-lg);}
 .book-hero-ring{position:relative;width:84px;height:84px;flex-shrink:0;}
 .book-hero-ring svg{transform:rotate(-90deg);}
@@ -2312,7 +2312,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 .milestone-toast .ms-title{font-family:'Bebas Neue',cursive;font-size:1.15rem;letter-spacing:0.5px;color:var(--text);margin-top:2px;}
 .milestone-toast .ms-desc{font-size:0.62rem;color:var(--text2);line-height:1.4;margin-top:2px;}
 
-/* â”€â”€ 3-STAGE UNLOCK MOMENTS â€” Anticipation â†’ Reveal â†’ Celebration â”€â”€ */
+/* â”€â”€ 3-STAGE UNLOCK MOMENTS - Anticipation â†’ Reveal â†’ Celebration â”€â”€ */
 .moment-overlay{position:fixed;inset:0;z-index:100000;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.97);cursor:pointer;overflow:hidden;animation:fadeIn 0.25s ease;}
 .moment-antici{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:1;transition:opacity 0.35s ease,transform 0.45s cubic-bezier(0.34,1.56,0.64,1);}
 .moment-overlay.stage-reveal .moment-antici{opacity:0;transform:scale(1.08);}
@@ -2349,7 +2349,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
 .book-sil.locked-shimmer{background-image:linear-gradient(90deg,var(--surf3) 0%,var(--surf2) 40%,var(--surf3) 80%);background-size:200% 100%;animation:shimmer 2.4s linear infinite;}
 
-/* â”€â”€ CARD EVOLUTION CEREMONY â€” dim world, charge, crack, regrow, foil, land â”€â”€ */
+/* â”€â”€ CARD EVOLUTION CEREMONY - dim world, charge, crack, regrow, foil, land â”€â”€ */
 .evo-overlay{position:fixed;inset:0;z-index:100001;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:rgba(0,0,0,0.98);animation:evoDimIn 0.8s ease both;}
 @keyframes evoDimIn{0%{background:rgba(0,0,0,0);}100%{background:rgba(0,0,0,0.98);}}
 .evo-aura{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 0.6s ease;}
@@ -2411,7 +2411,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 @keyframes evoParticleFly{0%{opacity:1;transform:translate(0,0) scale(1);}100%{opacity:0;transform:translate(var(--px,0px),var(--py,0px)) scale(0.2);}}
 @media (prefers-reduced-motion:reduce){.evo-overlay *{animation:none !important;transition:none !important;}.evo-overlay{background:rgba(0,0,0,0.97);}}
 
-/* â”€â”€ TITLE PROMOTION CEREMONY â€” old title fades, new crest stamps, seal â€” â”€â”€ */
+/* â”€â”€ TITLE PROMOTION CEREMONY - old title fades, new crest stamps, seal - â”€â”€ */
 .title-overlay{position:fixed;inset:0;z-index:100002;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:rgba(0,0,0,0.96);animation:titleDimIn 0.6s ease both;}
 @keyframes titleDimIn{0%{background:rgba(0,0,0,0);}100%{background:rgba(0,0,0,0.96);}}
 .title-halo{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 0.8s ease;background:radial-gradient(circle at 50% 42%,rgba(245,200,66,0.28),transparent 55%);}
@@ -2446,7 +2446,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 .title-overlay.stage-2 .title-pflag{animation:evoParticleFly 1.3s cubic-bezier(0.16,0.84,0.44,1) both;}
 @media (prefers-reduced-motion:reduce){.title-overlay *{animation:none !important;transition:none !important;}.title-overlay{background:rgba(0,0,0,0.96);}}
 
-/* â”€â”€ EXPEDITION COMPLETE â€” dossier slides in, objectives check off, wax seal â”€â”€ */
+/* â”€â”€ EXPEDITION COMPLETE - dossier slides in, objectives check off, wax seal â”€â”€ */
 .expo-cer{position:fixed;inset:0;z-index:100003;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,0.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);animation:fadeIn 0.4s ease;}
 .expo-cer-paper{position:relative;width:min(330px,88vw);border-radius:22px;padding:26px 22px 30px;text-align:center;background:linear-gradient(170deg,var(--surf),#141417);border:1px solid var(--glass-border);box-shadow:0 30px 80px rgba(0,0,0,0.6);transform:translateY(46px) scale(0.9);opacity:0;}
 .expo-cer.stage-paper .expo-cer-paper{animation:expoPaperIn 0.55s cubic-bezier(0.34,1.56,0.64,1) both;}
@@ -2477,7 +2477,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 .expo-cer.stage-seal .expo-cer-pflag{animation:evoParticleFly 1.2s cubic-bezier(0.16,0.84,0.44,1) both;}
 @media (prefers-reduced-motion:reduce){.expo-cer *{animation:none !important;transition:none !important;}.expo-cer-paper{transform:none;opacity:1;}}
 
-/* â”€â”€ MANUFACTURER (MARQUE) COMPLETE â€” gold seal ceremony, finish anim â”€â”€ */
+/* â”€â”€ MANUFACTURER (MARQUE) COMPLETE - gold seal ceremony, finish anim â”€â”€ */
 .make-cer{position:fixed;inset:0;z-index:100004;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:rgba(0,0,0,0.96);animation:fadeIn 0.4s ease;}
 .make-cer::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity 1s ease;background:radial-gradient(circle at 50% 45%,rgba(245,200,66,0.3),transparent 55%);}
 .make-cer.stage-2::before{opacity:1;}
@@ -2512,7 +2512,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 @keyframes tileGoldFlash{0%{box-shadow:0 0 0 2px rgba(245,200,66,0.85),0 0 30px rgba(245,200,66,0.45);}100%{box-shadow:0 0 0 0 transparent;}}
 @media (prefers-reduced-motion:reduce){.make-cer *{animation:none !important;transition:none !important;}.make-cer-panel{transform:none;opacity:1;}}
 
-/* â”€â”€ MYSTERY CAR REVEAL â€” silhouette glows, cracks, light bursts, card flies in â”€â”€ */
+/* â”€â”€ MYSTERY CAR REVEAL - silhouette glows, cracks, light bursts, card flies in â”€â”€ */
 .mys-overlay{position:fixed;inset:0;z-index:100005;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:rgba(0,0,0,0.93);animation:fadeIn 0.35s ease;}
 .mys-sil{position:relative;font-size:5rem;filter:brightness(0) drop-shadow(0 0 0 rgba(245,200,66,0));transition:filter 0.6s ease;animation:mysBreath 1.3s ease-in-out infinite;}
 @keyframes mysBreath{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
@@ -2538,7 +2538,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 @keyframes mysFall{0%{opacity:1;transform:translateY(0) rotate(0);}100%{opacity:0.4;transform:translateY(110vh) rotate(540deg);}}
 @media (prefers-reduced-motion:reduce){.mys-overlay *{animation:none !important;transition:none !important;}.mys-sil{filter:none;}}
 
-/* â”€â”€ ROAD TRIP LAUNCH â€” ticket tears off, route unrolls, journaled â”€â”€ */
+/* â”€â”€ ROAD TRIP LAUNCH - ticket tears off, route unrolls, journaled â”€â”€ */
 .trip-cer{position:fixed;inset:0;z-index:100006;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,0.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);animation:fadeIn 0.4s ease;}
 .trip-cer-ticket{position:relative;width:min(320px,86vw);background:linear-gradient(170deg,var(--surf),#141417);border:1px solid var(--glass-border);border-radius:18px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.6);transform:translateY(40px) rotate(-3deg);opacity:0;}
 .trip-cer.stage-1 .trip-cer-ticket{animation:ticketIn 0.55s cubic-bezier(0.34,1.56,0.64,1) both;}
@@ -2595,7 +2595,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
     <div style="display:flex;align-items:center;gap:10px;">
       <div class="hdr-r">
         <div class="hdr-lbl">Best Run</div>
-        <div class="hdr-val" id="headerBest">â€”</div>
+        <div class="hdr-val" id="headerBest">-</div>
       </div>
       <div id="userPillWrap"></div>
     </div>
@@ -2606,7 +2606,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
     <!-- SPOT PAGE -->
     <div class="page active" id="page-spot">
       <div id="installBanner" style="display:none" class="install-banner">
-        <div class="install-text"><strong>Install as app:</strong> Share â†’ Add to Home Screen (iPhone) Â· Install icon in Chrome (PC)</div>
+        <div class="install-text"><strong>Install as app:</strong> Share â†’ Add to Home Screen (iPhone) . Install icon in Chrome (PC)</div>
         <button class="install-close" onclick="dismissInstall()">âœ•</button>
       </div>
 
@@ -2623,7 +2623,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
             <div class="score-divider"></div>
             <div class="score-half score-half--right">
               <div class="s-lbl">Best Run</div>
-              <div class="b-num" id="bestTotal">â€”</div>
+              <div class="b-num" id="bestTotal">-</div>
               <div class="beat tied" id="beatMsg">No record yet</div>
             </div>
           </div>
@@ -2657,7 +2657,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
               <div class="ff">
                 <label for="carType">Type</label>
                 <select id="carType">
-                  <option value="" disabled selected>â€” Select Type â€”</option>
+                  <option value="" disabled selected>- Select Type -</option>
                   <option value="supercar">Supercar</option>
                   <option value="sports">Sports Car</option>
                   <option value="muscle">Muscle Car</option>
@@ -2706,7 +2706,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
             <!-- Two action buttons: run vs spotted -->
             <div class="btn-row">
-              <button class="btn-run" onclick="logRun()" title="Add to current session â€” tally builds until you tap End Run">+ ADD TO RUN</button>
+              <button class="btn-run" onclick="logRun()" title="Add to current session - tally builds until you tap End Run">+ ADD TO RUN</button>
               <button class="btn-spot" onclick="logSpotted()" title="Save this one car immediately, no active run needed">SAVE SOLO</button>
             </div>
             <div class="btn-hint-row">
@@ -2779,16 +2779,16 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
       <div class="garage-filter-row" id="garageFilterRow">
         <button class="gf-pill active" data-filter="all" onclick="setGarageFilter('all',this)">All</button>
         <button class="gf-pill" data-filter="supercar" onclick="setGarageFilter('supercar',this)">ðŸŽ Super</button>
-        <button class="gf-pill" data-filter="sports" onclick="setGarageFilter('sports',this)">ðŸš— Sports</button>
-        <button class="gf-pill" data-filter="muscle" onclick="setGarageFilter('muscle',this)">ðŸŽ Muscle</button>
-        <button class="gf-pill" data-filter="track" onclick="setGarageFilter('track',this)">ðŸ Track</button>
-        <button class="gf-pill" data-filter="exotic" onclick="setGarageFilter('exotic',this)">ðŸ”¥ Exotic</button>
-        <button class="gf-pill" data-filter="ev" onclick="setGarageFilter('ev',this)">âš¡ EV</button>
-        <button class="gf-pill" data-filter="legend" onclick="setGarageFilter('legend',this)">ðŸ‘‘ Legend+</button>
-        <button class="gf-pill" data-filter="hypercar" onclick="setGarageFilter('hypercar',this)">ðŸš€ Hyper+</button>
+        <button class="gf-pill" data-filter="sports" onclick="setGarageFilter('sports',this)">🚗 Sports</button>
+        <button class="gf-pill" data-filter="muscle" onclick="setGarageFilter('muscle',this)">🐎 Muscle</button>
+        <button class="gf-pill" data-filter="track" onclick="setGarageFilter('track',this)">🏁 Track</button>
+        <button class="gf-pill" data-filter="exotic" onclick="setGarageFilter('exotic',this)">🔥 Exotic</button>
+        <button class="gf-pill" data-filter="ev" onclick="setGarageFilter('ev',this)">⚡ EV</button>
+        <button class="gf-pill" data-filter="legend" onclick="setGarageFilter('legend',this)">👑 Legend+</button>
+        <button class="gf-pill" data-filter="hypercar" onclick="setGarageFilter('hypercar',this)">🚀 Hyper+</button>
       </div>
       <div id="garageList">
-        <div class="empty-garage"><div style="font-size:2.5rem;margin-bottom:12px;opacity:0.5">ðŸš—</div><strong style="color:var(--text2);font-size:0.85rem;display:block;margin-bottom:4px">Your garage is empty</strong><span style="color:var(--muted)">Log your first car from the Spot tab!</span></div>
+        <div class="empty-garage"><div style="font-size:2.5rem;margin-bottom:12px;opacity:0.5">🚗</div><strong style="color:var(--text2);font-size:0.85rem;display:block;margin-bottom:4px">Your garage is empty</strong><span style="color:var(--muted)">Log your first car from the Spot tab!</span></div>
       </div>
     </div>
 
@@ -2796,7 +2796,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
     <div class="page" id="page-history">
       <div id="recordWrap" style="display:none" class="record-card">
         <div class="rec-lbl">All-time Best Run</div>
-        <div class="rec-val" id="recordVal">â€”</div>
+        <div class="rec-val" id="recordVal">-</div>
         <div class="rec-sub" id="recordSub"></div>
       </div>
       <div style="background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
@@ -2832,7 +2832,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
       <div class="notes-header">
         <div>
           <div class="sec-title">Notes</div>
-          <div class="notes-sub">Type or speak â€” saves automatically</div>
+          <div class="notes-sub">Type or speak - saves automatically</div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
           <button class="mic-btn" id="micBtn" onclick="toggleMic()">
@@ -2841,7 +2841,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
           </button>
         </div>
       </div>
-      <textarea id="notesArea" class="notes-area" placeholder="Ferrari 488 red&#10;Yellow Lambo&#10;Blue Porsche GT3 992&#10;&#10;Jot notes here â€” switch to Spot tab to log them."></textarea>
+      <textarea id="notesArea" class="notes-area" placeholder="Ferrari 488 red&#10;Yellow Lambo&#10;Blue Porsche GT3 992&#10;&#10;Jot notes here - switch to Spot tab to log them."></textarea>
     </div>
 
 
@@ -3121,7 +3121,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
         <div class="eh-icon">ðŸ—ºï¸</div>
         <div>
           <div class="eh-title">ACHIEVEMENTS & EXPEDITIONS</div>
-          <div class="eh-sub">One collection Â· auto-earn or claim XP rewards</div>
+          <div class="eh-sub">One collection . auto-earn or claim XP rewards</div>
         </div>
       </div>
       <div id="expoList"></div>
@@ -3141,7 +3141,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
             <option value="ðŸŒ†">ðŸŒ† City</option>
             <option value="ðŸœï¸">ðŸœï¸ Desert</option>
             <option value="ðŸŒ²">ðŸŒ² Forest</option>
-            <option value="ðŸ”¥">ðŸ”¥ Canyon</option>
+            <option value="🔥">🔥 Canyon</option>
             <option value="ðŸŽ¢">ðŸŽ¢ Twisty Road</option>
           </select>
         </div>
@@ -3182,14 +3182,14 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
     </button>
   </nav>
 
-  <!-- More dropdown removed â€” now a full page (page-more) -->
+  <!-- More dropdown removed - now a full page (page-more) -->
 
 </div><!-- /app-shell -->
 
 <div class="road-deco"><div class="rdl"></div><div class="rdl"></div><div class="rdl"></div></div>
 
 <div class="toast" id="toast"></div>
-<div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE â€” Saves locally, syncs when back</span></div>
+<div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE - Saves locally, syncs when back</span></div>
 <div class="version-tag" id="versionTag">v27.10</div>
 
 <script>
@@ -3251,9 +3251,9 @@ let _lastSave    = 0;
 let syncUnsub    = null;
 let syncTimer    = null;
 let qpOpen       = false;
-var _idbPhotoCache = {}; // must init early â€” used by renders before the photo section
+var _idbPhotoCache = {}; // must init early - used by renders before the photo section
 
-// Track whether the user has actually interacted â€” gates vibrate/audio so mobile
+// Track whether the user has actually interacted - gates vibrate/audio so mobile
 // doesn't log "Blocked call to navigator.vibrate" before the first tap.
 // Also unlocks WebAudio on the first gesture: mobile browsers hold the AudioContext
 // suspended until a real user interaction, which is what makes sounds silently drop.
@@ -3266,7 +3266,7 @@ function unlockAudio() {
     var c = getAudioCtx();
     if (c && typeof c.resume === 'function' && c.state === 'suspended') c.resume();
     // Some engines need an actual sample pushed through before the silent switch
-    // route is established â€” a 1-sample silence forces the media session to start.
+    // route is established - a 1-sample silence forces the media session to start.
     if (c && c.state === 'running' && !_audioPrimed) {
       _audioPrimed = true;
       var src = c.createBufferSource();
@@ -3283,7 +3283,7 @@ _loadIDBCache();
 // Ask the browser to keep IndexedDB photo storage persistent (avoids eviction)
 if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().catch(function(){}); }
 
-// GARAGE VIEW â€” declared here so renderGarage() works before auth fires
+// GARAGE VIEW - declared here so renderGarage() works before auth fires
 let garageFilter = 'all';
 let garageView   = 'list';
 
@@ -3296,7 +3296,7 @@ let runTotalAnimated = 0;
 let tutorialTimer = null;
 let tutorialStep = 0;
 
-// Achievements â€” declared here so getUnlockedAchievements() works at any point
+// Achievements - declared here so getUnlockedAchievements() works at any point
 const ACHIEVEMENTS = [
   { id:'first_car',    icon:'01', name:'First Spot',      desc:'Log your first car',            xp:50,  check:(c,r)=>c.length>=1 },
   { id:'ten_cars',     icon:'10', name:'Decade',           desc:'Log 10 cars total',             xp:120, check:(c,r)=>c.length>=10 },
@@ -3340,7 +3340,7 @@ const ACHIEVEMENTS = [
 ];
 let _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
 
-//  MERGE HELPERS â€” prevent data loss when cloud & local diverge 
+//  MERGE HELPERS - prevent data loss when cloud & local diverge 
 function _mergeRunArrays(local, cloud) {
   const byTs = new Map();
   for (const c of local)  byTs.set(c.ts, c);
@@ -3356,7 +3356,7 @@ function _mergeRunHistory(local, cloud) {
   for (const r of local) byId.set(r.id, r);
   for (const r of cloud) {
     const existing = byId.get(r.id);
-    // Prefer local version on conflict â€” it reflects the user's latest edits/deletions
+    // Prefer local version on conflict - it reflects the user's latest edits/deletions
     if (!existing) byId.set(r.id, r);
   }
   return [...byId.values()];
@@ -3443,7 +3443,7 @@ auth.onAuthStateChanged(async user => {
 // Handle redirect sign-in result
 auth.getRedirectResult().then(function(result) {
   if (!result.user) {
-    // No pending redirect result â€” clear stale flag if present
+    // No pending redirect result - clear stale flag if present
     var key = 'firebase:pendingRedirect:AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug:[DEFAULT]';
     sessionStorage.removeItem(key);
   }
@@ -3535,7 +3535,7 @@ async function loadFromCloud() {
   renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
   fetchRefImagesForAllCars();
   if (currentRun.length > 0)
-    setTimeout(() => showToast(' Run resumed â€” ' + currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '') + ' restored!'), 700);
+    setTimeout(() => showToast(' Run resumed - ' + currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '') + ' restored!'), 700);
 }
 
 function subscribeCloud() {
@@ -3563,7 +3563,7 @@ function subscribeCloud() {
     }
   });
 }
-//  FIRESTORE PHOTO STRIPPER â€” keeps base64 out of the 1 MB document limit 
+//  FIRESTORE PHOTO STRIPPER - keeps base64 out of the 1 MB document limit 
 // Ensures every base64 photo is cached locally, then replaces with a key reference
 function _ensurePhotoIndexed(car) {
   if (!car || !car.photo || car.photo.indexOf('data:') !== 0) return;
@@ -3679,13 +3679,13 @@ function _buildCloudPayload() {
 
 function saveToCloud() {
   console.log('Starting Firestore save');
-  // Always persist locally first â€” works offline
+  // Always persist locally first - works offline
   _saveRunsLocal();
   _saveCurrentLocal();
   _saveQPLocal();
 
   if (!currentUser || !navigator.onLine) {
-    console.log('Firestore save: skipped â€”', !currentUser ? 'no user' : 'offline');
+    console.log('Firestore save: skipped -', !currentUser ? 'no user' : 'offline');
     // Queue for when we come back online
     if (!navigator.onLine) {
       offlineQueue.push(Date.now());
@@ -3711,7 +3711,7 @@ function saveToCloud() {
   }, 1500);
 }
 
-//  FLUSH ON PAGE UNLOAD â€” prevent debounced saves from being lost on tab close 
+//  FLUSH ON PAGE UNLOAD - prevent debounced saves from being lost on tab close 
 function _flushPendingSave() {
   if (!syncTimer) return;
   console.log('Firestore save: flush on unload');
@@ -3725,7 +3725,7 @@ function _flushPendingSave() {
       console.error('Firestore save: flush failed:', err.code, err.message, err);
     });
   } else {
-    console.log('Firestore save: flush skipped â€”', !currentUser ? 'no user' : 'offline');
+    console.log('Firestore save: flush skipped -', !currentUser ? 'no user' : 'offline');
   }
 }
 window.addEventListener('beforeunload', _flushPendingSave);
@@ -3739,7 +3739,7 @@ async function publishRunToLeaderboard(run) {
   const lastPub = parseInt(localStorage.getItem('cs_lb_last') || '0');
   const now = Date.now();
   if (now - lastPub < 10 * 60 * 1000) {
-    console.log('Leaderboard publish throttled â€” wait', Math.ceil((10*60*1000-(now-lastPub))/1000), 's');
+    console.log('Leaderboard publish throttled - wait', Math.ceil((10*60*1000-(now-lastPub))/1000), 's');
     return;
   }
   try {
@@ -3902,7 +3902,7 @@ function playSound(type) {
         o2.stop(ctx.currentTime + i*0.09 + 0.28);
       });
     } else if (type === 'collect') {
-      // Satisfying card thunk â€” quick pitch drop
+      // Satisfying card thunk - quick pitch drop
       o.type = 'triangle';
       o.frequency.setValueAtTime(720, ctx.currentTime);
       o.frequency.exponentialRampToValueAtTime(260, ctx.currentTime + 0.16);
@@ -3910,7 +3910,7 @@ function playSound(type) {
       g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
       o.start(); o.stop(ctx.currentTime + 0.18);
     } else if (type === 'shutter') {
-      // Camera shutter â€” sharp click + mechanical clack
+      // Camera shutter - sharp click + mechanical clack
       [1800, 700].forEach((freq, i) => {
         const o2 = ctx.createOscillator(), g2 = ctx.createGain();
         o2.connect(g2);         g2.connect(_masterOut || ctx.destination);
@@ -3923,7 +3923,7 @@ function playSound(type) {
         o2.stop(ctx.currentTime + i * 0.16 + 0.06);
       });
     } else if (type === 'charge') {
-      // Rising energy charge â€” two climbing oscillators
+      // Rising energy charge - two climbing oscillators
       [220, 330, 440, 660].forEach((freq, i) => {
         const o2 = ctx.createOscillator(), g2 = ctx.createGain();
         o2.connect(g2);         g2.connect(_masterOut || ctx.destination);
@@ -3936,7 +3936,7 @@ function playSound(type) {
         o2.stop(ctx.currentTime + i * 0.16 + 0.5);
       });
     } else if (type === 'crack') {
-      // Glass / border shatter â€” noisy square gliss down
+      // Glass / border shatter - noisy square gliss down
       [1400, 950, 620, 320].forEach((freq, i) => {
         const o2 = ctx.createOscillator(), g2 = ctx.createGain();
         o2.connect(g2);         g2.connect(_masterOut || ctx.destination);
@@ -3962,7 +3962,7 @@ function playSound(type) {
       o2.start(ctx.currentTime);
       o2.stop(ctx.currentTime + 0.08);
     } else if (type === 'promote') {
-      // Triumphant fanfare â€” ascending major arpeggio + shimmer
+      // Triumphant fanfare - ascending major arpeggio + shimmer
       [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
         const o2 = ctx.createOscillator(), g2 = ctx.createGain();
         o2.connect(g2);         g2.connect(_masterOut || ctx.destination);
@@ -3986,7 +3986,7 @@ function playSound(type) {
         o2.stop(ctx.currentTime + 0.62 + i * 0.1 + 0.8);
       });
     } else if (type === 'whoosh') {
-      // Soft airy pass â€” filtered white noise via rapid sine gliss down
+      // Soft airy pass - filtered white noise via rapid sine gliss down
       const g2 = ctx.createGain();
       const o2 = ctx.createOscillator();
       o2.connect(g2);         g2.connect(_masterOut || ctx.destination);
@@ -3998,7 +3998,7 @@ function playSound(type) {
       g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.24);
       o2.start(ctx.currentTime); o2.stop(ctx.currentTime + 0.26);
     } else if (type === 'flip') {
-      // Crisp card flip â€” two quick papery taps
+      // Crisp card flip - two quick papery taps
       [620, 980].forEach((freq, i) => {
         const o2 = ctx.createOscillator(), g2 = ctx.createGain();
         o2.connect(g2);         g2.connect(_masterOut || ctx.destination);
@@ -4012,7 +4012,7 @@ function playSound(type) {
         o2.stop(ctx.currentTime + i * 0.11 + 0.1);
       });
     } else if (type === 'shimmer') {
-      // Light sparkle â€” two detuned highs
+      // Light sparkle - two detuned highs
       [2100, 2800, 3500].forEach((freq, i) => {
         const o2 = ctx.createOscillator(), g2 = ctx.createGain();
         o2.connect(g2);         g2.connect(_masterOut || ctx.destination);
@@ -4025,7 +4025,7 @@ function playSound(type) {
         o2.stop(ctx.currentTime + i * 0.07 + 0.4);
       });
     } else if (type === 'land') {
-      // Deep satisfying landing thump â€” low pitch drop + body
+      // Deep satisfying landing thump - low pitch drop + body
       o.type = 'sine';
       o.frequency.setValueAtTime(180, ctx.currentTime);
       o.frequency.exponentialRampToValueAtTime(55, ctx.currentTime + 0.22);
@@ -4041,7 +4041,7 @@ function playSound(type) {
       g3.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
       o3.start(ctx.currentTime + 0.02); o3.stop(ctx.currentTime + 0.22);
     } else if (type === 'page') {
-      // Paper page turn â€” soft rustle sweep
+      // Paper page turn - soft rustle sweep
       const o2 = ctx.createOscillator(), g2 = ctx.createGain();
       o2.connect(g2);         g2.connect(_masterOut || ctx.destination);
       o2.type = 'triangle';
@@ -4053,7 +4053,7 @@ function playSound(type) {
       g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.24);
       o2.start(ctx.currentTime); o2.stop(ctx.currentTime + 0.26);
     } else if (type === 'stamp') {
-      // Wax seal stamp â€” muffled thump with quick high tick
+      // Wax seal stamp - muffled thump with quick high tick
       o.type = 'sine';
       o.frequency.setValueAtTime(140, ctx.currentTime);
       o.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.14);
@@ -4069,7 +4069,7 @@ function playSound(type) {
       g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
       o2.start(ctx.currentTime); o2.stop(ctx.currentTime + 0.06);
     } else if (type === 'crystal') {
-      // Metallic crystal forming â€” shimmering high arpeggio
+      // Metallic crystal forming - shimmering high arpeggio
       [880, 1320, 1760, 2200].forEach((freq, i) => {
         const o2 = ctx.createOscillator(), g2 = ctx.createGain();
         o2.connect(g2);         g2.connect(_masterOut || ctx.destination);
@@ -4115,7 +4115,7 @@ function initSoundToggle() {
   if (btn) btn.classList.toggle('on', soundEnabled);
 }
 
-//  UNDO â€” now supports a stack of up to 5 recent actions
+//  UNDO - now supports a stack of up to 5 recent actions
 undoStack = [];
 function pushUndo(type, data, msg) {
   undoStack.push({ type, data });
@@ -4132,7 +4132,7 @@ function doUndo() {
   document.getElementById('undoBar').classList.remove('show');
   const { type, data } = undoStack.pop();
   if (type === 'run') {
-    // Also restore QP: the removed car was potentially added to QP â€” re-add it
+    // Also restore QP: the removed car was potentially added to QP - re-add it
     currentRun = data.run;
     headlinerIdx = data.headlinerIdx;
     // Re-add removed cars back to QP if they had been added
@@ -4265,7 +4265,7 @@ function injectDesktopLogo() {
   if (nav.querySelector('.dsk-logo')) return;
   const div = document.createElement('div');
   div.className = 'dsk-logo';
-  div.innerHTML = `<div class="logo">Car<span>Spotter</span></div><div class="dsk-best"><div class="dsk-best-lbl">Best</div><div class="dsk-best-v" id="dskBest">â€”</div></div>`;
+  div.innerHTML = `<div class="logo">Car<span>Spotter</span></div><div class="dsk-best"><div class="dsk-best-lbl">Best</div><div class="dsk-best-v" id="dskBest">-</div></div>`;
   nav.insertBefore(div, nav.firstChild);
 }
 injectDesktopLogo();
@@ -4284,7 +4284,7 @@ function dismissInstall() {
   document.getElementById('installBanner').style.display = 'none';
   localStorage.setItem('cs_install_dismissed','1');
 }
-// Check after a delay â€” will fire after auth + data loads
+// Check after a delay - will fire after auth + data loads
   setTimeout(showInstall, 4000);
 
 //  FAVORITES 
@@ -4437,7 +4437,7 @@ function renderQPList(query) {
   const el = document.getElementById('qpList');
   const q  = query.toLowerCase().trim();
   const list = q ? quickPicks.filter(c => c.name.toLowerCase().includes(q)) : quickPicks;
-  if (!list.length) { el.innerHTML = '<div class="qp-empty">'+(q?'No matches':'No picks yet â€” log some cars!')+'</div>'; return; }
+  if (!list.length) { el.innerHTML = '<div class="qp-empty">'+(q?'No matches':'No picks yet - log some cars!')+'</div>'; return; }
   el.innerHTML = '';
   list.forEach(c => {
     const d = document.createElement('div');
@@ -4664,11 +4664,11 @@ function showRecap({ total, cars, headliner, isRec, prevBest }) {
   top3 = top3.slice(0,3);
 
   // Run tier badge
-  const tier = total >= 1000000 ? { label:'Legend Run', icon:'ðŸ‘‘', color:'#f5c842' }
-              : total >= 500000  ? { label:'Hyper Run',  icon:'ðŸ”¥', color:'#ff5733' }
-              : total >= 150000  ? { label:'Super Run',  icon:'ðŸŽï¸', color:'#c084fc' }
-              : total >= 50000   ? { label:'Sports Run', icon:'ðŸ', color:'#60a5fa' }
-              : { label:'Run Complete', icon:'ðŸ', color:'var(--muted)' };
+  const tier = total >= 1000000 ? { label:'Legend Run', icon:'👑', color:'#f5c842' }
+              : total >= 500000  ? { label:'Hyper Run',  icon:'🔥', color:'#ff5733' }
+              : total >= 150000  ? { label:'Super Run',  icon:'🏎️', color:'#c084fc' }
+              : total >= 50000   ? { label:'Sports Run', icon:'🏁', color:'#60a5fa' }
+              : { label:'Run Complete', icon:'🏁', color:'var(--muted)' };
 
   // XP earned across this run
   const xp = cars.reduce((s,c)=>s+rarityXP(c.value||0),0);
@@ -4681,8 +4681,8 @@ function showRecap({ total, cars, headliner, isRec, prevBest }) {
     vsHTML = `<div class="recap-vs">${diff >= 0 ? '' : ''} <span>${fmtFull(Math.abs(diff))}</span> ${diff >= 0 ? 'above' : 'below'} your best run of ${fmtFull(prevBest)}</div>`;
   }
 
-  // Podium cards â€” fly in from left / bottom / right, sit next to each other
-  const medals = ['ðŸ¥‡','ðŸ¥ˆ','ðŸ¥‰'];
+  // Podium cards - fly in from left / bottom / right, sit next to each other
+  const medals = ['🥇','🥈','🥉'];
   const flyCls = ['recap-fly-l','recap-fly-c','recap-fly-r'];
   const delays = ['0.1s','0.24s','0.38s'];
   const podiumHTML = top3.map((c,i) => {
@@ -4720,7 +4720,7 @@ function showRecap({ total, cars, headliner, isRec, prevBest }) {
       <div class="recap-label">${isRec ? 'NEW PERSONAL RECORD' : 'RUN COMPLETE'}</div>
       <div class="recap-tier" style="color:${tier.color}">${tier.icon} ${tier.label}</div>
       <div class="recap-total" id="recapTotalNum">$0</div>
-      ${isRec ? '<div class="recap-record-tag pop">ðŸ† NEW RECORD</div>' : `<div class="recap-meta">${cars.length} car${cars.length!==1?'s':''} Â· ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>`}
+      ${isRec ? '<div class="recap-record-tag pop">🏆 NEW RECORD</div>' : `<div class="recap-meta">${cars.length} car${cars.length!==1?'s':''} . ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>`}
       ${xp ? '<div class="recap-xp">â­ +' + xp + ' XP earned this run</div>' : ''}
       ${podiumHTML ? `
         <div class="recap-section-lbl" style="text-align:center">TOP CARS</div>
@@ -4818,12 +4818,12 @@ function getAllCars() {
   [...allRuns].reverse().forEach(run => {
     run.cars.forEach(car => {
       const key = car.name.toLowerCase();
-      const label = run.spotted ? 'Spotted Â· '+run.date : 'Run Â· '+run.date;
+      const label = run.spotted ? 'Spotted . '+run.date : 'Run . '+run.date;
       if (seen.has(key)) {
         const existing = seen.get(key);
         existing.spotCount++;
         existing.runDate = label;
-        // Prefer newer entry's photo â€” keeps latest pic in garage
+        // Prefer newer entry's photo - keeps latest pic in garage
         if (car.photo && !existing.photo) existing.photo = car.photo;
         // Upgrade location: if this entry has a location and existing doesn't, take it
         if (car.location && car.location.lat && !existing.location) {
@@ -4885,11 +4885,11 @@ function deleteCarEverywhere(name) {
   if (headlinerIdx >= 0) {
     if (carIdx === headlinerIdx) headlinerIdx = -1;
     else if (carIdx >= 0 && carIdx < headlinerIdx) headlinerIdx--;
-    // else: car not in current run or after headliner â€” keep headlinerIdx
+    // else: car not in current run or after headliner - keep headlinerIdx
   }
   currentRun = currentRun.filter(c=>c.name.toLowerCase()!==key);
   saveCurrentRun();
-  // Sync to cloud immediately â€” don't wait for the 1.5s debounce,
+  // Sync to cloud immediately - don't wait for the 1.5s debounce,
   // otherwise a reload will pull stale cloud data via _mergeRunHistory
   clearTimeout(syncTimer);
   if (currentUser && navigator.onLine) {
@@ -4904,7 +4904,7 @@ function deleteCarEverywhere(name) {
   renderSpot();
   renderGarage();
   pushUndo('delete_everywhere', { prevRuns, prevRun, prevHL }, name + ' removed from everything');
-  showToast(name+' removed â€” tap UNDO to restore');
+  showToast(name+' removed - tap UNDO to restore');
 }
 
 //  GARAGE FILTER & VIEW STATE 
@@ -4924,21 +4924,21 @@ function clearGarageSearch() {
 
 //  CAR TYPE LOOKUP  central source of truth for typeâ†”emoji mapping
 const CAR_TYPE_MAP = {
-  supercar: 'ðŸŽï¸',
-  sports:   'ðŸš—',
-  muscle:   'ðŸŽ',
-  track:    'ðŸ',
-  exotic:   'ðŸ”¥',
-  ev:       'âš¡',
-  luxury:   'ðŸ‘‘',
-  suv:      'ðŸ›»',
-  classic:  'ðŸ•¹ï¸',
-  hotrod:   'ðŸ”§',
+  supercar: '🏎️',
+  sports:   '🚗',
+  muscle:   '🐎',
+  track:    '🏁',
+  exotic:   '🔥',
+  ev:       '⚡',
+  luxury:   '👑',
+  suv:      '🚙',
+  classic:  '🕹️',
+  hotrod:   '🔧',
 };
 // Label lookup by type key
 function carTypeLabel(type) {
   // Support legacy emoji-stored types from old data
-  const legacyMap = {'ðŸŽ':'ðŸŽï¸','ðŸš—':'ðŸš—','ðŸŽ':'ðŸŽ','ðŸ':'ðŸ','ðŸ”¥':'ðŸ”¥','âš¡':'âš¡'};
+  const legacyMap = {'ðŸŽ':'🏎️','🚗':'🚗','🐎':'🐎','🏁':'🏁','🔥':'🔥','⚡':'⚡'};
   return CAR_TYPE_MAP[type] || legacyMap[type] || type || 'ðŸš˜';
 }
 
@@ -4950,7 +4950,7 @@ function applyGarageFilters(cars) {
     if (garageFilter === 'legend')   return car.value >= 1000000;
     if (garageFilter === 'hypercar') return car.value >= 500000;
     // Normalize legacy emoji types to text keys
-    const legacyRev = {'ðŸŽ':'supercar','ðŸš—':'sports','ðŸŽ':'muscle','ðŸ':'track','ðŸ”¥':'exotic','âš¡':'ev'};
+    const legacyRev = {'ðŸŽ':'supercar','🚗':'sports','🐎':'muscle','🏁':'track','🔥':'exotic','⚡':'ev'};
     const typeKey = legacyRev[car.type] || car.type || '';
     if (CAR_TYPE_MAP[garageFilter]) return typeKey === garageFilter;
     return true;
@@ -5084,7 +5084,7 @@ function buildMapPopup(car) {
     '<div class="map-popup-body">' +
     '<div class="map-popup-name" style="color:' + rarity.color + '">' + escapeHtml(car.name) + '</div>' +
     '<div class="map-popup-val">' + fmtFull(car.value) + '</div>' +
-    '<div class="map-popup-meta">' + (car.runDate ? escapeHtml(car.runDate) + (locLabel ? ' Â· ' : '') : '') + locLabel + '</div>' +
+    '<div class="map-popup-meta">' + (car.runDate ? escapeHtml(car.runDate) + (locLabel ? ' . ' : '') : '') + locLabel + '</div>' +
     '<div style="display:flex;gap:6px;margin-top:10px">' +
     '<button class="map-popup-btn" onclick="openMapCar(decodeURIComponent(\'' + encodeURIComponent(JSON.stringify({ name: car.name, value: car.value, color: car.color, type: car.type, photo: car.photo, location: car.location })).replace(/'/g, '%27') + '\'))">VIEW CAR â†’</button>' +
     '<button class="map-popup-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');this.textContent=this.textContent===\'â˜…\'?\'â˜†\':\'â˜…\';" title="Toggle favorite">' + (isFavorite(car.name) ? 'â˜…' : 'â˜†') + '</button>' +
@@ -5100,7 +5100,7 @@ function buildClusterPopup(cluster) {
     html += '<div class="map-cluster-item" onclick="openMapCar(decodeURIComponent(\'' + encodeURIComponent(JSON.stringify({ name: car.name, value: car.value, color: car.color, type: car.type, photo: car.photo, location: car.location })).replace(/'/g, '%27') + '\'))">' +
       photoHtml +
       '<div class="map-cluster-item-info"><div class="map-cluster-item-name">' + escapeHtml(car.name) + '</div>' +
-      '<div class="map-cluster-item-meta">' + (isRun ? 'Run' : 'Solo') + ' Â· ' + fmtFull(car.value) + '</div></div></div>';
+      '<div class="map-cluster-item-meta">' + (isRun ? 'Run' : 'Solo') + ' . ' + fmtFull(car.value) + '</div></div></div>';
   });
   html += '</div>';
   return html;
@@ -5109,7 +5109,7 @@ function buildClusterPopup(cluster) {
 function renderGarage() {
   _patchPhotosFromCache();
   // Only do the heavy museum render when the garage is actually on screen.
-  // logSpotted()/deleteCarEverywhere() call this from other pages â€” skipping
+  // logSpotted()/deleteCarEverywhere() call this from other pages - skipping
   // keeps those taps fast on phones (the page re-renders on navigation).
   var activePg = document.querySelector('.page.active');
   if (!activePg || activePg.id !== 'page-garage') return;
@@ -5155,7 +5155,7 @@ function renderGarage() {
     var listEl = document.getElementById('mapCarList');
     listEl.innerHTML = mapped.map(function(car){
       var rarity = getRarity(car.value);
-      return '<div class="garage-map-row" style="border-left:3px solid ' + rarity.color + '"><strong>' + escapeHtml(car.name) + '</strong><span>' + escapeHtml(locLabel(car.location)) + ' Â· ' + fmtFull(car.value) + '</span></div>';
+      return '<div class="garage-map-row" style="border-left:3px solid ' + rarity.color + '"><strong>' + escapeHtml(car.name) + '</strong><span>' + escapeHtml(locLabel(car.location)) + ' . ' + fmtFull(car.value) + '</span></div>';
     }).join('');
     setTimeout(function(){
       var mapEl = document.getElementById('leafletMap');
@@ -5354,7 +5354,7 @@ function renderHistory() {
   if (best>0) {
     document.getElementById('recordVal').textContent = fmtFull(best);
     const br = allRuns.find(r=>!r.spotted && r.total===best);
-    if (br) document.getElementById('recordSub').textContent = br.cars.length+' cars Â· '+br.date;
+    if (br) document.getElementById('recordSub').textContent = br.cars.length+' cars . '+br.date;
   }
 
   const el = document.getElementById('histList');
@@ -5381,7 +5381,7 @@ function renderHistory() {
       <div class="hc-row-wrap">
         <a class="hc-row" href="${carUrl(car.name)}" target="_blank" rel="noopener noreferrer">
           ${car.photo ? `<img class="hc-photo" src="${car.photo}" alt="car">` : `<span class="hc-emoji">${carTypeLabel(car.type)}</span>`}
-          <span class="hc-name">${escapeHtml(car.name)}${car.color?' <span style="font-weight:400;color:var(--text2)">Â· '+escapeHtml(car.color)+'</span>':''}${isCarHL?' <span style="color:var(--accent);font-size:0.6rem;letter-spacing:1px;font-weight:700">HEADLINER</span>':''}</span>
+          <span class="hc-name">${escapeHtml(car.name)}${car.color?' <span style="font-weight:400;color:var(--text2)">. '+escapeHtml(car.color)+'</span>':''}${isCarHL?' <span style="color:var(--accent);font-size:0.6rem;letter-spacing:1px;font-weight:700">HEADLINER</span>':''}</span>
           <span class="hc-val">${fmtFull(car.value)}</span>
           <span class="hc-arrow">â†—</span>
         </a>
@@ -5391,7 +5391,7 @@ function renderHistory() {
     }).join('');
 
     const headlinerHTML = (!isSpot && entry.headliner)
-      ? `<div class="hist-headliner">â­ HEADLINER Â· ${escapeHtml(entry.headliner.name)}</div>`
+      ? `<div class="hist-headliner">â­ HEADLINER . ${escapeHtml(entry.headliner.name)}</div>`
       : '';
 
     div.innerHTML=`
@@ -5465,7 +5465,7 @@ async function showSpecsCard(car) {
       <div class="specs-body">
         <div class="specs-name">${car.name}</div>
         <div class="specs-error">
-          Specs lookup unavailable right now â€” check your connection.<br><br>
+          Specs lookup unavailable right now - check your connection.<br><br>
           <a href="${carUrl(car.name)}" target="_blank" rel="noopener" style="color:var(--accent);font-size:0.75rem;letter-spacing:1px;">Search Google for full specs â†—</a>
         </div>
         <button class="specs-close-btn" onclick="document.getElementById('specsOverlay').remove()">GOT IT</button>
@@ -5610,7 +5610,7 @@ async function fetchCarSpecs(carName) {
   var cached = _csGet(ck);
   if (cached !== undefined) return cached;
 
-  // Expanded database â€” longest match string checked first for trim-level accuracy
+  // Expanded database - longest match string checked first for trim-level accuracy
   var db = [
     // Ferrari
     { m:['ferrari laferrari','laferrari'],      y:'2014', hp:'950',  tq:'664',  z:'2.6', ts:'217', e:'6.3L V12 Hybrid',         d:'RWD', w:'3495', t:'The hybrid halo car that rewrote the rulebook.' },
@@ -5621,7 +5621,7 @@ async function fetchCarSpecs(carName) {
     { m:['ferrari 488 gtb','ferrari 488','488 gtb','488'],y:'2019',hp:'660', tq:'560',  z:'3.0', ts:'205', e:'3.9L Twin-Turbo V8',       d:'RWD', w:'3252', t:'The twin-turbo V8 that rewrote the Ferrari rulebook.' },
     { m:['ferrari 458 italia','ferrari 458','458 italia'],y:'2014',hp:'562', tq:'398',  z:'3.4', ts:'202', e:'4.5L Naturally Aspirated V8',d:'RWD',w:'3274', t:'The last great naturally aspirated mid-engine Ferrari.' },
     { m:['ferrari f430','f430'],                 y:'2009', hp:'483',  tq:'343',  z:'3.6', ts:'196', e:'4.3L V8',                 d:'RWD', w:'3346', t:'The V8 Ferrari that defined a generation.' },
-    { m:['ferrari roma','ferrari roma'],         y:'2021', hp:'612',  tq:'561',  z:'3.4', ts:'198', e:'3.9L Twin-Turbo V8',       d:'RWD', w:'3340', t:'La Nuova Dolce Vita â€” elegance meets speed.' },
+    { m:['ferrari roma','ferrari roma'],         y:'2021', hp:'612',  tq:'561',  z:'3.4', ts:'198', e:'3.9L Twin-Turbo V8',       d:'RWD', w:'3340', t:'La Nuova Dolce Vita - elegance meets speed.' },
     { m:['ferrari 812 superfast','812 superfast','ferrari 812'],y:'2022',hp:'789',tq:'530', z:'2.8', ts:'211', e:'6.5L V12',                d:'RWD', w:'3594', t:'Front-engine V12 grand tourer. The last of its kind.' },
     { m:['ferrari portofino','portofino'],       y:'2022', hp:'591',  tq:'561',  z:'3.5', ts:'199', e:'3.9L Twin-Turbo V8',       d:'RWD', w:'3657', t:'The entry-level Ferrari. Still absurdly fast.' },
     { m:['ferrari california','california'],      y:'2017', hp:'483',  tq:'343',  z:'3.6', ts:'194', e:'4.3L V8',                 d:'RWD', w:'3834', t:'The convertible Ferrari for everyday use.' },
@@ -5783,7 +5783,7 @@ async function fetchCarSpecs(carName) {
     { m:['pininfarina battista','battista'],     y:'2024', hp:'1874', tq:'1693', z:'1.89',ts:'217',e:'Quad-Motor Electric',       d:'AWD', w:'4760', t:'Italian design meets Rimac power. 1,874 hp.' },
   ];
 
-  // Sort by longest match string descending â€” most specific match wins
+  // Sort by longest match string descending - most specific match wins
   db.sort(function(a,b){ var am=0,bm=0; a.m.forEach(function(s){if(s.length>am)am=s.length;}); b.m.forEach(function(s){if(s.length>bm)bm=s.length;}); return bm-am; });
   var entry = db.find(function(e){ return e.m.some(function(m){ return name.indexOf(m)!==-1; }); });
   if (entry) {
@@ -5801,7 +5801,7 @@ async function fetchCarSpecs(carName) {
     if (res.ok) {
       var data = await res.json();
       var found = data.Results && data.Results.find(function(r){ return r.Model_Name && r.Model_Name.toLowerCase().indexOf(model.toLowerCase())!==-1; });
-      if (found) { var nr = { tagline: found.Make_Name + ' ' + found.Model_Name + ' â€” a verified chassis on record.' }; _csSet(ck, nr); return nr; }
+      if (found) { var nr = { tagline: found.Make_Name + ' ' + found.Model_Name + ' - a verified chassis on record.' }; _csSet(ck, nr); return nr; }
     }
   } catch(e) {}
   _csSet(ck, null);
@@ -5840,7 +5840,7 @@ async function fetchCarImage(carName) {
   return null;
 }
 
-//  XP & LEVELS â€” reward every log so there's always a reason to find the next car
+//  XP & LEVELS - reward every log so there's always a reason to find the next car
 let _xpTotal = parseInt(localStorage.getItem('cs_xp') || '0');
 function xpInfo(xp) {
   var level = 1, into = 0, need = 100;
@@ -5885,7 +5885,7 @@ function levelUpPulse() {
   if (fill) { fill.classList.remove('glow'); void fill.offsetWidth; fill.classList.add('glow'); }
 }
 
-//  HAPTICS â€” tasteful buzz on supported devices
+//  HAPTICS - tasteful buzz on supported devices
 function haptic(pattern) {
   if (localStorage.getItem('cs_vibe') === 'off') return;
   if (!_userInteracted) return;
@@ -5903,7 +5903,7 @@ function initVibeToggle() {
   if (btn) btn.classList.toggle('on', localStorage.getItem('cs_vibe') !== 'off');
 }
 
-//  COLLECTOR CARD SETTINGS â€” keep the reward moment configurable
+//  COLLECTOR CARD SETTINGS - keep the reward moment configurable
 function ccAnimEnabled() { return localStorage.getItem('cs_cc_anim') !== 'off'; }
 function toggleCCAnim() {
   var on = localStorage.getItem('cs_cc_anim') !== 'off';
@@ -5917,11 +5917,11 @@ function initCCAnimToggle() {
   if (btn) btn.classList.toggle('on', localStorage.getItem('cs_cc_anim') !== 'off');
 }
 
-//  TIER HELPERS â€” shared by card, discovery history and quick mode
+//  TIER HELPERS - shared by card, discovery history and quick mode
 function tierOf(v) {
   return v >= 1000000 ? 'legend' : v >= 500000 ? 'hyper' : v >= 150000 ? 'super' : v >= 50000 ? 'sports' : 'daily';
 }
-function tierEmoji(t) { return { daily:'ðŸš—', sports:'ðŸ', super:'ðŸŽï¸', hyper:'ðŸ”¥', legend:'ðŸ‘‘' }[t] || 'ðŸš˜'; }
+function tierEmoji(t) { return { daily:'🚗', sports:'🏁', super:'🏎️', hyper:'🔥', legend:'👑' }[t] || 'ðŸš˜'; }
 function tierMeta(t) {
   return {
     daily:  { label:'Daily Spot',     stars:1, color:'#9aa3af' },
@@ -5932,7 +5932,7 @@ function tierMeta(t) {
   }[t] || { label:'Car Spot', stars:1, color:'#9aa3af' };
 }
 
-//  DISCOVERY HISTORY â€” your last 10 spots as a trophy case
+//  DISCOVERY HISTORY - your last 10 spots as a trophy case
 function recordDiscovery(car, xp) {
   try {
     var list = [];
@@ -5995,7 +5995,7 @@ function openDiscovery(name, value, type) {
   showSpecsCard({ name:name, value:value, type:type, color:'', photo:'' });
 }
 
-//  MODE SELECTION â€” full experience first, then dial back after repetition
+//  MODE SELECTION - full experience first, then dial back after repetition
 var _ccFullCount = 0;
 function wantsFullCollectorCard(tier) {
   if (localStorage.getItem('cs_cc_anim') === 'off') return false;
@@ -6005,7 +6005,7 @@ function wantsFullCollectorCard(tier) {
   return _ccFullCount <= 3;
 }
 
-//  COLLECTOR CARD â€” the core reward moment
+//  COLLECTOR CARD - the core reward moment
 function celebrateCollectorCard(car, opts) {
   opts = opts || {};
   var xp = opts.xpGain || rarityXP(car.value || 0);
@@ -6025,8 +6025,8 @@ function celebrateFullCollectorCard(car, opts) {
     exotic:'Exotic', ev:'EV', luxury:'Luxury', suv:'SUV', classic:'Classic', hotrod:'Hot Rod'
   }[car.type] || 'Car').toUpperCase();
   var typeEmoji = {
-    supercar:'ðŸŽï¸', sports:'ðŸš—', muscle:'ðŸŽ', track:'ðŸ', exotic:'ðŸ”¥', ev:'âš¡',
-    luxury:'ðŸ‘‘', suv:'ðŸ›»', classic:'ðŸ•¹ï¸', hotrod:'ðŸ”§'
+    supercar:'🏎️', sports:'🚗', muscle:'🐎', track:'🏁', exotic:'🔥', ev:'⚡',
+    luxury:'👑', suv:'🚙', classic:'🕹️', hotrod:'🔧'
   }[car.type] || 'ðŸš˜';
 
   var photo = car.photo || (_idbPhotoCache[car.name.toLowerCase()] || '');
@@ -6039,7 +6039,7 @@ function celebrateFullCollectorCard(car, opts) {
 
   var badgesHTML = '';
   if (opts.isFirst) badgesHTML += '<div class="cc-badge first"><span>ðŸ” First Discovery</span><span class="cc-badge-sub">You\u2019re the first to log this car</span></div>';
-  if (opts.isBest)  badgesHTML += '<div class="cc-badge best"><span>ðŸ† Personal Record</span><span class="cc-badge-sub">Your most valuable spot yet</span></div>';
+  if (opts.isBest)  badgesHTML += '<div class="cc-badge best"><span>🏆 Personal Record</span><span class="cc-badge-sub">Your most valuable spot yet</span></div>';
   if (opts.saved)   badgesHTML += '<div class="cc-badge saved"><span>âœ“ Saved to garage</span><span class="cc-badge-sub">Now part of your collection</span></div>';
 
   return new Promise(function(resolve) {
@@ -6077,7 +6077,7 @@ function celebrateFullCollectorCard(car, opts) {
           (badgesHTML ? '<div class="cc-back-badges">' + badgesHTML + '</div>' : '') +
         '</div>' +
       '</div>' +
-      '<div class="cc-dismiss">Tap to flip Â· tap again to collect</div>';
+      '<div class="cc-dismiss">Tap to flip . tap again to collect</div>';
     overlay.appendChild(card);
     document.body.appendChild(overlay);
 
@@ -6095,7 +6095,7 @@ function celebrateFullCollectorCard(car, opts) {
       }).catch(function(){});
     }
 
-    var phase = 0; // 0 front Â· 1 flipped (not revealed) Â· 2 revealed
+    var phase = 0; // 0 front . 1 flipped (not revealed) . 2 revealed
     var revealed = false;
     function revealNow() {
       if (revealed) return;
@@ -6191,7 +6191,7 @@ function celebrateFullCollectorCard(car, opts) {
   });
 }
 
-//  QUICK COLLECTOR MODE â€” non-blocking chip when animations are dialed back
+//  QUICK COLLECTOR MODE - non-blocking chip when animations are dialed back
 function celebrateQuick(car, opts) {
   opts = opts || {};
   var v = car.value || 0;
@@ -6226,7 +6226,7 @@ function popRunTotal() {
   el.classList.add('pop');
 }
 
-//  REWARD â€” XP + collector card + haptics + total pop in one place
+//  REWARD - XP + collector card + haptics + total pop in one place
 function rewardLog(car, popTotal, opts) {
   opts = opts || {};
   var before = xpInfo(_xpTotal);
@@ -6273,7 +6273,7 @@ function confettiBurst(container, count, colors) {
   }
 }
 
-//  LEVEL UP â€” the big milestone overlay
+//  LEVEL UP - the big milestone overlay
 function celebrateLevelUp(info) {
   if (document.querySelector('.levelup-overlay')) return;
   var t = titleForXP(_xpTotal);
@@ -6425,7 +6425,7 @@ function exportAllData() {
   const a    = document.createElement('a');
   a.href = url; a.download = 'CarSpotter_backup_full_' + new Date().toISOString().slice(0,10) + '.json'; a.click();
   URL.revokeObjectURL(url);
-  showToast('ðŸ“¥ Exported all data WITH photos â€” file may be large');
+  showToast('ðŸ“¥ Exported all data WITH photos - file may be large');
 }
 
 function importFromFile(input) {
@@ -6446,7 +6446,7 @@ function importFromFile(input) {
       let restored = 0;
       for (const key of Object.keys(data)) {
         if (!key.startsWith('cs_')) continue;
-        if (key === 'cs_garage') continue; // computed convenience field â€” never read
+        if (key === 'cs_garage') continue; // computed convenience field - never read
         if (key === 'cs_runs' || key === 'cs_current' || key === 'cs_qp') {
           // Move base64 photos into IndexedDB and store tiny 'photo:' refs in
           // localStorage so a photo-heavy backup fits within the storage quota.
@@ -6499,7 +6499,7 @@ function importFromFile(input) {
       renderAll();
       showToast('âœ… Restored ' + restored + ' data fields' +
         (hasPhotos ? ' WITH photos' : ' (no photos)') +
-        ' â€” ' + allRuns.reduce((s,r) => s + (r.cars||[]).length, 0) + ' cars total');
+        ' - ' + allRuns.reduce((s,r) => s + (r.cars||[]).length, 0) + ' cars total');
       // Re-check achievements
       setTimeout(checkNewAchievements, 800);
     } catch(err) {
@@ -6528,7 +6528,7 @@ document.getElementById('carName').addEventListener('keydown',  e=>{ if(e.key===
 document.getElementById('carValue').addEventListener('keydown', e=>{ if(e.key==='Enter') logRun(); });
 
 //  INIT 
-// Auth state change handles data load â€” just bootstrap UI
+// Auth state change handles data load - just bootstrap UI
 renderQPTrigger();
 renderSpot();
 renderHomeFav();
@@ -6539,7 +6539,7 @@ initVibeToggle();
 renderLevelBar();
 fetchRefImagesForAllCars();
 
-//  SERVICE WORKER â€” cache-first for offline support
+//  SERVICE WORKER - cache-first for offline support
 if ('serviceWorker' in navigator) {
   const swCode = `
 const CACHE = 'cs-v5';
@@ -6601,7 +6601,7 @@ function updateOfflineBanner() {
   isOffline = !navigator.onLine;
   b.classList.toggle('show', isOffline);
   if (isOffline) {
-    b.innerHTML = '<span>OFFLINE</span><span>OFFLINE â€” Saves locally, syncs when back</span>';
+    b.innerHTML = '<span>OFFLINE</span><span>OFFLINE - Saves locally, syncs when back</span>';
   } else {
     b.classList.remove('show');
   }
@@ -6627,14 +6627,14 @@ function refreshOfflineStatus() {
   if (!dot || !text) return;
   if (!navigator.onLine) {
     dot.style.background  = 'var(--red)';
-    text.textContent      = 'Offline â€” logging locally';
+    text.textContent      = 'Offline - logging locally';
     if (info && offlineQueue.length) {
       info.style.display  = 'block';
       info.textContent    = offlineQueue.length + ' pending saves waiting to sync';
     }
   } else {
     dot.style.background  = 'var(--green)';
-    text.textContent      = 'Online â€” syncing to cloud';
+    text.textContent      = 'Online - syncing to cloud';
     if (info) info.style.display = 'none';
   }
 }
@@ -6762,7 +6762,7 @@ const _attachPhotoInput = document.createElement('input');
 _attachPhotoInput.type = 'file';
 _attachPhotoInput.accept = 'image/*';
 _attachPhotoInput.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
-// IndexedDB photo storage â€” sidesteps localStorage 5MB limit
+// IndexedDB photo storage - sidesteps localStorage 5MB limit
 
 var _idbConn = null;
 function _idbOpen() {
@@ -6810,7 +6810,7 @@ function _loadIDBCache() {
   _idbGetAll().then(function(entries) {
     entries.forEach(function(e) { _idbPhotoCache[e.name] = e.data; });
     // Migrate any base64 photos still baked into localStorage out to IndexedDB as
-    // 'photo:' refs â€” frees the quota so later writes never throw QuotaExceededError.
+    // 'photo:' refs - frees the quota so later writes never throw QuotaExceededError.
     _saveRunsLocal(); _saveCurrentLocal(); _saveQPLocal();
     renderSpot(); renderGarage(); renderHistory(); renderDiscoveries();
   }).catch(function(){});
@@ -6877,7 +6877,7 @@ function _saveRunsLocal()    { return _safeSet('cs_runs',    JSON.stringify(_str
 function _saveCurrentLocal() { return _safeSet('cs_current', JSON.stringify(_stripCopy(currentRun))); }
 function _saveQPLocal()      { return _safeSet('cs_qp',      JSON.stringify(_stripCopy(quickPicks))); }
 
-// Deep copy with 'photo:' refs resolved back to their base64 from the IDB cache â€”
+// Deep copy with 'photo:' refs resolved back to their base64 from the IDB cache -
 // used by exports so backups contain the actual image data.
 function _resolvePhotosIn(obj) {
   if (Array.isArray(obj)) return obj.map(function(x) { return _resolvePhotosIn(x); });
@@ -7173,11 +7173,11 @@ async function smartVoiceFill() {
     voiceFillPending = parsed;
     const bar = document.getElementById('voiceFillBar');
     document.getElementById('voiceFillText').textContent =
-      `${parsed.type} ${parsed.name}${parsed.color ? ' Â· ' + parsed.color : ''} Â· $${Number(parsed.value).toLocaleString()}`;
+      `${parsed.type} ${parsed.name}${parsed.color ? ' . ' + parsed.color : ''} . $${Number(parsed.value).toLocaleString()}`;
     bar.classList.add('show');
     // Switch to spot tab so user can see the fill bar
     goTo('spot');
-    showToast(' Car detected â€” tap FILL!');
+    showToast(' Car detected - tap FILL!');
   } catch(e) {
     showToast('Could not parse a car from notes');
   } finally {
@@ -7390,7 +7390,7 @@ window.openLensWithPhoto = function(input) {
   // Convert to data URL then submit to Google Lens via form POST
   const reader = new FileReader();
   reader.onload = function(e) {
-    // Google Lens upload URL â€” works without an API key
+    // Google Lens upload URL - works without an API key
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = 'https://lens.google.com/upload';
@@ -7486,7 +7486,7 @@ window.runCarSearch = async function(query) {
       <button class="csr-fill-btn" onclick="fillFromSearch('${jsEscape(query)}',${guessVal},'','${guessType}')">âž• LOG THIS CAR</button>
     </div>`;
   } else if (wikiSummary || wikiImg) {
-    // Wikipedia fallback card â€” still useful
+    // Wikipedia fallback card - still useful
     el.innerHTML = `<div class="car-search-result">
       <div class="csr-img-wrap">${imgHTML}</div>
       <span class="specs-type-badge" style="color:${rarity.color};background:${rarity.bg};border-color:${rarity.color}44;margin-bottom:8px;display:inline-block">${rarity.label}</span>
@@ -7499,7 +7499,7 @@ window.runCarSearch = async function(query) {
     el.innerHTML = `<div class="car-search-result">
       <div class="csr-img-ph" style="margin-bottom:10px">ðŸš˜</div>
       <div class="csr-name">${escapeHtml(query)}</div>
-      <div class="csr-tagline" style="color:var(--muted)">Nothing found â€” check the spelling or try a more specific name like "Porsche 911 GT3 RS".</div>
+      <div class="csr-tagline" style="color:var(--muted)">Nothing found - check the spelling or try a more specific name like "Porsche 911 GT3 RS".</div>
       <button class="csr-fill-btn" onclick="fillFromSearch('${jsEscape(query)}',${guessVal},'','${guessType}')">âž• LOG ANYWAY</button>
     </div>`;
   }
@@ -7512,7 +7512,7 @@ window.fillFromSearch = function(name, value, color, type) {
   document.getElementById('carColor').value = color || '';
   document.getElementById('carType').value  = type || 'supercar';
   goTo('spot');
-  showToast('âœ… Form filled â€” review and log!');
+  showToast('âœ… Form filled - review and log!');
 };
 
 // 
@@ -7604,7 +7604,7 @@ function renderAchievements() {
 
 // Hook achievement checks into all data-mutating actions
 const _origEndRun = endRun;
-// (achievements are checked in logRun/logSpotted after save â€” patched below)
+// (achievements are checked in logRun/logSpotted after save - patched below)
 
 // 
 //  CAR AUTOCOMPLETE DATABASE 
@@ -7786,10 +7786,10 @@ async function runSmartCmd() {
         model: 'claude-sonnet-4-20250514',
         max_tokens: 300,
         system: `You are CarSpotter's AI assistant. Parse the user's command and return ONLY a JSON object with one of these actions:
-{"action":"log","name":"Make Model","value":NUMBER,"color":"color or ''","type":"supercar|sports|muscle|track|exotic|ev|luxury|suv|classic|hotrod"}  â€” to fill the log form
-{"action":"nav","page":"spot|garage|history|stats|news|voice"}  â€” to navigate
-{"action":"toast","msg":"short message"}  â€” for commands like "how many cars" (answer in msg, max 60 chars)
-{"action":"start_run"}  â€” to clear and start a fresh run
+{"action":"log","name":"Make Model","value":NUMBER,"color":"color or ''","type":"supercar|sports|muscle|track|exotic|ev|luxury|suv|classic|hotrod"}  - to fill the log form
+{"action":"nav","page":"spot|garage|history|stats|news|voice"}  - to navigate
+{"action":"toast","msg":"short message"}  - for commands like "how many cars" (answer in msg, max 60 chars)
+{"action":"start_run"}  - to clear and start a fresh run
 Use type emoji: =supercar/ferrari/lambo/mclaren, =sports/bmw/porsche/generic, =muscle/camaro/challenger/charger/mustang, =track/race, =exotic/rare, =electric/ev. For value, guess market price if not given. Return ONLY the JSON object, no extra text.`,
         messages: [{ role: 'user', content: cmd }]
       })
@@ -7805,7 +7805,7 @@ Use type emoji: =supercar/ferrari/lambo/mclaren, =sports/bmw/porsche/generic, =m
       document.getElementById('carColor').value = parsed.color || '';
       if (parsed.type) document.getElementById('carType').value = parsed.type;
       goTo('spot');
-      showToast(' Form filled â€” review & tap "+ TO RUN"');
+      showToast(' Form filled - review & tap "+ TO RUN"');
       input.value = '';
     } else if (parsed.action === 'nav') {
       const pg = parsed.page;
@@ -7824,7 +7824,7 @@ Use type emoji: =supercar/ferrari/lambo/mclaren, =sports/bmw/porsche/generic, =m
       input.value = '';
     }
   } catch(e) {
-    showToast('Command not understood â€” try rephrasing!');
+    showToast('Command not understood - try rephrasing!');
   } finally {
     btn.textContent = 'GO';
     btn.disabled = false;
@@ -7833,7 +7833,7 @@ Use type emoji: =supercar/ferrari/lambo/mclaren, =sports/bmw/porsche/generic, =m
 
 //  MORE MENU 
 function toggleMoreMenu() {
-  // More is now a full page â€” navigate to it
+  // More is now a full page - navigate to it
   goTo('more');
 }
 
@@ -7892,10 +7892,10 @@ function renderStats() {
         <div class="st-bar-label"><span class="st-bar-name">${make}</span><span class="st-bar-val">${count}x</span></div>
         <div class="st-bar-track"><div class="st-bar-fill" style="width:${Math.round(count/maxMake*100)}%"></div></div>
       </div>`).join('')
-    : '<div class="st-empty">No data yet â€” start spotting</div>';
+    : '<div class="st-empty">No data yet - start spotting</div>';
 
-  //  By type â€” group by category, hide unknown/empty types
-  const typeMap = {'supercar':'ðŸŽï¸ Supercar','sports':'ðŸš— Sports','muscle':'ðŸŽ Muscle','track':'ðŸ Track','exotic':'ðŸ”¥ Exotic','ev':'âš¡ EV','luxury':'ðŸ‘‘ Luxury','suv':'ðŸ›» SUV','classic':'ðŸ•¹ï¸ Classic','hotrod':'ðŸ”§ Hot Rod'};
+  //  By type - group by category, hide unknown/empty types
+  const typeMap = {'supercar':'🏎️ Supercar','sports':'🚗 Sports','muscle':'🐎 Muscle','track':'🏁 Track','exotic':'🔥 Exotic','ev':'⚡ EV','luxury':'👑 Luxury','suv':'🚙 SUV','classic':'🕹️ Classic','hotrod':'🔧 Hot Rod'};
   const typeCounts = {};
   allCars.forEach(c => {
     var key = c.type || '';
@@ -8023,7 +8023,7 @@ async function loadLeaderboard(force) {
     renderLeaderboard();
   } catch (e) {
     console.error(e);
-    // Permission error â€” show own runs instead
+    // Permission error - show own runs instead
     const myRuns = allRuns.filter(r => !r.spotted && r.total > 0)
       .sort((a,b) => b.total - a.total).slice(0, 10);
     if (myRuns.length) {
@@ -8041,11 +8041,11 @@ async function loadLeaderboard(force) {
       if (el) {
         const note = document.createElement('div');
         note.style.cssText = 'font-size:0.62rem;color:var(--muted);text-align:center;padding:8px;letter-spacing:0.5px;';
-        note.textContent = 'ðŸ“¡ Showing your local runs â€” global leaderboard requires Firestore rules to be updated.';
+        note.textContent = 'ðŸ“¡ Showing your local runs - global leaderboard requires Firestore rules to be updated.';
         el.prepend(note);
       }
     } else {
-      if (el) el.innerHTML = '<div class="lb-empty">No runs yet â€” complete a run to appear here!</div>';
+      if (el) el.innerHTML = '<div class="lb-empty">No runs yet - complete a run to appear here!</div>';
     }
   }
 }
@@ -8061,7 +8061,7 @@ function renderLeaderboard() {
   el.innerHTML = leaderboardRuns.map((run, idx) => {
     const top = idx < 3 ? 'top' : '';
     const who = run.isMe ? run.name + ' (You)' : run.name;
-    const medal = idx===0?'ðŸ¥‡':idx===1?'ðŸ¥ˆ':idx===2?'ðŸ¥‰':'#'+(idx+1);
+    const medal = idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':'#'+(idx+1);
     return `
       <div class="lb-row" style="animation-delay:${idx * 0.03}s">
         <div class="lb-rank ${top}">${medal}</div>
@@ -8142,16 +8142,16 @@ async function loadNews() {
       '</a>';
     }).join('');
   } catch(e) {
-    el.innerHTML = '<div class="news-error">Could not load news â€” check your connection.</div>';
+    el.innerHTML = '<div class="news-error">Could not load news - check your connection.</div>';
     var hl = document.getElementById('newsHeadliner');
     if (hl) hl.style.display = 'none';
   }
 }
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-//  PROGRESSION & REWARD SYSTEM EXPANSION â€” Foundation layer
-//  Spotter Titles Â· Collector Book Â· Mystery Cars Â· Expeditions
-//  Road Trips Â· Car Stories Â· Collector Card Evolution
+//  PROGRESSION & REWARD SYSTEM EXPANSION - Foundation layer
+//  Spotter Titles . Collector Book . Mystery Cars . Expeditions
+//  Road Trips . Car Stories . Collector Card Evolution
 //  Rare Discovery Moments
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
@@ -8181,19 +8181,19 @@ function saveProgress() {
 }
 function getProgression() { return _progress; }
 
-// ---- SPOTTER TITLES â€” the ladder that replaces "Level" as the identity ----
+// ---- SPOTTER TITLES - the ladder that replaces "Level" as the identity ----
 var SPOTTER_TITLES = [
   { id:'rookie',        name:'Rookie Spotter',      emoji:'ðŸ”°', xp:0,     desc:'Every legend starts with one spot.' },
-  { id:'roadrunner',    name:'Road Runner',         emoji:'ðŸ', xp:300,   desc:'You log cars like you own the road.' },
-  { id:'gearhead',      name:'Gearhead',            emoji:'ðŸ”§', xp:750,   desc:'You know your way around horsepower.' },
+  { id:'roadrunner',    name:'Road Runner',         emoji:'🏁', xp:300,   desc:'You log cars like you own the road.' },
+  { id:'gearhead',      name:'Gearhead',            emoji:'🔧', xp:750,   desc:'You know your way around horsepower.' },
   { id:'spotter',       name:'Spotter',             emoji:'ðŸ”­', xp:1400,  desc:'Your eyes are trained on the road ahead.' },
-  { id:'marque_master', name:'Marque Master',       emoji:'ðŸŽï¸', xp:2300, desc:'You can name a brand by its exhaust note.' },
+  { id:'marque_master', name:'Marque Master',       emoji:'🏎️', xp:2300, desc:'You can name a brand by its exhaust note.' },
   { id:'collector',     name:'Collector',           emoji:'ðŸ“¦', xp:3400,  desc:'Your garage is becoming a museum.' },
   { id:'connoisseur',   name:'Connoisseur',         emoji:'ðŸŽ©', xp:4700,  desc:'You spot the details others miss.' },
-  { id:'road_legend',   name:'Road Legend',         emoji:'ðŸ†', xp:6200,  desc:'Legends are made one spot at a time.' },
-  { id:'hyper_hunter',  name:'Hypercar Hunter',     emoji:'ðŸ”¥', xp:7900,  desc:'You chase the rarest metal on four wheels.' },
-  { id:'trophy_hunter', name:'Trophy Hunter',       emoji:'ðŸ¥‡', xp:9800,  desc:'Your trophy case rivals the cars.' },
-  { id:'supreme',       name:'Supreme Spotter',     emoji:'ðŸ‘‘', xp:12000, desc:'There is no road you cannot read.' }
+  { id:'road_legend',   name:'Road Legend',         emoji:'🏆', xp:6200,  desc:'Legends are made one spot at a time.' },
+  { id:'hyper_hunter',  name:'Hypercar Hunter',     emoji:'🔥', xp:7900,  desc:'You chase the rarest metal on four wheels.' },
+  { id:'trophy_hunter', name:'Trophy Hunter',       emoji:'🥇', xp:9800,  desc:'Your trophy case rivals the cars.' },
+  { id:'supreme',       name:'Supreme Spotter',     emoji:'👑', xp:12000, desc:'There is no road you cannot read.' }
 ];
 function titleForXP(xp) {
   var t = SPOTTER_TITLES[0];
@@ -8292,7 +8292,7 @@ function showTitleUp(title, done) {
   setTimeout(close, 8200);
 }
 
-// ---- COLLECTOR BOOK â€” built from CAR_AC_DB + the user's garage ----
+// ---- COLLECTOR BOOK - built from CAR_AC_DB + the user's garage ----
 function _modelKey(name) { return String(name || '').toLowerCase().trim(); }
 function _allSpottedFlat() {
   var out = [];
@@ -8364,7 +8364,7 @@ function renderBook() {
   var stats = bookMakeStats();
   grid.innerHTML = stats.map(function(s, i){
     var pct = Math.round(s.found / s.total * 100);
-    var logo = 'ðŸ';
+    var logo = '🏁';
     return '<div class="book-make-card ' + (s.found === s.total ? 'complete' : '') + '" style="animation-delay:' + (i * 0.03) + 's" onclick="openMakeSheet(\'' + jsEscape(s.make) + '\')">' +
       '<div class="bm-top"><div class="bm-logo">' + logo + '</div><div class="bm-pct">' + pct + '%</div></div>' +
       '<div class="bm-name">' + s.make + '</div>' +
@@ -8393,7 +8393,7 @@ function openMakeSheet(make) {
       return '<div class="book-car-tile spotted' + just + '" style="animation-delay:' + (i * 0.02) + 's" onclick="openDiscovery(\'' + jsEscape(m.name) + '\',' + m.val + ',\'' + (m.type || '') + '\')">' +
         (photo ? '<img class="bct-img" src="' + photo + '" alt="">' : '<div class="bct-ph">' + tierEmoji(tierOf(m.val)) + '</div>') +
         '<div class="bct-name">' + m.name + '</div>' +
-        '<div class="bct-meta">' + fmt(m.val) + ' Â· spotted</div>' +
+        '<div class="bct-meta">' + fmt(m.val) + ' . spotted</div>' +
       '</div>';
     }
     return '<div class="book-sil ' + (peeking ? 'revealed' : '') + '" style="animation-delay:' + (i * 0.02) + 's" onclick="peekMystery(\'' + jsEscape(m.name) + '\')">' +
@@ -8405,8 +8405,8 @@ function openMakeSheet(make) {
   overlay.innerHTML =
     '<div class="book-make-panel">' +
       '<div class="book-make-head">' +
-        '<div class="bml">ðŸ</div>' +
-        '<div class="bmt"><div class="bm-name">' + s.make + '</div><div class="bm-sub">' + s.found + ' / ' + s.total + ' discovered Â· tap a silhouette to peek</div></div>' +
+        '<div class="bml">🏁</div>' +
+        '<div class="bmt"><div class="bm-name">' + s.make + '</div><div class="bm-sub">' + s.found + ' / ' + s.total + ' discovered . tap a silhouette to peek</div></div>' +
         '<button class="book-close" onclick="this.closest(\'.book-make-sheet\').remove()">&times;</button>' +
       '</div>' +
       '<div class="book-sil-grid">' + tiles + '</div>' +
@@ -8467,7 +8467,7 @@ function celebrateMystery(name, info, done) {
     '<div class="mys-sil">' + tierEmoji(tierOf(info.val)) + '</div>' +
     '<div class="mys-ring"></div>' +
     '<div class="mys-name">' + info.name + '</div>' +
-    '<div class="mys-val">' + fmt(info.val) + ' Â· ' + info.make + '</div>' +
+    '<div class="mys-val">' + fmt(info.val) + ' . ' + info.make + '</div>' +
     '<div class="mys-confetti"></div>' +
     '<div class="mys-dismiss">Tap to continue</div>';
   document.body.appendChild(overlay);
@@ -8513,14 +8513,14 @@ function celebrateMystery(name, info, done) {
   setTimeout(close, 5600);
 }
 function showBookAllShelf() {
-  // Opens a combined sheet with every make stacked â€” foundation: reuse per-make grid via prompt-less nav
+  // Opens a combined sheet with every make stacked - foundation: reuse per-make grid via prompt-less nav
   renderBook();
   showToast('ðŸ“– Collector Book refreshed');
 }
 
 function celebrateMakeComplete(stats, done) {
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    showMilestoneToast({ kind:'marque', icon:'ðŸ', title:'Marque Completed!', desc:'You finished ' + stats.make + ' â€” all ' + stats.total + ' models.' });
+    showMilestoneToast({ kind:'marque', icon:'🏁', title:'Marque Completed!', desc:'You finished ' + stats.make + ' - all ' + stats.total + ' models.' });
     if (done) done();
     return;
   }
@@ -8529,7 +8529,7 @@ function celebrateMakeComplete(stats, done) {
   overlay.innerHTML =
     '<div class="make-cer-panel">' +
       '<div class="make-cer-eyebrow">Marque Collection Complete</div>' +
-      '<div class="make-cer-crest">ðŸ</div>' +
+      '<div class="make-cer-crest">🏁</div>' +
       '<div class="make-cer-name">' + stats.make + '</div>' +
       '<div class="make-cer-stamp">100% COMPLETE</div>' +
       '<div class="make-cer-pct">' + stats.total + '<small> models found</small></div>' +
@@ -8564,17 +8564,17 @@ function celebrateMakeComplete(stats, done) {
   setTimeout(close, 8500);
 }
 
-// ---- EXPEDITIONS â€” themed spotting challenges with one-time XP rewards ----
+// ---- EXPEDITIONS - themed spotting challenges with one-time XP rewards ----
 var EXPEDITIONS = [
   { id:'italian_3',   name:'Italian Stallions',   icon:'ðŸ‡®ðŸ‡¹', desc:'Spot 3 Italian exotics',          goal:3,  xp:120, check:function(c){ return c.filter(function(x){ return /^(ferrari|lamborghini|maserati|alfa|pagan)/i.test(x.name); }).length; } },
   { id:'german_4',    name:'German Precision',    icon:'ðŸ‡©ðŸ‡ª', desc:'Spot 4 German machines',          goal:4,  xp:120, check:function(c){ return c.filter(function(x){ return /^(porsche|bmw|mercedes|audi|vw)/i.test(x.name); }).length; } },
   { id:'muscle_4',    name:'Muscle Mayhem',       icon:'ðŸ‡ºðŸ‡¸', desc:'Spot 4 American muscle cars',     goal:4,  xp:120, check:function(c){ return c.filter(function(x){ return x.type === 'muscle'; }).length; } },
-  { id:'ev_4',        name:'Electric Dreams',     icon:'âš¡',  desc:'Spot 4 EVs',                      goal:4,  xp:120, check:function(c){ return c.filter(function(x){ return x.type === 'ev'; }).length; } },
-  { id:'hyper_1',     name:'Hypercar Hunt',       icon:'ðŸ”¥',  desc:'Spot a $500K+ hypercar',          goal:1,  xp:300, check:function(c){ return c.filter(function(x){ return x.value >= 500000; }).length; } },
-  { id:'legend_1',    name:'Legend Seeker',       icon:'ðŸ‘‘',  desc:'Spot a $1M+ legend',              goal:1,  xp:500, check:function(c){ return c.filter(function(x){ return x.value >= 1000000; }).length; } },
-  { id:'super_3',     name:'Supercar Squadron',   icon:'ðŸŽï¸', desc:'Spot 3 Supercars',                 goal:3,  xp:150, check:function(c){ return c.filter(function(x){ return x.type === 'supercar' || (x.value >= 150000 && x.value < 500000); }).length; } },
+  { id:'ev_4',        name:'Electric Dreams',     icon:'⚡',  desc:'Spot 4 EVs',                      goal:4,  xp:120, check:function(c){ return c.filter(function(x){ return x.type === 'ev'; }).length; } },
+  { id:'hyper_1',     name:'Hypercar Hunt',       icon:'🔥',  desc:'Spot a $500K+ hypercar',          goal:1,  xp:300, check:function(c){ return c.filter(function(x){ return x.value >= 500000; }).length; } },
+  { id:'legend_1',    name:'Legend Seeker',       icon:'👑',  desc:'Spot a $1M+ legend',              goal:1,  xp:500, check:function(c){ return c.filter(function(x){ return x.value >= 1000000; }).length; } },
+  { id:'super_3',     name:'Supercar Squadron',   icon:'🏎️', desc:'Spot 3 Supercars',                 goal:3,  xp:150, check:function(c){ return c.filter(function(x){ return x.type === 'supercar' || (x.value >= 150000 && x.value < 500000); }).length; } },
   { id:'luxury_2',    name:'First Class',         icon:'ðŸŽ©',  desc:'Spot 2 Luxury cars',              goal:2,  xp:90,  check:function(c){ return c.filter(function(x){ return x.type === 'luxury'; }).length; } },
-  { id:'classic_2',   name:'Time Machine',        icon:'ðŸ•¹ï¸', desc:'Spot 2 Classic cars',              goal:2,  xp:90,  check:function(c){ return c.filter(function(x){ return x.type === 'classic'; }).length; } },
+  { id:'classic_2',   name:'Time Machine',        icon:'🕹️', desc:'Spot 2 Classic cars',              goal:2,  xp:90,  check:function(c){ return c.filter(function(x){ return x.type === 'classic'; }).length; } },
   { id:'exotic_2',    name:'Exotic Rarities',     icon:'ðŸ’Ž',  desc:'Spot 2 Exotic cars',              goal:2,  xp:150, check:function(c){ return c.filter(function(x){ return x.type === 'exotic'; }).length; } },
   { id:'six_makes',   name:'Globe Trotter',       icon:'ðŸŒ',  desc:'Spot cars from 6 different makes', goal:6,  xp:150, check:function(c){ return new Set(c.map(function(x){ return (x.name || '').split(' ')[0].toLowerCase(); })).size; } },
   { id:'ten_makes_x', name:'World Tour',          icon:'âœˆï¸', desc:'Spot cars from 10 different makes',goal:10, xp:280, check:function(c){ return new Set(c.map(function(x){ return (x.name || '').split(' ')[0].toLowerCase(); })).size; } },
@@ -8583,7 +8583,7 @@ var EXPEDITIONS = [
   { id:'photog_3',    name:'Lens Master',         icon:'ðŸ“·',  desc:'Log 3 cars with photos',          goal:3,  xp:100, check:function(c){ return c.filter(function(x){ return x.photo; }).length; } },
   { id:'night_owl',   name:'Night Owl',           icon:'ðŸŒ™',  desc:'Log 4 cars in one run',           goal:4,  xp:160, check:function(c,r){ return (r||[]).some(function(x){ return !x.spotted && (x.cars||[]).length >= 4; }) ? 4 : 0; } }
 ];
-// Unified collection â€” achievements and expeditions live in one progress list.
+// Unified collection - achievements and expeditions live in one progress list.
 function allChallenges() {
   var all = _allSpottedFlat();
   var runs = allRuns;
@@ -8652,7 +8652,7 @@ function claimExpo(id) {
       emoji: ex.icon,
       eyebrow: isExpo ? 'Expedition Complete' : 'Achievement Unlocked',
       title: ex.name,
-      desc: 'Mission accomplished â€” +' + (ex.xp || 0) + ' XP banked.',
+      desc: 'Mission accomplished - +' + (ex.xp || 0) + ' XP banked.',
       sub: ex.desc,
       colors: ['#f5c842', '#ffd75e', '#fff', '#ff5733'],
       particles: 16
@@ -8737,7 +8737,7 @@ function celebrateExpo(ex, isExpo, done) {
   setTimeout(close, tickDone + 4500);
 }
 
-// ---- ROAD TRIPS â€” journal runs into named journeys ----
+// ---- ROAD TRIPS - journal runs into named journeys ----
 function tripById(id) { return _progress.trips.find(function(t){ return String(t.id) === String(id); }); }
 function createTrip() {
   var nameEl = document.getElementById('tripNameInput');
@@ -8770,7 +8770,7 @@ function celebrateTripLaunch(trip, done) {
         '</div>' +
       '</div>' +
       '<div class="trip-cer-body">' +
-        '<div class="trip-cer-route"><span class="dot"></span><div class="trip-cer-line"></div><span class="trip-cer-route-end">ðŸ</span></div>' +
+        '<div class="trip-cer-route"><span class="dot"></span><div class="trip-cer-line"></div><span class="trip-cer-route-end">🏁</span></div>' +
         '<div class="trip-cer-sub">Every completed run is now journaled into this trip</div>' +
         '<div class="trip-cer-dismiss">Tap to continue</div>' +
       '</div>' +
@@ -8836,8 +8836,8 @@ function renderTrips() {
       '<div class="tr-ico">' + t.emoji + '</div>' +
       '<div class="tr-body">' +
         '<div class="tr-name">' + escapeHtml(t.name) + '</div>' +
-        '<div class="tr-meta">' + (t.runIds.length) + ' run' + (t.runIds.length === 1 ? '' : 's') + ' Â· ' + (t.carCount || 0) + ' cars' + (active ? ' Â· collecting now' : '') + '</div>' +
-        (active ? '<div class="tr-active-tag">ACTIVE â€” ADDING RUNS</div>' : '') +
+        '<div class="tr-meta">' + (t.runIds.length) + ' run' + (t.runIds.length === 1 ? '' : 's') + ' . ' + (t.carCount || 0) + ' cars' + (active ? ' . collecting now' : '') + '</div>' +
+        (active ? '<div class="tr-active-tag">ACTIVE - ADDING RUNS</div>' : '') +
       '</div>' +
       '<div class="tr-val">' + fmt(t.total || 0) + '</div>' +
     '</div>';
@@ -8852,7 +8852,7 @@ function openTripDetail(id) {
   var runs = t.runIds.map(function(rid){
     var r = allRuns.find(function(x){ return x.id === rid; });
     if (!r) return null;
-    var head = r.headliner && r.headliner.name ? ' Â· â­ ' + r.headliner.name : '';
+    var head = r.headliner && r.headliner.name ? ' . â­ ' + r.headliner.name : '';
     return '<div class="trip-run-row">' +
       '<div><div class="trr-name">' + escapeHtml(r.date || 'Run') + head + '</div>' +
       '<div class="trr-meta">' + (r.cars || []).length + ' cars</div></div>' +
@@ -8876,25 +8876,25 @@ function openTripDetail(id) {
         '<button style="flex:1;background:var(--surf2);border:1px solid var(--border2);border-radius:var(--radius-xs);color:var(--text);font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:11px;cursor:pointer;" onclick="setActiveTrip(\'' + t.id + '\');document.querySelector(\'.trip-detail-sheet\').remove();renderTrips()">' + (String(_progress.activeTripId) === String(t.id) ? 'STOP ADDING RUNS' : 'ADD RUNS TO THIS') + '</button>' +
         '<button style="flex:1;background:rgba(224,82,64,0.12);border:1px solid rgba(224,82,64,0.35);border-radius:var(--radius-xs);color:#ff6b5b;font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:11px;cursor:pointer;" onclick="deleteTrip(\'' + t.id + '\');document.querySelector(\'.trip-detail-sheet\').remove();renderTrips()">DELETE</button>' +
       '</div>' +
-      (runs || '<div class="trip-empty">No runs journaled yet â€” complete a run while this trip is active.</div>') +
+      (runs || '<div class="trip-empty">No runs journaled yet - complete a run while this trip is active.</div>') +
     '</div>';
   document.body.appendChild(overlay);
 }
 
-// ---- CAR STORIES â€” a short history blurb surfaced in the specs card ----
+// ---- CAR STORIES - a short history blurb surfaced in the specs card ----
 var CAR_STORIES = {
-  'ferrari 488 gtb':   'The 488 replaced the 458 with twin turbos â€” a move purists doubted until the lap times proved it. It redefined what a \u201Csensible\u201D Ferrari could be.',
+  'ferrari 488 gtb':   'The 488 replaced the 458 with twin turbos - a move purists doubted until the lap times proved it. It redefined what a \u201Csensible\u201D Ferrari could be.',
   'ferrari laferrari': 'LaFerrari was Ferrari\u2019s first hybrid hypercar, built as one of the holy trinity alongside the P1 and 918. Each one was sold to a loyal owner before it was shown.',
   'lamborghini aventador': 'The Aventador revived the Lamborghini flagship V12 tradition. Its carbon monocoque and scissor doors made every arrival a spectacle.',
   'lamborghini huracan':   'Named after a fighting bull, the Huracan\u2019s naturally aspirated V10 is one of the last great NA engines in a supercar.',
   'porsche 911 gt3':       'The GT3 exists because Porsche keeps listening to purists who demand a manual, naturally aspirated track weapon you can drive home.',
-  'porsche 911 turbo s':   'The Turbo S is the 911 the engineers hide in plain sight â€” huge power, all-weather grip, and surprisingly livable.',
+  'porsche 911 turbo s':   'The Turbo S is the 911 the engineers hide in plain sight - huge power, all-weather grip, and surprisingly livable.',
   'mclaren p1':            'The P1 pioneered active aero that could change downforce on the fly, letting it corner harder than its weight suggested possible.',
   'bugatti chiron':        'The Chiron is built around a single number: 1,500 horsepower from a quad-turbo W16. It can empty a fuel tank in about nine minutes at full tilt.',
-  'ford gt':               'The 2017 Ford GT was born from Le Mans â€” Ford\u2019s way of answering the Ferrari rivalry, engineered from the track outward.',
+  'ford gt':               'The 2017 Ford GT was born from Le Mans - Ford\u2019s way of answering the Ferrari rivalry, engineered from the track outward.',
   'dodge challenger hellcat': 'The Hellcat threw a 707-horsepower supercharged V8 into a muscle car with zero pretense. It made drag-strip noise on every street.',
   'tesla model s plaid':   'Plaid stands for a tri-motor setup that shattered expectations for what a four-door sedan could do, cracking the 2-second sprint.',
-  'rimac nevera':          'The Nevera is named after a Croatian Mediterranean wind â€” fitting for the electric hypercar that set 23 records in a single day.',
+  'rimac nevera':          'The Nevera is named after a Croatian Mediterranean wind - fitting for the electric hypercar that set 23 records in a single day.',
   'toyota supra gr':       'The A90 Supra revived a legend with BMW DNA and a cult following that treats every sighting like a pilgrimage.',
   'nissan gt-r':           'The R35 GT-R earned the nickname Godzilla by humbling far more expensive supercars with AWD launch control.'
 };
@@ -8914,11 +8914,11 @@ function renderSpecsStory(car, card) {
   slot.innerHTML = '<div class="specs-story"><div class="ss-label">Car Story</div><div class="ss-text">' + text + '</div></div>';
 }
 
-// ---- COLLECTOR CARD EVOLUTION â€” cards grade up the more you spot a model ----
+// ---- COLLECTOR CARD EVOLUTION - cards grade up the more you spot a model ----
 var EVOLUTION_TIERS = [
-  { min: 1,  name:'Bronze',  icon:'ðŸ¥‰', color:'#cd7f32' },
-  { min: 3,  name:'Silver',  icon:'ðŸ¥ˆ', color:'#c0c0c0' },
-  { min: 5,  name:'Gold',    icon:'ðŸ¥‡', color:'#f5c842' },
+  { min: 1,  name:'Bronze',  icon:'🥉', color:'#cd7f32' },
+  { min: 3,  name:'Silver',  icon:'🥈', color:'#c0c0c0' },
+  { min: 5,  name:'Gold',    icon:'🥇', color:'#f5c842' },
   { min: 8,  name:'Platinum',icon:'ðŸ’Ž', color:'#7fd1f7' },
   { min: 12, name:'Diamond', icon:'ðŸ’ ', color:'#9ff2ff' }
 ];
@@ -8945,30 +8945,30 @@ function renderSpecsEvolution(car, card) {
     '<div style="margin-top:14px;background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">' +
         '<div class="ss-label" style="margin-bottom:0">Card Evolution</div>' +
-        '<span class="evol-badge" style="color:' + ev.tier.color + ';border-color:' + ev.tier.color + '44;background:rgba(0,0,0,0.3)">' + ev.tier.icon + ' ' + ev.tier.name + ' Â· Ã—' + ev.count + '</span>' +
+        '<span class="evol-badge" style="color:' + ev.tier.color + ';border-color:' + ev.tier.color + '44;background:rgba(0,0,0,0.3)">' + ev.tier.icon + ' ' + ev.tier.name + ' . Ã—' + ev.count + '</span>' +
       '</div>' +
       '<div class="evol-pips">' + pips + '</div>' +
     '</div>';
 }
 
-// ---- RARE DISCOVERY MOMENTS â€” milestone moments beyond the standard card ----
+// ---- RARE DISCOVERY MOMENTS - milestone moments beyond the standard card ----
 function checkMilestones(car) {
   var all = _allSpottedFlat();
   var fired = [];
   // First-ever spot
   if (!_progress.milestones.first_spot && all.length >= 1) {
     _progress.milestones.first_spot = Date.now();
-    fired.push({ id:'first_spot', icon:'ðŸš€', title:'First Spot!', desc:'Your journey begins.' });
+    fired.push({ id:'first_spot', icon:'🚀', title:'First Spot!', desc:'Your journey begins.' });
   }
   // 10 / 25 / 50 total
-  if (!_progress.milestones.cars_10 && all.length >= 10) { _progress.milestones.cars_10 = Date.now(); fired.push({ id:'cars_10', icon:'ðŸŽ‰', title:'Double Digits', desc:'10 cars in your book.' }); }
-  if (!_progress.milestones.cars_25 && all.length >= 25) { _progress.milestones.cars_25 = Date.now(); fired.push({ id:'cars_25', icon:'ðŸŽ‰', title:'Quarter Century', desc:'25 cars spotted.' }); }
-  if (!_progress.milestones.cars_50 && all.length >= 50) { _progress.milestones.cars_50 = Date.now(); fired.push({ id:'cars_50', icon:'ðŸŽ–ï¸', title:'Half Century', desc:'50 cars â€” a serious collection.' }); }
+  if (!_progress.milestones.cars_10 && all.length >= 10) { _progress.milestones.cars_10 = Date.now(); fired.push({ id:'cars_10', icon:'🎉', title:'Double Digits', desc:'10 cars in your book.' }); }
+  if (!_progress.milestones.cars_25 && all.length >= 25) { _progress.milestones.cars_25 = Date.now(); fired.push({ id:'cars_25', icon:'🎉', title:'Quarter Century', desc:'25 cars spotted.' }); }
+  if (!_progress.milestones.cars_50 && all.length >= 50) { _progress.milestones.cars_50 = Date.now(); fired.push({ id:'cars_50', icon:'🎖️', title:'Half Century', desc:'50 cars - a serious collection.' }); }
   // First legend
-  if (!_progress.milestones.first_legend && car && car.value >= 1000000) { _progress.milestones.first_legend = Date.now(); fired.push({ id:'first_legend', icon:'ðŸ‘‘', title:'Legend Sighted!', desc:'A $1M+ masterpiece joins the garage.' }); }
+  if (!_progress.milestones.first_legend && car && car.value >= 1000000) { _progress.milestones.first_legend = Date.now(); fired.push({ id:'first_legend', icon:'👑', title:'Legend Sighted!', desc:'A $1M+ masterpiece joins the garage.' }); }
   // First hyper
-  if (!_progress.milestones.first_hyper && car && car.value >= 500000 && car.value < 1000000) { _progress.milestones.first_hyper = Date.now(); fired.push({ id:'first_hyper', icon:'ðŸ”¥', title:'Hypercar Down!', desc:'$500K+ spotted in the wild.' }); }
-  // First completed make â€” each marque gets its own full ceremony
+  if (!_progress.milestones.first_hyper && car && car.value >= 500000 && car.value < 1000000) { _progress.milestones.first_hyper = Date.now(); fired.push({ id:'first_hyper', icon:'🔥', title:'Hypercar Down!', desc:'$500K+ spotted in the wild.' }); }
+  // First completed make - each marque gets its own full ceremony
   var stats = bookMakeStats();
   var completed = stats.filter(function(s){ return s.found === s.total && s.total > 0; }).length;
   if (completed >= 1) {
@@ -8997,7 +8997,7 @@ function showMilestoneToast(m) {
   });
 }
 
-// ---- 3-STAGE UNLOCK MOMENT ENGINE â€” Anticipation â†’ Reveal â†’ Celebration ----
+// ---- 3-STAGE UNLOCK MOMENT ENGINE - Anticipation â†’ Reveal â†’ Celebration ----
 var _momentQueue = [];
 var _momentBusy = false;
 function enqueueMoment(cfg) {
@@ -9006,7 +9006,7 @@ function enqueueMoment(cfg) {
 }
 function pumpMoment() {
   if (_momentBusy || !_momentQueue.length) return;
-  // Let the collector card / quick chip / ceremonies finish first â€” moments queue behind
+  // Let the collector card / quick chip / ceremonies finish first - moments queue behind
   if (document.querySelector('.cc-overlay') || document.querySelector('.cc-quick') ||
       document.querySelector('.evo-overlay') || document.querySelector('.title-overlay') ||
       document.querySelector('.expo-cer') || document.querySelector('.make-cer') ||
@@ -9055,9 +9055,9 @@ function showMoment(cfg, done) {
   overlay.onclick = close;
   playSound('shimmer');
   haptic([40, 60, 40, 30, 80]);
-  // Stage 2 â€” reveal
+  // Stage 2 - reveal
   setTimeout(function(){ overlay.classList.add('stage-reveal'); playSound('impact'); }, 1100);
-  // Stage 3 â€” celebration: confetti + particle burst + flash
+  // Stage 3 - celebration: confetti + particle burst + flash
   setTimeout(function() {
     overlay.classList.add('stage-celebrate');
     confettiBurst(overlay, 60, cfg.colors || ['#f5c842', '#ffd75e', '#fff', '#ff5733']);
@@ -9081,7 +9081,7 @@ function showMoment(cfg, done) {
   setTimeout(close, 6500);
 }
 
-// ---- CEREMONY QUEUE â€” big overlays chain one-at-a-time behind cards/moments ----
+// ---- CEREMONY QUEUE - big overlays chain one-at-a-time behind cards/moments ----
 var _cerQueue = [];
 var _cerBusy = false;
 function enqueueCeremony(fn) {
@@ -9101,7 +9101,7 @@ function pumpCeremony() {
 }
 window.enqueueCeremony = enqueueCeremony;
 
-// ---- COLLECTOR CARD EVOLUTION â€” celebrate each tier-up once per model ----
+// ---- COLLECTOR CARD EVOLUTION - celebrate each tier-up once per model ----
 function checkEvolutionUnlock(car) {
   if (!car || !car.name) return;
   var key = 'evo_' + _modelKey(car.name);
@@ -9121,7 +9121,7 @@ function checkEvolutionUnlock(car) {
         emoji: tier.icon,
         eyebrow: 'Collector Card Evolution',
         title: tier.name + ' Card',
-        desc: car.name + ' now grades at ' + tier.name + ' â€” spotted ' + ev.count + ' times.',
+        desc: car.name + ' now grades at ' + tier.name + ' - spotted ' + ev.count + ' times.',
         sub: 'Your collector card is grading up',
         colors: [tier.color, '#ffffff', '#f5c842'],
         particles: 18
@@ -9164,7 +9164,7 @@ function celebrateEvolution(car, oldTier, newTier, count, done) {
     '<div class="evo-ring-burst"></div>' +
     '<div class="evo-land-dust"></div>' +
     '<div class="evo-title">' + newTier.icon + ' ' + newTier.name.toUpperCase() + ' CARD</div>' +
-    '<div class="evo-sub">' + car.name + ' Â· spotted ' + count + 'x Â· +1 tier</div>';
+    '<div class="evo-sub">' + car.name + ' . spotted ' + count + 'x . +1 tier</div>';
   document.body.appendChild(overlay);
 
   var closed = false;
