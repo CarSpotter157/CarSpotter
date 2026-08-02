@@ -3299,6 +3299,32 @@ let syncTimer    = null;
 let qpOpen       = false;
 var _idbPhotoCache = {}; // must init early — used by renders before the photo section
 
+// ── DETERMINISTIC SYNC STATE ────────────────────────────────────────
+var _lamport = parseInt(localStorage.getItem('cs_lamport') || '0');                  // global logical clock (persisted, monotonic)
+var _lastAppliedLamport = parseInt(localStorage.getItem('cs_lamport_last') || '0');   // lamport of the newest cloud doc we've applied
+var _fieldVer = (function(){ try { var f = JSON.parse(localStorage.getItem('cs_fv') || 'null'); return (f && typeof f === 'object') ? f : {}; } catch(e){ return {}; } })(); // per-field Lamport versions
+var _deletedRuns = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_runs') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })(); // tombstoned run ids
+var _deletedQP  = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_qp') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();  // tombstoned quick-pick names (lowercase)
+var _removedFavs = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_fav') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })(); // tombstoned favorite names
+var _dirty = localStorage.getItem('cs_sync_dirty') === '1';                           // durable "unsynced change" flag
+var _applyingCloud = false;                                                           // guard: never echo-write while applying a cloud doc
+var CS_SYNC_DEBUG = localStorage.getItem('cs_sync_debug') === '1';                    // gated debug logging
+window.CS_SYNC_DEBUG = CS_SYNC_DEBUG;
+window.setSyncDebug = function(v){ CS_SYNC_DEBUG = window.CS_SYNC_DEBUG = !!v; try { localStorage.setItem('cs_sync_debug', CS_SYNC_DEBUG ? '1' : '0'); } catch(e){} if (CS_SYNC_DEBUG) console.log('[sync] debug logging ON'); };
+function logSync() {
+  if (!CS_SYNC_DEBUG) return;
+  try { console.log.apply(console, ['[sync]'].concat(Array.prototype.slice.call(arguments))); } catch(e) {}
+}
+function _bumpVer(key) { _lamport += 1; _fieldVer[key] = _lamport; _persistLamport(); _persistFieldVer(); return _lamport; }
+function _persistLamport() { try { localStorage.setItem('cs_lamport', String(_lamport)); } catch(e){} }
+function _persistFieldVer() { try { localStorage.setItem('cs_fv', JSON.stringify(_fieldVer)); } catch(e){} }
+function _persistDeleted() { try { localStorage.setItem('cs_del_runs', JSON.stringify(_deletedRuns)); localStorage.setItem('cs_del_qp', JSON.stringify(_deletedQP)); localStorage.setItem('cs_del_fav', JSON.stringify(_removedFavs)); } catch(e){} }
+function _markDirty(v) {
+  _dirty = !!v;
+  try { localStorage.setItem('cs_sync_dirty', _dirty ? '1' : '0'); } catch(e){}
+  logSync('dirty=' + _dirty);
+}
+
 // Track whether the user has actually interacted — gates vibrate/audio so mobile
 // doesn't log "Blocked call to navigator.vibrate" before the first tap.
 // Also unlocks WebAudio on the first gesture: mobile browsers hold the AudioContext
@@ -3414,6 +3440,113 @@ function _mergeQuickPicks(local, cloud) {
   return [...byName.values()];
 }
 
+// ── DETERMINISTIC MERGE ENGINE (per-field versions + tombstones) ────
+function _mergeTombstones(arr, cloudIds) {
+  var changed = false;
+  (cloudIds || []).forEach(function(id) {
+    if (arr.indexOf(id) === -1) { arr.push(id); changed = true; }
+  });
+  return changed;
+}
+function _purgeTombstoned() {
+  var dr = new Set(_deletedRuns);
+  allRuns = allRuns.filter(function(r) { return !dr.has(r.id); });
+  var qpDel = new Set(_deletedQP.map(function(n) { return String(n).toLowerCase(); }));
+  quickPicks = quickPicks.filter(function(q) { return !qpDel.has(String(q.name || '').toLowerCase()); });
+}
+function _mergeRuns(cloudItems) {
+  if (!Array.isArray(cloudItems)) return false;
+  var byId = {};
+  var changed = false;
+  allRuns.forEach(function(r) { byId[r.id] = r; });
+  cloudItems.forEach(function(r) {
+    if (!r || r.id === undefined || r.id === null) return;
+    if (byId[r.id] !== undefined) {
+      if ((r._v || 0) > (byId[r.id]._v || 0)) { byId[r.id] = r; changed = true; }
+    } else { byId[r.id] = r; changed = true; }
+  });
+  if (changed) allRuns = Object.keys(byId).map(function(k) { return byId[k]; });
+  return changed;
+}
+function _mergeQP(cloudItems) {
+  if (!Array.isArray(cloudItems)) return false;
+  var byName = {};
+  var changed = false;
+  quickPicks.forEach(function(c) { byName[String(c.name).toLowerCase()] = c; });
+  cloudItems.forEach(function(c) {
+    if (!c || !c.name) return;
+    var k = String(c.name).toLowerCase();
+    if (byName[k] !== undefined) {
+      if ((c._v || 0) > (byName[k]._v || 0)) { byName[k] = c; changed = true; }
+    } else { byName[k] = c; changed = true; }
+  });
+  if (changed) quickPicks = Object.keys(byName).map(function(k) { return byName[k]; });
+  return changed;
+}
+function _mergeFavorites(cloudNames, cloudRemoved) {
+  if (!Array.isArray(cloudNames) && !Array.isArray(cloudRemoved)) return false;
+  var changed = false;
+  if (Array.isArray(cloudNames)) {
+    cloudNames.forEach(function(n) { if (n && !favoriteNames.has(n)) { favoriteNames.add(n); changed = true; } });
+  }
+  if (Array.isArray(cloudRemoved)) {
+    cloudRemoved.forEach(function(n) { if (n && favoriteNames.has(n)) { favoriteNames.delete(n); changed = true; } });
+  }
+  return changed;
+}
+function _mergeAliases(cloudMap) {
+  if (!cloudMap || typeof cloudMap !== 'object') return false;
+  var changed = false;
+  Object.keys(cloudMap).forEach(function(k) {
+    if (aliases[k] === undefined) { aliases[k] = cloudMap[k]; changed = true; }
+  });
+  return changed;
+}
+function _mergeAchievements(cloudIds) {
+  if (!Array.isArray(cloudIds)) return false;
+  var changed = false;
+  var s = new Set(_prevAchievements || []);
+  cloudIds.forEach(function(id) { if (id && !s.has(id)) { s.add(id); changed = true; } });
+  if (changed) { _prevAchievements = Array.from(s); try { localStorage.setItem('cs_ach', JSON.stringify(_prevAchievements)); } catch(e){} }
+  return changed;
+}
+function _settingsMap() {
+  var m = { theme: activeTheme, carbon: carbonOn ? 'on' : 'off', sound: soundEnabled ? 'on' : 'off' };
+  if (typeof compactMode !== 'undefined') m.compact = compactMode ? 'on' : 'off';
+  try { m.vibe = localStorage.getItem('cs_vibe') || 'on'; } catch(e){}
+  if (sortMode) m.sort = sortMode;
+  return m;
+}
+function _applySettings(m) {
+  if (!m || typeof m !== 'object') return;
+  var themeIdx = null;
+  if (m.theme != null && parseInt(m.theme) !== activeTheme) themeIdx = parseInt(m.theme);
+  if (m.carbon != null && (m.carbon === 'on') !== carbonOn) {
+    carbonOn = m.carbon === 'on';
+    if (typeof applyCarbon === 'function') applyCarbon();
+    var cb = document.getElementById('carbonToggle'); if (cb) cb.classList.toggle('on', carbonOn);
+  }
+  if (m.sound != null && (m.sound !== 'off') !== soundEnabled) {
+    soundEnabled = m.sound !== 'off';
+    var sb = document.getElementById('soundToggle'); if (sb) sb.classList.toggle('on', soundEnabled);
+  }
+  if (m.compact != null && typeof compactMode !== 'undefined' && (m.compact === 'on') !== compactMode) {
+    compactMode = m.compact === 'on';
+    if (typeof applyCompactMode === 'function') applyCompactMode();
+  }
+  if (m.vibe != null) { try { localStorage.setItem('cs_vibe', m.vibe); } catch(e){} }
+  if (m.sort != null && m.sort !== sortMode) {
+    sortMode = m.sort;
+    if (typeof initSortPrefBtns === 'function') initSortPrefBtns();
+  }
+  if (themeIdx != null && typeof applyTheme === 'function') applyTheme(themeIdx);
+}
+function _saveAllLocal() {
+  _saveCurrentLocal(); _saveRunsLocal(); _saveQPLocal();
+  _persistDeleted();
+  _persistFieldVer();
+}
+
 //  FIREBASE AUTH & SYNC 
 
 window.signInGoogle = function() {
@@ -3476,6 +3609,7 @@ auth.onAuthStateChanged(async user => {
     _lastSave = Date.now();
     loadFromCloud().catch(function(){});
     subscribeCloud();
+    if (_dirty) flushSyncNow();
     checkNewAchievements();
     const localRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
     if (localRuns.length > 0 && !user.isAnonymous) showImportBanner(localRuns.length);
@@ -3570,19 +3704,36 @@ function _normArr(arr, key) {
 }
 function _coreEqual(a, b) {
   try {
-    var ka = _stripDeepPhotos(JSON.parse(JSON.stringify(a)));
+    var ka = JSON.parse(JSON.stringify(a));
     var kb = JSON.parse(JSON.stringify(b));
-    if (JSON.stringify(_normArr(ka.allRuns, function(r){return r.id;}))      !== JSON.stringify(_normArr(kb.allRuns, function(r){return r.id;})))      return false;
-    if (JSON.stringify(_normArr(ka.currentRun, function(c){return c.name;})) !== JSON.stringify(_normArr(kb.currentRun, function(c){return c.name;}))) return false;
-    if (JSON.stringify(_normArr(ka.quickPicks, function(c){return c.name;})) !== JSON.stringify(_normArr(kb.quickPicks, function(c){return c.name;}))) return false;
-    if (String(ka.notes || '') !== String(kb.notes || '')) return false;
+    var cur = function(o){ return JSON.stringify(_normArr((o.currentRun && o.currentRun.cars) || [], function(c){ return c.name; })); };
+    var runs = function(o){ return JSON.stringify(_normArr((o.allRuns && o.allRuns.items) || [], function(r){ return r.id; })); };
+    var qp   = function(o){ return JSON.stringify(_normArr((o.quickPicks && o.quickPicks.items) || [], function(c){ return c.name; })); };
+    var tomR = function(o){ return JSON.stringify(_normArr((o.deletedRuns && o.deletedRuns.ids) || [], function(x){ return String(x); })); };
+    var tomQ = function(o){ return JSON.stringify(_normArr((o.deletedQP && o.deletedQP.ids) || [], function(x){ return String(x); })); };
+    var fav  = function(o){ return JSON.stringify(_normArr((o.favorites && o.favorites.names) || [], function(x){ return String(x); })); };
+    var ach  = function(o){ return JSON.stringify(_normArr((o.achievements && o.achievements.ids) || [], function(x){ return String(x); })); };
+    if (cur(ka) !== cur(kb)) return false;
+    if (runs(ka) !== runs(kb)) return false;
+    if (qp(ka) !== qp(kb)) return false;
+    if (tomR(ka) !== tomR(kb)) return false;
+    if (tomQ(ka) !== tomQ(kb)) return false;
+    if (String((ka.notes && ka.notes.text) || '') !== String((kb.notes && kb.notes.text) || '')) return false;
+    if (((ka.xp && ka.xp.value) || 0) !== ((kb.xp && kb.xp.value) || 0)) return false;
+    if (fav(ka) !== fav(kb)) return false;
+    if (JSON.stringify((ka.aliases && ka.aliases.map) || null) !== JSON.stringify((kb.aliases && kb.aliases.map) || null)) return false;
+    if (JSON.stringify((ka.settings && ka.settings.map) || null) !== JSON.stringify((kb.settings && kb.settings.map) || null)) return false;
+    if (ach(ka) !== ach(kb)) return false;
     if (JSON.stringify(ka.progression || null) !== JSON.stringify(kb.progression || null)) return false;
     return true;
   } catch(e) { return false; }
 }
 function _stampCloud(san) {
+  _lamport = Math.max(_lamport, _lastAppliedLamport) + 1;
+  _persistLamport();
   _saveSeq++;
   _lastLocalSeq = (currentUser ? currentUser.uid + ':' : '') + _sessionId + ':' + _saveSeq;
+  san.lamport = _lamport;
   san.seq = _lastLocalSeq;
   san.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
   return san;
@@ -3596,32 +3747,15 @@ async function loadFromCloud() {
     if (snap.exists) {
       const d = snap.data();
       _diagRead('loadFromCloud(get)', d);
-      // Take cloud currentRun only if it's newer than the last local currentRun save.
-      // Compare client-clock receipts (not the Firestore server timestamp vs our clock),
-      // so device clock skew can't make cloud data permanently lose.
-      const localCRTs = parseInt(localStorage.getItem('cs_current_ts') || '0');
-      const cloudReceiptTs = parseInt(localStorage.getItem('cs_cloud_current_ts') || '0');
-      if (d.currentRun && (localCRTs === 0 || cloudReceiptTs > localCRTs)) {
-        currentRun = d.currentRun.slice();
-        localStorage.setItem('cs_cloud_current_ts', String(Date.now()));
+      // Apply if it's a legacy doc (no lamport) or genuinely newer than what we've applied.
+      if (!d.lamport || d.lamport > _lastAppliedLamport) {
+        logSync('loadFromCloud', 'apply lamport', d.lamport || 'legacy');
+        _applyCloud(d);
+        _saveAllLocal();
       }
-      if (d.allRuns)    allRuns    = _mergeRunHistory(allRuns, d.allRuns.filter((r,i,a) => a.findIndex(x=>x.id===r.id)===i));
-      if (d.quickPicks) quickPicks = _mergeQuickPicks(quickPicks, d.quickPicks);
-      if (d.notes != null) {
-        localStorage.setItem('cs_notes', d.notes);
-        const a = document.getElementById('notesArea');
-        if (a) a.value = d.notes;
-      }
-      if (d.progression && window.mergeCloudProgression) window.mergeCloudProgression(d.progression);
-      _lastCloudTs = Math.max(_lastCloudTs, _tsMillis(d.updatedAt));
-      localStorage.setItem('cs_cloud_ts', String(_lastCloudTs));
-      _saveCurrentLocal();
-      _saveRunsLocal();
-      _saveQPLocal();
-      // Save merged result back to cloud so other devices see it
+      // Always converge back — the transactional rebase applies any newer cloud state first.
       _lastSave = Date.now();
-      var sanCloud = _diagAndSanitize('loadFromCloud(set)', _buildCloudPayload(), 'write');
-      db.collection('users').doc(currentUser.uid).set(_stampCloud(sanCloud)).then(() => setSyncDot('ok')).catch(() => setSyncDot(''));
+      _txWrite({ cause: 'loadFromCloud' });
     }
     if (!_lastSave) setSyncDot('ok');
   } catch(e) { setSyncDot(''); console.error(e); }
@@ -3636,34 +3770,20 @@ function subscribeCloud() {
   syncUnsub = db.collection('users').doc(currentUser.uid).onSnapshot(snap => {
     if (!snap.exists) return;
     const d = snap.data();
-    // Ignore our own writes (echo) so we don't clobber local state with our own snapshot
+    // Ignore our own writes (echo) and any doc no newer than the newest we've applied
     if (d.seq && d.seq === _lastLocalSeq) return;
-    const ts = _tsMillis(d.updatedAt);
-    if (!ts || ts <= _lastCloudTs) return;
-    if (d.currentRun) { currentRun = d.currentRun.slice(); localStorage.setItem('cs_cloud_current_ts', String(Date.now())); }
-    if (d.allRuns)    allRuns    = _mergeRunHistory(allRuns, d.allRuns.filter((r,i,a) => a.findIndex(x=>x.id===r.id)===i));
-    if (d.quickPicks) quickPicks = _mergeQuickPicks(quickPicks, d.quickPicks);
-    if (d.notes != null) {
-      localStorage.setItem('cs_notes', d.notes);
-      const a = document.getElementById('notesArea');
-      if (a && document.activeElement !== a) a.value = d.notes;
-    }
-    if (d.progression && window.mergeCloudProgression) window.mergeCloudProgression(d.progression);
-    _lastCloudTs = Math.max(_lastCloudTs, ts);
-    localStorage.setItem('cs_cloud_ts', String(_lastCloudTs));
-    _saveCurrentLocal();
-    _saveRunsLocal();
-    _saveQPLocal();
+    if (d.lamport && d.lamport <= _lastAppliedLamport) return;
+    logSync('listener', 'lamport', d.lamport, 'seq', d.seq);
+    _applyCloud(d);
+    _saveAllLocal();
     renderQPTrigger(); renderSpot();
     const pg = document.querySelector('.page.active')?.id;
     if (pg === 'page-garage')  renderGarage();
     if (pg === 'page-history') renderHistory();
-    // Converge: push the merged union back so other devices (and this one) stay in sync
+    // Converge: push the merged union back so other devices (and this one) stay in sync.
+    // The transactional rebase makes this safe — it never clobbers newer cloud fields.
     if (!_coreEqual(_buildCloudPayload(), d)) {
-      var san = _diagAndSanitize('subscribeCloud(set)', _buildCloudPayload(), 'write');
-      db.collection('users').doc(currentUser.uid).set(_stampCloud(san))
-        .then(() => { setSyncDot('ok'); leaderboardLoaded = false; })
-        .catch(() => setSyncDot(''));
+      _txWrite({ cause: 'converge', retries: 2 });
     }
   });
 }
@@ -3710,7 +3830,7 @@ function _sizeOf(v) {
 function _diagRead(tag, obj) {
   var rawSize = _sizeOf(obj);
   console.log('===== FIRESTORE DIAGNOSTIC [' + tag + '] (READ FROM FIRESTORE) =====');
-  ['allRuns','currentRun','quickPicks','notes','profileName','profilePhoto','settings','updatedAt'].forEach(function(k) {
+  ['currentRun','allRuns','deletedRuns','quickPicks','deletedQP','notes','xp','favorites','aliases','settings','achievements','progression','profileName','profilePhoto','updatedAt'].forEach(function(k) {
     console.log('  ' + k + ' = ' + (obj && Object.prototype.hasOwnProperty.call(obj, k) ? _sizeOf(obj[k]) + ' bytes' : '<absent>'));
   });
   console.log('  TOTAL = ' + rawSize + ' bytes' + (rawSize > 1048576 ? '  *** EXCEEDS 1 MB LIMIT ***' : ''));
@@ -3731,7 +3851,7 @@ function _diagAndSanitize(tag, obj, mode) {
     console.log('  SANITIZED: YES (pre-sanitized)   FINAL SIZE = ' + rawSize + ' bytes');
     return obj;
   }
-  ['allRuns','currentRun','quickPicks','notes','profileName','profilePhoto','settings','updatedAt'].forEach(function(k) {
+  ['currentRun','allRuns','deletedRuns','quickPicks','deletedQP','notes','xp','favorites','aliases','settings','achievements','progression','profileName','profilePhoto','updatedAt'].forEach(function(k) {
     if (obj && Object.prototype.hasOwnProperty.call(obj, k)) {
       console.log('  ' + k + ' = ' + _sizeOf(obj[k]) + ' bytes');
     } else {
@@ -3739,9 +3859,9 @@ function _diagAndSanitize(tag, obj, mode) {
     }
   });
   if (obj) {
-    console.log('  additional keys: ' + (Object.keys(obj).filter(function(k){return ['allRuns','currentRun','quickPicks','notes','profileName','profilePhoto','settings','updatedAt'].indexOf(k) < 0;}).join(', ') || 'none'));
+    console.log('  additional keys: ' + (Object.keys(obj).filter(function(k){return ['currentRun','allRuns','deletedRuns','quickPicks','deletedQP','notes','xp','favorites','aliases','settings','achievements','progression','profileName','profilePhoto','updatedAt'].indexOf(k) < 0;}).join(', ') || 'none'));
   }
-  var runs = (obj && obj.allRuns) || [];
+  var runs = (obj && obj.allRuns && obj.allRuns.items) || [];
   var carCount = 0, photoCount = 0, photoChars = 0;
   runs.forEach(function(r) {
     (r.cars || []).forEach(function(c) {
@@ -3777,12 +3897,20 @@ function _diagAndSanitize(tag, obj, mode) {
 var _sanitizedSet = typeof WeakSet !== 'undefined' ? new WeakSet() : null;
 function _buildCloudPayload() {
   var payload = {
-    currentRun: currentRun, allRuns: allRuns, quickPicks: quickPicks || [],
-    notes: localStorage.getItem('cs_notes') || '',
-    profileName: currentUser?.displayName || 'Spotter',
-    profilePhoto: currentUser?.photoURL || '',
-    progression: _progress || null,
-    updatedAt: _lastSave
+    currentRun:   { ver: _fieldVer.currentRun || 0, cars: currentRun },
+    allRuns:      { ver: _fieldVer.runs || 0, items: allRuns },
+    deletedRuns:  { ver: _fieldVer.deletedRuns || 0, ids: _deletedRuns },
+    quickPicks:   { ver: _fieldVer.qp || 0, items: quickPicks || [] },
+    deletedQP:    { ver: _fieldVer.deletedQP || 0, ids: _deletedQP },
+    notes:        { ver: _fieldVer.notes || 0, text: localStorage.getItem('cs_notes') || '' },
+    xp:           { ver: _fieldVer.xp || 0, value: _xpTotal || 0 },
+    favorites:    { ver: _fieldVer.favorites || 0, names: Array.from(favoriteNames), removed: _removedFavs || [] },
+    aliases:      { ver: _fieldVer.aliases || 0, map: aliases || {} },
+    settings:     { ver: _fieldVer.settings || 0, map: _settingsMap() },
+    achievements: { ver: _fieldVer.achievements || 0, ids: _prevAchievements || [] },
+    progression:  _progress || null,
+    profileName:  currentUser?.displayName || 'Spotter',
+    profilePhoto: currentUser?.photoURL || ''
   };
   var san = JSON.parse(JSON.stringify(payload));
   _stripDeepPhotos(san);
@@ -3807,62 +3935,194 @@ function _flushLocalNow() {
   _saveRunsLocal();
   _saveCurrentLocal();
   _saveQPLocal();
+  _persistDeleted();
+  _persistFieldVer();
 }
 
 function saveToCloud() {
-  console.log('Starting Firestore save');
+  logSync('saveToCloud', 'queued');
   // Persist locally first (debounced) — works offline
   _persistLocalSoon();
 
   if (!currentUser || !navigator.onLine) {
-    console.log('Firestore save: skipped —', !currentUser ? 'no user' : 'offline');
-    // Queue for when we come back online
+    logSync('saveToCloud', !currentUser ? 'no user' : 'offline');
     if (!navigator.onLine) {
       offlineQueue.push(Date.now());
       localStorage.setItem('cs_offline_queue', JSON.stringify(offlineQueue));
+      _markDirty(true);
     }
     return;
   }
-  console.log('Firestore save: user=' + currentUser.uid + ', online=' + navigator.onLine);
+  _markDirty(true);
   setSyncDot('syncing');
   clearTimeout(syncTimer);
   // Raise the gate immediately so incoming snapshots don't overwrite local state
   _lastSave = Date.now();
   syncTimer = setTimeout(() => {
-    console.log('Firestore save: writing to users/' + currentUser.uid);
-    var san = _diagAndSanitize('saveToCloud(set)', _buildCloudPayload(), 'write');
-    db.collection('users').doc(currentUser.uid).set(_stampCloud(san)).then(() => {
-      console.log('Firestore save successful');
-      _lastPushTs = Date.now();
-      localStorage.setItem('cs_cloud_current_ts', String(_lastPushTs));
-      setSyncDot('ok'); leaderboardLoaded = false;
-    }).catch(function(err) {
-      console.error('Firestore save failed:', err.code, err.message, err);
-      setSyncDot('');
-    });
+    syncTimer = null;
+    _txWrite({ cause: 'saveToCloud' });
   }, 1500);
 }
 
 //  FLUSH ON PAGE UNLOAD — prevent debounced saves from being lost on tab close 
 function _flushPendingSave() {
   _flushLocalNow();
-  if (!syncTimer) return;
-  console.log('Firestore save: flush on unload');
-  clearTimeout(syncTimer);
-  syncTimer = null;
-  if (currentUser && navigator.onLine) {
-    console.log('Firestore save: writing to users/' + currentUser.uid + ' (flush)');
-    _lastSave = Date.now();
-    var sanFs = _diagAndSanitize('flush(set)', _buildCloudPayload(), 'write');
-    db.collection('users').doc(currentUser.uid).set(_stampCloud(sanFs)).then(() => { console.log('Firestore save: flush successful'); }).catch(function(err) {
-      console.error('Firestore save: flush failed:', err.code, err.message, err);
-    });
-  } else {
-    console.log('Firestore save: flush skipped —', !currentUser ? 'no user' : 'offline');
+  if (syncTimer) { clearTimeout(syncTimer); syncTimer = null; }
+  if (!currentUser || !navigator.onLine) {
+    if (!navigator.onLine) _markDirty(true);
+    return;
   }
+  _txWrite({ cause: 'unload', retries: 0 });
 }
 window.addEventListener('beforeunload', _flushPendingSave);
 window.addEventListener('pagehide',     _flushPendingSave);
+
+//  APPLY A CLOUD DOC — deterministic per-field merge (versions + tombstones + Lamport)
+function _applyCloud(c) {
+  if (!c || typeof c !== 'object') return false;
+  var changed = false;
+  _applyingCloud = true;
+  try {
+    if (c.lamport) { _lastAppliedLamport = Math.max(_lastAppliedLamport, c.lamport); try { localStorage.setItem('cs_lamport_last', String(_lastAppliedLamport)); } catch(e){} }
+    // Backward compatibility: pre-update cloud docs stored plain arrays/strings
+    // (no lamport, no per-field versions). Adopt their data via the additive merges.
+    if (!c.lamport) {
+      if (Array.isArray(c.currentRun) && !currentRun.length) {
+        currentRun = c.currentRun.slice();
+        _fieldVer.currentRun = Math.max(_fieldVer.currentRun || 0, 1);
+        _persistFieldVer();
+        try { localStorage.setItem('cs_cloud_current_ts', String(Date.now())); } catch(e){}
+        changed = true;
+      }
+      if (Array.isArray(c.allRuns)) { if (_mergeRuns(c.allRuns)) changed = true; }
+      if (Array.isArray(c.quickPicks)) { if (_mergeQP(c.quickPicks)) changed = true; }
+      if (typeof c.notes === 'string') {
+        try { localStorage.setItem('cs_notes', c.notes); } catch(e){}
+        var nal = document.getElementById('notesArea');
+        if (nal && document.activeElement !== nal) nal.value = c.notes;
+        changed = true;
+      }
+    }
+    // currentRun — whole-field version wins (a clear's ver dominates any stale add)
+    if (c.currentRun && c.currentRun.ver != null && c.currentRun.ver > (_fieldVer.currentRun || 0)) {
+      currentRun = (Array.isArray(c.currentRun.cars) ? c.currentRun.cars : []).slice();
+      _fieldVer.currentRun = c.currentRun.ver;
+      try { localStorage.setItem('cs_cloud_current_ts', String(Date.now())); } catch(e){}
+      changed = true;
+    }
+    // allRuns — additive union, higher per-run _v wins, minus tombstones
+    if (_mergeRuns(c.allRuns && c.allRuns.items)) changed = true;
+    if (c.deletedRuns && Array.isArray(c.deletedRuns.ids)) {
+      if (_mergeTombstones(_deletedRuns, c.deletedRuns.ids)) changed = true;
+      _fieldVer.deletedRuns = Math.max(_fieldVer.deletedRuns || 0, c.deletedRuns.ver || 0);
+    }
+    // quickPicks — additive union, higher per-entry _v wins, minus tombstones
+    if (_mergeQP(c.quickPicks && c.quickPicks.items)) changed = true;
+    if (c.deletedQP && Array.isArray(c.deletedQP.ids)) {
+      if (_mergeTombstones(_deletedQP, c.deletedQP.ids)) changed = true;
+      _fieldVer.deletedQP = Math.max(_fieldVer.deletedQP || 0, c.deletedQP.ver || 0);
+    }
+    _purgeTombstoned();
+    // notes — whole-field version wins
+    if (c.notes && c.notes.ver != null && c.notes.ver > (_fieldVer.notes || 0)) {
+      var nt = String(c.notes.text || '');
+      try { localStorage.setItem('cs_notes', nt); } catch(e){}
+      _fieldVer.notes = c.notes.ver;
+      var na = document.getElementById('notesArea');
+      if (na && document.activeElement !== na) na.value = nt;
+      changed = true;
+    }
+    // xp — monotonic max (never loses XP already earned)
+    if (c.xp && typeof c.xp.value === 'number' && c.xp.value > _xpTotal) {
+      _xpTotal = c.xp.value;
+      try { localStorage.setItem('cs_xp', String(_xpTotal)); } catch(e){}
+      if (typeof renderLevelBar === 'function') renderLevelBar();
+      if (typeof renderTitleChip === 'function') renderTitleChip();
+      _fieldVer.xp = Math.max(_fieldVer.xp || 0, c.xp.ver || 0);
+      changed = true;
+    }
+    // favorites — union minus removed tombstone
+    if (_mergeFavorites(c.favorites && c.favorites.names, c.favorites && c.favorites.removed)) {
+      try { localStorage.setItem('cs_fav', JSON.stringify(Array.from(favoriteNames))); } catch(e){}
+      if (typeof renderHomeFav === 'function') renderHomeFav();
+      if (typeof renderGarage === 'function') renderGarage();
+      changed = true;
+    }
+    // aliases — per-key union, local wins on same-key conflict
+    if (_mergeAliases(c.aliases && c.aliases.map)) {
+      try { localStorage.setItem('cs_aliases', JSON.stringify(aliases)); } catch(e){}
+      changed = true;
+    }
+    // settings — whole-field version wins
+    if (c.settings && c.settings.ver != null && c.settings.ver > (_fieldVer.settings || 0)) {
+      _applySettings(c.settings.map);
+      _fieldVer.settings = c.settings.ver;
+      changed = true;
+    }
+    // achievements — union
+    if (_mergeAchievements(c.achievements && c.achievements.ids)) changed = true;
+    // progression — existing union merge (trips/flags)
+    if (c.progression && window.mergeCloudProgression) window.mergeCloudProgression(c.progression);
+    _saveAllLocal();
+    return changed;
+  } catch(e) { console.error('applyCloud', e); return changed; }
+  finally { _applyingCloud = false; }
+}
+
+//  TRANSACTIONAL WRITER — read doc, rebase against newest cloud state, then write.
+//  Firestore retries on contention, so a stale device's write can never silently
+//  clobber a newer field (this is what fixes End-Run reverts and delete resurrection).
+function _txWrite(opts) {
+  if (!currentUser) return Promise.resolve(false);
+  if (!navigator.onLine) { _markDirty(true); return Promise.resolve(false); }
+  var docRef  = db.collection('users').doc(currentUser.uid);
+  var cause   = (opts && opts.cause) || 'write';
+  var maxTries = (opts && opts.retries != null) ? opts.retries : 3;
+  var attempt = 0;
+  function tryOnce() {
+    attempt++;
+    return db.runTransaction(function(tx) {
+      return tx.get(docRef).then(function(snap) {
+        var cloud = snap.exists ? snap.data() : null;
+        // Rebase: apply any newer cloud state before building our payload so we
+        // never overwrite fields another device has since updated.
+        if (cloud && cloud.lamport) _applyCloud(cloud);
+        var san = _diagAndSanitize('txWrite(' + cause + ')#' + attempt, _buildCloudPayload(), 'write');
+        tx.set(docRef, _stampCloud(san));
+      });
+    }).then(function() {
+      logSync('txWrite', cause, 'ok (attempt ' + attempt + ')');
+      _markDirty(false);
+      setSyncDot('ok');
+      leaderboardLoaded = false;
+      _lastPushTs = Date.now();
+      try { localStorage.setItem('cs_cloud_current_ts', String(_lastPushTs)); } catch(e){}
+      return true;
+    }).catch(function(err) {
+      logSync('txWrite', cause, 'FAILED (attempt ' + attempt + '):', err && err.code, err && err.message);
+      if (attempt < maxTries) {
+        return new Promise(function(res) { setTimeout(res, 400 * attempt); }).then(tryOnce);
+      }
+      _markDirty(true);
+      setSyncDot('');
+      return false;
+    });
+  }
+  return tryOnce();
+}
+
+//  IMMEDIATE FLUSH (manual / on-reconnect) 
+function flushSyncNow() {
+  if (syncTimer) { clearTimeout(syncTimer); syncTimer = null; }
+  if (!currentUser) return;
+  if (!navigator.onLine) { _markDirty(true); return; }
+  _txWrite({ cause: 'flush' });
+}
+window.flushSyncNow = flushSyncNow;
+window.addEventListener('online', function() {
+  if (_dirty && currentUser) flushSyncNow();
+  if (typeof updateOfflineBanner === 'function') updateOfflineBanner();
+});
 
 //  THEMES 
 
@@ -3947,6 +4207,8 @@ function renderThemeBar() {
 function selectTheme(idx) {
   applyTheme(idx);
   renderThemeBar();
+  _bumpVer('settings');
+  saveToCloud();
 }
 function toggleCarbon() {
   carbonOn = !carbonOn;
@@ -3955,6 +4217,8 @@ function toggleCarbon() {
   const btn = document.getElementById('carbonToggle');
   if (btn) btn.classList.toggle('on', carbonOn);
   showToast(carbonOn ? ' Carbon fiber on' : 'Carbon fiber off');
+  _bumpVer('settings');
+  saveToCloud();
 }
 function applyCarbon() {
   document.body.classList.toggle('carbon-on', carbonOn);
@@ -4242,6 +4506,8 @@ function toggleSound() {
   const btn = document.getElementById('soundToggle');
   if (btn) btn.classList.toggle('on', soundEnabled);
   showToast(soundEnabled ? ' Sounds on' : ' Sounds off');
+  _bumpVer('settings');
+  saveToCloud();
 }
 function initSoundToggle() {
   const btn = document.getElementById('soundToggle');
@@ -4276,6 +4542,13 @@ function doUndo() {
   } else if (type === 'history') {
     allRuns = data;
     _saveRunsLocal();
+    // Undo restores deleted runs — pull their ids back out of the tombstone list
+    const restoredIds = new Set(allRuns.map(r => r.id));
+    const before = _deletedRuns.length;
+    _deletedRuns = _deletedRuns.filter(id => !restoredIds.has(id));
+    _bumpVer('runs');
+    if (_deletedRuns.length !== before) _bumpVer('deletedRuns');
+    _persistDeleted();
     saveToCloud();
     renderHistory();
     renderGarage();
@@ -4283,6 +4556,7 @@ function doUndo() {
     allRuns = data.prevRuns;
     currentRun = data.prevRun;
     headlinerIdx = data.prevHL;
+    _bumpVer('runs');
     _saveRunsLocal();
     saveCurrentRun();
     renderSpot();
@@ -4316,7 +4590,11 @@ function bulkDelete() {
   if (!bulkSelected.size) { showToast('Nothing selected'); return; }
   const prev = [...allRuns];
   const count = bulkSelected.size;
+  const ids = Array.from(bulkSelected);
   allRuns = allRuns.filter(r => !bulkSelected.has(r.id));
+  ids.forEach(id => { if (_deletedRuns.indexOf(id) === -1) _deletedRuns.push(id); });
+  _bumpVer('deletedRuns');
+  _persistDeleted();
   _saveRunsLocal();
   saveToCloud();
   pushUndo('history', prev, count + ' entr' + (count===1?'y':'ies') + ' deleted');
@@ -4337,7 +4615,9 @@ function resolveAlias(name) {
 }
 function saveAliases() {
   localStorage.setItem('cs_aliases', JSON.stringify(aliases));
+  _bumpVer('aliases');
   updateAliasCount();
+  saveToCloud();
 }
 function updateAliasCount() {
   const el = document.getElementById('aliasCount');
@@ -4424,9 +4704,13 @@ setTimeout(showInstall, 4000);
 
 //  FAVORITES 
 function toggleFavorite(name){
-  if (favoriteNames.has(name)) { favoriteNames.delete(name); } else { favoriteNames.add(name); }
-  localStorage.setItem('cs_fav', JSON.stringify(Array.from(favoriteNames)));
+  const key = String(name);
+  if (favoriteNames.has(name)) { favoriteNames.delete(name); if (_removedFavs.indexOf(key) === -1) _removedFavs.push(key); }
+  else { favoriteNames.add(name); _removedFavs = _removedFavs.filter(n => n !== key); }
+  try { localStorage.setItem('cs_fav', JSON.stringify(Array.from(favoriteNames))); localStorage.setItem('cs_del_fav', JSON.stringify(_removedFavs)); } catch(e){}
+  _bumpVer('favorites');
   renderHomeFav(); renderGarage();
+  saveToCloud();
 }
 function isFavorite(name){ return favoriteNames.has(name); }
 
@@ -4511,14 +4795,22 @@ function cleanQPAfterRemoval(name) {
   const key = name.toLowerCase();
   if (!carExistsAnywhere(key)) {
     quickPicks = quickPicks.filter(q => q.name.toLowerCase() !== key);
+    if (_deletedQP.indexOf(key) === -1) _deletedQP.push(key);
+    _bumpVer('deletedQP');
+    _persistDeleted();
     _saveQPLocal();
+    saveToCloud();
   }
 }
 function saveToQP(car) {
   const existing = quickPicks.find(q => q.name.toLowerCase() === car.name.toLowerCase());
   const photo = car.photo || (existing && existing.photo) || '';
   quickPicks = quickPicks.filter(q => q.name.toLowerCase() !== car.name.toLowerCase());
-  quickPicks.unshift({ name:car.name, value:car.value, color:car.color, type:car.type, ...(photo ? {photo} : {}) });
+  quickPicks.unshift({ name:car.name, value:car.value, color:car.color, type:car.type, _v:(existing && existing._v || 0) + 1, ...(photo ? {photo} : {}) });
+  const key = String(car.name).toLowerCase();
+  _deletedQP = _deletedQP.filter(n => String(n) !== key);
+  _bumpVer('qp');
+  _persistDeleted();
   _saveQPLocal();
   saveToCloud();
 }
@@ -4551,22 +4843,31 @@ function updateQPEditUI() {
   if (clearBtn) { clearBtn.style.display = qpEditMode && quickPicks.length ? 'block' : 'none'; }
 }
 function removeQP(name) {
-  quickPicks = quickPicks.filter(q => q.name.toLowerCase() !== name.toLowerCase());
+  const key = String(name).toLowerCase();
+  quickPicks = quickPicks.filter(q => q.name.toLowerCase() !== key);
+  if (_deletedQP.indexOf(key) === -1) _deletedQP.push(key);
+  _bumpVer('deletedQP');
+  _persistDeleted();
   _saveQPLocal();
   renderQPList(document.getElementById('qpSearch')?.value || '');
   updateQPEditUI();
   renderQPTrigger();
+  saveToCloud();
 }
 function clearAllQP() {
   if (!quickPicks.length) return;
   if (!confirm('Remove all ' + quickPicks.length + ' quick pick' + (quickPicks.length !== 1 ? 's' : '') + '?')) return;
+  quickPicks.forEach(q => { const key = String(q.name).toLowerCase(); if (_deletedQP.indexOf(key) === -1) _deletedQP.push(key); });
   quickPicks = [];
+  _bumpVer('deletedQP');
+  _persistDeleted();
   _saveQPLocal();
   qpEditMode = false;
   renderQPList('');
   updateQPEditUI();
   renderQPTrigger();
   showToast('All quick picks cleared');
+  saveToCloud();
 }
 function renderQPList(query) {
   const el = document.getElementById('qpList');
@@ -4661,9 +4962,10 @@ function logSpotted() {
   var prevRuns = JSON.parse(JSON.stringify(allRuns));
   var prevBestCar = garageBestValue();
   var isFirst = !carExistsAnywhere(name);
-  var entry = { id:Date.now(), date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), total:input.value, spotted:true, cars:[car] };
+  var entry = { id:Date.now(), date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}), total:input.value, spotted:true, _v:1, cars:[car] };
   allRuns.unshift(entry);
   _lastSpottedName = name;
+  _bumpVer('runs');
   _saveRunsLocal();
   saveToCloud();
   fetchAndStoreRefImage(car);
@@ -4743,6 +5045,7 @@ function showUnicornAlert(total) {
 }
 
 function saveCurrentRun() {
+  _bumpVer('currentRun');
   _lastSave = Date.now();
   _saveCurrentLocal();
   _safeSet('cs_current_ts', String(_lastSave));
@@ -4763,11 +5066,13 @@ function endRun() {
     date:    new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),
     total,
     spotted: false,
+    _v: 1,
     headliner: headliner ? { name: headliner.name, type: headliner.type, value: headliner.value } : null,
     cars:    JSON.parse(JSON.stringify(currentRun))
   };
   const runCars = [...currentRun]; // snapshot before clearing
   allRuns.unshift(run);
+  _bumpVer('runs');
   _saveRunsLocal();
   // Update leaderboard cache if this is the new best
   if (total > bestFromLB) {
@@ -5012,8 +5317,9 @@ function deleteCarEverywhere(name) {
     const newTotal  = remaining.reduce((s,c)=>s+c.value,0);
     // Clean up headliner if it was the deleted car
     const headliner = (run.headliner && run.headliner.name.toLowerCase()===key) ? null : run.headliner;
-    return { ...run, cars: remaining, total: newTotal, headliner };
+    return { ...run, cars: remaining, total: newTotal, headliner, _v:(run._v || 0) + 1 };
   }).filter(run=>run.cars.length>0);
+  _bumpVer('runs');
   _saveRunsLocal();
   // Fix headlinerIdx: check index in OLD currentRun BEFORE filtering
   const carIdx = prevRun.findIndex(c=>c.name.toLowerCase()===key);
@@ -5024,15 +5330,9 @@ function deleteCarEverywhere(name) {
   }
   currentRun = currentRun.filter(c=>c.name.toLowerCase()!==key);
   saveCurrentRun();
-  // Sync to cloud immediately — don't wait for the 1.5s debounce,
-  // otherwise a reload will pull stale cloud data via _mergeRunHistory
-  clearTimeout(syncTimer);
-  if (currentUser && navigator.onLine) {
-    _lastSave = Date.now();
-    var sanDel = _diagAndSanitize('deleteCarEverywhere(set)', _buildCloudPayload(), 'write');
-    db.collection('users').doc(currentUser.uid).set(_stampCloud(sanDel))
-      .then(function(){ setSyncDot('ok'); leaderboardLoaded = false; }).catch(function(){ setSyncDot(''); });
-  }
+  // Sync through the transactional writer — its rebase prevents a stale cloud doc
+  // from clobbering this edit even if the user reloads immediately.
+  saveToCloud();
   // Only remove from QP if no instances remain anywhere
   cleanQPAfterRemoval(name);
   renderQPTrigger();
@@ -5457,6 +5757,8 @@ function toggleHistoryHeadliner(runId, carName, carType, carValue) {
   if (!run || run.spotted) return;
   const isAlready = run.headliner && run.headliner.name === carName;
   run.headliner = isAlready ? null : { name: carName, type: carType, value: carValue };
+  run._v = (run._v || 0) + 1;
+  _bumpVer('runs');
   _saveRunsLocal();
   saveToCloud();
   renderHistory();
@@ -5469,6 +5771,9 @@ function deleteRun(id) {
   const prev = JSON.parse(JSON.stringify(allRuns));
   const entry = allRuns.find(r => r.id === id);
   allRuns = allRuns.filter(r => r.id !== id);
+  if (_deletedRuns.indexOf(id) === -1) _deletedRuns.push(id);
+  _bumpVer('deletedRuns');
+  _persistDeleted();
   _saveRunsLocal();
   saveToCloud();
   playSound('delete');
@@ -5986,7 +6291,9 @@ function xpInfo(xp) {
 function addXP(amount) {
   _xpTotal += amount;
   localStorage.setItem('cs_xp', String(_xpTotal));
+  _bumpVer('xp');
   renderLevelBar();
+  saveToCloud();
   return xpInfo(_xpTotal);
 }
 function rarityXP(value) {
@@ -6032,6 +6339,8 @@ function toggleVibe() {
   var btn = document.getElementById('vibeToggle');
   if (btn) btn.classList.toggle('on', !on);
   showToast(on ? ' Vibrations off' : ' Vibrations on');
+  _bumpVer('settings');
+  saveToCloud();
 }
 function initVibeToggle() {
   var btn = document.getElementById('vibeToggle');
@@ -7412,6 +7721,8 @@ function toggleCompactMode() {
   localStorage.setItem('cs_compact', compactMode ? 'on' : 'off');
   applyCompactMode();
   showToast(compactMode ? 'Compact mode on' : 'Compact mode off');
+  _bumpVer('settings');
+  saveToCloud();
 }
 applyCompactMode();
 
@@ -7424,6 +7735,8 @@ function setSortPref(mode) {
   if (btn) btn.classList.add('active');
   renderGarage();
   showToast('Sort: ' + (mode === 'desc' ? 'High–Low' : mode === 'asc' ? 'Low–High' : 'A–Z'));
+  _bumpVer('settings');
+  saveToCloud();
 }
 function initSortPrefBtns() {
   document.querySelectorAll('.sort-pref-btn').forEach(b => b.classList.remove('active'));
@@ -8272,6 +8585,7 @@ var _progress = (function(){
 })();
 function saveProgress() {
   try { localStorage.setItem('cs_progress', JSON.stringify(_progress)); } catch(e){}
+  if (!_applyingCloud) { _bumpVer('progression'); saveToCloud(); }
 }
 function getProgression() { return _progress; }
 
