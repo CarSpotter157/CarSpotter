@@ -3593,6 +3593,7 @@ function importLocalData() {
     if (a) a.value = localNotes;
   }
 
+  _bumpVer('runs'); _bumpVer('currentRun'); _bumpVer('qp');
   saveToCloud();
   renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
   checkNewAchievements();
@@ -4004,10 +4005,17 @@ function _applyCloud(c) {
       }
     }
     // currentRun — whole-field version wins (a clear's ver dominates any stale add)
-    if (c.currentRun && c.currentRun.ver != null && c.currentRun.ver > (_fieldVer.currentRun || 0)) {
-      currentRun = (Array.isArray(c.currentRun.cars) ? c.currentRun.cars : []).slice();
+    var crv = _fieldVer.currentRun || 0;
+    var crCars = (c.currentRun && Array.isArray(c.currentRun.cars)) ? c.currentRun.cars : null;
+    if (crCars && c.currentRun.ver != null && c.currentRun.ver > crv) {
+      currentRun = crCars.slice();
       _fieldVer.currentRun = c.currentRun.ver;
       try { localStorage.setItem('cs_cloud_current_ts', String(Date.now())); } catch(e){}
+      changed = true;
+    } else if (crCars && c.currentRun.ver != null && c.currentRun.ver === crv &&
+               c.currentRun.ver >= 1 && crCars.length === 0 && currentRun.length > 0) {
+      // Equal version: an End-Run clear dominates a stale in-progress run (no resurrection).
+      currentRun = [];
       changed = true;
     }
     // allRuns — additive union, higher per-run _v wins, minus tombstones
@@ -7313,15 +7321,18 @@ function _savePhoto(compressed, t) {
     var runIdx = allRuns.findIndex(r => r.id === t.runId);
     if (runIdx >= 0 && allRuns[runIdx].cars[t.carIndex]) {
       allRuns[runIdx].cars[t.carIndex].photo = compressed;
+      allRuns[runIdx]._v = (allRuns[runIdx]._v || 0) + 1;
+      _bumpVer('runs');
       _idbPut(allRuns[runIdx].cars[t.carIndex].name, compressed).catch(function(){});
       _saveRunsLocal(); saveToCloud();
     }
   } else if (t.type === 'all') {
     var key = t.name.toLowerCase();
-    allRuns.forEach(function(run) { run.cars.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = compressed; }); });
+    allRuns.forEach(function(run) { var hit = false; run.cars.forEach(function(car) { if (car.name.toLowerCase() === key) { car.photo = compressed; hit = true; } }); if (hit) run._v = (run._v || 0) + 1; });
     currentRun.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = compressed; });
     var qp = quickPicks.find(function(q) { return q.name.toLowerCase() === key; });
     if (qp) { qp.photo = compressed; }
+    _bumpVer('runs');
     // Persist the image in IndexedDB first, then write tiny 'photo:' refs to
     // localStorage so the 5MB quota is never consumed by images.
     _idbPut(t.name, compressed).then(function() {
@@ -7672,20 +7683,25 @@ window.saveEditCar = function(originalName) {
   const origKey = originalName.toLowerCase();
 
   // Update in allRuns
-  allRuns = allRuns.map(run => ({
-    ...run,
-    cars: (run.cars || []).map(c => {
-      if (c.name.toLowerCase() !== origKey) return c;
-      return { ...c, name: newName, value: newValue, color: newColor, type: newType };
-    }),
-    total: (run.cars || []).map(c => {
-      if (c.name.toLowerCase() !== origKey) return c.value;
-      return newValue;
-    }).reduce((a,b) => a+b, 0),
-    headliner: run.headliner && run.headliner.name.toLowerCase() === origKey
-      ? { ...run.headliner, name: newName, type: newType, value: newValue }
-      : run.headliner
-  }));
+  allRuns = allRuns.map(run => {
+    const touched = (run.cars || []).some(c => c.name.toLowerCase() === origKey);
+    return {
+      ...run,
+      _v: (run._v || 0) + (touched ? 1 : 0),
+      cars: (run.cars || []).map(c => {
+        if (c.name.toLowerCase() !== origKey) return c;
+        return { ...c, name: newName, value: newValue, color: newColor, type: newType };
+      }),
+      total: (run.cars || []).map(c => {
+        if (c.name.toLowerCase() !== origKey) return c.value;
+        return newValue;
+      }).reduce((a,b) => a+b, 0),
+      headliner: run.headliner && run.headliner.name.toLowerCase() === origKey
+        ? { ...run.headliner, name: newName, type: newType, value: newValue }
+        : run.headliner
+    };
+  });
+  _bumpVer('runs');
 
   // Update in currentRun
   currentRun = currentRun.map(c => {
