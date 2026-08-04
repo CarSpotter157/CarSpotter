@@ -2748,14 +2748,14 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
               </div>
             </div>
 
-            <!-- Two action buttons: run vs spotted -->
+<!-- Two action buttons: run vs spotted -->
             <div class="btn-row">
-              <button class="btn-run" onclick="logRun()" title="Add to current session — tally builds until you tap End Run">+ ADD TO RUN</button>
-              <button class="btn-spot" onclick="logSpotted()" title="Save this one car immediately, no active run needed">SAVE SOLO</button>
+              <button class="btn-run" onclick="logRun()" title="Stacks this car into the current run — tap END RUN to finish and save the whole session">+ ADD TO RUN</button>
+              <button class="btn-spot" onclick="logSpotted()" title="Log this one car straight into your garage, no session needed">SAVE SOLO</button>
             </div>
             <div class="btn-hint-row">
-              <span>Adds to current session</span>
-              <span>Saves immediately</span>
+              <span>Stacks into the active run (below)</span>
+              <span>Saves this car alone</span>
             </div>
             <div class="section" id="favSection" style="margin:12px 0 0">
               <div class="sec-row"><div class="sec-title">FAVORITES</div><button class="txt-btn" id="favToggle" onclick="goTo('garage')">Show All</button></div>
@@ -3153,7 +3153,6 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
       <div class="book-hero" id="bookHero"></div>
       <div class="sec-row" style="margin-bottom:10px">
         <div class="sec-title">MANUFACTURER SHELVES</div>
-        <button class="txt-btn" onclick="showBookAllShelf()">View All</button>
       </div>
       <div class="book-make-grid" id="bookMakeGrid"></div>
       <div class="mystery-hint-chip">👁 Silhouettes are undiscovered models. Tap to peek at what you're hunting.</div>
@@ -3234,7 +3233,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
 <div class="toast" id="toast"></div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v27.10</div>
+<div class="version-tag" id="versionTag">v27.11</div>
 
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
@@ -3378,11 +3377,11 @@ const ACHIEVEMENTS = [
   { id:'first_run',    icon:'R1', name:'First Run',        desc:'Complete your first run',       xp:60,  check:(c,r)=>r.filter(x=>!x.spotted).length>=1 },
   { id:'five_runs',    icon:'R5', name:'Regular',          desc:'Complete 5 runs',               xp:150, check:(c,r)=>r.filter(x=>!x.spotted).length>=5 },
   { id:'twenty_runs',  icon:'R20',name:'Road Warrior',     desc:'Complete 20 runs',              xp:400, check:(c,r)=>r.filter(x=>!x.spotted).length>=20 },
-  { id:'supercar',     icon:'SC', name:'Supercar Spotter', desc:'Log a Supercar',                xp:80,  check:(c,r)=>c.some(x=>x.type==='supercar'||x.type==='') },
-  { id:'ev_spotter',   icon:'EV', name:'Electric Dreams',  desc:'Log 5 EVs',                    xp:120, check:(c,r)=>c.filter(x=>x.type==='ev'||x.type==='').length>=5 },
-  { id:'muscle_fan',   icon:'V8', name:'Muscle Head',      desc:'Log 5 Muscle Cars',             xp:120, check:(c,r)=>c.filter(x=>x.type==='muscle'||x.type==='').length>=5 },
-  { id:'classic_fan',  icon:'CL', name:'Classic Collector',desc:'Log 3 Classic Cars',            xp:120, check:(c,r)=>c.filter(x=>x.type==='classic'||x.type==='').length>=3 },
-  { id:'suv_driver',   icon:'UV', name:'Utility Player',   desc:'Log 3 SUVs',                   xp:100, check:(c,r)=>c.filter(x=>x.type==='suv'||x.type==='').length>=3 },
+{ id:'supercar',     icon:'SC', name:'Supercar Spotter', desc:'Log a Supercar',                xp:80,  check:(c,r)=>c.some(x=>x.type==='supercar') },
+  { id:'ev_spotter',   icon:'EV', name:'Electric Dreams',  desc:'Log 5 EVs',                    xp:120, check:(c,r)=>c.filter(x=>x.type==='ev').length>=5 },
+  { id:'muscle_fan',   icon:'V8', name:'Muscle Head',      desc:'Log 5 Muscle Cars',             xp:120, check:(c,r)=>c.filter(x=>x.type==='muscle').length>=5 },
+  { id:'classic_fan',  icon:'CL', name:'Classic Collector',desc:'Log 3 Classic Cars',            xp:120, check:(c,r)=>c.filter(x=>x.type==='classic').length>=3 },
+  { id:'suv_driver',   icon:'UV', name:'Utility Player',   desc:'Log 3 SUVs',                   xp:100, check:(c,r)=>c.filter(x=>x.type==='suv').length>=3 },
   { id:'half_mil',     icon:'½M', name:'Half a Milly',     desc:'Single run over $500K',         xp:200, check:(c,r)=>r.some(x=>!x.spotted&&x.total>=500000) },
   { id:'millionaire',  icon:'1M', name:'Millionaire Run',  desc:'Single run over $1M',           xp:400, check:(c,r)=>r.some(x=>!x.spotted&&x.total>=1000000) },
   { id:'legend_spot',  icon:'LG', name:'Legend Spotter',   desc:'Spot a Legend ($1M+) car',     xp:250, check:(c,r)=>c.some(x=>x.value>=1000000) },
@@ -3422,16 +3421,6 @@ function _mergeRunArrays(local, cloud) {
     else if (c.photo && !existing.photo) byTs.set(c.ts, c); // prefer version with photo
   }
   return [...byTs.values()];
-}
-function _mergeRunHistory(local, cloud) {
-  const byId = new Map();
-  for (const r of local) byId.set(r.id, r);
-  for (const r of cloud) {
-    const existing = byId.get(r.id);
-    // Prefer local version on conflict — it reflects the user's latest edits/deletions
-    if (!existing) byId.set(r.id, r);
-  }
-  return [...byId.values()];
 }
 function _mergeQuickPicks(local, cloud) {
   const byName = new Map();
@@ -4747,7 +4736,7 @@ function goTo(page) {
   updatePageTransition(page);
   // Defer heavy rendering to next frame so INP stays fast
   requestAnimationFrame(() => {
-    if (page==='garage')       renderGarage();
+    if (page==='garage')       { garagePage = 0; renderGarage(); }
     if (page==='history')      renderHistory();
     if (page==='achievements') renderAchievements();
     if (page==='settings')     { renderThemeBar(); initSoundToggle(); initVibeToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); initSortPrefBtns(); applyCompactMode(); }
@@ -5096,6 +5085,9 @@ function endRun() {
   renderSpot();
   playSound('end');
   showRecap({ total, cars: runCars, headliner, isRec: isRec || isFirstRec, prevBest });
+  if (total >= 1000000) {
+    setTimeout(function(){ showUnicornAlert(total); playSound('level'); haptic([20,40,20,60,20]); }, 700);
+  }
   setTimeout(checkNewAchievements, 1200);
   if (window.attachRunToTrip) window.attachRunToTrip(run);
 }
@@ -5641,7 +5633,9 @@ function renderGarage() {
   }
   if (garageView === 'grid') {
     el.className = 'garage-grid';
-    el.innerHTML = filtered.map(function(car, idx){
+    var gridPage = filtered.slice(0, (garagePage + 1) * GARAGE_PAGE_SIZE);
+    var gridRemaining = filtered.length - gridPage.length;
+    el.innerHTML = gridPage.map(function(car, idx){
       var tier = tierOf(car.value);
       var meta = tierMeta(tier);
       var rarity = getRarity(car.value);
@@ -5680,13 +5674,16 @@ function renderGarage() {
         '</div>' +
       '</div>';
     }).join('');
-    el.querySelectorAll('[data-inst]').forEach(function(a){
+el.querySelectorAll('[data-inst]').forEach(function(a){
       attachCarTap(a);
     });
+    if (gridRemaining > 0) appendLoadMoreBtn(el, function(){ garagePage += 1; renderGarage(); }, gridRemaining);
     return;
   }
   el.className = '';
-  el.innerHTML = filtered.map(function(car, idx){
+  var listPage = filtered.slice(0, (garagePage + 1) * GARAGE_PAGE_SIZE);
+  var listRemaining = filtered.length - listPage.length;
+  el.innerHTML = listPage.map(function(car, idx){
     var rarity = getRarity(car.value);
     var ev = (typeof evolutionFor === 'function') ? evolutionFor(car.name) : null;
     var evoTier = (ev && ev.count >= 3) ? ev.tier : null;
@@ -5698,6 +5695,7 @@ function renderGarage() {
   el.querySelectorAll('[data-inst]').forEach(function(a){
     attachCarTap(a);
   });
+  if (listRemaining > 0) appendLoadMoreBtn(el, function(){ garagePage += 1; renderGarage(); }, listRemaining);
 }
 
 function attachCarTap(el) {
@@ -6447,10 +6445,11 @@ function openDiscovery(name, value, type) {
   showSpecsCard({ name:name, value:value, type:type, color:'', photo:'' });
 }
 
-//  MODE SELECTION — full card always shows unless the user disables it
+//  MODE SELECTION — full card for headliner-worthy tiers (super/hyper/legend);
+//  daily & sports get a quick, non-blocking chip. The setting fully disables it.
 function wantsFullCollectorCard(tier) {
   if (localStorage.getItem('cs_cc_anim') === 'off') return false;
-  return true;
+  return (tier === 'super' || tier === 'hyper' || tier === 'legend');
 }
 
 //  COLLECTOR CARD — the core reward moment
@@ -6845,8 +6844,9 @@ function exportLocalData() {
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href = url; a.download = 'carspotter-backup-nophotos.json'; a.click();
-  URL.revokeObjectURL(url);
+  a.href = url; a.download = 'carspotter-backup-nophotos.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
   showToast('📥 Exported all data (no photos)');
 }
 
@@ -6875,8 +6875,9 @@ function exportAllData() {
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href = url; a.download = 'CarSpotter_backup_full_' + new Date().toISOString().slice(0,10) + '.json'; a.click();
-  URL.revokeObjectURL(url);
+  a.href = url; a.download = 'CarSpotter_backup_full_' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
   showToast('📥 Exported all data WITH photos — file may be large');
 }
 
@@ -6925,6 +6926,14 @@ function importFromFile(input) {
       aliases    = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
       bestFromLB = parseInt(localStorage.getItem('cs_best_lb')   || '0');
       _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
+      // Reload deterministic sync state too — otherwise stale in-memory tombstones
+      // / field versions let auto-sync resurrect or clobber the freshly imported data.
+      _deletedRuns = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_runs') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();
+      _deletedQP  = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_qp') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();
+      _removedFavs = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_fav') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();
+      _fieldVer = (function(){ try { var f = JSON.parse(localStorage.getItem('cs_fv') || 'null'); return (f && typeof f === 'object') ? f : {}; } catch(e){ return {}; } })();
+      _lamport = parseInt(localStorage.getItem('cs_lamport') || '0');
+      favoriteNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
       // Reload progression state (cs_progress) so trips/titles/etc. reflect the import
       try {
         var impP = JSON.parse(localStorage.getItem('cs_progress') || 'null');
@@ -7006,10 +7015,11 @@ let offlineQueue = JSON.parse(localStorage.getItem('cs_offline_queue') || '[]');
 function updateOfflineBanner() {
   const b = document.getElementById('offlineBanner');
   if (!b) return;
-  isOffline = !navigator.onLine;
+isOffline = !navigator.onLine;
   b.classList.toggle('show', isOffline);
   if (isOffline) {
-    b.innerHTML = '<span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span>';
+    var syncMsg = currentUser ? 'OFFLINE — Saves locally, syncs when back' : 'OFFLINE — Saving locally on this device';
+    b.innerHTML = '<span>OFFLINE</span><span>' + syncMsg + '</span>';
   } else {
     b.classList.remove('show');
   }
@@ -7498,7 +7508,7 @@ window.checkPhotos = function(){
 window._csReady = Date.now();
 function photoThumb(dataUrl) {
   if (!dataUrl) return '';
-  return `<img class="run-item-photo" src="${dataUrl}" alt="car" onclick="event.stopPropagation();viewPhoto('${dataUrl.substring(0,30)}...')" style="cursor:pointer">`;
+  return `<img class="run-item-photo" src="${dataUrl}" alt="car" onclick="event.stopPropagation();viewPhoto(this.src)" style="cursor:pointer">`;
 }
 
 function photoThumbSmall(dataUrl) {
@@ -7555,10 +7565,102 @@ function attachPendingLocation(car){
 
 window.openMapCar = function(payload){ try { showSpecsCard(JSON.parse(decodeURIComponent(String(payload)))); } catch (e) {} };
 
-//  SMART VOICE FILL (AI-powered) 
+//  SMART VOICE FILL — fully local parser (was AI-powered via Anthropic, but the
+//  call had no API key and always failed. Now runs offline against CAR_AC_DB.)
 let voiceFillPending = null; // { name, value, color, type }
 
-async function smartVoiceFill() {
+// ── LOCAL CAR PARSER — offline extractor (no network, no API key needed) ──
+var _locCarColor =
+  /\b(black|white|red|blue|green|yellow|orange|purple|silver|grey|gray|gold|bronze|pink|matte|carbon|gunmetal)\b/i;
+function _locNormalize(s){ return String(s||'').toLowerCase().replace(/[.,]+/g,'').trim(); }
+// Find the best CAR_AC_DB entry whose name appears somewhere in the text.
+function _locFindDB(text) {
+  var t = _locNormalize(text);
+  if (!t) return null;
+  var exact = null, exactLen = 0, partial = null, partialScore = -1;
+  try {
+    (CAR_AC_DB || []).forEach(function(entry){
+      var n = _locNormalize(entry.name);
+      if (!n) return;
+      if (t.indexOf(n) !== -1) {
+        if (n.length > exactLen) { exact = entry; exactLen = n.length; }
+        return;
+      }
+      // Partial match: make present + at least one numeric model token present.
+      var toks = n.split(' ');
+      if (toks.length < 2) return;
+      var make = toks[0];
+      if (make && t.indexOf(make) !== -1) {
+        var digs = 0;
+        for (var i = 1; i < toks.length; i++) {
+          if (/\d/.test(toks[i]) && t.indexOf(toks[i]) !== -1) digs++;
+        }
+        var score = make.length + digs * 4;
+        if (digs >= 1 && score > partialScore) { partial = entry; partialScore = score; }
+      }
+    });
+  } catch(e) {}
+  return exact || partial;
+}
+// Guess type from brand keywords when no DB hit, or as a safety net.
+function _locGuessType(text) {
+  var t = _locNormalize(text);
+  var defs = {
+    supercar:[ 'ferrari','lamborghini','mclaren','bugatti','koenigsegg','pagani','aventador','huracan','senna','sf90','laferrari' ],
+    sports:  [ 'porsche','bmw','corvette','gtr','nissan','mercedes','audi' ],
+    muscle:  [ 'camaro','challenger','charger','mustang','viper','dodge','ford gt','hellcat' ],
+    track:   [ 'gt3','gt4','gt2','race','rally','cup' ],
+    exotic:  [ 'lambo','exotic' ],
+    ev:      [ 'tesla','ev','electric','model 3','model s','model x','model y','taycan','leaf' ],
+    luxury:  [ 'rolls','bentley','maybach','range rover','sedan' ],
+    suv:     [ 'suv','truck','urus','cayenne','range rover','x5','land rover' ],
+    classic: [ 'classic','vintage','cobra','c1','c2','impala','chevelle' ],
+    hotrod:  [ 'hot rod','hotrod','fat fender','rat rod' ]
+  };
+  for (var def in defs) {
+    var kws = defs[def];
+    for (var i=0;i<kws.length;i++){ if (kws[i] && t.indexOf(kws[i]) !== -1) return def; }
+  }
+  return '';
+}
+function _locValue(text, fallback) {
+  var t = text.toLowerCase();
+  // Prefer an explicit amount anchored to a label/currency, then a suffixed
+  // shorthand, then any bare 3–6 digit number (avoids "488" model numbers).
+  var m = t.match(/(?:worth|valued\s*(?:at)?|usd|around|about|approx|\$)\s*(\d+(?:[.,]\d+)?)\s*(k|m|b|thousand|million|billion)?/);
+  if (!m) m = t.match(/\b(\d+(?:[.,]\d+)?)\s*(k|m|b|thousand|million|billion)\b/);
+  if (!m) m = t.match(/\b(\d{3,6})\b/);
+  if (!m) return fallback;
+  var num = parseFloat(m[1].replace(/,/g, ''));
+  var unit = (m[2] || '').toLowerCase();
+  var v = num;
+  if (unit === 'k' || unit === 'thousand') v *= 1000;
+  else if (unit === 'm' || unit === 'million') v *= 1000000;
+  else if (unit === 'b' || unit === 'billion') v *= 1000000000;
+  return isFinite(v) && v > 2000 ? Math.round(v) : fallback;
+}
+function _locGuessName(text) {
+  var t = _locNormalize(text)
+    .replace(/\b(worth|valued|around|about|saw|spotted|spot|see|log|add|record|fill|please|can\s?you|the|and|for|with|from|red|black|white|blue|green|grey|gray|silver|gold)\b/g,' ')
+    .replace(/\b\d{1,3}(?:\.\d+)?\s*(k|m|b|thousand|million|billion)\b/g,' ')
+    .replace(/\b\d{3,6}\b/g,' ')
+    .replace(/\s{2,}/g,' ').trim();
+  var words = t.split(' ');
+  if (!words.length) return '';
+  var keep = words.slice(-3);
+  return keep.map(function(w){ return w.charAt(0).toUpperCase()+w.slice(1); }).join(' ');
+}
+function _locParseCar(text) {
+  var db  = _locFindDB(text);
+  var color = (_locCarColor.exec(text) || ['',''])[1] || '';
+  var type = db ? db.type : (_locGuessType(text) || 'sports');
+  var value = _locValue(text, db ? db.val : 0);
+  var name = db ? db.name : _locGuessName(text);
+  if (!name) return null;
+  return { name:name, value:value, color:color, type:type };
+}
+
+function smartVoiceFill() {
   const notes = document.getElementById('notesArea')?.value?.trim();
   if (!notes) { showToast('Nothing in notes to parse!'); return; }
 
@@ -7568,21 +7670,8 @@ async function smartVoiceFill() {
   btn.disabled = true;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        system: `You are a car spotting assistant. Extract ONE car from the user's notes text to fill a log form. Return ONLY valid JSON with these exact keys: {"name":"Make Model (string)","value":NUMBER,"color":"color string or empty string","type":"supercar|sports|muscle|track|exotic|ev|luxury|suv|classic|hotrod"}. For type pick the best emoji: =supercar/ferrari/lambo/mclaren, =sports/bmw/porsche/mustang/generic, =muscle/camaro/challenger/charger, =track/race, =exotic/rare, =electric/tesla/ev. For value: if user says "250k" use 250000, "1.2m" use 1200000, if no value given make a best guess based on typical market price. Return ONLY the JSON, no other text.`,
-        messages: [{ role: 'user', content: notes }]
-      })
-    });
-    const data = await response.json();
-    const raw = data.content?.[0]?.text || '';
-    const clean = raw.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
-    if (!parsed.name) throw new Error('No car found');
+    const parsed = _locParseCar(notes);
+    if (!parsed || !parsed.name) throw new Error('No car found');
 
     voiceFillPending = parsed;
     const bar = document.getElementById('voiceFillBar');
@@ -7591,7 +7680,7 @@ async function smartVoiceFill() {
     bar.classList.add('show');
     // Switch to spot tab so user can see the fill bar
     goTo('spot');
-    showToast(' Car detected — tap FILL!');
+    showToast('🚗 Car detected — tap FILL!');
   } catch(e) {
     showToast('Could not parse a car from notes');
   } finally {
@@ -8190,9 +8279,64 @@ document.getElementById('carName').addEventListener('keydown', e => {
 });
 
 // 
-//  SMART COMMAND BAR 
-// 
-async function runSmartCmd() {
+//  SMART COMMAND BAR — fully local intent parser (was AI-powered via Anthropic,
+//  but the call had no API key and always failed. Now works offline.)
+var _cmdNav = [
+  { k:'garage',        p:'garage' },
+  { k:'history',       p:'history' },
+  { k:'achievement',   p:'achievements' },
+  { k:'expedition',    p:'expeditions' },
+  { k:'leaderboard',   p:'leaderboard' },
+  { k:'book',          p:'book' },
+  { k:'trip',          p:'trips' },
+  { k:'more',          p:'more' },
+  { k:'settings',      p:'settings' },
+  { k:'news',          p:'news' },
+  { k:'stats',         p:'stats' },
+  { k:'notes',         p:'voice' },
+  { k:'voice',         p:'voice' },
+  { k:'home',          p:'spot' },
+  { k:'spot',          p:'spot' }
+];
+function _parseSmartCmd(cmd) {
+  var c = String(cmd || '').toLowerCase().trim();
+  if (!c) return null;
+
+  // Start / clear run
+  if (/start|begin|clear|reset|new/.test(c) && /run|session/.test(c)) {
+    return { action:'start_run' };
+  }
+
+  // Log intent: explicit verbs fill the form — check BEFORE value/count toasts
+  // so "log a Tesla worth 200k" doesn't get swallowed by the "worth" answer.
+  if (/\b(log|add|record|fill|spot\b|spotted)\b/.test(c)) {
+    var car = _locParseCar(c);
+    if (car && car.name) return { action:'log', name:car.name, value:car.value, color:car.color, type:car.type };
+  }
+
+  // Count queries -> toast answer
+  var totalCars = allRuns.reduce(function(s,r){ return s + (r.cars||[]).length; }, 0);
+  if (/how many|total\s*(cars|cars|spots)|count/.test(c)) {
+    return { action:'toast', msg: 'You have logged ' + totalCars + ' car' + (totalCars===1?'':'s') + ' so far!' };
+  }
+  var totalVal = allRuns.reduce(function(s,r){ return s + (r.cars||[]).reduce(function(x,car){ return x + (car.value||0); },0); }, 0);
+  if (/total value|worth|how much/.test(c)) {
+    return { action:'toast', msg: 'Your garage is worth ' + fmt(totalVal) + ' across ' + totalCars + ' cars!' };
+  }
+
+  // Navigation
+  for (var i=0;i<_cmdNav.length;i++) {
+    if (c.indexOf(_cmdNav[i].k) !== -1) return { action:'nav', page:_cmdNav[i].p };
+  }
+
+  // Fallback: if it looks like it contains a known car, still try to log
+  var guessed = _locParseCar(c);
+  if (guessed && guessed.name) return { action:'log', name:guessed.name, value:guessed.value, color:guessed.color, type:guessed.type };
+
+  return { action:'toast', msg:'Try "log a Ferrari 488", "garage", "stats", or "how many cars"' };
+}
+
+function runSmartCmd() {
   const input = document.getElementById('smartCmdInput');
   const btn   = document.getElementById('smartCmdBtn');
   const cmd   = input.value.trim();
@@ -8201,57 +8345,40 @@ async function runSmartCmd() {
   btn.textContent = '...';
   btn.disabled = true;
 
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 300,
-        system: `You are CarSpotter's AI assistant. Parse the user's command and return ONLY a JSON object with one of these actions:
-{"action":"log","name":"Make Model","value":NUMBER,"color":"color or ''","type":"supercar|sports|muscle|track|exotic|ev|luxury|suv|classic|hotrod"}  — to fill the log form
-{"action":"nav","page":"spot|garage|history|stats|news|voice"}  — to navigate
-{"action":"toast","msg":"short message"}  — for commands like "how many cars" (answer in msg, max 60 chars)
-{"action":"start_run"}  — to clear and start a fresh run
-Use type emoji: =supercar/ferrari/lambo/mclaren, =sports/bmw/porsche/generic, =muscle/camaro/challenger/charger/mustang, =track/race, =exotic/rare, =electric/ev. For value, guess market price if not given. Return ONLY the JSON object, no extra text.`,
-        messages: [{ role: 'user', content: cmd }]
-      })
-    });
-    const data = await response.json();
-    const raw  = data.content?.[0]?.text || '';
-    const clean = raw.replace(/```json|```/g,'').trim();
-    const parsed = JSON.parse(clean);
-
-    if (parsed.action === 'log') {
-      document.getElementById('carName').value  = parsed.name  || '';
-      document.getElementById('carValue').value = parsed.value || '';
-      document.getElementById('carColor').value = parsed.color || '';
-      if (parsed.type) document.getElementById('carType').value = parsed.type;
-      goTo('spot');
-      showToast(' Form filled — review & tap "+ TO RUN"');
-      input.value = '';
-    } else if (parsed.action === 'nav') {
-      const pg = parsed.page;
-      goTo(pg);
-      showToast('Navigated to ' + pg);
-      input.value = '';
-    } else if (parsed.action === 'toast') {
-      showToast(parsed.msg || 'Done!');
-      input.value = '';
-    } else if (parsed.action === 'start_run') {
-      if (currentRun.length && !confirm('Clear current run and start fresh?')) return;
-      currentRun = []; headlinerIdx = -1;
-      saveCurrentRun(); renderSpot();
-      goTo('spot');
-      showToast(' New run started!');
-      input.value = '';
+  setTimeout(function() {
+    const parsed = _parseSmartCmd(cmd);
+    try {
+      if (parsed.action === 'log') {
+        document.getElementById('carName').value  = parsed.name  || '';
+        document.getElementById('carValue').value = parsed.value || '';
+        document.getElementById('carColor').value = parsed.color || '';
+        if (parsed.type) document.getElementById('carType').value = parsed.type;
+        goTo('spot');
+        showToast('🚗 Form filled — review & tap "+ TO RUN"');
+        input.value = '';
+      } else if (parsed.action === 'nav') {
+        const pg = parsed.page;
+        goTo(pg);
+        showToast('🧭 ' + pg);
+        input.value = '';
+      } else if (parsed.action === 'toast') {
+        showToast(parsed.msg || 'Done!');
+        input.value = '';
+      } else if (parsed.action === 'start_run') {
+        if (currentRun.length && !confirm('Clear current run and start fresh?')) return;
+        currentRun = []; headlinerIdx = -1;
+        saveCurrentRun(); renderSpot();
+        goTo('spot');
+        showToast('🏁 New run started!');
+        input.value = '';
+      }
+    } catch(e) {
+      showToast('Command not understood — try rephrasing!');
+    } finally {
+      btn.textContent = 'GO';
+      btn.disabled = false;
     }
-  } catch(e) {
-    showToast('Command not understood — try rephrasing!');
-  } finally {
-    btn.textContent = 'GO';
-    btn.disabled = false;
-  }
+  }, 120);
 }
 
 //  MORE MENU 
@@ -8937,9 +9064,9 @@ function celebrateMystery(name, info, done) {
   setTimeout(close, 5600);
 }
 function showBookAllShelf() {
-  // Opens a combined sheet with every make stacked — foundation: reuse per-make grid via prompt-less nav
   renderBook();
-  showToast('📖 Collector Book refreshed');
+  var grid = document.getElementById('bookMakeGrid');
+  if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function celebrateMakeComplete(stats, done) {
@@ -9902,8 +10029,8 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
   // Progression expansion init
   if (window.renderTitleChip) renderTitleChip();
   if (window.checkTitleUnlock) setTimeout(function(){ checkTitleUnlock(true); }, 600);
-  // One-shot tutorial check after auth resolves
-  if (currentUser && !localStorage.getItem('cs_tutorial_done') && !document.getElementById('tutorialOverlay')) {
+// One-shot tutorial check on first launch — shown to signed-in and guest users alike
+  if (!localStorage.getItem('cs_tutorial_done') && !document.getElementById('tutorialOverlay')) {
     setTimeout(function(){ openTutorial(false); }, 2500);
   }
 })();
