@@ -8450,22 +8450,19 @@ function openMakeSheet(make) {
   var overlay = document.createElement('div');
   overlay.className = 'book-make-sheet';
   overlay.onclick = function(e){ if (e.target === overlay) overlay.remove(); };
-  var tiles = s.models.map(function(m, i){
+var tiles = s.models.map(function(m, i){
     var key = _modelKey(m.name);
-    var peeking = _progress.mysteryPeeked[key];
     var just = _lastSpottedName && _modelKey(m.name) === _modelKey(_lastSpottedName) ? ' just-spotted' : '';
     if (m.found) {
       var photo = _idbPhotoCache[key] || '';
       return '<div class="book-car-tile spotted' + just + '" style="animation-delay:' + (i * 0.02) + 's" onclick="openDiscovery(\'' + jsEscape(m.name) + '\',' + m.val + ',\'' + (m.type || '') + '\')">' +
-(photo ? '<img class="bct-img" src="' + photo + '" alt="">' : '<div class="bct-ph">' + tierEmoji(tierOf(m.val)) + '</div>') +
+        (photo ? '<img class="bct-img" src="' + photo + '" alt="">' : '<div class="bct-ph">' + tierEmoji(tierOf(m.val)) + '</div>') +
         '<div class="bct-name">' + m.name + '</div>' +
         '<div class="bct-meta">' + fmt(m.val) + ' · spotted</div>' +
       '</div>';
     }
-    return '<div class="book-sil ' + (peeking ? 'revealed' : '') + '" style="animation-delay:' + (i * 0.02) + 's">' +
-      (peeking
-        ? '<div class="sil-car">' + tierEmoji(tierOf(m.val)) + '</div><div class="sil-name">' + m.name + '</div><div class="sil-val">' + fmt(m.val) + '</div>'
-        : '<div class="sil-car">🚘</div><div class="sil-q">?</div><div class="sil-val">' + fmt(m.val) + ' tier</div>') +
+    return '<div class="book-sil" style="animation-delay:' + (i * 0.02) + 's">' +
+      '<div class="sil-car">🚘</div><div class="sil-q">?</div><div class="sil-val">' + fmt(m.val) + ' tier</div>' +
     '</div>';
   }).join('');
   overlay.innerHTML =
@@ -8608,11 +8605,10 @@ function claimExpo(id) {
   _progress.expoClaimed[id] = Date.now();
   var ex = EXPEDITIONS.find(function(e){ return e.id === id; }) ||
     ACHIEVEMENTS.find(function(a){ return a.id === id; });
-  if (ex) addXP(ex.xp || 0);
+if (ex) addXP(ex.xp || 0);
   saveProgress();
   renderExpeditions();
   renderLevelBar();
-  checkTitleUnlock();
   var isExpo = !!(ex && EXPEDITIONS.some(function(e){ return e.id === id; }));
   if (ex && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
     enqueueCeremony(function(done){ celebrateExpo(ex, isExpo, done); });
@@ -9179,10 +9175,8 @@ function celebrateEvolution(car, oldTier, newTier, count, done) {
 
 // ---- Hooks: run once after each log ----
 function updateProgressionAfterLog(car) {
-  checkTitleUnlock();
   checkMilestones(car);
   checkEvolutionUnlock(car);
-  renderTitleChip();
   renderLevelBar();
   // Refresh book/expedition/trip pages if they are the active page
   var pg = document.querySelector('.page.active');
@@ -9232,6 +9226,8 @@ window.attachRunToTrip = attachRunToTrip;
 window.enqueueMoment = enqueueMoment;
 window.checkEvolutionUnlock = checkEvolutionUnlock;
 
+// ACHIEVEMENTS array (referenced in IIFE seed)
+var ACHIEVEMENTS = [];
 
 
 (function(){
@@ -9405,12 +9401,10 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
   if (settingsPage) settingsPage.innerHTML = settingsPage.innerHTML.replace("CarSpotter''s", "CarSpotter's");
   renderPendingLocation();
   renderSpot();
-  renderGarage();
-  renderAchievements();
+renderGarage();
   refreshOfflineStatus();
   // Progression expansion init
   if (window.renderTitleChip) renderTitleChip();
-  if (window.checkTitleUnlock) setTimeout(function(){ checkTitleUnlock(true); }, 600);
 // One-shot tutorial check on first launch — shown to signed-in and guest users alike
   if (!localStorage.getItem('cs_tutorial_done') && !document.getElementById('tutorialOverlay')) {
     setTimeout(function(){ openTutorial(false); }, 2500);
