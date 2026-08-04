@@ -1934,6 +1934,22 @@ body.compact-mode .g-name{font-size:0.78rem;}
 body.compact-mode .g-meta{display:none;}
 body.compact-mode .rarity-pill{display:none;}
 
+/* ── CARBON FIBER ── */
+body.carbon-on .card,
+body.carbon-on .hist-item,
+body.carbon-on .garage-row,
+body.carbon-on .score-banner,
+body.carbon-on .run-item,
+body.carbon-on .bottom-nav,
+body.carbon-on .app-header,
+body.carbon-on .recap-card,
+body.carbon-on .modal-card{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%23111'/%3E%3Cpolygon points='0,4 4,0 8,0 4,4' fill='%23222'/%3E%3Cpolygon points='0,4 4,0 4,4 0,8' fill='%23282828'/%3E%3Cpolygon points='4,0 8,0 8,4 4,4' fill='%231a1a1a'/%3E%3Cpolygon points='8,4 12,0 16,0 12,4' fill='%23222'/%3E%3Cpolygon points='8,4 12,0 12,4 8,8' fill='%23282828'/%3E%3Cpolygon points='12,0 16,0 16,4 12,4' fill='%231a1a1a'/%3E%3Cpolygon points='0,12 4,8 8,8 4,12' fill='%231e1e1e'/%3E%3Cpolygon points='0,12 4,8 4,12 0,16' fill='%23242424'/%3E%3Cpolygon points='4,8 8,8 8,12 4,12' fill='%23181818'/%3E%3Cpolygon points='8,12 12,8 16,8 12,12' fill='%231e1e1e'/%3E%3Cpolygon points='8,12 12,8 12,12 8,16' fill='%23242424'/%3E%3Cpolygon points='12,8 16,8 16,12 12,12' fill='%23181818'/%3E%3C/svg%3E");
+  background-size:16px 16px;
+}
+.carbon-preview{width:24px;height:24px;border-radius:5px;flex-shrink:0;border:1px solid var(--border2);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%23111'/%3E%3Cpolygon points='0,4 4,0 8,0 4,4' fill='%23222'/%3E%3Cpolygon points='0,4 4,0 4,4 0,8' fill='%23282828'/%3E%3Cpolygon points='4,0 8,0 8,4 4,4' fill='%231a1a1a'/%3E%3Cpolygon points='8,4 12,0 16,0 12,4' fill='%23222'/%3E%3Cpolygon points='8,4 12,0 12,4 8,8' fill='%23282828'/%3E%3Cpolygon points='12,0 16,0 16,4 12,4' fill='%231a1a1a'/%3E%3C/svg%3E");background-size:16px 16px;}
+.carbon-toggle-row{display:flex;align-items:center;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+
 /* ── TUTORIAL ── */
 .tutorial-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:99998;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn 0.2s ease;}
 .tutorial-card{background:var(--surf);border:1px solid var(--border2);border-radius:var(--radius);padding:28px;width:100%;max-width:340px;position:relative;animation:popIn 0.25s ease;}
@@ -2168,6 +2184,23 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
 /* ══ PROGRESSION & REWARD EXPANSION ══ */
 
+/* Title chip on the spot page level bar — the spotter identity itself */
+#levelTitleSlot{display:inline-flex;align-items:center;gap:6px;background:var(--adim);border:1px solid var(--accent);border-radius:99px;padding:3px 11px;font-family:'Inter',sans-serif;font-size:0.6rem;font-weight:700;letter-spacing:1.2px;color:var(--accent);text-transform:uppercase;transition:all 0.25s var(--ease);line-height:1;}
+#levelTitleSlot .tc-emoji{font-size:0.8rem;line-height:1;}
+#levelTitleSlot.new-title{animation:titlePop 0.6s cubic-bezier(0.34,1.56,0.64,1) both;}
+@keyframes titlePop{0%{transform:scale(0.6);opacity:0;}60%{transform:scale(1.15);}100%{transform:scale(1);opacity:1;}}
+@media(max-width:480px){#levelTitleSlot{font-size:0.55rem;letter-spacing:1px;padding:3px 9px;}}
+
+/* Title unlock overlay */
+.titleup-overlay{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.96);cursor:pointer;animation:fadeIn 0.3s ease;}
+.titleup-card{text-align:center;padding:40px 34px;max-width:340px;animation:levelUpIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;}
+.titleup-emoji{font-size:4rem;margin-bottom:12px;animation:levelUpSpin 2.2s ease infinite;}
+.titleup-eyebrow{font-size:0.58rem;color:var(--accent);letter-spacing:4px;font-weight:800;text-transform:uppercase;}
+.titleup-name{font-family:'Inter',sans-serif;font-size:3rem;letter-spacing:2px;line-height:1.05;margin:10px 0 12px;color:var(--text);}
+.titleup-desc{font-size:0.72rem;color:var(--text2);line-height:1.5;letter-spacing:0.5px;margin-bottom:6px;}
+.titleup-prev{font-size:0.56rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:22px;}
+.titleup-dismiss{margin-top:28px;font-size:0.58rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+
 /* Collector Book — make shelf cards */
 .book-hero{display:flex;align-items:center;gap:16px;background:var(--glass-card);border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:24px;margin-bottom:18px;box-shadow:var(--shadow-lg);}
 .book-hero-ring{position:relative;width:84px;height:84px;flex-shrink:0;}
@@ -2219,6 +2252,26 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 .book-car-tile .bct-meta{font-size:0.52rem;color:var(--muted);padding:0 8px 8px;letter-spacing:0.5px;}
 .book-car-tile.spotted{border-color:rgba(232,184,75,0.4);}
 .book-car-tile.spotted .bct-name{color:var(--accent);}
+
+/* Mystery silhouette tiles */
+.book-sil{aspect-ratio:3/4;background:linear-gradient(180deg,var(--surf3),#101013);border:1px solid var(--border2);border-radius:var(--radius-sm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:all 0.18s;overflow:hidden;position:relative;}
+.book-sil:hover{border-color:var(--accent2);box-shadow:0 0 0 1px var(--accent2) inset;}
+.book-sil .sil-car{filter:brightness(0);opacity:0.5;font-size:2.2rem;}
+.book-sil .sil-q{font-family:'Inter',sans-serif;font-size:1rem;color:var(--muted);letter-spacing:2px;}
+.book-sil .sil-val{font-size:0.5rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.book-sil.revealed{border-color:var(--accent);animation:titlePop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;}
+/* Empty slots glow faintly — they're waiting, not empty. */
+.book-sil{transition:all 0.18s, box-shadow 0.18s;}
+.book-sil:not(.revealed){animation:emptySlotGlow 5s ease-in-out infinite;}
+@keyframes emptySlotGlow{
+  0%,100%{box-shadow:0 0 0 0 rgba(232,184,75,0);}
+  50%{box-shadow:0 0 14px -2px rgba(232,184,75,0.12);}
+}
+.book-sil.revealed .sil-car{filter:none;opacity:1;}
+.book-sil.revealed .sil-q{color:var(--accent);}
+.book-sil.revealed .sil-name{font-size:0.6rem;font-weight:700;color:var(--text);letter-spacing:0.5px;text-align:center;padding:0 6px;}
+.book-sil.revealed .sil-val{color:var(--accent);}
+.mystery-hint-chip{margin-top:14px;font-size:0.6rem;color:var(--text2);letter-spacing:0.5px;line-height:1.6;text-align:center;}
 
 /* Expeditions */
 .expo-hero{display:flex;align-items:center;gap:14px;background:var(--glass-card);border:1px solid var(--glass-border);border-radius:var(--radius-xl);padding:20px;margin-bottom:16px;box-shadow:var(--shadow-lg);}
@@ -2283,6 +2336,11 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 .trip-run-row .trr-meta{font-size:0.58rem;color:var(--muted);letter-spacing:0.5px;margin-top:2px;}
 .trip-run-row .trr-val{font-family:'Inter',sans-serif;font-size:0.95rem;color:var(--accent);}
 
+/* Car story in specs card */
+.specs-story{margin-top:16px;background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;}
+.specs-story .ss-label{font-size:0.5rem;font-weight:800;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:6px;}
+.specs-story .ss-text{font-size:0.74rem;color:var(--text2);line-height:1.6;}
+
 /* Evolution badge */
 .evol-badge{display:inline-flex;align-items:center;gap:5px;font-size:0.56rem;font-weight:800;letter-spacing:1px;border-radius:99px;padding:3px 9px;text-transform:uppercase;font-family:'Inter',sans-serif;border:1px solid;}
 .evol-pips{display:flex;gap:4px;margin-top:8px;}
@@ -2331,7 +2389,9 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 .moment-confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
 .moment-particle{position:absolute;left:50%;top:50%;width:8px;height:8px;border-radius:50%;pointer-events:none;}
 
+/* Rarity shimmer on book tiles */
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.book-sil.locked-shimmer{background-image:linear-gradient(90deg,var(--surf3) 0%,var(--surf2) 40%,var(--surf3) 80%);background-size:200% 100%;animation:shimmer 2.4s linear infinite;}
 
 /* ── CARD EVOLUTION CEREMONY — dim world, charge, crack, regrow, foil, land ── */
 .evo-overlay{position:fixed;inset:0;z-index:100001;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:rgba(0,0,0,0.98);animation:evoDimIn 0.8s ease both;}
@@ -2496,6 +2556,32 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 @keyframes tileGoldFlash{0%{box-shadow:0 0 0 2px rgba(245,200,66,0.85),0 0 30px rgba(245,200,66,0.45);}100%{box-shadow:0 0 0 0 transparent;}}
 @media (prefers-reduced-motion:reduce){.make-cer *{animation:none !important;transition:none !important;}.make-cer-panel{transform:none;opacity:1;}}
 
+/* ── MYSTERY CAR REVEAL — silhouette glows, cracks, light bursts, card flies in ── */
+.mys-overlay{position:fixed;inset:0;z-index:100005;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:rgba(0,0,0,0.93);animation:fadeIn 0.35s ease;}
+.mys-sil{position:relative;font-size:5rem;filter:brightness(0) drop-shadow(0 0 0 rgba(245,200,66,0));transition:filter 0.6s ease;animation:mysBreath 1.3s ease-in-out infinite;}
+@keyframes mysBreath{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+.mys-overlay.stage-2 .mys-sil{filter:none;animation:mysPop 0.55s cubic-bezier(0.34,1.56,0.64,1) both;}
+@keyframes mysPop{0%{transform:scale(0.5) rotate(-8deg);opacity:0.4;}60%{transform:scale(1.15) rotate(3deg);}100%{transform:scale(1) rotate(0);}}
+.mys-ring{position:absolute;left:50%;top:50%;width:0;height:0;border-radius:50%;border:2px solid rgba(245,200,66,0.7);opacity:0;pointer-events:none;}
+.mys-overlay.stage-2 .mys-ring{animation:mysRing 0.8s cubic-bezier(0.16,0.84,0.44,1) both;}
+@keyframes mysRing{0%{width:0;height:0;opacity:1;}100%{width:300px;height:300px;margin:-150px 0 0 -150px;opacity:0;}}
+.mys-glow{position:absolute;left:50%;top:50%;width:180px;height:180px;margin:-90px 0 0 -90px;border-radius:50%;pointer-events:none;opacity:0;background:radial-gradient(circle,rgba(245,200,66,0.4),transparent 65%);}
+.mys-overlay.stage-1 .mys-glow{animation:mysGlowPulse 1.4s ease-in-out infinite;}
+@keyframes mysGlowPulse{0%,100%{opacity:0.5;transform:scale(1);}50%{opacity:0.9;transform:scale(1.25);}}
+.mys-spark{position:absolute;left:50%;top:50%;width:5px;height:5px;border-radius:50%;pointer-events:none;background:#f5c842;box-shadow:0 0 12px #f5c842;opacity:0;}
+.mys-overlay.stage-1 .mys-spark{animation:evoSparkIn 0.8s ease forwards;}
+.mys-name{position:relative;margin-top:26px;font-family:'Inter',sans-serif;font-size:1.7rem;letter-spacing:2px;text-align:center;opacity:0;transform:translateY(14px);}
+.mys-overlay.stage-2 .mys-name{animation:titleFadeUp 0.5s 0.35s ease both;}
+.mys-val{position:relative;font-size:0.66rem;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;text-align:center;margin-top:6px;opacity:0;}
+.mys-overlay.stage-2 .mys-val{animation:titleFadeUp 0.5s 0.5s ease both;}
+.mys-dismiss{position:relative;margin-top:30px;font-size:0.56rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;text-align:center;opacity:0;}
+.mys-overlay.stage-2 .mys-dismiss{animation:titleFadeUp 0.5s 0.7s ease both;}
+.mys-confetti{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.mys-confetti i{position:absolute;top:-12px;width:7px;height:12px;border-radius:2px;opacity:0;}
+.mys-overlay.stage-2 .mys-confetti i{animation:mysFall linear forwards;}
+@keyframes mysFall{0%{opacity:1;transform:translateY(0) rotate(0);}100%{opacity:0.4;transform:translateY(110vh) rotate(540deg);}}
+@media (prefers-reduced-motion:reduce){.mys-overlay *{animation:none !important;transition:none !important;}.mys-sil{filter:none;}}
+
 /* ── ROAD TRIP LAUNCH — ticket tears off, route unrolls, journaled ── */
 .trip-cer{position:fixed;inset:0;z-index:100006;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,0.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);animation:fadeIn 0.4s ease;}
 .trip-cer-ticket{position:relative;width:min(320px,86vw);background:linear-gradient(170deg,var(--surf),#141417);border:1px solid var(--glass-border);border-radius:18px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.6);transform:translateY(40px) rotate(-3deg);opacity:0;}
@@ -2586,9 +2672,9 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
             </div>
           </div>
 
-<div class="level-bar-wrap">
+          <div class="level-bar-wrap">
             <div class="level-bar-info">
-              <span class="level-lbl"><span class="level-num">LV <span id="levelNum">1</span></span></span>
+              <span class="level-lbl"><span id="levelTitleSlot"></span><span class="level-num">LV <span id="levelNum">1</span></span></span>
               <span class="level-xp" id="levelXp">0 / 100 XP</span>
             </div>
             <div class="level-bar-track"><div class="level-bar-fill" id="levelFill" style="width:0%"></div></div>
@@ -2803,9 +2889,17 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
     </div>
 
 
+    <!-- ACHIEVEMENTS PAGE -->
+    <div class="page" id="page-achievements">
+      <div class="sec-title" style="margin-bottom:6px">Achievements</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">
+        <div class="ach-count-row" id="achCountRow" style="margin-bottom:0"><span id="achUnlocked">0</span> / <span id="achTotal">0</span> unlocked</div>
+        <button class="txt-btn" onclick="goTo('expeditions')" style="white-space:nowrap">See all →</button>
+      </div>
+      <div class="ach-grid" id="achGrid"></div>
+    </div>
 
-
-<!-- SETTINGS PAGE -->
+    <!-- SETTINGS PAGE -->
     <div class="page" id="page-settings">
       <div class="sec-title" style="margin-bottom:14px">Settings</div>      <!-- Themes -->
       <div class="card setting-card">
@@ -2813,11 +2907,17 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
           <div class="setting-icon">Theme</div>
           <div class="setting-copy">
             <div class="card-title">THEME</div>
-            <div class="setting-desc">Choose your color scheme.</div>
+            <div class="setting-desc">Tune CarSpotter''s look with bold palettes, then add carbon fiber texture for extra depth.</div>
           </div>
         </div>
         <div class="theme-bar" id="themeBar"></div>
         <div style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;margin-top:8px;" id="themeName">Default</div>
+        <div style="font-size:0.6rem;color:var(--muted);margin-top:4px;line-height:1.5;">Dark: Default  Carbon  Stealth  Inferno  Cobalt  Acid<br>Light: Light &nbsp;|&nbsp; Special: Cyberpunk  Retro 80s</div>
+        <div class="setting-row" style="border-top:none;padding-top:10px;">
+          <div class="carbon-preview"></div>
+          <span style="font-size:0.78rem;color:var(--text2);flex:1;">Carbon fiber texture on surfaces</span>
+          <button class="toggle-pill" id="carbonToggle" onclick="toggleCarbon()"><div class="toggle-knob"></div></button>
+        </div>
       </div>
 
       <!-- Offline Status -->
@@ -2857,7 +2957,36 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
           <span style="font-size:0.78rem;color:var(--text2);flex:1;">Collector card animations</span>
           <button class="toggle-pill" id="ccAnimToggle" onclick="toggleCCAnim()"><div class="toggle-knob"></div></button>
         </div>
-</div>
+      </div>
+
+      <!-- Aliases -->
+      <div class="card setting-card">
+        <div class="setting-head">
+          <div class="setting-icon">Names</div>
+          <div class="setting-copy">
+            <div class="card-title">CAR NICKNAMES</div>
+            <div class="setting-desc">Map abbreviations to full names so your stats and garage stay tidy. Example: GT3 RS -> Porsche 911 GT3 RS.</div>
+          </div>
+        </div>
+        <button class="setting-link" onclick="openAliasModal()">
+          <span>Manage nicknames</span>
+          <span id="aliasCount" style="font-family:'Inter',sans-serif;font-size:0.9rem;color:var(--accent);letter-spacing:1px;">0 saved</span>
+        </button>
+      </div>
+
+      <div class="card setting-card">
+        <div class="setting-head">
+          <div class="setting-icon">Guide</div>
+          <div class="setting-copy">
+            <div class="card-title">HELP & ONBOARDING</div>
+            <div class="setting-desc">Replay the quick 3-step intro any time to show how runs, Smart Fill, and syncing work.</div>
+          </div>
+        </div>
+        <button class="setting-link" onclick="openTutorial(true)">
+          <span>Show onboarding tutorial</span>
+          <span>Open</span>
+        </button>
+      </div>
 
       <!-- Default Sort -->
       <div class="card setting-card">
@@ -2960,9 +3089,13 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
           <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg></span>
           <span class="more-tile-label">History</span>
         </button>
-<button class="more-page-tile" onclick="goTo('leaderboard')">
+        <button class="more-page-tile" onclick="goTo('leaderboard')">
           <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
           <span class="more-tile-label">Leaderboard</span>
+        </button>
+        <button class="more-page-tile" onclick="goTo('achievements')">
+          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
+          <span class="more-tile-label">Achievements</span>
         </button>
         <button class="more-page-tile" onclick="goTo('news')">
           <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg></span>
@@ -3367,7 +3500,7 @@ function _mergeAchievements(cloudIds) {
   return changed;
 }
 function _settingsMap() {
-  var m = { theme: activeTheme, sound: soundEnabled ? 'on' : 'off' };
+  var m = { theme: activeTheme, carbon: carbonOn ? 'on' : 'off', sound: soundEnabled ? 'on' : 'off' };
   if (typeof compactMode !== 'undefined') m.compact = compactMode ? 'on' : 'off';
   try { m.vibe = localStorage.getItem('cs_vibe') || 'on'; } catch(e){}
   if (sortMode) m.sort = sortMode;
@@ -3377,6 +3510,11 @@ function _applySettings(m) {
   if (!m || typeof m !== 'object') return;
   var themeIdx = null;
   if (m.theme != null && parseInt(m.theme) !== activeTheme) themeIdx = parseInt(m.theme);
+  if (m.carbon != null && (m.carbon === 'on') !== carbonOn) {
+    carbonOn = m.carbon === 'on';
+    if (typeof applyCarbon === 'function') applyCarbon();
+    var cb = document.getElementById('carbonToggle'); if (cb) cb.classList.toggle('on', carbonOn);
+  }
   if (m.sound != null && (m.sound !== 'off') !== soundEnabled) {
     soundEnabled = m.sound !== 'off';
     var sb = document.getElementById('soundToggle'); if (sb) sb.classList.toggle('on', soundEnabled);
@@ -4016,12 +4154,19 @@ async function publishRunToLeaderboard(run) {
 
 const THEMES = [
   { name:'Default',      accent:'#f5c842', accent2:'#ff5733', bg:'#0a0a0a', surf:'#141414', surf2:'#1e1e22', bodyClass:'' },
+  { name:'Carbon',       accent:'#e0e0e0', accent2:'#ff4444', bg:'#0d0d0d', surf:'#1a1a1a', surf2:'#242428', bodyClass:'' },
+  { name:'Stealth',      accent:'#6ee7b7', accent2:'#f472b6', bg:'#050505', surf:'#101010', surf2:'#1a1a1e', bodyClass:'' },
+  { name:'Inferno',      accent:'#fb923c', accent2:'#f43f5e', bg:'#0c0a09', surf:'#1c1410', surf2:'#261c16', bodyClass:'' },
+  { name:'Cobalt',       accent:'#60a5fa', accent2:'#a78bfa', bg:'#080c14', surf:'#0f1624', surf2:'#181e30', bodyClass:'' },
+  { name:'Acid',         accent:'#a3e635', accent2:'#facc15', bg:'#090a05', surf:'#131505', surf2:'#1b1d08', bodyClass:'' },
   { name:'Light',        accent:'#e65c00', accent2:'#ff3366', bg:'#f5f5f0', surf:'#ffffff', surf2:'#eae9e3', bodyClass:'theme-light' },
-  { name:'Midnight',     accent:'#60a5fa', accent2:'#a78bfa', bg:'#080c14', surf:'#0f1624', surf2:'#181e30', bodyClass:'' },
+  { name:'Cyberpunk',    accent:'#bf00ff', accent2:'#00ffee', bg:'#08001a', surf:'#100028', surf2:'#180040', bodyClass:'theme-cyberpunk' },
+  { name:'Retro 80s',    accent:'#ff6ec7', accent2:'#ffe600', bg:'#0d0d1a', surf:'#131325', surf2:'#1c1c35', bodyClass:'theme-retro80s' },
 ];
 let activeTheme = parseInt(localStorage.getItem('cs_theme') || '0');
+let carbonOn    = localStorage.getItem('cs_carbon') === 'on';
 
-//  THEMES
+//  THEMES 
 function applyTheme(idx) {
   const t = THEMES[idx];
   const r = document.documentElement.style;
@@ -4058,12 +4203,30 @@ function renderThemeBar() {
 }
 function selectTheme(idx) {
   applyTheme(idx);
-renderThemeBar();
+  renderThemeBar();
   _bumpVer('settings');
   saveToCloud();
 }
+function toggleCarbon() {
+  carbonOn = !carbonOn;
+  localStorage.setItem('cs_carbon', carbonOn ? 'on' : 'off');
+  applyCarbon();
+  const btn = document.getElementById('carbonToggle');
+  if (btn) btn.classList.toggle('on', carbonOn);
+  showToast(carbonOn ? ' Carbon fiber on' : 'Carbon fiber off');
+  _bumpVer('settings');
+  saveToCloud();
+}
+function applyCarbon() {
+  document.body.classList.toggle('carbon-on', carbonOn);
+}
+function initCarbonToggle() {
+  applyCarbon();
+  const btn = document.getElementById('carbonToggle');
+  if (btn) btn.classList.toggle('on', carbonOn);
+}
 
-//  SOUND
+//  SOUND 
 let _audioCtx = null;
 let _audioPrimed = false;
 let _masterOut = null;
@@ -4447,8 +4610,65 @@ function resolveAlias(name) {
   }
   return name;
 }
+function saveAliases() {
+  localStorage.setItem('cs_aliases', JSON.stringify(aliases));
+  _bumpVer('aliases');
+  updateAliasCount();
+  saveToCloud();
+}
+function updateAliasCount() {
+  const el = document.getElementById('aliasCount');
+  if (el) { const c = Object.keys(aliases).length; el.textContent = c + ' saved'; }
+}
+function openAliasModal() {
+  const existing = Object.entries(aliases);
+  let rows = existing.map(([a,f]) => `
+    <div class="alias-row" data-abbr="${a.replace(/"/g,'&quot;')}">
+      <input class="alias-abbr" placeholder="GT3 RS" value="${a.replace(/"/g,'&quot;')}">
+      <span class="alias-arrow">→</span>
+      <input class="alias-full" placeholder="Porsche 911 GT3 RS" value="${f.replace(/"/g,'&quot;')}">
+      <button class="alias-del" onclick="this.closest('.alias-row').remove()"></button>
+    </div>`).join('');
 
-//  DESKTOP SIDEBAR LOGO
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'aliasModal';
+  overlay.innerHTML = `
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div class="modal-title"> CAR NICKNAMES</div>
+      <div class="alias-hint">Abbreviation on the left → Full name on the right.<br>Stats will group entries with matching full names together.</div>
+      <div id="aliasRows">${rows}</div>
+      <button class="alias-add-btn" onclick="addAliasRow()">+ Add nickname</button>
+      <button class="modal-save-btn" onclick="saveAliasModal()">SAVE NICKNAMES</button>
+    </div>`;
+  overlay.onclick = () => overlay.remove();
+  document.body.appendChild(overlay);
+}
+function addAliasRow() {
+  const d = document.createElement('div');
+  d.className = 'alias-row';
+  d.innerHTML = `
+    <input class="alias-abbr" placeholder="GT3 RS">
+    <span class="alias-arrow">→</span>
+    <input class="alias-full" placeholder="Porsche 911 GT3 RS">
+    <button class="alias-del" onclick="this.closest('.alias-row').remove()"></button>`;
+  document.getElementById('aliasRows').appendChild(d);
+  d.querySelector('.alias-abbr').focus();
+}
+function saveAliasModal() {
+  aliases = {};
+  document.querySelectorAll('#aliasRows .alias-row').forEach(row => {
+    const abbr = row.querySelector('.alias-abbr').value.trim();
+    const full = row.querySelector('.alias-full').value.trim();
+    if (abbr && full) aliases[abbr] = full;
+  });
+  saveAliases();
+  document.getElementById('aliasModal')?.remove();
+  showToast(' Nicknames saved!');
+}
+
+//  DESKTOP SIDEBAR LOGO 
 function injectDesktopLogo() {
   if (window.innerWidth < 800) return;
   const nav = document.getElementById('bottomNav');
@@ -4519,7 +4739,7 @@ function goTo(page) {
     if (page==='garage')       { garagePage = 0; renderGarage(); }
     if (page==='history')      renderHistory();
     if (page==='achievements') renderAchievements();
-    if (page==='settings')     { renderThemeBar(); initSoundToggle(); initVibeToggle(); refreshOfflineStatus(); initSortPrefBtns(); applyCompactMode(); }
+    if (page==='settings')     { renderThemeBar(); initSoundToggle(); initVibeToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); initSortPrefBtns(); applyCompactMode(); }
     if (page==='news')         { if (!newsLoaded) { newsLoaded=true; renderNewsSources(); } loadNews(); }
     if (page==='leaderboard')  loadLeaderboard(true);
     if (page==='stats')        renderStats();
@@ -5744,9 +5964,11 @@ async function showSpecsCard(car) {
           <div class="specs-cell-unit">lbs</div>
         </div>` : ''}
       </div>
-<div id="specsEvolSlot"></div>
+      <div id="specsStorySlot"></div>
+      <div id="specsEvolSlot"></div>
       <button class="specs-close-btn" onclick="document.getElementById('specsOverlay').remove()">Got it</button>
     </div>`;
+  if (window.renderSpecsStory) renderSpecsStory(car, card);
   if (window.renderSpecsEvolution) renderSpecsEvolution(car, card);
 }
 
@@ -6719,8 +6941,10 @@ function importFromFile(input) {
       } catch(e){}
 
       // Re-apply settings
-const theme = parseInt(localStorage.getItem('cs_theme') || '0');
+      const theme = parseInt(localStorage.getItem('cs_theme') || '0');
       applyTheme(theme);
+      carbonOn = localStorage.getItem('cs_carbon') === 'on';
+      applyCarbon();
       compactMode = localStorage.getItem('cs_compact') === 'on';
       applyCompactMode();
       soundEnabled = localStorage.getItem('cs_sound') !== 'off';
@@ -6752,9 +6976,10 @@ function renderAll() {
   renderSpot();
   renderGarage();
   renderHistory();
-renderAchievements();
+  renderAchievements();
   refreshOfflineStatus();
   initSortPrefBtns();
+  updateAliasCount();
   if (window.renderTitleChip) renderTitleChip();
   renderDiscoveries();
 }
@@ -6769,6 +6994,7 @@ renderQPTrigger();
 renderSpot();
 renderHomeFav();
 applyTheme(activeTheme);
+applyCarbon();
 initSoundToggle();
 initVibeToggle();
 renderLevelBar();
@@ -7434,6 +7660,51 @@ function _locParseCar(text) {
   return { name:name, value:value, color:color, type:type };
 }
 
+function smartVoiceFill() {
+  const notes = document.getElementById('notesArea')?.value?.trim();
+  if (!notes) { showToast('Nothing in notes to parse!'); return; }
+
+  const btn = document.getElementById('smartFillBtn');
+  const origInner = btn.innerHTML;
+  btn.innerHTML = '<span class="mic-icon">⏳</span><span class="mic-lbl" style="color:var(--accent)">Parsing...</span>';
+  btn.disabled = true;
+
+  try {
+    const parsed = _locParseCar(notes);
+    if (!parsed || !parsed.name) throw new Error('No car found');
+
+    voiceFillPending = parsed;
+    const bar = document.getElementById('voiceFillBar');
+    document.getElementById('voiceFillText').textContent =
+      `${parsed.type} ${parsed.name}${parsed.color ? ' · ' + parsed.color : ''} · $${Number(parsed.value).toLocaleString()}`;
+    bar.classList.add('show');
+    // Switch to spot tab so user can see the fill bar
+    goTo('spot');
+    showToast('🚗 Car detected — tap FILL!');
+  } catch(e) {
+    showToast('Could not parse a car from notes');
+  } finally {
+    btn.innerHTML = origInner;
+    btn.disabled = false;
+  }
+}
+
+function acceptVoiceFill() {
+  if (!voiceFillPending) return;
+  const p = voiceFillPending;
+  document.getElementById('carName').value  = p.name  || '';
+  document.getElementById('carValue').value = p.value || '';
+  document.getElementById('carColor').value = p.color || '';
+  if (p.type) document.getElementById('carType').value = p.type;
+  dismissVoiceFill();
+  showToast(' Form filled!');
+}
+
+function dismissVoiceFill() {
+  voiceFillPending = null;
+  document.getElementById('voiceFillBar').classList.remove('show');
+}
+
 initNotes();
 
 // ─────────────────────────────────────────────
@@ -8010,7 +8281,107 @@ document.getElementById('carName').addEventListener('keydown', e => {
 // 
 //  SMART COMMAND BAR — fully local intent parser (was AI-powered via Anthropic,
 //  but the call had no API key and always failed. Now works offline.)
-//  MORE MENU
+var _cmdNav = [
+  { k:'garage',        p:'garage' },
+  { k:'history',       p:'history' },
+  { k:'achievement',   p:'achievements' },
+  { k:'expedition',    p:'expeditions' },
+  { k:'leaderboard',   p:'leaderboard' },
+  { k:'book',          p:'book' },
+  { k:'trip',          p:'trips' },
+  { k:'more',          p:'more' },
+  { k:'settings',      p:'settings' },
+  { k:'news',          p:'news' },
+  { k:'stats',         p:'stats' },
+  { k:'notes',         p:'voice' },
+  { k:'voice',         p:'voice' },
+  { k:'home',          p:'spot' },
+  { k:'spot',          p:'spot' }
+];
+function _parseSmartCmd(cmd) {
+  var c = String(cmd || '').toLowerCase().trim();
+  if (!c) return null;
+
+  // Start / clear run
+  if (/start|begin|clear|reset|new/.test(c) && /run|session/.test(c)) {
+    return { action:'start_run' };
+  }
+
+  // Log intent: explicit verbs fill the form — check BEFORE value/count toasts
+  // so "log a Tesla worth 200k" doesn't get swallowed by the "worth" answer.
+  if (/\b(log|add|record|fill|spot\b|spotted)\b/.test(c)) {
+    var car = _locParseCar(c);
+    if (car && car.name) return { action:'log', name:car.name, value:car.value, color:car.color, type:car.type };
+  }
+
+  // Count queries -> toast answer
+  var totalCars = allRuns.reduce(function(s,r){ return s + (r.cars||[]).length; }, 0);
+  if (/how many|total\s*(cars|cars|spots)|count/.test(c)) {
+    return { action:'toast', msg: 'You have logged ' + totalCars + ' car' + (totalCars===1?'':'s') + ' so far!' };
+  }
+  var totalVal = allRuns.reduce(function(s,r){ return s + (r.cars||[]).reduce(function(x,car){ return x + (car.value||0); },0); }, 0);
+  if (/total value|worth|how much/.test(c)) {
+    return { action:'toast', msg: 'Your garage is worth ' + fmt(totalVal) + ' across ' + totalCars + ' cars!' };
+  }
+
+  // Navigation
+  for (var i=0;i<_cmdNav.length;i++) {
+    if (c.indexOf(_cmdNav[i].k) !== -1) return { action:'nav', page:_cmdNav[i].p };
+  }
+
+  // Fallback: if it looks like it contains a known car, still try to log
+  var guessed = _locParseCar(c);
+  if (guessed && guessed.name) return { action:'log', name:guessed.name, value:guessed.value, color:guessed.color, type:guessed.type };
+
+  return { action:'toast', msg:'Try "log a Ferrari 488", "garage", "stats", or "how many cars"' };
+}
+
+function runSmartCmd() {
+  const input = document.getElementById('smartCmdInput');
+  const btn   = document.getElementById('smartCmdBtn');
+  const cmd   = input.value.trim();
+  if (!cmd) return;
+
+  btn.textContent = '...';
+  btn.disabled = true;
+
+  setTimeout(function() {
+    const parsed = _parseSmartCmd(cmd);
+    try {
+      if (parsed.action === 'log') {
+        document.getElementById('carName').value  = parsed.name  || '';
+        document.getElementById('carValue').value = parsed.value || '';
+        document.getElementById('carColor').value = parsed.color || '';
+        if (parsed.type) document.getElementById('carType').value = parsed.type;
+        goTo('spot');
+        showToast('🚗 Form filled — review & tap "+ TO RUN"');
+        input.value = '';
+      } else if (parsed.action === 'nav') {
+        const pg = parsed.page;
+        goTo(pg);
+        showToast('🧭 ' + pg);
+        input.value = '';
+      } else if (parsed.action === 'toast') {
+        showToast(parsed.msg || 'Done!');
+        input.value = '';
+      } else if (parsed.action === 'start_run') {
+        if (currentRun.length && !confirm('Clear current run and start fresh?')) return;
+        currentRun = []; headlinerIdx = -1;
+        saveCurrentRun(); renderSpot();
+        goTo('spot');
+        showToast('🏁 New run started!');
+        input.value = '';
+      }
+    } catch(e) {
+      showToast('Command not understood — try rephrasing!');
+    } finally {
+      btn.textContent = 'GO';
+      btn.disabled = false;
+    }
+  }, 120);
+}
+
+//  MORE MENU 
 function toggleMoreMenu() {
   // More is now a full page — navigate to it
   goTo('more');
@@ -8337,11 +8708,14 @@ async function loadNews() {
 // ---- persisted progression state (cs_progress) ----
 var _progressV = 1;
 function _defaultProgress() {
-return {
+  return {
     v: _progressV,
+    titlesUnlocked: {},      // { titleId: true }
     trips: [],               // [{ id, name, emoji, created, runIds[], total, carCount }]
     activeTripId: null,
     expoClaimed: {},         // { expeditionId: ts }
+    mysteryPeeked: {},       // { modelKey: true }
+    storiesRead: {},         // { modelKey: true }
     milestones: {}           // { milestoneId: ts }
   };
 }
@@ -8357,6 +8731,117 @@ function saveProgress() {
   if (!_applyingCloud) { _bumpVer('progression'); saveToCloud(); }
 }
 function getProgression() { return _progress; }
+
+// ---- SPOTTER TITLES — the ladder that replaces "Level" as the identity ----
+var SPOTTER_TITLES = [
+  { id:'rookie',        name:'Rookie Spotter',      emoji:'🔰', xp:0,     desc:'Every legend starts with one spot.' },
+  { id:'roadrunner',    name:'Road Runner',         emoji:'🏁', xp:300,   desc:'You log cars like you own the road.' },
+  { id:'gearhead',      name:'Gearhead',            emoji:'🔧', xp:750,   desc:'You know your way around horsepower.' },
+  { id:'spotter',       name:'Spotter',             emoji:'🔭', xp:1400,  desc:'Your eyes are trained on the road ahead.' },
+  { id:'marque_master', name:'Marque Master',       emoji:'🏎️', xp:2300, desc:'You can name a brand by its exhaust note.' },
+  { id:'collector',     name:'Collector',           emoji:'📦', xp:3400,  desc:'Your garage is becoming a museum.' },
+  { id:'connoisseur',   name:'Connoisseur',         emoji:'🎩', xp:4700,  desc:'You spot the details others miss.' },
+  { id:'road_legend',   name:'Road Legend',         emoji:'🏆', xp:6200,  desc:'Legends are made one spot at a time.' },
+  { id:'hyper_hunter',  name:'Hypercar Hunter',     emoji:'🔥', xp:7900,  desc:'You chase the rarest metal on four wheels.' },
+  { id:'trophy_hunter', name:'Trophy Hunter',       emoji:'🥇', xp:9800,  desc:'Your trophy case rivals the cars.' },
+  { id:'supreme',       name:'Supreme Spotter',     emoji:'👑', xp:12000, desc:'There is no road you cannot read.' }
+];
+function titleForXP(xp) {
+  var t = SPOTTER_TITLES[0];
+  for (var i = 0; i < SPOTTER_TITLES.length; i++) {
+    if (xp >= SPOTTER_TITLES[i].xp) t = SPOTTER_TITLES[i];
+  }
+  return t;
+}
+function nextTitleForXP(xp) {
+  for (var i = 0; i < SPOTTER_TITLES.length; i++) {
+    if (xp < SPOTTER_TITLES[i].xp) return SPOTTER_TITLES[i];
+  }
+  return null;
+}
+function currentTitle() { return titleForXP(_xpTotal); }
+function titlePctToNext() {
+  var cur = currentTitle();
+  var nxt = nextTitleForXP(_xpTotal);
+  if (!nxt) return 100;
+  var span = nxt.xp - cur.xp;
+  var got  = _xpTotal - cur.xp;
+  return Math.round(got / span * 100);
+}
+function renderTitleChip() {
+  if (!SPOTTER_TITLES || !SPOTTER_TITLES.length) return;
+  var cur = currentTitle();
+  var slot = document.getElementById('levelTitleSlot');
+  if (slot) {
+    slot.style.display = '';
+    slot.innerHTML = '<span class="tc-emoji">' + cur.emoji + '</span>' + cur.name;
+  }
+}
+// Announce newly unlocked titles (fire once per title id)
+function checkTitleUnlock(silent) {
+  var cur = currentTitle();
+  if (_progress.titlesUnlocked[cur.id]) return;
+  _progress.titlesUnlocked[cur.id] = true;
+  saveProgress();
+  if (silent) return;
+  var chip = document.getElementById('levelTitleSlot');
+  if (chip) { chip.classList.remove('new-title'); void chip.offsetWidth; chip.classList.add('new-title'); }
+  enqueueCeremony(function(done){ showTitleUp(cur, done); });
+}
+function showTitleUp(title, done) {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    enqueueMoment({
+      emoji: title.emoji,
+      eyebrow: 'New Spotter Title Unlocked',
+      title: title.name,
+      desc: title.desc,
+      sub: 'Your rank in the spotters\u2019 guild',
+      colors: ['#f5c842', '#ffd75e', '#fff', '#ff5733'],
+      particles: 16
+    });
+    if (done) done();
+    return;
+  }
+  var overlay = document.createElement('div');
+  overlay.className = 'title-overlay';
+  overlay.innerHTML =
+    '<div class="title-halo"></div>' +
+    '<div class="title-old">' + (SPOTTER_TITLES[0].emoji) + ' ' + SPOTTER_TITLES[0].name + ' &#8594; ' + title.emoji + ' ' + title.name + '</div>' +
+    '<div class="title-crest">' + title.emoji + '<div class="title-crest-glow"></div></div>' +
+    '<div class="title-youve">Promotion Earned</div>' +
+    '<div class="title-name">' + title.name + '</div>' +
+    '<div class="title-desc">' + title.desc + '</div>' +
+    '<div class="title-seal"></div>' +
+    '<div class="title-dismiss">Tap to continue</div>';
+  document.body.appendChild(overlay);
+
+  // golden particles bursting from the crest
+  for (var p = 0; p < 18; p++) {
+    var pt = document.createElement('div');
+    pt.className = 'title-pflag';
+    var a = (Math.PI * 2 * p) / 18 + Math.random() * 0.5;
+    var d = 90 + Math.random() * 130;
+    pt.style.setProperty('--px', (Math.cos(a) * d).toFixed(0) + 'px');
+    pt.style.setProperty('--py', (Math.sin(a) * d).toFixed(0) + 'px');
+    pt.style.animationDelay = (0.5 + Math.random() * 0.8) + 's';
+    overlay.appendChild(pt);
+  }
+
+  var closed = false;
+  function close() {
+    if (closed) return;
+    closed = true;
+    overlay.style.transition = 'opacity 0.35s ease';
+    overlay.style.opacity = '0';
+    setTimeout(function(){ if (overlay.parentNode) overlay.parentNode.removeChild(overlay); if (done) done(); }, 360);
+  }
+  overlay.onclick = function(){ if (overlay.classList.contains('stage-2')) close(); else overlay.classList.add('stage-2'); };
+
+  setTimeout(function(){ playSound('whoosh'); haptic([30, 40, 30, 60]); }, 250);
+  setTimeout(function(){ overlay.classList.add('stage-1'); }, 500);
+  setTimeout(function(){ overlay.classList.add('stage-2'); playSound('crystal'); playSound('collect'); haptic([50, 60, 80]); }, 1500);
+  setTimeout(close, 8200);
+}
 
 // ---- COLLECTOR BOOK — built from CAR_AC_DB + the user's garage ----
 function _modelKey(name) { return String(name || '').toLowerCase().trim(); }
@@ -8450,8 +8935,9 @@ function openMakeSheet(make) {
   var overlay = document.createElement('div');
   overlay.className = 'book-make-sheet';
   overlay.onclick = function(e){ if (e.target === overlay) overlay.remove(); };
-var tiles = s.models.map(function(m, i){
+  var tiles = s.models.map(function(m, i){
     var key = _modelKey(m.name);
+    var peeking = _progress.mysteryPeeked[key];
     var just = _lastSpottedName && _modelKey(m.name) === _modelKey(_lastSpottedName) ? ' just-spotted' : '';
     if (m.found) {
       var photo = _idbPhotoCache[key] || '';
@@ -8461,22 +8947,121 @@ var tiles = s.models.map(function(m, i){
         '<div class="bct-meta">' + fmt(m.val) + ' · spotted</div>' +
       '</div>';
     }
-    return '<div class="book-sil" style="animation-delay:' + (i * 0.02) + 's">' +
-      '<div class="sil-car">🚘</div><div class="sil-q">?</div><div class="sil-val">' + fmt(m.val) + ' tier</div>' +
+    return '<div class="book-sil ' + (peeking ? 'revealed' : '') + '" style="animation-delay:' + (i * 0.02) + 's" onclick="peekMystery(\'' + jsEscape(m.name) + '\')">' +
+      (peeking
+        ? '<div class="sil-car">' + tierEmoji(tierOf(m.val)) + '</div><div class="sil-name">' + m.name + '</div><div class="sil-val">' + fmt(m.val) + '</div>'
+        : '<div class="sil-car">🚘</div><div class="sil-q">?</div><div class="sil-val">' + fmt(m.val) + ' tier</div>') +
     '</div>';
   }).join('');
   overlay.innerHTML =
     '<div class="book-make-panel">' +
       '<div class="book-make-head">' +
         '<div class="bml">🏁</div>' +
-        '<div class="bmt"><div class="bm-name">' + s.make + '</div><div class="bm-sub">' + s.found + ' / ' + s.total + ' discovered</div></div>' +
+        '<div class="bmt"><div class="bm-name">' + s.make + '</div><div class="bm-sub">' + s.found + ' / ' + s.total + ' discovered · tap a silhouette to peek</div></div>' +
         '<button class="book-close" onclick="this.closest(\'.book-make-sheet\').remove()">&times;</button>' +
       '</div>' +
       '<div class="book-sil-grid">' + tiles + '</div>' +
     '</div>';
-document.body.appendChild(overlay);
+  document.body.appendChild(overlay);
   _lastSpottedName = '';
 }
+function peekMystery(name) {
+  var key = _modelKey(name);
+  if (_progress.mysteryPeeked[key]) {
+    _progress.mysteryPeeked[key] = true;
+    saveProgress();
+    playSound('shutter');
+    haptic(20);
+    // Rebuild the sheet that contains this tile
+    var sheet = document.querySelector('.book-make-sheet');
+    if (sheet) {
+      var make = '';
+      var stats = bookMakeStats();
+      for (var i = 0; i < stats.length; i++) {
+        if (stats[i].models.some(function(m){ return _modelKey(m.name) === key; })) { make = stats[i].make; break; }
+      }
+      sheet.remove();
+      openMakeSheet(make);
+    }
+    return;
+  }
+  var info = _mysteryInfo(name);
+  if (!info) return;
+  _progress.mysteryPeeked[key] = true;
+  saveProgress();
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    playSound('shutter');
+    haptic(20);
+    var sheet2 = document.querySelector('.book-make-sheet');
+    if (sheet2) { sheet2.remove(); openMakeSheet(info.make); }
+    return;
+  }
+  enqueueCeremony(function(done){ celebrateMystery(name, info, done); });
+}
+function _mysteryInfo(name) {  var stats = bookMakeStats();
+  for (var i = 0; i < stats.length; i++) {
+    var mk = stats[i];
+    for (var j = 0; j < mk.models.length; j++) {
+      if (_modelKey(mk.models[j].name) === _modelKey(name)) {
+        return { make: mk.make, name: mk.models[j].name, val: mk.models[j].val, type: mk.models[j].type };
+      }
+    }
+  }
+  return null;
+}
+function celebrateMystery(name, info, done) {
+  if (document.querySelector('.mys-overlay')) return;
+  var overlay = document.createElement('div');
+  overlay.className = 'mys-overlay';
+  overlay.innerHTML =
+    '<div class="mys-glow"></div>' +
+    '<div class="mys-sil">' + tierEmoji(tierOf(info.val)) + '</div>' +
+    '<div class="mys-ring"></div>' +
+    '<div class="mys-name">' + info.name + '</div>' +
+    '<div class="mys-val">' + fmt(info.val) + ' · ' + info.make + '</div>' +
+    '<div class="mys-confetti"></div>' +
+    '<div class="mys-dismiss">Tap to continue</div>';
+  document.body.appendChild(overlay);
+
+  // charging sparks
+  for (var s = 0; s < 12; s++) {
+    var sp = document.createElement('div');
+    sp.className = 'mys-spark';
+    var a = (Math.PI * 2 * s) / 12 + Math.random() * 0.4;
+    var d = 70 + Math.random() * 50;
+    sp.style.setProperty('--sx', (Math.cos(a) * d).toFixed(0) + 'px');
+    sp.style.setProperty('--sy', (Math.sin(a) * d).toFixed(0) + 'px');
+    sp.style.animationDelay = (Math.random() * 0.6) + 's';
+    overlay.appendChild(sp);
+  }
+  // confetti rain after reveal
+  var confetti = overlay.querySelector('.mys-confetti');
+  var cols = ['#f5c842','#ffd75e','#ff5733','#60a5fa','#4ade80'];
+  for (var c = 0; c < 26; c++) {
+    var fl = document.createElement('i');
+    fl.style.left = (Math.random() * 100) + '%';
+    fl.style.background = cols[c % cols.length];
+    fl.style.animationDuration = (1.6 + Math.random() * 1.4) + 's';
+    fl.style.animationDelay = (Math.random() * 1.2) + 's';
+    confetti.appendChild(fl);
+  }
+
+  var closed = false;
+  function close() {
+    if (closed) return;
+    closed = true;
+    overlay.style.transition = 'opacity 0.35s ease';
+    overlay.style.opacity = '0';
+    setTimeout(function(){ if (overlay.parentNode) overlay.parentNode.removeChild(overlay); if (done) done(); }, 360);
+    var sheet = document.querySelector('.book-make-sheet');
+    if (sheet) sheet.remove();
+    openMakeSheet(info.make);
+  }
+  overlay.onclick = function(){ if (overlay.classList.contains('stage-2')) close(); else overlay.classList.add('stage-2'); };
+
+  setTimeout(function(){ overlay.classList.add('stage-1'); playSound('charge'); haptic([15, 25, 35]); }, 200);
+  setTimeout(function(){ overlay.classList.add('stage-2'); playSound('shutter'); playSound('collect'); haptic([40, 60, 45]); }, 1600);
+  setTimeout(close, 5600);
 }
 function showBookAllShelf() {
   renderBook();
@@ -8605,10 +9190,11 @@ function claimExpo(id) {
   _progress.expoClaimed[id] = Date.now();
   var ex = EXPEDITIONS.find(function(e){ return e.id === id; }) ||
     ACHIEVEMENTS.find(function(a){ return a.id === id; });
-if (ex) addXP(ex.xp || 0);
+  if (ex) addXP(ex.xp || 0);
   saveProgress();
   renderExpeditions();
   renderLevelBar();
+  checkTitleUnlock();
   var isExpo = !!(ex && EXPEDITIONS.some(function(e){ return e.id === id; }));
   if (ex && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
     enqueueCeremony(function(done){ celebrateExpo(ex, isExpo, done); });
@@ -8843,7 +9429,40 @@ function openTripDetail(id) {
       '</div>' +
       (runs || '<div class="trip-empty">No runs journaled yet — complete a run while this trip is active.</div>') +
     '</div>';
-document.body.appendChild(overlay);
+  document.body.appendChild(overlay);
+}
+
+// ---- CAR STORIES — a short history blurb surfaced in the specs card ----
+var CAR_STORIES = {
+  'ferrari 488 gtb':   'The 488 replaced the 458 with twin turbos — a move purists doubted until the lap times proved it. It redefined what a \u201Csensible\u201D Ferrari could be.',
+  'ferrari laferrari': 'LaFerrari was Ferrari\u2019s first hybrid hypercar, built as one of the holy trinity alongside the P1 and 918. Each one was sold to a loyal owner before it was shown.',
+  'lamborghini aventador': 'The Aventador revived the Lamborghini flagship V12 tradition. Its carbon monocoque and scissor doors made every arrival a spectacle.',
+  'lamborghini huracan':   'Named after a fighting bull, the Huracan\u2019s naturally aspirated V10 is one of the last great NA engines in a supercar.',
+  'porsche 911 gt3':       'The GT3 exists because Porsche keeps listening to purists who demand a manual, naturally aspirated track weapon you can drive home.',
+  'porsche 911 turbo s':   'The Turbo S is the 911 the engineers hide in plain sight — huge power, all-weather grip, and surprisingly livable.',
+  'mclaren p1':            'The P1 pioneered active aero that could change downforce on the fly, letting it corner harder than its weight suggested possible.',
+  'bugatti chiron':        'The Chiron is built around a single number: 1,500 horsepower from a quad-turbo W16. It can empty a fuel tank in about nine minutes at full tilt.',
+  'ford gt':               'The 2017 Ford GT was born from Le Mans — Ford\u2019s way of answering the Ferrari rivalry, engineered from the track outward.',
+  'dodge challenger hellcat': 'The Hellcat threw a 707-horsepower supercharged V8 into a muscle car with zero pretense. It made drag-strip noise on every street.',
+  'tesla model s plaid':   'Plaid stands for a tri-motor setup that shattered expectations for what a four-door sedan could do, cracking the 2-second sprint.',
+  'rimac nevera':          'The Nevera is named after a Croatian Mediterranean wind — fitting for the electric hypercar that set 23 records in a single day.',
+  'toyota supra gr':       'The A90 Supra revived a legend with BMW DNA and a cult following that treats every sighting like a pilgrimage.',
+  'nissan gt-r':           'The R35 GT-R earned the nickname Godzilla by humbling far more expensive supercars with AWD launch control.'
+};
+function storyFor(name) {
+  var key = _modelKey(name);
+  if (CAR_STORIES[key]) return CAR_STORIES[key];
+  return '';
+}
+function renderSpecsStory(car, card) {
+  var slot = card && card.querySelector('#specsStorySlot');
+  if (!slot) return;
+  var text = storyFor(car.name);
+  if (!text) { slot.innerHTML = ''; return; }
+  var key = _modelKey(car.name);
+  _progress.storiesRead[key] = true;
+  saveProgress();
+  slot.innerHTML = '<div class="specs-story"><div class="ss-label">Car Story</div><div class="ss-text">' + text + '</div></div>';
 }
 
 // ---- COLLECTOR CARD EVOLUTION — cards grade up the more you spot a model ----
@@ -9175,8 +9794,10 @@ function celebrateEvolution(car, oldTier, newTier, count, done) {
 
 // ---- Hooks: run once after each log ----
 function updateProgressionAfterLog(car) {
+  checkTitleUnlock();
   checkMilestones(car);
   checkEvolutionUnlock(car);
+  renderTitleChip();
   renderLevelBar();
   // Refresh book/expedition/trip pages if they are the active page
   var pg = document.querySelector('.page.active');
@@ -9185,6 +9806,7 @@ function updateProgressionAfterLog(car) {
     if (pg.id === 'page-expeditions') renderExpeditions();
   }
 }
+window.renderSpecsStory = renderSpecsStory;
 window.renderSpecsEvolution = renderSpecsEvolution;
 window.getProgression = getProgression;
 // Merge progression state from another device (union of trips, latest flags)
@@ -9199,7 +9821,7 @@ window.mergeCloudProgression = function(cloud) {
     });
     _progress.trips = Object.keys(localTrips).map(function(k){ return localTrips[k]; });
     // Flags: union (a milestone/claim/peek that happened anywhere stays true)
-    ['expoClaimed','milestones'].forEach(function(key){
+    ['expoClaimed','mysteryPeeked','storiesRead','milestones','titlesUnlocked'].forEach(function(key){
       var src = cloud[key];
       if (src && typeof src === 'object') {
         Object.keys(src).forEach(function(k){ _progress[key][k] = src[k]; });
@@ -9209,6 +9831,7 @@ window.mergeCloudProgression = function(cloud) {
     if (cloud.activeTripId && !_progress.activeTripId) _progress.activeTripId = cloud.activeTripId;
     else if (cloud.activeTripId && !tripById(cloud.activeTripId)) _progress.activeTripId = cloud.activeTripId;
     saveProgress();
+    renderTitleChip();
   } catch(e) {}
 };
 window.renderBook = renderBook;
@@ -9219,6 +9842,7 @@ window.openTripDetail = openTripDetail;
 window.setActiveTrip = setActiveTrip;
 window.deleteTrip = deleteTrip;
 window.openMakeSheet = openMakeSheet;
+window.peekMystery = peekMystery;
 window.showBookAllShelf = showBookAllShelf;
 window.claimExpo = claimExpo;
 window.updateProgressionAfterLog = updateProgressionAfterLog;
@@ -9226,8 +9850,6 @@ window.attachRunToTrip = attachRunToTrip;
 window.enqueueMoment = enqueueMoment;
 window.checkEvolutionUnlock = checkEvolutionUnlock;
 
-// ACHIEVEMENTS array (referenced in IIFE seed)
-var ACHIEVEMENTS = [];
 
 
 (function(){
@@ -9401,10 +10023,12 @@ var ACHIEVEMENTS = [];
   if (settingsPage) settingsPage.innerHTML = settingsPage.innerHTML.replace("CarSpotter''s", "CarSpotter's");
   renderPendingLocation();
   renderSpot();
-renderGarage();
+  renderGarage();
+  renderAchievements();
   refreshOfflineStatus();
   // Progression expansion init
   if (window.renderTitleChip) renderTitleChip();
+  if (window.checkTitleUnlock) setTimeout(function(){ checkTitleUnlock(true); }, 600);
 // One-shot tutorial check on first launch — shown to signed-in and guest users alike
   if (!localStorage.getItem('cs_tutorial_done') && !document.getElementById('tutorialOverlay')) {
     setTimeout(function(){ openTutorial(false); }, 2500);
@@ -9414,7 +10038,6 @@ renderGarage();
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 </body>
 </html>
-
 
 
 
