@@ -362,6 +362,10 @@ body{
   box-shadow:var(--shadow-lg);
   min-height:140px;
 }
+@media (max-width:420px){
+  .score-banner{padding:22px 16px;min-height:120px;}
+  .score-divider{margin:0 14px;}
+}
 .score-banner::after{
   content:'';position:absolute;top:0;left:0;right:0;height:1.5px;
   background:linear-gradient(90deg,transparent,var(--accent),transparent);
@@ -371,7 +375,7 @@ body{
   0%,100%{opacity:0.1;transform:scaleX(0.95);}
   50%{opacity:0.35;transform:scaleX(1);}
 }
-.score-half{flex:1;display:flex;flex-direction:column;justify-content:center;}
+.score-half{flex:1;display:flex;flex-direction:column;justify-content:center;min-width:0;overflow:hidden;}
 .score-half--right{text-align:right;align-items:flex-end;}
 .score-divider{width:1px;background:linear-gradient(180deg,transparent,var(--accent),transparent);opacity:0.12;margin:0 24px;flex-shrink:0;}
 .s-lbl{
@@ -379,9 +383,12 @@ body{
   text-transform:uppercase;margin-bottom:6px;
 }
 .s-num{
-  font-family:Calibri,'Inter',sans-serif;font-size:3rem;color:var(--accent);
+  font-family:Calibri,'Inter',sans-serif;
+  font-size:clamp(1.55rem, 6.2vw, 3rem);
+  color:var(--accent);
   font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1;-webkit-font-feature-settings:'tnum' 1;
   letter-spacing:0.5px;line-height:1;
+  white-space:nowrap;
   animation:numFade 0.6s var(--ease) both;
 }
 @keyframes numFade{from{opacity:0;transform:translateY(8px) scale(0.95);}to{opacity:1;transform:translateY(0) scale(1);}}
@@ -390,9 +397,10 @@ body{
   letter-spacing:0.5px;
 }
 .b-num{
-  font-family:Calibri,'Inter',sans-serif;font-size:3rem;
+  font-family:Calibri,'Inter',sans-serif;
+  font-size:clamp(1.55rem, 6.2vw, 3rem);
   font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1;-webkit-font-feature-settings:'tnum' 1;
-  letter-spacing:0.5px;line-height:1;color:var(--text);
+  letter-spacing:0.5px;line-height:1;color:var(--text);white-space:nowrap;
 }
 .beat{font-size:0.55rem;letter-spacing:0.5px;margin-top:6px;font-weight:500;}
 .beat.beating{color:var(--green);}
@@ -3240,7 +3248,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
 <div class="toast" id="toast"></div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v27.11</div>
+<div class="version-tag" id="versionTag">v29</div>
 
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
@@ -3317,7 +3325,7 @@ var _deletedQP  = (function(){ try { var d = JSON.parse(localStorage.getItem('cs
 var _removedFavs = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_fav') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })(); // tombstoned favorite names
 var _dirty = localStorage.getItem('cs_sync_dirty') === '1';                           // durable "unsynced change" flag
 var _applyingCloud = false;                                                           // guard: never echo-write while applying a cloud doc
-var CS_SYNC_DEBUG = localStorage.getItem('cs_sync_debug') === '1';                    // gated debug logging
+var CS_SYNC_DEBUG = false;                    // sync debug logging off by default (diagnostics can be noisy/laggy)
 window.CS_SYNC_DEBUG = CS_SYNC_DEBUG;
 window.setSyncDebug = function(v){ CS_SYNC_DEBUG = window.CS_SYNC_DEBUG = !!v; try { localStorage.setItem('cs_sync_debug', CS_SYNC_DEBUG ? '1' : '0'); } catch(e){} if (CS_SYNC_DEBUG) console.log('[sync] debug logging ON'); };
 function logSync() {
@@ -3830,6 +3838,7 @@ function _sizeOf(v) {
   try { return new Blob([JSON.stringify(v)]).size; } catch(e) { return 0; }
 }
 function _diagRead(tag, obj) {
+  if (!CS_SYNC_DEBUG) return;
   var rawSize = _sizeOf(obj);
   console.log('===== FIRESTORE DIAGNOSTIC [' + tag + '] (READ FROM FIRESTORE) =====');
   ['currentRun','allRuns','deletedRuns','quickPicks','deletedQP','notes','xp','favorites','aliases','settings','achievements','progression','profileName','profilePhoto','updatedAt'].forEach(function(k) {
@@ -3845,23 +3854,28 @@ function _diagRead(tag, obj) {
 function _diagAndSanitize(tag, obj, mode) {
   var already = _sanitizedSet && _sanitizedSet.has(obj);
   var rawSize = _sizeOf(obj);
-  console.log('===== FIRESTORE DIAGNOSTIC [' + tag + '] (' + (mode || '') + ') =====');
-  console.log('  TOTAL = ' + rawSize + ' bytes' + (rawSize > 1048576 ? '  *** EXCEEDS 1 MB LIMIT ***' : ''));
+  var log = function(){};
+  if (CS_SYNC_DEBUG && window.console && window.console.log) log = console.log.bind(console);
+  log('===== FIRESTORE DIAGNOSTIC [' + tag + '] (' + (mode || '') + ') =====');
+  log('  TOTAL = ' + rawSize + ' bytes' + (rawSize > 1048576 ? '  *** EXCEEDS 1 MB LIMIT ***' : ''));
   if (already) {
-    // Payload came straight from _buildCloudPayload() — already a fresh clone with
-    // base64 photos stripped. Skip the redundant deep clone + rescan on the hot path.
-    console.log('  SANITIZED: YES (pre-sanitized)   FINAL SIZE = ' + rawSize + ' bytes');
+    log('  SANITIZED: YES (pre-sanitized)   FINAL SIZE = ' + rawSize + ' bytes');
     return obj;
+  }
+  if (!CS_SYNC_DEBUG) {
+    var sanQuiet = JSON.parse(JSON.stringify(obj));
+    _stripDeepPhotos(sanQuiet);
+    return sanQuiet;
   }
   ['currentRun','allRuns','deletedRuns','quickPicks','deletedQP','notes','xp','favorites','aliases','settings','achievements','progression','profileName','profilePhoto','updatedAt'].forEach(function(k) {
     if (obj && Object.prototype.hasOwnProperty.call(obj, k)) {
-      console.log('  ' + k + ' = ' + _sizeOf(obj[k]) + ' bytes');
+      log('  ' + k + ' = ' + _sizeOf(obj[k]) + ' bytes');
     } else {
-      console.log('  ' + k + ' = <absent>');
+      log('  ' + k + ' = <absent>');
     }
   });
   if (obj) {
-    console.log('  additional keys: ' + (Object.keys(obj).filter(function(k){return ['currentRun','allRuns','deletedRuns','quickPicks','deletedQP','notes','xp','favorites','aliases','settings','achievements','progression','profileName','profilePhoto','updatedAt'].indexOf(k) < 0;}).join(', ') || 'none'));
+    log('  additional keys: ' + (Object.keys(obj).filter(function(k){return ['currentRun','allRuns','deletedRuns','quickPicks','deletedQP','notes','xp','favorites','aliases','settings','achievements','progression','profileName','profilePhoto','updatedAt'].indexOf(k) < 0;}).join(', ') || 'none'));
   }
   var runs = (obj && obj.allRuns && obj.allRuns.items) || [];
   var carCount = 0, photoCount = 0, photoChars = 0;
@@ -3873,26 +3887,26 @@ function _diagAndSanitize(tag, obj, mode) {
       }
     });
   });
-  console.log('  allRuns: ' + runs.length + ' runs, ' + carCount + ' cars, ' + photoCount + ' base64 photos (' + photoChars + ' chars)');
+  log('  allRuns: ' + runs.length + ' runs, ' + carCount + ' cars, ' + photoCount + ' base64 photos (' + photoChars + ' chars)');
   var foundRaw = [];
   _scanForBase64(obj, 'payload', foundRaw);
-  console.log('  base64 image strings: ' + foundRaw.length);
+  log('  base64 image strings: ' + foundRaw.length);
   foundRaw.slice(0, 10).forEach(function(f) {
-    console.log('    ' + f.path + '  (' + f.chars + ' chars, ' + f.kind + ')');
+    log('    ' + f.path + '  (' + f.chars + ' chars, ' + f.kind + ')');
   });
-  if (foundRaw.length > 10) console.log('    ... and ' + (foundRaw.length - 10) + ' more');
+  if (foundRaw.length > 10) log('    ... and ' + (foundRaw.length - 10) + ' more');
   if (mode === 'write') {
-    console.log('  OBJECT PASSED TO set():');
-    console.log(obj);
+    log('  OBJECT PASSED TO set():');
+    log(obj);
   }
   var san = JSON.parse(JSON.stringify(obj));
   _stripDeepPhotos(san);
   var foundSan = [];
   _scanForBase64(san, 'sanitized', foundSan);
-  console.log('  SANITIZED: ' + (foundSan.length === 0 ? 'YES (0 base64 strings remain)' : 'NO (' + foundSan.length + ' base64 strings remain)') + '   FINAL SIZE = ' + _sizeOf(san) + ' bytes' + (_sizeOf(san) > 1048576 ? '  *** EXCEEDS 1 MB ***' : ''));
+  log('  SANITIZED: ' + (foundSan.length === 0 ? 'YES (0 base64 strings remain)' : 'NO (' + foundSan.length + ' base64 strings remain)') + '   FINAL SIZE = ' + _sizeOf(san) + ' bytes' + (_sizeOf(san) > 1048576 ? '  *** EXCEEDS 1 MB ***' : ''));
   if (foundSan.length) {
-    console.log('  WHERE IT REMAINS:');
-    foundSan.slice(0, 10).forEach(function(f) { console.log('    ' + f.path + ' -> ' + f.chars + ' chars (' + f.kind + ')'); });
+    log('  WHERE IT REMAINS:');
+    foundSan.slice(0, 10).forEach(function(f) { log('    ' + f.path + ' -> ' + f.chars + ' chars (' + f.kind + ')'); });
   }
   return san;
 }
