@@ -3749,12 +3749,11 @@ async function loadFromCloud() {
     if (snap.exists) {
       const d = snap.data();
       _diagRead('loadFromCloud(get)', d);
-      // Apply if it's a legacy doc (no lamport) or genuinely newer than what we've applied.
-      if (!d.lamport || d.lamport > _lastAppliedLamport) {
-        logSync('loadFromCloud', 'apply lamport', d.lamport || 'legacy');
-        _applyCloud(d);
-        _saveAllLocal();
-      }
+      // Apply the doc unconditionally — the per-field merges are additive + tombstoned
+      // and monotonic, so this is safe and never drops newer data (post-rebase races).
+      logSync('loadFromCloud', 'apply lamport', d.lamport || 'legacy');
+      _applyCloud(d);
+      _saveAllLocal();
       // Always converge back — the transactional rebase applies any newer cloud state first.
       _lastSave = Date.now();
       _txWrite({ cause: 'loadFromCloud' });
@@ -3772,10 +3771,11 @@ function subscribeCloud() {
   syncUnsub = db.collection('users').doc(currentUser.uid).onSnapshot(snap => {
     if (!snap.exists) return;
     const d = snap.data();
-    // Ignore our own writes (echo) and any doc no newer than the newest we've applied
+    // Ignore our own echo (the doc this device just wrote). Never gate on lamport here:
+    // a rebase/converge by another device can race the phone's lower-lamport run, and
+    // those merges are additive + tombstoned, so applying every differing payload is safe.
     if (d.seq && d.seq === _lastLocalSeq) return;
-    if (d.lamport && d.lamport <= _lastAppliedLamport) return;
-    logSync('listener', 'lamport', d.lamport, 'seq', d.seq);
+    logSync('listener', 'seq', d.seq, 'lamport', d.lamport);
     _applyCloud(d);
     _saveAllLocal();
     renderQPTrigger(); renderSpot();
