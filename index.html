@@ -790,6 +790,10 @@ body{
 .levelup-bar{width:min(300px,80vw);height:8px;border-radius:99px;background:var(--surf3);overflow:hidden;margin:0 auto 8px;}
 .levelup-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent-d),var(--accent));transition:width 0.8s ease;width:0;}
 .levelup-bar-lbl{font-size:0.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.levelup-reward{width:min(300px,80vw);margin:2px auto 14px;padding:12px 14px;border:1px solid var(--glass-border);border-radius:14px;background:rgba(255,255,255,0.03);}
+.levelup-earned{font-family:'Inter',sans-serif;font-size:0.68rem;font-weight:800;letter-spacing:2px;color:var(--accent);}
+.levelup-earned-name{font-family:'Inter',sans-serif;font-size:1.05rem;font-weight:800;letter-spacing:1px;margin-top:6px;text-transform:uppercase;}
+.levelup-earned-sub{font-size:0.56rem;color:var(--text2);letter-spacing:1px;margin-top:4px;}
 .levelup-dismiss{margin-top:34px;font-size:0.56rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
 
 @media (prefers-reduced-motion: reduce){
@@ -1931,6 +1935,9 @@ html.show-install #installBanner{display:flex;}
 .theme-swatch{width:28px;height:28px;border-radius:50%;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;}
 .theme-swatch:hover{transform:scale(1.12);}
 .theme-swatch.active{transform:scale(1.15);}
+.theme-swatch.locked{filter:grayscale(1) brightness(0.55);cursor:not-allowed;}
+.theme-swatch.locked .theme-lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Inter',sans-serif;font-size:0.5rem;font-weight:800;letter-spacing:1px;background:rgba(0,0,0,0.45);border-radius:inherit;text-shadow:0 1px 2px rgba(0,0,0,0.8);}
+.theme-swatch{position:relative;}
 .sort-pref-btn{
   background:var(--glass-card);
   backdrop-filter:blur(8px) saturate(1.2);
@@ -4179,18 +4186,27 @@ async function publishRunToLeaderboard(run) {
 }
 
 const THEMES = [
-  { name:'Default',      accent:'#f5c842', accent2:'#ff5733', bg:'#0a0a0a', surf:'#141414', surf2:'#1e1e22', bodyClass:'' },
-  { name:'Carbon',       accent:'#e0e0e0', accent2:'#ff4444', bg:'#0d0d0d', surf:'#1a1a1a', surf2:'#242428', bodyClass:'' },
-  { name:'Stealth',      accent:'#6ee7b7', accent2:'#f472b6', bg:'#050505', surf:'#101010', surf2:'#1a1a1e', bodyClass:'' },
-  { name:'Inferno',      accent:'#fb923c', accent2:'#f43f5e', bg:'#0c0a09', surf:'#1c1410', surf2:'#261c16', bodyClass:'' },
-  { name:'Cobalt',       accent:'#60a5fa', accent2:'#a78bfa', bg:'#080c14', surf:'#0f1624', surf2:'#181e30', bodyClass:'' },
-  { name:'Acid',         accent:'#a3e635', accent2:'#facc15', bg:'#090a05', surf:'#131505', surf2:'#1b1d08', bodyClass:'' },
-  { name:'Light',        accent:'#e65c00', accent2:'#ff3366', bg:'#f5f5f0', surf:'#ffffff', surf2:'#eae9e3', bodyClass:'theme-light' },
-  { name:'Cyberpunk',    accent:'#bf00ff', accent2:'#00ffee', bg:'#08001a', surf:'#100028', surf2:'#180040', bodyClass:'theme-cyberpunk' },
-  { name:'Retro 80s',    accent:'#ff6ec7', accent2:'#ffe600', bg:'#0d0d1a', surf:'#131325', surf2:'#1c1c35', bodyClass:'theme-retro80s' },
+  { name:'Default',      accent:'#f5c842', accent2:'#ff5733', bg:'#0a0a0a', surf:'#141414', surf2:'#1e1e22', bodyClass:'', unlock:1 },
+  { name:'Carbon',       accent:'#e0e0e0', accent2:'#ff4444', bg:'#0d0d0d', surf:'#1a1a1a', surf2:'#242428', bodyClass:'', unlock:3 },
+  { name:'Stealth',      accent:'#6ee7b7', accent2:'#f472b6', bg:'#050505', surf:'#101010', surf2:'#1a1a1e', bodyClass:'', unlock:5 },
+  { name:'Inferno',      accent:'#fb923c', accent2:'#f43f5e', bg:'#0c0a09', surf:'#1c1410', surf2:'#261c16', bodyClass:'', unlock:7 },
+  { name:'Cobalt',       accent:'#60a5fa', accent2:'#a78bfa', bg:'#080c14', surf:'#0f1624', surf2:'#181e30', bodyClass:'', unlock:9 },
+  { name:'Acid',         accent:'#a3e635', accent2:'#facc15', bg:'#090a05', surf:'#131505', surf2:'#1b1d08', bodyClass:'', unlock:12 },
+  { name:'Light',        accent:'#ffa94d', accent2:'#ff6a3d', bg:'#f5f5f0', surf:'#ffffff', surf2:'#eae9e3', bodyClass:'theme-light', unlock:15 },
+  { name:'Cyberpunk',    accent:'#bf00ff', accent2:'#00ffee', bg:'#08001a', surf:'#100028', surf2:'#180040', bodyClass:'theme-cyberpunk', unlock:18 },
+  { name:'Retro 80s',    accent:'#ff6ec7', accent2:'#ffe600', bg:'#0d0d1a', surf:'#131325', surf2:'#1c1c35', bodyClass:'theme-retro80s', unlock:22 },
 ];
 let activeTheme = parseInt(localStorage.getItem('cs_theme') || '0');
 let carbonOn    = localStorage.getItem('cs_carbon') === 'on';
+function _themeUnlocked(i) {
+  var lvl = (i==null) ? 0 : THEMES[i] ? THEMES[i].unlock : 0;
+  return (lvl <= 0) || xpInfo(_xpTotal).level >= lvl;
+}
+// New theme unlocked at this level (if any), for the level-up celebration
+function themeUnlockedAtLevel(lvl) {
+  for (var i = 1; i < THEMES.length; i++) if (THEMES[i].unlock === lvl) return THEMES[i];
+  return null;
+}
 
 //  THEMES 
 function applyTheme(idx) {
@@ -4221,13 +4237,19 @@ function renderThemeBar() {
   bar.innerHTML = THEMES.map((t,i) => {
     const isLight = t.bodyClass === 'theme-light';
     const border = isLight ? '#ccc' : t.bg;
-    return `<div class="theme-swatch${i===activeTheme?' active':''}" 
+    const locked = !_themeUnlocked(i);
+    const unlockLabel = locked ? `<span class="theme-lock">LV ${t.unlock}</span>` : '';
+    return `<div class="theme-swatch${i===activeTheme?' active':''}${locked?' locked':''}" 
       style="background:${t.accent};box-shadow:0 0 0 3px ${border};${isLight?'border:2px solid #ddd;':''}" 
-      onclick="selectTheme(${i})" title="${t.name}"></div>`;
+      onclick="selectTheme(${i})" title="${t.name}${locked?' (Unlocks at Level '+t.unlock+')':''}">${unlockLabel}</div>`;
   }).join('');
   document.getElementById('themeName').textContent = THEMES[activeTheme].name;
 }
 function selectTheme(idx) {
+  if (!_themeUnlocked(idx)) {
+    showToast('🔒 Unlock at Level ' + THEMES[idx].unlock + ' by earning XP');
+    return;
+  }
   applyTheme(idx);
   renderThemeBar();
   _bumpVer('settings');
@@ -5230,9 +5252,11 @@ function renderSpot() {
   var best = getBest();
   animateValue(document.getElementById('runTotal'), runTotalAnimated || 0, total, fmtFull, 420);
   runTotalAnimated = total;
+  setTimeout(function(){ fitScoreNumber(document.getElementById('runTotal')); fitScoreNumber(document.getElementById('bestTotal')); }, 460);
   document.getElementById('runCount').textContent = currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '');
   if (best > 0) {
     document.getElementById('bestTotal').textContent = fmtFull(best);
+    fitScoreNumber(document.getElementById('bestTotal'));
     document.getElementById('headerBest').textContent = fmt(best);
     var dskBest = document.getElementById('dskBest');
     if (dskBest) dskBest.textContent = fmt(best);
@@ -5243,6 +5267,7 @@ function renderSpot() {
     else { msg.textContent = 'Tied!'; msg.className = 'beat tied'; }
   } else {
     document.getElementById('bestTotal').textContent = '';
+    var btEl = document.getElementById('bestTotal'); if (btEl) btEl.style.fontSize = '';
     document.getElementById('headerBest').textContent = '';
     document.getElementById('beatMsg').textContent = 'No record yet';
     document.getElementById('beatMsg').className = 'beat tied';
@@ -6784,6 +6809,7 @@ function celebrateLevelUp(info) {
   if (document.querySelector('.levelup-overlay')) return;
   var t = titleForXP(_xpTotal);
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var unlockedTheme = themeUnlockedAtLevel(info.level);
   var overlay = document.createElement('div');
   overlay.className = 'levelup-overlay' + (reduced ? '' : ' stage-anticipate');
   overlay.innerHTML =
@@ -6792,17 +6818,25 @@ function celebrateLevelUp(info) {
       '<div class="levelup-eyebrow">New Rank Reached</div>' +
       '<div class="levelup-num" id="levelUpNum">0</div>' +
       '<div class="levelup-sub">' + t.name.toUpperCase() + '</div>' +
+      '<div class="levelup-reward" id="levelUpReward">' + (unlockedTheme
+        ? '<div class="levelup-earned">🎨 NEW THEME UNLOCKED</div><div class="levelup-earned-name" style="color:' + unlockedTheme.accent + '">' + unlockedTheme.name + '</div><div class="levelup-earned-sub">Tap to continue — apply it in Settings → Theme</div>'
+        : '<div class="levelup-earned">RANK <b>' + info.level + '</b> REACHED</div><div class="levelup-earned-sub" style="color:var(--muted)">' + info.into + ' / ' + info.need + ' XP until the next rank — keep spotting!</div>') + '</div>' +
       '<div class="levelup-bar"><div class="levelup-fill" id="levelUpFill"></div></div>' +
       '<div class="levelup-bar-lbl" id="levelUpBarLbl"></div>' +
       '<div class="levelup-dismiss">Tap anywhere to continue</div>' +
     '</div>';
-  overlay.onclick = function() { overlay.remove(); };
+  overlay.onclick = function() {
+    if (unlockedTheme && _themeUnlocked(THEMES.indexOf(unlockedTheme))) {
+      try { applyTheme(THEMES.indexOf(unlockedTheme)); renderThemeBar(); } catch(e){}
+    }
+    overlay.remove();
+  };
   document.body.appendChild(overlay);
   // 0.45s of anticipation (charging ring + sweep) before the card lands.
   setTimeout(function() {
     overlay.classList.add('stage-reveal');
     if (!reduced) { overlay.classList.remove('stage-anticipate'); }
-    confettiBurst(overlay, 60, ['#f5c842','#ffd75e','#fff','#ff5733']);
+    confettiBurst(overlay, 60, reduced ? [] : ['#f5c842','#ffd75e','#fff','#ff5733']);
     playSound('crystal');
     haptic([40,30,60,30,80]);
     animateValue(document.getElementById('levelUpNum'), 0, info.level, function(n) { return Math.round(n); }, 700);
@@ -7610,6 +7644,30 @@ function animateValue(el, from, to, formatter, duration){
   }
   requestAnimationFrame(frame);
 }
+// Shrink a score number's font until it fits its half — keeps the $ and full
+// figure on-screen on narrow phones instead of clipping at the edge.
+function fitScoreNumber(el) {
+  if (!el) return;
+  var parent = el.parentElement;
+  if (!parent) return;
+  var maxFont = parseFloat(window.getComputedStyle(el).fontSize) || 48;
+  el.style.fontSize = maxFont + 'px';
+  var maxWidth = parent.clientWidth - 2;
+  if (el.scrollWidth <= maxWidth) return;
+  var lo = 12, hi = maxFont, best = maxFont;
+  for (var i = 0; i < 14; i++) {
+    var mid = (lo + hi) / 2;
+    el.style.fontSize = mid + 'px';
+    if (el.scrollWidth <= maxWidth) { best = mid; lo = mid; }
+    else hi = mid;
+  }
+  el.style.fontSize = best + 'px';
+}
+window.addEventListener('resize', function(){
+  fitScoreNumber(document.getElementById('runTotal'));
+  fitScoreNumber(document.getElementById('bestTotal'));
+});
+
 
 function updatePageTransition(page){
   var target = document.getElementById('page-' + page);
