@@ -247,8 +247,16 @@ body{
 .page.active{
   opacity:1;pointer-events:all;
 }
-.page-enter-forward{animation:pageFadeIn 0.15s ease both;}
-.page-enter-back{animation:pageFadeIn 0.15s ease both reverse;}
+.page-enter-forward{animation:pageEnterUp 0.34s cubic-bezier(0.16,1,0.3,1) both;}
+.page-enter-back{animation:pageEnterDown 0.3s cubic-bezier(0.16,1,0.3,1) both;}
+@keyframes pageEnterUp{
+  0%{opacity:0;transform:translateY(16px) scale(0.995);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
+}
+@keyframes pageEnterDown{
+  0%{opacity:0;transform:translateY(-12px);}
+  100%{opacity:1;transform:translateY(0);}
+}
 @keyframes pageFadeIn{from{opacity:0}to{opacity:1}}
 
 /* Screen personalities — each section enters with its own metaphor. */
@@ -274,7 +282,7 @@ body{
   0%{opacity:0;transform:perspective(1000px) translateX(36px) rotateY(-6deg);transform-origin:right center;}
   100%{opacity:1;transform:perspective(1000px) translateX(0) rotateY(0);}
 }
-.page-enter-history{animation:pageFadeIn 0.35s ease both;}
+.page-enter-history{animation:pageEnterUp 0.34s cubic-bezier(0.16,1,0.3,1) both;}
 @media (prefers-reduced-motion:reduce){
   .page-enter-book,.page-enter-achievements,.page-enter-trips,.page-enter-garage{animation:none !important;opacity:1;}
 }
@@ -531,6 +539,7 @@ body{
 @keyframes ccXPUp{0%{opacity:0;transform:translateY(16px) scale(0.8)}70%{opacity:1;transform:translateY(-5px) scale(1.1)}100%{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes ccShineSweep{0%{left:-70%}100%{left:140%}}
 @keyframes ccBreathe{0%{filter:brightness(1) saturate(1)}50%{filter:brightness(1.18) saturate(1.15)}100%{filter:brightness(1) saturate(1)}}
+@keyframes ccGlowPulse{0%{opacity:0.25;transform:scale(0.92)}50%{opacity:0.55;transform:scale(1.05)}100%{opacity:0.25;transform:scale(0.92)}}
 @keyframes ccRainbowSpin{to{transform:rotate(360deg)}}
 @keyframes ccGoldShimmer{to{background-position:200% 0}}
 @keyframes ccFlyOut{
@@ -558,11 +567,18 @@ body{
   animation:fadeIn 0.3s ease;cursor:pointer;
 }
 .cc-card{
+  position:relative;
   width:min(272px,78vw);aspect-ratio:3/4;
   perspective:1200px;transform-style:preserve-3d;
   animation:ccCardIn 0.75s cubic-bezier(0.34,1.56,0.64,1) both;
 }
 .cc-card[data-tier="daily"]{--cc-color:#9aa3af;--cc-glow:rgba(154,163,175,0.35);}
+.cc-glow{
+  position:absolute;inset:-12%;border-radius:50%;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle at 50% 55%, var(--cc-glow,transparent), transparent 70%);
+  filter:blur(18px);
+  animation:ccGlowPulse 2.4s cubic-bezier(0.45,0,0.55,1) infinite;
+}
 .cc-card[data-tier="sports"]{--cc-color:#60a5fa;--cc-glow:rgba(96,165,250,0.4);}
 .cc-card[data-tier="super"]{--cc-color:#c084fc;--cc-glow:rgba(192,132,252,0.45);}
 .cc-card[data-tier="hyper"]{--cc-color:#ff5733;--cc-glow:rgba(255,87,51,0.5);}
@@ -675,9 +691,9 @@ body{
 .cc-quick{
   position:fixed;left:50%;top:max(84px,calc(env(safe-area-inset-top,0px) + 16px));
   transform:translateX(-50%) translateY(-8px);z-index:99995;pointer-events:none;
-  animation:ccQuickIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both;
+  animation:ccQuickIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
 }
-@keyframes ccQuickIn{0%{opacity:0;transform:translateX(-50%) translateY(-20px) scale(0.85)}60%{opacity:1;transform:translateX(-50%) translateY(2px) scale(1.03)}100%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+@keyframes ccQuickIn{0%{opacity:0;transform:translateX(-50%) translateY(-24px) scale(0.8)}55%{opacity:1;transform:translateX(-50%) translateY(3px) scale(1.04)}75%{transform:translateX(-50%) translateY(-2px) scale(0.99)}100%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
 .cc-quick.out{transition:opacity 0.32s,transform 0.32s;opacity:0;transform:translateX(-50%) translateY(-10px) scale(0.9);}
 .cc-quick-chip{
   display:flex;align-items:center;gap:10px;
@@ -685,6 +701,12 @@ body{
   padding:7px 16px 7px 8px;box-shadow:var(--shadow-lg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   font-size:0.78rem;font-weight:600;white-space:nowrap;max-width:88vw;position:relative;overflow:hidden;
 }
+.cc-quick-chip::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;
+  background:radial-gradient(120% 160% at 12% 0%, var(--q-color), transparent 55%);
+  animation:ccQuickFlash 0.7s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes ccQuickFlash{0%{opacity:0}25%{opacity:0.28}100%{opacity:0}}
 .cc-quick-ring{position:absolute;inset:0;border-radius:999px;border:1px solid var(--q-color);opacity:0;pointer-events:none;animation:ccQuickRing 0.9s ease-out both;}
 @keyframes ccQuickRing{0%{box-shadow:0 0 0 0 var(--q-color)}100%{box-shadow:0 0 0 12px transparent}}
 .cc-quick-thumb{width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--q-color);background:linear-gradient(160deg,#232328,#151518);animation:ccQuickPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;}
@@ -733,7 +755,7 @@ body{
 #runTotal{display:inline-block;}
 #runTotal.pop{animation:runTotalPop 0.45s cubic-bezier(0.34,1.56,0.64,1);}
 @media (prefers-reduced-motion: reduce){
-  .cc-card,.cc-inner,.cc-back-stars,.cc-back-xp,.cc-badge,.cc-rainbow,.cc-shine,.cc-quick,.cc-collected,#runTotal.pop{animation:none !important;}
+  .cc-card,.cc-inner,.cc-back-stars,.cc-back-xp,.cc-badge,.cc-rainbow,.cc-shine,.cc-glow,.cc-quick,.cc-collected,#runTotal.pop{animation:none !important;}
   .cc-inner{transition:none !important;}
   .moment-overlay,.moment-card,.moment-emoji,.moment-sil,.moment-ring,.moment-sweep,.moment-flash,.moment-antici-txt,.moment-dismiss{animation:none !important;}
   .moment-overlay.stage-reveal .moment-card,.moment-overlay.stage-celebrate .moment-card{opacity:1;transform:none;}
@@ -6573,6 +6595,7 @@ function celebrateFullCollectorCard(car, opts) {
     card.className = 'cc-card';
     card.setAttribute('data-tier', tier);
     card.innerHTML =
+      '<div class="cc-glow" data-tier="' + tier + '"></div>' +
       (tier === 'legend' ? '<div class="cc-rainbow"></div>' : '') +
       '<div class="cc-inner">' +
         '<div class="cc-face cc-front" data-tier="' + tier + '">' +
