@@ -704,9 +704,9 @@ body{
 .cc-quick-chip::before{
   content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;
   background:radial-gradient(120% 160% at 12% 0%, var(--q-color), transparent 55%);
-  animation:ccQuickFlash 0.7s cubic-bezier(0.22,1,0.36,1) both;
+  animation:ccQuickFlash 1.1s cubic-bezier(0.16,1,0.3,1) 0.45s both;
 }
-@keyframes ccQuickFlash{0%{opacity:0}25%{opacity:0.28}100%{opacity:0}}
+@keyframes ccQuickFlash{0%{opacity:0}25%{opacity:0.9}50%{opacity:0.35}100%{opacity:0}}
 .cc-quick-ring{position:absolute;inset:0;border-radius:999px;border:1px solid var(--q-color);opacity:0;pointer-events:none;animation:ccQuickRing 0.9s ease-out both;}
 @keyframes ccQuickRing{0%{box-shadow:0 0 0 0 var(--q-color)}100%{box-shadow:0 0 0 12px transparent}}
 .cc-quick-thumb{width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--q-color);background:linear-gradient(160deg,#232328,#151518);animation:ccQuickPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;}
@@ -1834,7 +1834,56 @@ html.show-install #installBanner{display:flex;}
   white-space:nowrap;max-width:90vw;box-shadow:var(--shadow);
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.major{background:linear-gradient(135deg,rgba(232,184,75,0.16),rgba(232,184,75,0.07));border-color:rgba(232,184,75,0.4);font-weight:600;}
 @media(min-width:800px){.toast{bottom:20px;left:calc(80px + 50%);}}
+
+/* ── NOTIFICATION BELL + ACTIVITY CENTER ── */
+.act-bell{
+  position:relative;width:34px;height:34px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  border:1px solid var(--border2);background:var(--surf2);color:var(--text2);
+  transition:border-color 0.15s,color 0.15s,transform 0.12s;flex-shrink:0;
+}
+.act-bell:hover{border-color:var(--accent);color:var(--text);}
+.act-bell:active{transform:scale(0.94);}
+.act-bell.unread{border-color:var(--accent);color:var(--accent);}
+.act-bell-ic{width:17px;height:17px;display:block;}
+.act-badge{
+  position:absolute;top:-5px;right:-5px;min-width:17px;height:17px;border-radius:9px;
+  background:var(--accent);color:#0a0a0a;font-family:'Inter',sans-serif;
+  font-size:0.58rem;font-weight:800;display:flex;align-items:center;justify-content:center;
+  padding:0 4px;line-height:1;box-shadow:0 0 0 2px var(--surf2);pointer-events:none;
+}
+.act-panel{
+  position:fixed;top:calc(var(--header-h,58px) + 6px);right:14px;
+  width:min(348px,calc(100vw - 24px));
+  background:var(--glass-card);backdrop-filter:blur(20px) saturate(1.3);
+  -webkit-backdrop-filter:blur(20px) saturate(1.3);
+  border:1px solid var(--glass-border);border-radius:18px;
+  box-shadow:var(--shadow),0 24px 60px rgba(0,0,0,0.5);z-index:12000;
+  opacity:0;pointer-events:none;transform:translateY(-8px) scale(0.98);
+  transition:opacity 0.18s ease,transform 0.22s cubic-bezier(0.16,1,0.3,1);
+  overflow:hidden;
+}
+.act-panel.show{opacity:1;pointer-events:auto;transform:translateY(0) scale(1);}
+.act-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--glass-border);}
+.act-title{font-family:'Inter',sans-serif;font-size:0.72rem;letter-spacing:2.5px;color:var(--text);text-transform:uppercase;}
+.act-clear{background:none;border:none;color:var(--muted);font-family:'Inter',sans-serif;font-size:0.62rem;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;padding:6px 8px;border-radius:8px;transition:all 0.15s;}
+.act-clear:hover{color:var(--accent);background:var(--adim);}
+.act-list{max-height:min(58vh,440px);overflow-y:auto;padding:6px 10px 10px;-webkit-overflow-scrolling:touch;}
+.act-day{font-size:0.58rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:12px 8px 4px;}
+.act-item{display:flex;align-items:flex-start;gap:11px;padding:10px 8px;border-radius:12px;border-bottom:1px solid var(--glass-border);animation:fadeUp 0.28s ease both;}
+.act-item:last-child{border-bottom:none;}
+.act-item.aged{opacity:0.75;}
+.act-item-ic{flex-shrink:0;width:34px;height:34px;border-radius:10px;background:var(--surf2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:1.05rem;}
+.act-item.special .act-item-ic{background:rgba(232,184,75,0.12);border-color:rgba(232,184,75,0.35);}
+.act-item-bd{min-width:0;flex:1;}
+.act-item-t{font-size:0.78rem;font-weight:600;color:var(--text);line-height:1.35;word-break:break-word;}
+.act-item-s{font-size:0.68rem;color:var(--text2);margin-top:2px;line-height:1.45;word-break:break-word;}
+.act-item-ts{flex-shrink:0;font-size:0.56rem;color:var(--muted);letter-spacing:0.5px;margin-top:3px;}
+.act-empty{padding:30px 18px;text-align:center;font-size:0.72rem;color:var(--muted);line-height:1.7;}
+.act-empty .act-empty-ic{font-size:1.3rem;display:block;margin-bottom:8px;}
+@media(min-width:800px){.act-panel{top:calc(var(--header-h,64px) + 6px);right:calc(80px + 20px);}}
 
 /* ── VERSION TAG ── */
 .version-tag{
@@ -2685,6 +2734,10 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
         <div class="hdr-lbl">Best Run</div>
         <div class="hdr-val" id="headerBest">—</div>
       </div>
+      <button class="act-bell" id="actBell" onclick="toggleActivity(1)" aria-label="Activity">
+        <svg class="act-bell-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="act-badge" id="actBadge" style="display:none">0</span>
+      </button>
       <div id="userPillWrap"></div>
     </div>
   </header>
@@ -2987,7 +3040,6 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
           <div class="setting-copy">
             <div class="card-title">SOUND EFFECTS</div>
             <div class="setting-desc">Keep the app quiet or add feedback when you log cars and finish runs.</div>
-          </div>
         </div>
         <div class="setting-row sound-toggle" style="border-top:none;padding-top:0;margin-top:0;">
           <span style="font-size:0.78rem;color:var(--text2);flex:1;">Play sounds when logging cars</span>
@@ -3276,8 +3328,15 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 <div class="road-deco"><div class="rdl"></div><div class="rdl"></div><div class="rdl"></div></div>
 
 <div class="toast" id="toast"></div>
+<div class="act-panel" id="actPanel">
+  <div class="act-head">
+    <div class="act-title">Activity</div>
+    <button class="act-clear" onclick="clearActivity()">Clear</button>
+  </div>
+  <div class="act-list" id="actList"></div>
+</div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v29</div>
+<div class="version-tag" id="versionTag">v30</div>
 
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
@@ -3634,7 +3693,7 @@ function importLocalData() {
   renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
   checkNewAchievements();
   document.getElementById('importBtn')?.remove();
-  showToast(' Imported ' + newRuns.length + ' runs from this device!');
+  notify('📥 Imported ' + newRuns.length + ' runs from this device!', { priority:'major', record: true, key:'Import', icon:'📥' });
 }
 
 auth.onAuthStateChanged(async user => {
@@ -3800,7 +3859,7 @@ async function loadFromCloud() {
   renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
   fetchRefImagesForAllCars();
   if (currentRun.length > 0)
-    setTimeout(() => showToast(' Run resumed — ' + currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '') + ' restored!'), 700);
+    setTimeout(() => notify('🚗 Run resumed — ' + currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '') + ' restored!', { priority:'major', record: true, key:'Run resumed', icon:'🚗' }), 700);
 }
 
 function subscribeCloud() {
@@ -4157,6 +4216,9 @@ function _txWrite(opts) {
       }
       _markDirty(true);
       setSyncDot('');
+      if (cause !== 'unload') {
+        recordActivity('sync', '⚠️ Sync failed — local copy safe, will retry automatically', { icon: '⚠️' });
+      }
       return false;
     });
   }
@@ -4967,6 +5029,9 @@ function renderQPTrigger() {
 }
 document.addEventListener('click', e => {
   if (qpOpen && !document.getElementById('qpWrap').contains(e.target)) closeQP();
+  if (_actOpen && !document.getElementById('actPanel').contains(e.target) && !document.getElementById('actBell').contains(e.target)) {
+    toggleActivity(0);
+  }
 });
 
 //  SANITIZE  strip tags/script from free-text fields
@@ -5012,8 +5077,13 @@ function logRun() {
   if (garageView === 'map') renderGarage();
   playSound('log');
   rewardLog(car, true, { isFirst: isFirst });
+  if (car.value >= 500000) {
+    recordActivity('find', '🔥 ' + tierMeta(tierOf(car.value)).label + ': ' + name + ' worth ' + fmtFull(car.value) + ' logged!', { icon: '🔥' });
+  } else if (car.value >= 150000 && isFirst) {
+    recordActivity('find', '✨ First-ever spot of ' + name + ' (' + fmtFull(car.value) + ')', { icon: '✨' });
+  }
   pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, input.type + ' ' + name + ' removed');
-  showToast('Discovery Recorded — ' + name + ' added to this run.');
+  notify('Discovery Recorded — ' + name + ' added to this run.', { priority:'quiet', group:'logrun' });
   setTimeout(checkNewAchievements, 400);
 }
 
@@ -5039,11 +5109,16 @@ function logSpotted() {
   fetchAndStoreRefImage(car);
   playSound('log');
   rewardLog(car, false, { mode:'solo', isFirst: isFirst, isBest: input.value > prevBestCar });
+  if (car.value >= 500000) {
+    recordActivity('find', '🔥 ' + tierMeta(tierOf(car.value)).label + ': ' + name + ' worth ' + fmtFull(car.value) + ' discovered!', { icon: '🔥' });
+  } else if (car.value >= 150000 && isFirst) {
+    recordActivity('find', '✨ First-ever spot of ' + name + ' (' + fmtFull(car.value) + ')', { icon: '✨' });
+  }
   pushUndo('history', prevRuns, input.type + ' ' + name + ' removed');
   clearInputs();
   renderQPTrigger();
   renderGarage();
-  showToast('Discovery Recorded — ' + name + ' added to your collection.');
+  notify('Discovery Recorded — ' + name + ' added to your collection.', { priority:'quiet', group:'logsolo' });
   setTimeout(checkNewAchievements, 400);
 }
 
@@ -5156,6 +5231,11 @@ function endRun() {
   renderSpot();
   playSound('end');
   showRecap({ total, cars: runCars, headliner, isRec: isRec || isFirstRec, prevBest });
+  if (isRec || isFirstRec) {
+    recordActivity('record', '🏆 New personal record — ' + fmtFull(total) + ' in one run!', { icon: '🏆' });
+  } else {
+    recordActivity('run', '🏁 Run complete — ' + fmtFull(total) + ' across ' + runCars.length + ' car' + (runCars.length !== 1 ? 's' : ''), { icon: '🏁' });
+  }
   if (total >= 1000000) {
     setTimeout(function(){ showUnicornAlert(total); playSound('level'); haptic([20,40,20,60,20]); }, 700);
   }
@@ -6833,6 +6913,7 @@ function celebrateLevelUp(info) {
   var t = titleForXP(_xpTotal);
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var unlockedTheme = themeUnlockedAtLevel(info.level);
+  recordActivity('levelup', (unlockedTheme ? '🎨 ' : '⭐ ') + 'Reached Level ' + info.level + ' — ' + t.name + (unlockedTheme ? ' · ' + unlockedTheme.name + ' theme unlocked' : ''), { icon: unlockedTheme ? '🎨' : '⭐' });
   var overlay = document.createElement('div');
   overlay.className = 'levelup-overlay' + (reduced ? '' : ' stage-anticipate');
   overlay.innerHTML =
@@ -6901,10 +6982,189 @@ function fetchAndStoreRefImage(car) {
 }
 
 //  TOAST 
-function showToast(msg) {
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2300);
+//  NOTIFICATION ENGINE (v30)
+//  Centralizes every toast/badge so messages are deduped, grouped, silencable and
+//  recorded into the Activity log in one place — no more scattered one-off toasts.
+var _toastTimer = null;
+var _toastStackArr = [];
+var _toastPumping = false;
+var _toastDedupe = null;      // last { txt, ts } to collapse redraws
+var _groupCounters = {};      // group|txt -> burst counter for coalescing
+function showToast(msg, opts) {
+  notify(msg, opts);
+}
+// notify(msg, { priority:'info'|'major'|'quiet', key, group, record:bool, recall:bool })
+function notify(msg, opts) {
+  opts = opts || {};
+  var text = String(msg || '').trim();
+  if (!text) return;
+  var prio = opts.priority || 'info';
+
+  // STAGE 1 — GROUPED BURST — same text under the same group within 900ms coalesces into a
+  //    "·×N" counter on the live toast instead of re-flashing a stack of toasts.
+  if (opts.group) {
+    var gkey = opts.group + '|' + text;
+    var now = Date.now();
+    var g = _groupCounters[gkey];
+    if (g && now - g.ms < 900) {
+      g.n++;
+      var tEl = document.getElementById('toast');
+      if (tEl && tEl.classList.contains('show')) {
+        tEl.textContent = text + '  ·×' + g.n;
+        clearTimeout(_toastTimer);
+        _toastDedupe = null;
+        _toastTimer = setTimeout(function(){ tEl.classList.remove('show'); }, 2100);
+      }
+      return;
+    }
+    _groupCounters[gkey] = { ms: now, n: 1 };
+    setTimeout(function(){ delete _groupCounters[gkey]; }, 4000);
+  }
+
+  // STAGE 2 — DEDUPE — identical text within 1.2s is a redraw of the same event. Quiet
+  //    (silenced) messages never flash, so they must not consume the dedupe slot.
+  if (prio !== 'major' && prio !== 'quiet' && _toastDedupe && _toastDedupe.txt === text && Date.now() - _toastDedupe.ms < 1200) return;
+
+  // STAGE 3 — QUIET — background tech-noise (sync, photo, auto-save confirmations). Never
+  //    flashes; only surfaces in the Activity log when opts.record marks it useful.
+  if (prio === 'quiet') {
+    if (opts.record) recordActivity(opts.key || 'misc', text, opts);
+    return;
+  }
+
+  // STAGE 4 — FLASH — one toast at a time; 'major' waits its turn if a ceremony owns the screen.
+  _toastDedupe = { txt: text, ms: Date.now() };
+  _toastStackArr.push({ text: text, prio: prio });
+  _toastPump();
+  if (opts.record) recordActivity(opts.key || 'misc', text, opts);
+  if (opts.recall) recallActivity(opts.key || opts.group || 'misc', text);
+}
+function _toastPump() {
+  if (_toastPumping || !_toastStackArr.length) return;
+  if (_ceremonyVisible()) {           // a collector card / moment owns the screen — hold
+    setTimeout(_toastPump, 400);
+    return;
+  }
+  _toastPumping = true;
+  var n = _toastStackArr.shift();
+  var t = document.getElementById('toast');
+  t.classList.remove('major');
+  if (n.prio === 'major') t.classList.add('major');
+  t.textContent = n.text;
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(function() {
+    t.classList.remove('show');
+    _toastPumping = false;
+    setTimeout(_toastPump, 260);
+  }, n.prio === 'major' ? 3000 : 1950);
+}
+
+//  ACTIVITY LOG — a lightweight, durable feed of the moments that matter (level-ups,
+//  records, achievements, rare finds, sync recoveries). Stored per-device in
+//  localStorage only — deliberately never sent to Firestore (it is ephemeral UI)
+//  and never exported (photos stay out; the feed is trivial to rebuild on import).
+var _actList = (function(){ try { var a = JSON.parse(localStorage.getItem('cs_activity') || 'null'); return Array.isArray(a) ? a : []; } catch(e){ return []; } })();
+var _actSeen = parseInt(localStorage.getItem('cs_activity_seen') || '0') || 0;
+var _actOpen = false;
+function _saveAct() { try { localStorage.setItem('cs_activity', JSON.stringify(_actList)); } catch(e){} }
+function _ceremonyVisible() {
+  return !!(document.querySelector('.cc-overlay') || document.querySelector('.cc-quick') ||
+            document.querySelector('.evo-overlay') || document.querySelector('.title-overlay') ||
+            document.querySelector('.expo-cer') || document.querySelector('.make-cer') ||
+            document.querySelector('.mys-overlay') || document.querySelector('.moment-overlay') ||
+            document.querySelector('.levelup-overlay') || document.querySelector('.unicorn-overlay'));
+}
+function recordActivity(kind, text, opts) {
+  opts = opts || {};
+  try {
+    var emitter = opts.emitter && typeof opts.emitter === 'string' ? opts.emitter : '';
+    _actList.unshift({ k: kind, t: text, e: emitter, i: (opts.icon || '✦'), ts: Date.now() });
+    if (_actList.length > 80) _actList.length = 80;
+    _saveAct();
+  } catch(e) {}
+  _updateActBadge();
+  if (_actOpen) renderActivityPanel();
+}
+// Recall: if the most recent entry matches this key+text, don't pile the same line up.
+function recallActivity(key, text) {
+  if (_actList[0] && _actList[0].e === key && _actList[0].t === text) return;
+  recordActivity(key, text, { icon: '' });
+}
+function clearActivity() {
+  _actList = [];
+  _actSeen = Date.now();
+  try { localStorage.setItem('cs_activity_seen', String(_actSeen)); } catch(e){}
+  _saveAct();
+  _updateActBadge();
+  if (_actOpen) renderActivityPanel();
+  showToast('Activity cleared');
+}
+function _unreadAct() {
+  var n = 0;
+  for (var i = 0; i < _actList.length; i++) if (_actList[i].ts > _actSeen) n++;
+  return n;
+}
+function _updateActBadge() {
+  var b = document.getElementById('actBadge');
+  var bell = document.getElementById('actBell');
+  var n = _unreadAct();
+  if (b) { b.style.display = n > 0 ? 'flex' : 'none'; if (n > 99) b.textContent = '99+'; else b.textContent = String(n); }
+  if (bell) bell.classList.toggle('unread', n > 0);
+}
+function toggleActivity(forceOpen) {
+  var p = document.getElementById('actPanel');
+  if (!p) return;
+  var want = forceOpen === 1 ? true : !_actOpen;
+  _actOpen = want;
+  p.classList.toggle('show', want);
+  document.body.classList.toggle('act-open', want);
+  if (want) {
+    renderActivityPanel();
+    _actSeen = Date.now();
+    try { localStorage.setItem('cs_activity_seen', String(_actSeen)); } catch(e){}
+    _updateActBadge();
+  }
+}
+function renderActivityPanel() {
+  var list = document.getElementById('actList');
+  if (!list) return;
+  if (!_actList.length) {
+    list.innerHTML = '<div class="act-empty"><span class="act-empty-ic">🏁</span>No activity yet — records, level-ups and big finds will land here.</div>';
+    return;
+  }
+  var out = '';
+  var lastDay = '';
+  for (var i = 0; i < _actList.length; i++) {
+    var a = _actList[i];
+    var d = new Date(a.ts);
+    var day = d.toDateString();
+    if (day !== lastDay) {
+      lastDay = day;
+      var lbl = d.toDateString() === new Date().toDateString() ? 'Today'
+              : (new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() === new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate()).getTime() - 86400000) ? 'Yesterday'
+              : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      out += '<div class="act-day">' + lbl + '</div>';
+    }
+    var fresh = (a.ts > _actSeen) ? ' unread' : '';
+    out += '<div class="act-item' + fresh + '" style="animation-delay:' + Math.min(i * 0.03, 0.4) + 's">' +
+      '<div class="act-item-ic">' + (a.i || '✦') + '</div>' +
+      '<div class="act-item-bd"><div class="act-item-t">' + escapeHtml(a.t) + '</div>' +
+      (a.e ? '<div class="act-item-s">' + escapeHtml(a.e) + '</div>' : '') + '</div>' +
+      '<div class="act-item-ts">' + fmtTimeAgo(a.ts) + '</div></div>';
+  }
+  list.innerHTML = out;
+}
+function fmtTimeAgo(ts) {
+  var s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return 'now';
+  var m = Math.floor(s / 60);
+  if (m < 60) return m + 'm';
+  var h = Math.floor(m / 60);
+  if (h < 24) return h + 'h';
+  var dd = Math.floor(h / 24);
+  if (dd < 7) return dd + 'd';
+  return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 }
 
 function deepStripPhotos(obj) {
@@ -7072,9 +7332,9 @@ function importFromFile(input) {
 
       // Refresh everything
       renderAll();
-      showToast('✅ Restored ' + restored + ' data fields' +
+      notify('✅ Restored ' + restored + ' data fields' +
         (hasPhotos ? ' WITH photos' : ' (no photos)') +
-        ' — ' + allRuns.reduce((s,r) => s + (r.cars||[]).length, 0) + ' cars total');
+        ' — ' + allRuns.reduce((s,r) => s + (r.cars||[]).length, 0) + ' cars total', { priority:'major', record: true, key:'restore', icon:'✅' });
       // Re-check achievements
       setTimeout(checkNewAchievements, 800);
     } catch(err) {
@@ -7113,6 +7373,7 @@ initSoundToggle();
 initVibeToggle();
 renderLevelBar();
 fetchRefImagesForAllCars();
+_updateActBadge();
 
 //  SERVICE WORKER — cache-first for offline support
 // NOTE: register() rejects blob: URLs — only a real same-origin script path is valid.
@@ -7149,7 +7410,7 @@ function flushOfflineQueue() {
   offlineQueue = [];
   localStorage.removeItem('cs_offline_queue');
   saveToCloud();
-  showToast(' Synced ' + n + ' offline saves!');
+  notify('☁️ Synced ' + n + ' offline save' + (n !== 1 ? 's' : '') + ' from this device', { priority:'quiet', record:true, key:'Offline sync', icon:'☁️' });
 }
 
 function refreshOfflineStatus() {
@@ -7492,7 +7753,7 @@ function _savePhoto(compressed, t) {
   if (t.type !== 'all') showToast('📷 Photo attached!');
 }
 
-// Cinematic camera flash that plays while a photo saves
+// Cinematic camera FLASH feedback
 function playPhotoFlash(photoUrl) {
   if (!photoUrl || photoUrl.indexOf('data:') !== 0) return;
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -8211,6 +8472,7 @@ function checkNewAchievements() {
           saveProgress();
         }
         setTimeout(() => celebrateAchievement(a), i * 3000);
+        recordActivity('achievement', a.icon + ' ' + a.name + ' unlocked' + (a.xp ? ' · +' + a.xp + ' XP' : ''), { icon: a.icon });
       }
     });
   }
@@ -9758,7 +10020,7 @@ function showMoment(cfg, done) {
   haptic([40, 60, 40, 30, 80]);
   // Stage 2 — reveal
   setTimeout(function(){ overlay.classList.add('stage-reveal'); playSound('impact'); }, 1100);
-  // Stage 3 — celebration: confetti + particle burst + flash
+  // Stage 3 — celebration: confetti + particle burst + white flash
   setTimeout(function() {
     overlay.classList.add('stage-celebrate');
     confettiBurst(overlay, 60, cfg.colors || ['#f5c842', '#ffd75e', '#fff', '#ff5733']);
