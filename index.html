@@ -3364,7 +3364,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
   <div class="act-list" id="actList"></div>
 </div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v30 Secure</div>
+<div class="version-tag" id="versionTag">v30</div>
 
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
@@ -3376,7 +3376,6 @@ if (sessionStorage.getItem(_pendingKey) && !window.location.hash) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-functions-compat.min.js"></script>
 <script>
 firebase.initializeApp({
   apiKey: "AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug",
@@ -3388,7 +3387,6 @@ firebase.initializeApp({
 });
 const auth = firebase.auth();
 const db   = firebase.firestore();
-const functions = firebase.functions();
 
 // Find the OAuth client ID from Firebase auth internals
 var oauthClientId = '';
@@ -4343,7 +4341,7 @@ window.addEventListener('online', function() {
 
 //  THEMES 
 
-async function publishRunToLeaderboardLegacy(run) {
+async function publishRunToLeaderboard(run) {
   if (!currentUser || !run || run.spotted) return;
   // Rate-limit: only publish once per 10 minutes to prevent quota abuse
   const lastPub = parseInt(localStorage.getItem('cs_lb_last') || '0');
@@ -4369,28 +4367,6 @@ async function publishRunToLeaderboardLegacy(run) {
     leaderboardLoaded = false;
   } catch (e) {
     console.error('Leaderboard publish failed', e);
-  }
-}
-
-// v30: leaderboard writes are server-authoritative. This later declaration
-// replaces the legacy direct-Firestore publisher above.
-async function publishRunToLeaderboard(run) {
-  if (!currentUser || !run || run.spotted) return;
-  var publish = functions.httpsCallable('publishLeaderboardRun');
-  // endRun schedules the normal cloud save first. Wait for that save to become
-  // visible before asking the server to read and publish this run.
-  for (var attempt = 0; attempt < 5; attempt++) {
-    try {
-      await publish({ runId: String(run.id) });
-      leaderboardLoaded = false;
-      return;
-    } catch (e) {
-      if (attempt === 4 || (e.code !== 'functions/not-found' && e.code !== 'functions/failed-precondition')) {
-        console.error('Leaderboard publish failed', e);
-        return;
-      }
-      await new Promise(function(resolve) { setTimeout(resolve, 1500 * (attempt + 1)); });
-    }
   }
 }
 
@@ -5205,61 +5181,6 @@ document.addEventListener('click', e => {
 //  SANITIZE  strip tags/script from free-text fields
 function sanitizeText(str) {
   return String(str || '').replace(/[<>]/g, '').trim().slice(0, 120);
-}
-
-function _safeImageUrl(value) {
-  var url = String(value || '');
-  return /^(https?:\/\/|data:image\/|photo:)/i.test(url) ? url : '';
-}
-function _normalizeImportedCar(raw) {
-  raw = raw && typeof raw === 'object' ? raw : {};
-  return {
-    name: sanitizeText(raw.name),
-    value: Math.max(0, Math.min(Number(raw.value) || 0, 10000000)),
-    color: sanitizeText(raw.color),
-    type: /^[a-z-]{1,24}$/i.test(String(raw.type || '')) ? String(raw.type) : 'other',
-    ts: Number(raw.ts) || Date.now(),
-    photo: _safeImageUrl(raw.photo),
-    photoId: /^[a-z0-9-]{1,100}$/i.test(String(raw.photoId || '')) ? String(raw.photoId) : undefined,
-    location: raw.location && Number.isFinite(Number(raw.location.lat)) && Number.isFinite(Number(raw.location.lng))
-      ? { lat: Number(raw.location.lat), lng: Number(raw.location.lng) } : undefined
-  };
-}
-function _normalizeImportedRuns(items) {
-  return Array.isArray(items) ? items.map(function(raw) {
-    raw = raw && typeof raw === 'object' ? raw : {};
-    var cars = Array.isArray(raw.cars) ? raw.cars.map(_normalizeImportedCar).filter(function(c) { return c.name; }).slice(0, 500) : [];
-    return { id: String(raw.id || Date.now()), date: sanitizeText(raw.date), total: Math.max(0, Number(raw.total) || 0), spotted: !!raw.spotted, _v: Number(raw._v) || 1, headliner: raw.headliner ? _normalizeImportedCar(raw.headliner) : null, cars: cars };
-  }).filter(function(run) { return run.cars.length; }) : [];
-}
-
-// v30: imported/cloud quick-pick labels and URLs must never become markup.
-function renderQPList(query) {
-  var el = document.getElementById('qpList');
-  if (!el) return;
-  var q = String(query || '').toLowerCase().trim();
-  var list = q ? quickPicks.filter(function(c) { return String(c.name || '').toLowerCase().includes(q); }) : quickPicks;
-  if (!list.length) { el.innerHTML = '<div class="qp-empty">' + (q ? 'No matches' : 'No picks yet') + '</div>'; return; }
-  el.innerHTML = '';
-  list.forEach(function(c) {
-    var d = document.createElement('div');
-    var photo = _safeImageUrl(c.photo);
-    d.className = 'qp-item' + (qpEditMode ? ' editing' : '');
-    d.innerHTML = (photo
-      ? '<img style="width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid var(--border)" src="' + escapeHtml(photo) + '" alt="">'
-      : '<span class="qp-item-type" style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:36px;text-align:right">' + escapeHtml(carTypeLabel(c.type)) + '</span>')
-      + '<span class="qp-item-name">' + escapeHtml(c.name || '') + '</span><span class="qp-item-val">' + fmtFull(Number(c.value) || 0) + '</span>'
-      + (qpEditMode ? '<button class="qp-item-del" title="Remove">&#10005;</button>' : '');
-    if (qpEditMode) d.querySelector('.qp-item-del').onclick = function(e) { e.stopPropagation(); removeQP(c.name); };
-    else d.onclick = function() {
-      document.getElementById('carName').value = c.name || '';
-      document.getElementById('carValue').value = Number(c.value) || 0;
-      document.getElementById('carColor').value = c.color || '';
-      document.getElementById('carType').value = c.type || 'other';
-      closeQP(); document.getElementById('qpSearch').value = '';
-    };
-    el.appendChild(d);
-  });
 }
 
 //  GET INPUTS 
@@ -7561,11 +7482,6 @@ function importFromFile(input) {
       allRuns    = JSON.parse(localStorage.getItem('cs_runs')    || '[]');
       currentRun = JSON.parse(localStorage.getItem('cs_current') || '[]');
       quickPicks = JSON.parse(localStorage.getItem('cs_qp')      || '[]');
-      // Backups are untrusted input. Normalize their displayable and numeric
-      // fields before any renderer can put them in the DOM.
-      allRuns = _normalizeImportedRuns(allRuns);
-      currentRun = Array.isArray(currentRun) ? currentRun.map(_normalizeImportedCar).filter(function(c) { return c.name; }) : [];
-      quickPicks = Array.isArray(quickPicks) ? quickPicks.map(_normalizeImportedCar).filter(function(c) { return c.name; }) : [];
       aliases    = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
       bestFromLB = parseInt(localStorage.getItem('cs_best_lb')   || '0');
       _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
@@ -7948,38 +7864,6 @@ function _stripCopy(obj) {
   }
   return obj;
 }
-// v30: image blobs are keyed by an immutable car/photo identity, not a model
-// name.  This prevents one "Porsche 911" photo from replacing another.
-function _ensurePhotoId(car) {
-  if (!car || !car.photo || car.photoId) return car && car.photoId;
-  var random = (window.crypto && typeof window.crypto.randomUUID === 'function')
-    ? window.crypto.randomUUID()
-    : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2);
-  car.photoId = 'photo-' + random;
-  return car.photoId;
-}
-function _stripCopy(obj) {
-  if (Array.isArray(obj)) return obj.map(function(x) { return _stripCopy(x); });
-  if (obj && typeof obj === 'object') {
-    var c = {};
-    for (var k in obj) {
-      var v = obj[k];
-      if (k === 'photo' && typeof v === 'string' && v.indexOf('data:') === 0) {
-        var photoKey = _ensurePhotoId(obj);
-        if (_idbPhotoCache[photoKey] !== v) {
-          _idbPhotoCache[photoKey] = v;
-          _idbPut(photoKey, v).catch(function() {});
-        }
-        c.photoId = photoKey;
-        c.photo = 'photo:' + photoKey;
-      } else if (v && typeof v === 'object') c[k] = _stripCopy(v);
-      else c[k] = v;
-    }
-    return c;
-  }
-  return obj;
-}
-
 function _saveRunsLocal()    { return _safeSet('cs_runs',    JSON.stringify(_stripCopy(allRuns))); }
 function _saveCurrentLocal() { return _safeSet('cs_current', JSON.stringify(_stripCopy(currentRun))); }
 function _saveQPLocal()      { return _safeSet('cs_qp',      JSON.stringify(_stripCopy(quickPicks))); }
@@ -9334,24 +9218,6 @@ function renderLeaderboard() {
           <div class="lb-total">${fmtFull(run.total)}</div>
         </div>
       </div>`;
-  }).join('');
-}
-
-// v30: leaderboard content comes from other users, so never interpolate it as
-// trusted HTML.
-function renderLeaderboard() {
-  var el = document.getElementById('leaderboardList');
-  if (!el) return;
-  if (!leaderboardRuns.length) { el.innerHTML = '<div class="lb-empty">No completed runs have been synced yet.</div>'; return; }
-  el.className = 'leaderboard-list';
-  el.innerHTML = leaderboardRuns.map(function(run, idx) {
-    var top = idx < 3 ? 'top' : '';
-    var medal = idx === 0 ? '&#129351;' : idx === 1 ? '&#129352;' : idx === 2 ? '&#129353;' : '#' + (idx + 1);
-    var name = escapeHtml((run.isMe ? String(run.name || '') + ' (You)' : String(run.name || 'Spotter')));
-    var meta = escapeHtml(fmtLeaderboardDate(run.date));
-    if (run.headliner) meta += ' &#11088; ' + escapeHtml(String(run.headliner));
-    meta += ' &#128664; ' + (Number(run.cars) || 0) + ' cars';
-    return '<div class="lb-row" style="animation-delay:' + (idx * 0.03) + 's"><div class="lb-rank ' + top + '">' + medal + '</div><div class="lb-main"><div class="lb-name">' + name + '</div><div class="lb-meta">' + meta + '</div></div><div class="lb-score"><div class="lb-total">' + fmtFull(Number(run.total) || 0) + '</div></div></div>';
   }).join('');
 }
 
