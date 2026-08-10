@@ -586,7 +586,7 @@ body{
 }
 .cc-card{
   position:relative;
-  width:min(272px,78vw);aspect-ratio:3/4;
+  width:min(272px,78vw);height:min(362px,104vw);aspect-ratio:3/4;
   perspective:1200px;transform-style:preserve-3d;
   animation:ccCardIn 0.75s cubic-bezier(0.34,1.56,0.64,1) both;
 }
@@ -2033,6 +2033,9 @@ html.show-install #installBanner{display:flex;}
 .theme-swatch.locked{filter:grayscale(1) brightness(0.55);cursor:not-allowed;}
 .theme-swatch.locked .theme-lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Inter',sans-serif;font-size:0.5rem;font-weight:800;letter-spacing:1px;background:rgba(0,0,0,0.45);border-radius:inherit;text-shadow:0 1px 2px rgba(0,0,0,0.8);}
 .theme-swatch{position:relative;}
+.theme-swatch.mystery{background:repeating-conic-gradient(#1a1a20 0% 25%,#101014 0% 50%) 50%/8px 8px;box-shadow:0 0 0 3px #1a1a20;cursor:pointer;filter:none;}
+.theme-swatch.mystery .theme-lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--accent2);font-family:'Inter',sans-serif;font-size:0.6rem;font-weight:800;background:rgba(5,5,8,0.35);border-radius:inherit;}
+.theme-swatch.mystery:hover{transform:scale(1.12);}
 .sort-pref-btn{
   background:var(--glass-card);
   backdrop-filter:blur(8px) saturate(1.2);
@@ -3499,6 +3502,74 @@ let tutorialTimer = null;
 let tutorialStep = 0;
 
 // Achievements — declared here so getUnlockedAchievements() works at any point
+
+// ---- WEIRD-ACHIEVEMENT DETECTORS — little moments worth remembering ----
+function detectThreeGenerations(cars) {
+  // Same base model across 3 distinct body-code generations
+  // (e.g. Corvette C3/C7/C8, 911 964/991/992, Mustang/GT, R34/R35 skyline).
+  var GEN = /\b(C\d|964|993|996|997|991|992|930|R34|R35|E30|E36|E46|E9X|F80|G80)\b/i;
+    // trim descriptors that get dropped from the base key (911 Carrera/GT3 -> 911)
+    var TRIM = /^(carrera|gt|gt3|gts|turbo|turbo\s?s?|rs|z06|zr1|stingray|amg|gs|ss|rt|highway|super|cls|coupe)$/i;
+  var base = {};
+  (cars||[]).forEach(function(c){
+    var name = String(c.name||'');
+    var words = name.trim().split(/\s+/);
+    var gens = [];
+    words.forEach(function(wd){ if (GEN.test(wd)) gens.push(wd); });
+    if (!gens.length) return;
+    // base = words before the first generation token (drops descriptors like Z06/GTS)
+    var cut = words.length;
+    for (var i=0;i<words.length;i++){ if (GEN.test(words[i])) { cut=i; break; } }
+    var baseWords = words.slice(0, cut).filter(function(wd){ return !TRIM.test(wd); });
+    var key = baseWords.join(' ').toLowerCase().trim();
+    if (!key) key = name.toLowerCase();
+    (base[key] = base[key] || []);
+    gens.forEach(function(g){
+      var gk = g.toUpperCase();
+      if (base[key].indexOf(gk) === -1) base[key].push(gk);
+    });
+  });
+  return Object.keys(base).some(function(k){ return base[k].length >= 3; });
+}
+function detectFiveMakesInOneRun(allRuns) {
+  // "spotted 5 brands in one run"
+  return (allRuns||[]).some(function(r){
+    if (r.spotted) return false;
+    var makes = new Set((r.cars||[]).map(function(c){ return String(c.name||'').split(' ')[0].toLowerCase(); }));
+    return makes.size >= 5;
+  });
+}
+function detectRainbowRun(allRuns) {
+  // 4 different colors in a single run
+  return (allRuns||[]).some(function(r){
+    if (r.spotted) return false;
+    var colors = new Set((r.cars||[]).map(function(c){ return String(c.color||'').toLowerCase(); }).filter(Boolean));
+    return colors.size >= 4;
+  });
+}
+function detectPalindromicValue(cars) {
+  // a car whose value reads the same backwards (e.g. $1,212,121)
+  return (cars||[]).some(function(c){
+    var v = String(c.value||'0');
+    var s = v.replace(/[^0-9]/g,'');
+    if (s.length < 2) return false;
+    return s === s.split('').reverse().join('');
+  });
+}
+function detectTwinSpot(allRuns) {
+  // the exact same car twice — name, color, and value — in one run
+  return (allRuns||[]).some(function(r){
+    if (r.spotted) return false;
+    var seen = {};
+    return (r.cars||[]).some(function(c){
+      var k = String(c.name||'').toLowerCase() + '|' + (c.color||'') + '|' + (c.value||0);
+      if (seen[k]) return true;
+      seen[k] = true;
+      return false;
+    });
+  });
+}
+
 const ACHIEVEMENTS = [
   { id:'first_car',    icon:'01', name:'First Spot',      desc:'Log your first car',            xp:50,  check:(c,r)=>c.length>=1 },
   { id:'ten_cars',     icon:'10', name:'Decade',           desc:'Log 10 cars total',             xp:120, check:(c,r)=>c.length>=10 },
@@ -3539,6 +3610,11 @@ const ACHIEVEMENTS = [
   { id:'two_mil_run',  icon:'2M', name:'Two Million Club', desc:'Complete a run over $2M',       xp:800, check:(c,r)=>r.some(x=>!x.spotted&&x.total>=2000000) },
   { id:'three_mil_run',icon:'3M', name:'Unicorn Run',      desc:'Complete a run over $3M',       xp:1200,check:(c,r)=>r.some(x=>!x.spotted&&x.total>=3000000) },
   { id:'double_legend_run',icon:'2L',name:'Royal Convoy',  desc:'Log 2 legend cars in one run',  xp:1000,check:(c,r)=>r.some(x=>!x.spotted&&(x.cars||[]).filter(car=>car.value>=1000000).length>=2) },
+  { id:'three_generations',icon:'3G',name:'Time Machine Tamer', desc:'Spot 3 generations of the same model', xp:800, check:(c,r)=>detectThreeGenerations(c) },
+  { id:'brand_bouquet',    icon:'5M',name:'Brand Bouquet',  desc:'Spot 5 different makes in one run', xp:260, check:(c,r)=>detectFiveMakesInOneRun(r) },
+  { id:'rainbow_run',      icon:'RC',name:'Rainbow Run',    desc:'Catch 4 different car colors in one run', xp:220, check:(c,r)=>detectRainbowRun(r) },
+  { id:'palindrome',       icon:'PP',name:'Mirror Mirror',  desc:'Spot a car worth a palindrome ($1,212,121)', xp:300, check:(c,r)=>detectPalindromicValue(c) },
+  { id:'twin_spot',        icon:'TT',name:'Double Take',    desc:'Spot the exact same car twice in one run', xp:420, check:(c,r)=>detectTwinSpot(r) },
 ];
 let _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
 
@@ -4304,12 +4380,18 @@ const THEMES = [
   { name:'Light',        accent:'#ffa94d', accent2:'#ff6a3d', bg:'#f5f5f0', surf:'#ffffff', surf2:'#eae9e3', bodyClass:'theme-light', unlock:15 },
   { name:'Cyberpunk',    accent:'#bf00ff', accent2:'#00ffee', bg:'#08001a', surf:'#100028', surf2:'#180040', bodyClass:'theme-cyberpunk', unlock:18 },
   { name:'Retro 80s',    accent:'#ff6ec7', accent2:'#ffe600', bg:'#0d0d1a', surf:'#131325', surf2:'#1c1c35', bodyClass:'theme-retro80s', unlock:22 },
+  { name:'Midnight',     accent:'#8ea2ff', accent2:'#e8b84b', bg:'#060608', surf:'#0e0e12', surf2:'#171720', bodyClass:'', id:'midnight', secret:true, unlock:30 },
 ];
 let activeTheme = parseInt(localStorage.getItem('cs_theme') || '0');
 let carbonOn    = localStorage.getItem('cs_carbon') === 'on';
 function _themeUnlocked(i) {
-  var lvl = (i==null) ? 0 : THEMES[i] ? THEMES[i].unlock : 0;
+  var t = (i==null) ? null : THEMES[i];
+  var lvl = t ? t.unlock : 0;
+  if (t && t.secret) return _secretThemeFound(t.id);
   return (lvl <= 0) || xpInfo(_xpTotal).level >= lvl;
+}
+function _secretThemeFound(id) {
+  try { return localStorage.getItem('cs_secret_' + id) === '1'; } catch(e){ return false; }
 }
 // New theme unlocked at this level (if any), for the level-up celebration
 function themeUnlockedAtLevel(lvl) {
@@ -4346,15 +4428,22 @@ function renderThemeBar() {
   bar.innerHTML = THEMES.map((t,i) => {
     const isLight = t.bodyClass === 'theme-light';
     const border = isLight ? '#ccc' : t.bg;
+    const mystery = !!(t.secret) && !_secretThemeFound(t.id);
     const locked = !_themeUnlocked(i);
-    const unlockLabel = locked ? `<span class="theme-lock">LV ${t.unlock}</span>` : '';
-    return `<div class="theme-swatch${i===activeTheme?' active':''}${locked?' locked':''}" 
+    const unlockLabel = mystery ? '<span class="theme-lock">?</span>'
+      : locked ? `<span class="theme-lock">LV ${t.unlock}</span>` : '';
+    return `<div class="theme-swatch${i===activeTheme?' active':''}${locked?' locked':''}${mystery?' mystery':''}" 
       style="background:${t.accent};box-shadow:0 0 0 3px ${border};${isLight?'border:2px solid #ddd;':''}" 
-      onclick="selectTheme(${i})" title="${t.name}${locked?' (Unlocks at Level '+t.unlock+')':''}">${unlockLabel}</div>`;
+      onclick="selectTheme(${i})" title="${mystery ? '???' : (t.name + (locked ? ' (Unlocks at Level '+t.unlock+')' : ''))}">${unlockLabel}</div>`;
   }).join('');
   document.getElementById('themeName').textContent = THEMES[activeTheme].name;
 }
 function selectTheme(idx) {
+  const t = THEMES[idx];
+  if (t && t.secret && !_secretThemeFound(t.id)) {
+    showToast('??  There\u2019s something hiding here...');
+    return;
+  }
   if (!_themeUnlocked(idx)) {
     showToast('🔒 Unlock at Level ' + THEMES[idx].unlock + ' by earning XP');
     return;
@@ -4363,6 +4452,36 @@ function selectTheme(idx) {
   renderThemeBar();
   _bumpVer('settings');
   saveToCloud();
+}
+//  SECRET THEME DISCOVERY — tap the CarSpotter wordmark 5 times within 2s.
+var _secretTapLog = [];
+function _onLogoSecretTap() {
+  var now = Date.now();
+  _secretTapLog = _secretTapLog.filter(function(t){ return now - t < 2000; });
+  _secretTapLog.push(now);
+  if (_secretTapLog.length >= 5) {
+    _secretTapLog = [];
+    var midnight = THEMES.find(function(t){ return t && t.secret; });
+    if (!midnight || _secretThemeFound(midnight.id)) { showToast('Others watch the road. You watch the wordmark.'); return; }
+    try { localStorage.setItem('cs_secret_' + midnight.id, '1'); } catch(e){}
+    applyTheme(THEMES.indexOf(midnight));
+    renderThemeBar();
+    playSound('crystal');
+    recordActivity('secret', '🌙 You found a hidden theme — tap 5x on the wordmark. Midnight has been added to your palette.', { icon:'🌙' });
+    enqueueMoment({
+      emoji:'🌙', eyebrow:'Secret Discovered', title:'Midnight',
+      desc:'Tap the wordmark five times and the world goes dark.',
+      sub:'A hidden theme joins your palette — Settings > Appearance.',
+      colors:['#8ea2ff','#e8b84b','#ffffff','#6b7bff'], particles:26
+    });
+    if (typeof renderThemeBar === 'function') renderThemeBar();
+  }
+}
+function initSecretThemeTap() {
+  document.addEventListener('click', function(e){
+    var el = e.target && e.target.closest ? e.target.closest('.logo, .auth-logo') : null;
+    if (el) _onLogoSecretTap();
+  });
 }
 function toggleCarbon() {
   carbonOn = !carbonOn;
@@ -6904,7 +7023,48 @@ function rewardLog(car, popTotal, opts) {
     cardDone.then(function() { celebrateLevelUp(after); });
   }
   if (window.updateProgressionAfterLog) setTimeout(function(){ updateProgressionAfterLog(car); }, 900);
+  maybeCarPersonality(car);
   return cardDone;
+}
+
+//  LITTLE MOMENTS — absurd finds & personality. Restrained: mostly quiet activity
+//  feed notes, with an occasional toast for genuinely absurd combos.
+function maybeCarPersonality(car) {
+  try {
+    if (!car) return;
+    var name = String(car.name || '').toLowerCase();
+    var v = car.value || 0;
+    var s = String(Math.round(v));
+    var isPal = s.length > 1 && s === s.split('').reverse().join('');
+
+    var absurd = [];
+    if (isPal) absurd.push('🪞 ' + fmtFull(v) + ' — reads the same backwards. Suspiciously tidy.');
+    if (v >= 500000 && (car.type === 'daily' || car.type === 'sports')) absurd.push('😳 A ' + (car.type||'') + ' worth ' + fmtFull(v) + '? Bold claim.');
+    if (name === 'the mystery machine' || name === 'lightning mcqueen' || name === 'herbie') absurd.push('🤫 The Scooby van is here. Do not let it leave.');
+
+    if (absurd.length) {
+      absurd.forEach(function(line){ recordActivity('find', line, { icon: line.slice(0,2) }); });
+      // Only surface the rarest ones as a live toast, never the feed spam.
+      if (absurd.some(function(l){ return l.indexOf('🤫') === 0; })) {
+        setTimeout(function(){ showToast(absurd[absurd.length-1]); }, 600);
+      }
+      return;
+    }
+
+    // Personality drip — ~6% of logs, quiet-only, rotates through a small pool.
+    if (Math.random() < 0.06) {
+      var pool = [
+        'The stripes are crooked. You noticed.',
+        'This car and you go way back now.',
+        'A leaf is stuck in the grille. You took the shot anyway.',
+        'Somewhere, the owner is waving.',
+        'Check the panel gaps. Trust nothing.',
+        'The engine note follows you home.'
+      ];
+      var line = pool[Math.floor(Math.random()*pool.length)];
+      recordActivity('vibe', '💬 ' + line, { icon: '💬' });
+    }
+  } catch(e) {}
 }
 
 function garageBestValue() {
@@ -10463,6 +10623,7 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
   renderGarage();
   renderAchievements();
   refreshOfflineStatus();
+  initSecretThemeTap();
   // Progression expansion init
   if (window.renderTitleChip) renderTitleChip();
   if (window.checkTitleUnlock) setTimeout(function(){ checkTitleUnlock(true); }, 600);
