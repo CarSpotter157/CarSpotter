@@ -3441,6 +3441,22 @@ var _deletedQP  = (function(){ try { var d = JSON.parse(localStorage.getItem('cs
 var _removedFavs = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_fav') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })(); // tombstoned favorite names
 var _dirty = localStorage.getItem('cs_sync_dirty') === '1';                           // durable "unsynced change" flag
 var _applyingCloud = false;                                                           // guard: never echo-write while applying a cloud doc
+var _lastSyncErr = null;                                                              // {at,cause,code,message} of the most recent failed write
+var _lastSyncErrNotified = '';                                                        // dedupe key so each distinct failure notifies only once
+var _syncRetryTimer = null;                                                           // backoff timer for the automatic retry after a failed write
+var _syncRetryN = 0;                                                                  // backoff attempt counter
+var _txChain = Promise.resolve();                                                     // serializes all Firestore writes on this device (prevents self-contention)
+function _scheduleSyncRetry() {
+  if (_syncRetryTimer) { clearTimeout(_syncRetryTimer); _syncRetryTimer = null; }
+  if (!_dirty || !currentUser) return;
+  _syncRetryN++;
+  var delay = Math.min(60000, 5000 * Math.pow(2, _syncRetryN - 1)); // 5s, 10s, 20s, 40s, 60s cap
+  _syncRetryTimer = setTimeout(function() {
+    _syncRetryTimer = null;
+    if (!_dirty || !currentUser) return;
+    flushSyncNow();
+  }, delay);
+}
 var CS_SYNC_DEBUG = false;                    // sync debug logging off by default (diagnostics can be noisy/laggy)
 window.CS_SYNC_DEBUG = CS_SYNC_DEBUG;
 window.setSyncDebug = function(v){ CS_SYNC_DEBUG = window.CS_SYNC_DEBUG = !!v; try { localStorage.setItem('cs_sync_debug', CS_SYNC_DEBUG ? '1' : '0'); } catch(e){} if (CS_SYNC_DEBUG) console.log('[sync] debug logging ON'); };
@@ -3982,7 +3998,7 @@ function subscribeCloud() {
     // Converge: push the merged union back so other devices (and this one) stay in sync.
     // The transactional rebase makes this safe — it never clobbers newer cloud fields.
     if (!_coreEqual(_buildCloudPayload(), d)) {
-      _txWrite({ cause: 'converge', retries: 2 });
+      _txWrite({ cause: 'converge', retries: 5 });
     }
   });
 }
@@ -4287,6 +4303,14 @@ function _applyCloud(c) {
 function _txWrite(opts) {
   if (!currentUser) return Promise.resolve(false);
   if (!navigator.onLine) { _markDirty(true); return Promise.resolve(false); }
+  // Serialize all writes on this device so rapid-fire calls (endRun's immediate
+  // flush + the achievement/XP cascade) never run two Firestore transactions at
+  // once and contend on the same doc. Each queued write still re-reads + rebases.
+  var run = _txChain.then(function(){ return _txWriteCore(opts); });
+  _txChain = run.then(function(){}, function(){});
+  return run;
+}
+function _txWriteCore(opts) {
   var docRef  = db.collection('users').doc(currentUser.uid);
   var cause   = (opts && opts.cause) || 'write';
   var maxTries = (opts && opts.retries != null) ? opts.retries : 3;
@@ -4305,6 +4329,11 @@ function _txWrite(opts) {
     }).then(function() {
       logSync('txWrite', cause, 'ok (attempt ' + attempt + ')');
       _markDirty(false);
+      _lastSyncErr = null;
+      _lastSyncErrNotified = '';
+      _syncRetryN = 0;
+      if (_syncRetryTimer) { clearTimeout(_syncRetryTimer); _syncRetryTimer = null; }
+      try { localStorage.removeItem('cs_sync_last_err'); } catch(e){}
       setSyncDot('ok');
       leaderboardLoaded = false;
       _lastPushTs = Date.now();
@@ -4312,13 +4341,25 @@ function _txWrite(opts) {
       return true;
     }).catch(function(err) {
       logSync('txWrite', cause, 'FAILED (attempt ' + attempt + '):', err && err.code, err && err.message);
+      // Persist the real error so a future sync failure is diagnosable even when
+      // debug logging is off.
+      _lastSyncErr = { at: Date.now(), cause: cause, code: (err && err.code) || '', message: (err && err.message) || '' };
+      try { localStorage.setItem('cs_sync_last_err', JSON.stringify(_lastSyncErr)); } catch(e){}
       if (attempt < maxTries) {
         return new Promise(function(res) { setTimeout(res, 400 * attempt); }).then(tryOnce);
       }
       _markDirty(true);
       setSyncDot('');
       if (cause !== 'unload') {
-        recordActivity('sync', '⚠️ Sync failed — local copy safe, will retry automatically', { icon: '⚠️' });
+        var errCode = (err && err.code) ? ' (' + err.code + ')' : '';
+        // Notify once per distinct error; automatic retries stay quiet so a
+        // persistent failure doesn't spam the activity log on every backoff tick.
+        var errKey = cause + ':' + ((err && err.code) || '') + ':' + ((err && err.message) || '');
+        if (_lastSyncErrNotified !== errKey) {
+          _lastSyncErrNotified = errKey;
+          recordActivity('sync', '⚠️ Sync failed' + errCode + ' — local copy safe, will retry automatically', { icon: '⚠️' });
+        }
+        _scheduleSyncRetry();
       }
       return false;
     });
