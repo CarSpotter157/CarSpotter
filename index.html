@@ -5373,6 +5373,10 @@ function endRun() {
   saveCurrentRun();
   renderQPTrigger();
   renderSpot();
+  // End-run is a critical state transition: the run record + cleared currentRun must
+  // reach the cloud promptly, not ride the tail of the 1500ms debounce, which the
+  // achievement/XP cascade below would otherwise keep re-arming for ~2.7s+.
+  flushSyncNow();
   playSound('end');
   showRecap({ total, cars: runCars, headliner, isRec: isRec || isFirstRec, prevBest });
   if (isRec || isFirstRec) {
