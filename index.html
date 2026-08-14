@@ -28,12 +28,6 @@
   try {
     var qp = JSON.parse(localStorage.getItem('cs_qp') || '[]');
     if (qp.length) document.documentElement.classList.add('show-qp');
-    // The picker also lists every garage car, so any runs/current data makes it relevant.
-    if (!document.documentElement.classList.contains('show-qp')) {
-      var hasRuns = (JSON.parse(localStorage.getItem('cs_runs') || '[]')).length > 0 ||
-                    (JSON.parse(localStorage.getItem('cs_current') || '[]')).length > 0;
-      if (hasRuns) document.documentElement.classList.add('show-qp');
-    }
     var favNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
     if (favNames.size) {
       var known = new Set();
@@ -192,6 +186,19 @@ body{
   50%{transform:translate3d(1%,1.5%,0) scale(1.06);opacity:1;}
   100%{transform:translate3d(-0.5%,0.5%,0) scale(1.02);opacity:0.85;}
 }
+/* When the tab/WebView is backgrounded, freeze the perpetual decorative
+   animations so WKWebView doesn't keep the compositor busy (a known iOS
+   memory/pressure reload trigger). */
+html.cs-hidden .app-shell::before,
+html.cs-hidden .score-banner::after,
+html.cs-hidden .rdl,
+html.cs-hidden .track-deco,
+html.cs-hidden .cc-glow,
+html.cs-hidden .cc-rainbow,
+html.cs-hidden .cc-shine::before,
+html.cs-hidden .btn-run::after{animation-play-state:paused !important;}
+html.cs-hidden .cc-card,.html.cs-hidden .cc-inner,
+html.cs-hidden .levelup-star,.html.cs-hidden .recap-record-tag.pop{animation-play-state:paused !important;}
 .app-shell > .pages{position:relative;z-index:1;}
 
 /* Cinematic camera push — apply to a screen during a big reveal. */
@@ -1209,12 +1216,6 @@ html:not(.show-qp) #qpWrap{display:none;}
 .gc-edit{color:#fff;}
 .gc-edit:hover{transform:scale(1.2);background:rgba(232,184,75,0.25);}
 .gc-edit:active{transform:scale(0.9);}
-.gc-lot{color:#fff;font-size:0.8rem;}
-.gc-lot:hover{transform:scale(1.2);background:rgba(52,199,89,0.35);}
-.gc-lot:active{transform:scale(0.9);}
-.gc-rev{color:#fff;font-size:0.8rem;}
-.gc-rev:hover{transform:scale(1.2);background:rgba(232,184,75,0.3);}
-.gc-rev:active{transform:scale(0.9);}
 .gc-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
 .gc-meta-chip{background:var(--surf2);border:1px solid var(--border);border-radius:6px;padding:5px 7px;}
 .gc-meta-label{font-size:0.38rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:1px;}
@@ -3027,13 +3028,12 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 
     <!-- ACHIEVEMENTS PAGE -->
     <div class="page" id="page-achievements">
-      <div class="sec-title" style="margin-bottom:6px">Achievements & Expeditions</div>
+      <div class="sec-title" style="margin-bottom:6px">Achievements</div>
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">
         <div class="ach-count-row" id="achCountRow" style="margin-bottom:0"><span id="achUnlocked">0</span> / <span id="achTotal">0</span> unlocked</div>
+        <button class="txt-btn" onclick="goTo('expeditions')" style="white-space:nowrap">See all →</button>
       </div>
       <div class="ach-grid" id="achGrid"></div>
-      <div class="sec-title" style="margin:22px 0 8px">Expeditions</div>
-      <div id="expoList"></div>
     </div>
 
     <!-- SETTINGS PAGE -->
@@ -3214,7 +3214,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
           <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
           <span class="more-tile-label">Collector Book</span>
         </button>
-        <button class="more-page-tile" onclick="goTo('achievements')">
+        <button class="more-page-tile" onclick="goTo('expeditions')">
           <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
           <span class="more-tile-label">Expeditions</span>
         </button>
@@ -3230,7 +3230,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
           <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
           <span class="more-tile-label">Leaderboard</span>
         </button>
-        <button class="more-page-tile" onclick="goTo('achievements')">
+        <button class="more-page-tile" onclick="goTo('expeditions')">
           <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
           <span class="more-tile-label">Achievements</span>
         </button>
@@ -3296,6 +3296,17 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
     </div>
 
     <!-- EXPEDITIONS PAGE (unified challenge collection: expeditions + achievements) -->
+    <div class="page" id="page-expeditions">
+      <div class="expo-hero">
+        <div class="eh-icon">🗺️</div>
+        <div>
+          <div class="eh-title">ACHIEVEMENTS & EXPEDITIONS</div>
+          <div class="eh-sub">One collection · auto-earn or claim XP rewards</div>
+        </div>
+      </div>
+      <div id="expoList"></div>
+    </div>
+
     <!-- ROAD TRIPS PAGE -->
     <div class="page" id="page-trips">
       <div class="trip-hero" id="tripHero"></div>
@@ -3430,6 +3441,61 @@ let syncUnsub    = null;
 let syncTimer    = null;
 let qpOpen       = false;
 var _idbPhotoCache = {}; // must init early — used by renders before the photo section
+// Bounded in-memory photo mirror. Base64 strings are heavy (hundreds of KB each);
+// keeping every photo in JS memory is what makes iOS WKWebView kill and reload the
+// page under pressure. We keep only the most recently used `_photoCacheMax` entries
+// resident and lazily re-read evicted ones from IndexedDB.
+var _photoCacheMax = 30;
+var _photoCacheOrder = [];
+var _photoLazyQueue = [];
+var _photoLazyTimer = null;
+var _photoLoading = {};      // keys currently fetching / already attempted (prevents re-queue storms)
+var _photoMissing = {};      // keys confirmed absent from IDB (skip repeat reads every render)
+var _photoRerenderTimer = null;
+function _photoCacheSet(key, data) {
+  if (!data) return;
+  _idbPhotoCache[key] = data;
+  delete _photoMissing[key];
+  var i = _photoCacheOrder.indexOf(key);
+  if (i >= 0) _photoCacheOrder.splice(i, 1);
+  _photoCacheOrder.unshift(key);
+  while (_photoCacheOrder.length > _photoCacheMax) {
+    var ev = _photoCacheOrder.pop();
+    delete _idbPhotoCache[ev];
+    delete _photoLoading[ev]; // allow a later render to re-load it from IDB on demand
+  }
+}
+function _photoCacheKey(name) { return String(name || '').toLowerCase(); }
+function _photoCacheGet(key) { return _idbPhotoCache[key] || ''; }
+function _photoLazyLoad(key) {
+  if (!key || _photoLoading[key] || _photoMissing[key] || _idbPhotoCache[key]) return;
+  _photoLoading[key] = true;
+  _photoLazyQueue.push(key);
+  if (_photoLazyTimer) return;
+  _photoLazyTimer = setTimeout(function() {
+    _photoLazyTimer = null;
+    var q = _photoLazyQueue; _photoLazyQueue = [];
+    var pending = q.length;
+    q.forEach(function(k) {
+      _idbGet(k).then(function(data) {
+        if (data) _photoCacheSet(k, data);
+        else _photoMissing[k] = true;
+      }).catch(function(){}).then(function() {
+        _photoLoading[k] = false;
+        pending--;
+        if (pending <= 0 && !_photoRerenderTimer) {
+          _photoRerenderTimer = setTimeout(function() {
+            _photoRerenderTimer = null;
+            renderSpot();
+            renderGarage();
+            renderHistory();
+            renderDiscoveries();
+          }, 180);
+        }
+      });
+    });
+  }, 60);
+}
 
 // ── DETERMINISTIC SYNC STATE ────────────────────────────────────────
 var _lamport = parseInt(localStorage.getItem('cs_lamport') || '0');                  // global logical clock (persisted, monotonic)
@@ -3448,23 +3514,6 @@ var _lastSyncErrNotified = '';                                                  
 var _syncRetryTimer = null;                                                           // backoff timer for the automatic retry after a failed write
 var _syncRetryN = 0;                                                                  // backoff attempt counter
 var _txChain = Promise.resolve();                                                     // serializes all Firestore writes on this device (prevents self-contention)
-//  CRASH TRAP — some WebViews kill + restart the whole page when an error escapes.
-//  Log the last handful of errors to localStorage (so the cause of a restart is
-//  diagnosable after it happens) and keep listener callbacks from crashing the host.
-var _crashLog = (function(){ try { return JSON.parse(localStorage.getItem('cs_crash_log') || '[]'); } catch(e){ return []; } })();
-function _recordCrash(msg, stack) {
-  try {
-    _crashLog.push({ at: Date.now(), msg: String(msg || '').slice(0,300), st: String(stack || '').slice(0,600) });
-    if (_crashLog.length > 6) _crashLog.splice(0, _crashLog.length - 6);
-    localStorage.setItem('cs_crash_log', JSON.stringify(_crashLog));
-  } catch(e) {}
-}
-window.addEventListener('error', function(ev) { _recordCrash((ev && ev.message) || 'uncaught error', ev && ev.error && ev.error.stack); });
-window.addEventListener('unhandledrejection', function(ev) {
-  var r = ev && ev.reason;
-  _recordCrash('unhandled rejection' + (r && r.code ? ' (' + r.code + ')' : ''), r && r.stack ? r.stack : (r && r.message));
-});
-window._getCrashLog = function(){ return _crashLog.slice(); };
 function _scheduleSyncRetry() {
   if (_syncRetryTimer) { clearTimeout(_syncRetryTimer); _syncRetryTimer = null; }
   if (!_dirty || !currentUser) return;
@@ -3833,7 +3882,6 @@ function importLocalData() {
 }
 
 auth.onAuthStateChanged(async user => {
-  try {
   currentUser = user;
   var authOverlay = document.getElementById('authOverlay');
   if (user) {
@@ -3853,7 +3901,6 @@ auth.onAuthStateChanged(async user => {
     document.getElementById('userPillWrap').innerHTML = '<div class="user-pill" onclick="showSignInSheet()">Sign In</div>';
     if (syncUnsub) { syncUnsub(); syncUnsub = null; }
   }
-  } catch(e) { _recordCrash('authStateChanged', e.stack); }
 });
 
 // Handle redirect sign-in result
@@ -3949,7 +3996,6 @@ function _coreEqual(a, b) {
     var tomQ = function(o){ return JSON.stringify(_normArr((o.deletedQP && o.deletedQP.ids) || [], function(x){ return String(x); })); };
     var fav  = function(o){ return JSON.stringify(_normArr((o.favorites && o.favorites.names) || [], function(x){ return String(x); })); };
     var ach  = function(o){ return JSON.stringify(_normArr((o.achievements && o.achievements.ids) || [], function(x){ return String(x); })); };
-    var disc = function(o){ return JSON.stringify(_normArr((o.discoveries && o.discoveries.items) || [], function(x){ return String(x.d || x.n); })); };
     if (cur(ka) !== cur(kb)) return false;
     if (runs(ka) !== runs(kb)) return false;
     if (qp(ka) !== qp(kb)) return false;
@@ -3961,7 +4007,6 @@ function _coreEqual(a, b) {
     if (JSON.stringify((ka.aliases && ka.aliases.map) || null) !== JSON.stringify((kb.aliases && kb.aliases.map) || null)) return false;
     if (JSON.stringify((ka.settings && ka.settings.map) || null) !== JSON.stringify((kb.settings && kb.settings.map) || null)) return false;
     if (ach(ka) !== ach(kb)) return false;
-    if (disc(ka) !== disc(kb)) return false;
     if (JSON.stringify(ka.progression || null) !== JSON.stringify(kb.progression || null)) return false;
     return true;
   } catch(e) { return false; }
@@ -3996,7 +4041,7 @@ async function loadFromCloud() {
     }
     if (!_lastSave) setSyncDot('ok');
   } catch(e) { setSyncDot(''); console.error(e); }
-  renderQPTrigger(); renderSpot(); renderGarage(); renderHistory(); renderDiscoveries();
+  renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
   fetchRefImagesForAllCars();
   if (currentRun.length > 0)
     setTimeout(() => notify('🚗 Run resumed — ' + currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '') + ' restored!', { priority:'major', record: true, key:'Run resumed', icon:'🚗' }), 700);
@@ -4005,7 +4050,6 @@ async function loadFromCloud() {
 function subscribeCloud() {
   if (!currentUser) return;
   syncUnsub = db.collection('users').doc(currentUser.uid).onSnapshot(snap => {
-    try {
     if (!snap.exists) return;
     const d = snap.data();
     // Ignore our own echo (the doc this device just wrote). Never gate on lamport here:
@@ -4013,18 +4057,19 @@ function subscribeCloud() {
     // those merges are additive + tombstoned, so applying every differing payload is safe.
     if (d.seq && d.seq === _lastLocalSeq) return;
     logSync('listener', 'seq', d.seq, 'lamport', d.lamport);
-    _applyCloud(d);
-    _saveAllLocal();
-    renderQPTrigger(); renderSpot();
-    const pg = document.querySelector('.page.active')?.id;
-    if (pg === 'page-garage')  { renderGarage(); renderDiscoveries(); }
-    if (pg === 'page-history') renderHistory();
-    // Converge: push the merged union back so other devices (and this one) stay in sync.
-    // The transactional rebase makes this safe — it never clobbers newer cloud fields.
-    if (!_coreEqual(_buildCloudPayload(), d)) {
-      _txWrite({ cause: 'converge', retries: 5 });
+    const changed = _applyCloud(d);
+    if (changed) {
+      _saveAllLocal();
+      renderQPTrigger(); renderSpot();
+      const pg = document.querySelector('.page.active')?.id;
+      if (pg === 'page-garage')  renderGarage();
+      if (pg === 'page-history') renderHistory();
+      // Converge: push the merged union back so other devices (and this one) stay in sync.
+      // The transactional rebase makes this safe — it never clobbers newer cloud fields.
+      if (!_coreEqual(_buildCloudPayload(), d)) {
+        _txWrite({ cause: 'converge', retries: 5 });
+      }
     }
-    } catch(e) { _recordCrash('snapshot', e.stack); }
   });
 }
 //  FIRESTORE PHOTO STRIPPER — keeps base64 out of the 1 MB document limit 
@@ -4032,7 +4077,7 @@ function subscribeCloud() {
 function _ensurePhotoIndexed(car) {
   if (!car || !car.photo || car.photo.indexOf('data:') !== 0) return;
   var key = car.name.toLowerCase();
-  _idbPhotoCache[key] = car.photo;
+  _photoCacheSet(key, car.photo);
   _idbPut(car.name, car.photo).catch(function(){});
 }
 function _stripDeepPhotos(obj) {
@@ -4154,7 +4199,6 @@ function _buildCloudPayload() {
     aliases:      { ver: _fieldVer.aliases || 0, map: aliases || {} },
     settings:     { ver: _fieldVer.settings || 0, map: _settingsMap() },
     achievements: { ver: _fieldVer.achievements || 0, ids: _prevAchievements || [] },
-    discoveries:  { ver: _fieldVer.discoveries || 0, items: _getDiscoveriesLocal() },
     progression:  _progress || null,
     profileName:  currentUser?.displayName || 'Spotter',
     profilePhoto: currentUser?.photoURL || ''
@@ -4211,15 +4255,16 @@ function saveToCloud() {
   }, 1500);
 }
 
-//  FLUSH ON PAGE UNLOAD — prevent debounced saves from being lost on tab close 
+//  FLUSH ON PAGE UNLOAD — prevent debounced saves from being lost on tab close.
+//  Local-only: a Firestore transaction started inside beforeunload/pagehide is killed
+//  by the browser mid-teardown (and on iOS can contribute to a hung unload → WebView
+//  restart). Any unsynced change is flagged dirty (cs_sync_dirty) and flushed on the
+//  next launch by auth.onAuthStateChanged, so nothing is lost by skipping the cloud write here.
 function _flushPendingSave() {
   _flushLocalNow();
-  if (syncTimer) { clearTimeout(syncTimer); syncTimer = null; }
-  if (!currentUser || !navigator.onLine) {
-    if (!navigator.onLine) _markDirty(true);
-    return;
-  }
-  _txWrite({ cause: 'unload', retries: 0 });
+  var hadPending = false;
+  if (syncTimer) { clearTimeout(syncTimer); syncTimer = null; hadPending = true; }
+  if (hadPending || _dirty) _markDirty(true);
 }
 window.addEventListener('beforeunload', _flushPendingSave);
 window.addEventListener('pagehide',     _flushPendingSave);
@@ -4315,11 +4360,6 @@ function _applyCloud(c) {
     }
     // achievements — union
     if (_mergeAchievements(c.achievements && c.achievements.ids)) changed = true;
-    // discoveries — additive union (newest per car), shown on Garage
-    if (c.discoveries && _mergeDiscoveries(c.discoveries.items)) {
-      _fieldVer.discoveries = Math.max(_fieldVer.discoveries || 0, c.discoveries.ver || 0);
-      changed = true;
-    }
     // progression — existing union merge (trips/flags)
     if (c.progression && window.mergeCloudProgression) window.mergeCloudProgression(c.progression);
     _saveAllLocal();
@@ -5087,12 +5127,13 @@ function goTo(page) {
   requestAnimationFrame(() => {
     if (page==='garage')       { garagePage = 0; renderGarage(); }
     if (page==='history')      renderHistory();
-    if (page==='achievements' || page==='expeditions') renderAchievements();
+    if (page==='achievements') renderAchievements();
     if (page==='settings')     { renderThemeBar(); initSoundToggle(); initVibeToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); initSortPrefBtns(); applyCompactMode(); }
     if (page==='news')         { if (!newsLoaded) { newsLoaded=true; renderNewsSources(); } loadNews(); }
     if (page==='leaderboard')  loadLeaderboard(true);
     if (page==='stats')        renderStats();
     if (page==='book')         renderBook();
+    if (page==='expeditions')  renderExpeditions();
     if (page==='trips')        renderTrips();
     if (page==='spot')         { renderHomeFav(); setTimeout(startFavRotation, 250); }
   });
@@ -5128,22 +5169,6 @@ function fmtFull(n) {
   return '$'+Math.round(n).toLocaleString();
 }
 function carUrl(name) { return 'https://www.google.com/search?q='+encodeURIComponent(name+' car specs price'); }
-// Opens a buyer-facing review page for a car so a potential buyer can get a feel
-// for it (expert + owner reviews). Falls back to a web search when the site has no
-// dedicated page; every link opens in a new tab and never navigates the app away.
-function reviewCarUrl(name) {
-  try {
-    var q = String(name || '').trim();
-    if (!q) return '';
-    var clean = q.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim();
-    return 'https://www.google.com/search?q=' + encodeURIComponent(clean + ' car review') + '&udm=14';
-  } catch(e) { return ''; }
-}
-function openCarReview(name) {
-  var url = reviewCarUrl(name);
-  if (url) window.open(url, '_blank', 'noopener');
-  else showToast('Could not open reviews for that car');
-}
 
 //  QUICK PICKS 
 function carExistsAnywhere(name) {
@@ -5233,29 +5258,15 @@ function clearAllQP() {
 function renderQPList(query) {
   const el = document.getElementById('qpList');
   const q  = query.toLowerCase().trim();
-  // Merge Quick Picks with every car currently in the garage so a car you own can
-  // always be found and re-logged quickly — even if it was never saved as a pick.
-  var garageCars = getAllCars();
-  var byName = new Map();
-  quickPicks.forEach(function(c){ if (c && c.name) byName.set(String(c.name).toLowerCase(), c); });
-  garageCars.forEach(function(c){ if (c && c.name) {
-    var k = String(c.name).toLowerCase();
-    var ex = byName.get(k);
-    if (!ex) byName.set(k, c);
-  }});
-  var combined = Array.from(byName.values());
-  var list = q ? combined.filter(c => c.name.toLowerCase().includes(q)) : combined;
+  const list = q ? quickPicks.filter(c => c.name.toLowerCase().includes(q)) : quickPicks;
   if (!list.length) { el.innerHTML = '<div class="qp-empty">'+(q?'No matches':'No picks yet — log some cars!')+'</div>'; return; }
   el.innerHTML = '';
-  var isPick = function(n){ return quickPicks.some(function(p){ return String(p.name).toLowerCase() === String(n).toLowerCase(); }); };
   list.forEach(c => {
     const d = document.createElement('div');
     d.className = 'qp-item' + (qpEditMode ? ' editing' : '');
-    d.innerHTML = (c.photo ? `<img style="width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid var(--border)" src="${c.photo}" alt="">` : `<span class="qp-item-type" style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:36px;text-align:right">${carTypeLabel(c.type)}</span>`) + `<span class="qp-item-name">${c.name}</span><span class="qp-item-val">${fmtFull(c.value)}</span>` + (qpEditMode && isPick(c.name) ? `<button class="qp-item-del" title="Remove">✕</button>` : '');
+    d.innerHTML = (c.photo ? `<img style="width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid var(--border)" src="${c.photo}" alt="">` : `<span class="qp-item-type" style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:36px;text-align:right">${carTypeLabel(c.type)}</span>`) + `<span class="qp-item-name">${c.name}</span><span class="qp-item-val">${fmtFull(c.value)}</span>` + (qpEditMode ? `<button class="qp-item-del" title="Remove">✕</button>` : '');
     if (qpEditMode) {
-      const btn = d.querySelector('.qp-item-del');
-      if (btn) btn.onclick = (e) => { e.stopPropagation(); removeQP(c.name); };
-      if (!btn) d.onclick = null;
+      d.querySelector('.qp-item-del').onclick = (e) => { e.stopPropagation(); removeQP(c.name); };
     } else {
       d.onclick = () => {
         document.getElementById('carName').value  = c.name;
@@ -5270,10 +5281,7 @@ function renderQPList(query) {
   });
 }
 function renderQPTrigger() {
-  // Show the picker whenever there are picks OR any garage cars — the list always
-  // merges garage cars in, so an owned car is never unreachable.
-  var hasAny = quickPicks.length > 0 || getAllCars().length > 0;
-  document.getElementById('qpWrap').style.display = hasAny ? 'block' : 'none';
+  document.getElementById('qpWrap').style.display = quickPicks.length ? 'block' : 'none';
 }
 document.addEventListener('click', e => {
   if (qpOpen && !document.getElementById('qpWrap').contains(e.target)) closeQP();
@@ -5304,31 +5312,8 @@ function clearInputs() {
 
 //  LOG TO RUN 
 // Adds to current run list only. Does NOT go to history until you End Run.
-function addGarageCarToRun(name) {
-  name = String(name || '');
-  var key = name.toLowerCase();
-  var car = _garageCarByKey[key] || getAllCars().find(function(c){ return String(c.name).toLowerCase() === key; });
-  if (!car) { showToast('Car not found in garage'); return; }
-  // Mirror logRun() but pull values straight from the garage record.
-  var prevRun = JSON.parse(JSON.stringify(currentRun));
-  var prevHL = headlinerIdx;
-  var isFirst = !carExistsAnywhere(car.name);
-  var entry = { name: car.name, value: car.value || 0, color: car.color || '', type: car.type || 'sports', ts: Date.now() };
-  if (car.photo) entry.photo = car.photo;
-  currentRun.push(entry);
-  _lastSpottedName = car.name;
-  saveCurrentRun();
-  fetchAndStoreRefImage(entry);
-  renderSpot();
-  playSound('log');
-  rewardLog(entry, true, { isFirst: isFirst });
-  recordActivity('find', '🚗 ' + car.name + ' added to the run from your garage.', { icon: '🚗' });
-  pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, car.name + ' removed');
-  notify(car.name + ' added to this run.', { priority:'quiet', group:'logrun' });
-  setTimeout(checkNewAchievements, 400);
-  showToast('🏁 ' + car.name + ' added to the run');
-}
-function logRun() {  var input = getInputs();
+function logRun() {
+  var input = getInputs();
   if (!input.name) { showToast('Enter a car name!'); return; }
   if (isNaN(input.value) || input.value < 0) { showToast('Enter a valid value!'); return; }
   var name = resolveAlias(input.name);
@@ -6098,8 +6083,6 @@ function renderGarage() {
         '<div class="gc-tier-chip">' + tierEmoji(tier) + ' ' + meta.label + (evoTier ? '<span class="gc-evo-chip">' + evoTier.icon + '</span>' : '') + '</div>' +
         '<div class="gc-img-wrap">' + media +
           '<div class="gc-actions">' +
-            '<button class="gc-lot" onclick="event.stopPropagation();addGarageCarToRun(\'' + jsEscape(car.name) + '\');" title="Add to current run">\uD83C\uDFC1</button>' +
-            '<button class="gc-rev" onclick="event.stopPropagation();openCarReview(\'' + jsEscape(car.name) + '\');" title="Read reviews">\uD83D\uDD0D</button>' +
             '<button class="gc-feat' + (isFeat ? ' active' : '') + '" onclick="event.stopPropagation();setFeaturedCar(\'' + jsEscape(car.name) + '\');" title="Feature this car">\uD83D\uDC51</button>' +
             '<button class="gc-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');renderGarage();">' + (isFav ? '\u2605' : '\u2606') + '</button>' +
             '<button class="gc-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')">\u270E</button>' +
@@ -6131,7 +6114,7 @@ el.querySelectorAll('[data-inst]').forEach(function(a){
     var nameSuffix = car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '';
     var clickAttr = ' data-inst="1" data-name="' + escapeHtml(car.name) + '"';
     var evoBadge = evoTier ? '<span class="gc-badge evo" style="color:' + evoTier.color + ';border-color:' + evoTier.color + '44">' + evoTier.icon + ' ' + evoTier.name + ' \u00D7' + ev.count + '</span>' : '';
-    return '<div class="garage-row' + (evoTier ? ' evo-row evo-' + evoTier.name.toLowerCase() : '') + '" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + evoBadge + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-act-btn g-lot" onclick="event.stopPropagation();addGarageCarToRun(\'' + jsEscape(car.name) + '\')" title="Add to current run">🏁</button><button class="g-act-btn g-rev" onclick="event.stopPropagation();openCarReview(\'' + jsEscape(car.name) + '\')" title="Read reviews">🔍</button><button class="g-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');this.textContent=this.textContent===\'★\'?\'☆\':\'★\';">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')">✎</button><button class="g-act-btn g-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')">✕</button></div></div>';
+    return '<div class="garage-row' + (evoTier ? ' evo-row evo-' + evoTier.name.toLowerCase() : '') + '" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + evoBadge + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');this.textContent=this.textContent===\'★\'?\'☆\':\'★\';">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')">✎</button><button class="g-act-btn g-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')">✕</button></div></div>';
   }).join('');
   el.querySelectorAll('[data-inst]').forEach(function(a){
     attachCarTap(a);
@@ -6463,7 +6446,6 @@ function showCarInstances(car, originEl) {
     '<div class="detail-actions">' +
     '<button class="detail-action-btn" data-fav="' + escapeHtml(car.name) + '">' + (isFavorite(car.name) ? '★ Favorite' : '☆ Favorite') + '</button>' +
     '<a class="detail-action-btn" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Search this car">↗ Search</a>' +
-    '<a class="detail-action-btn" href="' + reviewCarUrl(car.name) + '" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Read buyer reviews">🔍 Reviews</a>' +
     '<button class="detail-action-btn" onclick="event.stopPropagation();this.closest(\'.detail-overlay\').remove();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')">✏️ Edit</button>' +
     '<button class="detail-action-btn" onclick="event.stopPropagation();addPhotoToCar(\'' + jsEscape(car.name) + '\')">📷 Photo</button>' +
     '<button class="detail-action-btn detail-action-del" onclick="event.stopPropagation();this.closest(\'.detail-overlay\').remove();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')">✕ Delete</button>' +
@@ -6825,59 +6807,32 @@ function tierMeta(t) {
 }
 
 //  DISCOVERY HISTORY — your last 10 spots as a trophy case
-function _getDiscoveriesLocal() {
-  try { var l = JSON.parse(localStorage.getItem('cs_discoveries') || '[]'); return Array.isArray(l) ? l : []; } catch(e) { return []; }
-}
-function _saveDiscoveriesLocal(list) {
-  try { localStorage.setItem('cs_discoveries', JSON.stringify(list)); } catch(e) {}
-}
-// Additive union of recent-discoveries lists: newest entry per car wins (dedupe by
-// name), union preserves entries from both devices, then sort newest-first, cap 10.
-function _mergeDiscoveries(items) {
-  if (!Array.isArray(items) || !items.length) return false;
-  var local = _getDiscoveriesLocal();
-  var byName = {};
-  function add(rec) {
-    if (!rec || !rec.n) return;
-    var key = String(rec.n).toLowerCase();
-    if (!byName[key] || (rec.d || 0) > (byName[key].d || 0)) byName[key] = rec;
-  }
-  local.forEach(add);
-  items.forEach(add);
-  var merged = Object.keys(byName).map(function(k){ return byName[k]; });
-  merged.sort(function(a,b){ return (b.d || 0) - (a.d || 0); });
-  if (merged.length > 10) merged.length = 10;
-  _saveDiscoveriesLocal(merged);
-  return true;
-}
 function recordDiscovery(car, xp) {
   try {
-    var list = _getDiscoveriesLocal();
+    var list = [];
+    try { list = JSON.parse(localStorage.getItem('cs_discoveries') || '[]'); } catch(e) { list = []; }
     var photoRef = '';
     if (car.photo && car.photo.indexOf('data:image/') === 0) {
       var pKey = (car.name || '').toLowerCase();
-      _idbPhotoCache[pKey] = car.photo;
+      _photoCacheSet(pKey, car.photo);
       photoRef = 'photo:' + pKey;
     }
     else if (car.photo) photoRef = car.photo;
     list.unshift({ n: car.name, v: car.value || 0, t: car.type || '', r: tierOf(car.value || 0), xp: xp || 0, d: Date.now(), p: photoRef });
     if (list.length > 10) list.length = 10;
-    _saveDiscoveriesLocal(list);
-    _fieldVer.discoveries = _bumpVer('discoveries');
+    localStorage.setItem('cs_discoveries', JSON.stringify(list));
     renderDiscoveries();
   } catch(e) {}
 }
 function resolveDiscoveryPhoto(p, name) {
-  if (!p) return _idbPhotoCache[(name || '').toLowerCase()] || '';
-  if (p.indexOf('photo:') === 0) return _idbPhotoCache[p.slice(6)] || _idbPhotoCache[(name || '').toLowerCase()] || '';
+  if (!p) return _photoCacheGet(_photoCacheKey(name));
+  if (p.indexOf('photo:') === 0) return _photoCacheGet(p.slice(6)) || _photoCacheGet(_photoCacheKey(name));
   return p;
 }
 function clearDiscoveries() {
   if (!confirm('Clear your recent discoveries?')) return;
   try { localStorage.removeItem('cs_discoveries'); } catch(e) {}
-  _fieldVer.discoveries = _bumpVer('discoveries');
   renderDiscoveries();
-  saveToCloud();
 }
 function renderDiscoveries() {
   var section = document.getElementById('discSection');
@@ -7723,10 +7678,10 @@ _updateActBadge();
 
 //  SERVICE WORKER — cache-first for offline support
 // NOTE: register() rejects blob: URLs — only a real same-origin script path is valid.
-// We register without forcing an update check: an eager reg.update() can combine with
-// a skipWaiting()+claim() worker to reload the page out from under the user.
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
-  navigator.serviceWorker.register('sw.js').catch(function(){});
+  navigator.serviceWorker.register('sw.js').then(function(reg) {
+    if (reg) reg.update();
+  }).catch(function(){});
 }
 
 //  OFFLINE MODE 
@@ -7749,6 +7704,12 @@ isOffline = !navigator.onLine;
 window.addEventListener('online',  updateOfflineBanner);
 window.addEventListener('offline', updateOfflineBanner);
 setTimeout(updateOfflineBanner, 1000);
+
+// Freeze decorative animations while backgrounded (reduces iOS memory pressure
+// that otherwise causes the WebView to kill and reload the page).
+document.addEventListener('visibilitychange', function() {
+  document.documentElement.classList.toggle('cs-hidden', document.hidden);
+});
 
 function flushOfflineQueue() {
   if (!offlineQueue.length || !currentUser) return;
@@ -7927,7 +7888,7 @@ function _idbPut(name, data) {
     return new Promise(function(res, rej) {
       var tx = db.transaction('photos', 'readwrite');
       tx.objectStore('photos').put({ name: name.toLowerCase(), data: data });
-      tx.oncomplete = function() { _idbPhotoCache[name.toLowerCase()] = data; res(); };
+      tx.oncomplete = function() { _photoCacheSet(name.toLowerCase(), data); res(); };
       tx.onerror = function(e) { rej(e.target.error); };
     });
   });
@@ -7944,10 +7905,23 @@ function _idbGetAll() {
   });
 }
 
+function _idbGet(name) {
+  return _idbOpen().then(function(db) {
+    return new Promise(function(res, rej) {
+      var tx = db.transaction('photos', 'readonly');
+      var r = tx.objectStore('photos').get(String(name || '').toLowerCase());
+      r.onsuccess = function(e) { res(e.target.result ? e.target.result.data : null); };
+      r.onerror = function(e) { rej(e.target.error); };
+    });
+  });
+}
+
 function _loadIDBCache() {
   if (typeof indexedDB === 'undefined') return;
   _idbGetAll().then(function(entries) {
-    entries.forEach(function(e) { _idbPhotoCache[e.name] = e.data; });
+    // Don't pin every photo in RAM — keep only the newest few resident; the rest
+    // stay in IndexedDB and are pulled back on demand by _photoLazyLoad.
+    entries.slice(-Math.min(_photoCacheMax, 10)).forEach(function(e) { _photoCacheSet(e.name, e.data); });
     // Migrate any base64 photos still baked into localStorage out to IndexedDB as
     // 'photo:' refs — frees the quota so later writes never throw QuotaExceededError.
     _saveRunsLocal(); _saveCurrentLocal(); _saveQPLocal();
@@ -7959,35 +7933,53 @@ function _patchPhotosFromCache() {
   if (!_idbPhotoCache) return;
   allRuns.forEach(function(run) {
     (run.cars||[]).forEach(function(car) {
-      var cached = _idbPhotoCache[car.name.toLowerCase()];
+      var key = _photoCacheKey(car.name);
+      var cached = _photoCacheGet(key);
       if (car.photo && typeof car.photo === 'string' && car.photo.indexOf('photo:') === 0) {
-        car.photo = _idbPhotoCache[car.photo.slice(6)] || '';
+        var refKey = car.photo.slice(6);
+        var ref = _photoCacheGet(refKey) || _photoCacheGet(key);
+        if (ref) car.photo = ref;
+        else { car.photo = ''; _photoLazyLoad(refKey || key); }
       } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0) {
         // Prefer the user's own photo over a stock/reference image.
         car.photo = cached;
       } else if (!car.photo && cached) {
         car.photo = cached;
+      } else if (!car.photo && !cached) {
+        _photoLazyLoad(key);
       }
     });
   });
   currentRun.forEach(function(car) {
-    var cached = _idbPhotoCache[car.name.toLowerCase()];
+    var key = _photoCacheKey(car.name);
+    var cached = _photoCacheGet(key);
     if (car.photo && typeof car.photo === 'string' && car.photo.indexOf('photo:') === 0) {
-      car.photo = _idbPhotoCache[car.photo.slice(6)] || '';
+      var refKey = car.photo.slice(6);
+      var ref = _photoCacheGet(refKey) || _photoCacheGet(key);
+      if (ref) car.photo = ref;
+      else { car.photo = ''; _photoLazyLoad(refKey || key); }
     } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0) {
       car.photo = cached;
     } else if (!car.photo && cached) {
       car.photo = cached;
+    } else if (!car.photo && !cached) {
+      _photoLazyLoad(key);
     }
   });
   quickPicks.forEach(function(car) {
-    var cached = _idbPhotoCache[car.name.toLowerCase()];
+    var key = _photoCacheKey(car.name);
+    var cached = _photoCacheGet(key);
     if (car.photo && typeof car.photo === 'string' && car.photo.indexOf('photo:') === 0) {
-      car.photo = _idbPhotoCache[car.photo.slice(6)] || '';
+      var refKey = car.photo.slice(6);
+      var ref = _photoCacheGet(refKey) || _photoCacheGet(key);
+      if (ref) car.photo = ref;
+      else { car.photo = ''; _photoLazyLoad(refKey || key); }
     } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0) {
       car.photo = cached;
     } else if (!car.photo && cached) {
       car.photo = cached;
+    } else if (!car.photo && !cached) {
+      _photoLazyLoad(key);
     }
   });
 }
@@ -8012,8 +8004,8 @@ function _stripCopy(obj) {
       var v = obj[k];
       if (k === 'photo' && typeof v === 'string' && v.indexOf('data:') === 0) {
         var cacheKey = String(obj.name || '').toLowerCase();
-        if (_idbPhotoCache[cacheKey] !== v) {
-          _idbPhotoCache[cacheKey] = v;
+        if (_photoCacheGet(cacheKey) !== v) {
+          _photoCacheSet(cacheKey, v);
           _idbPut(String(obj.name || ''), v).catch(function() {});
         }
         c[k] = 'photo:' + cacheKey;
@@ -8038,7 +8030,7 @@ function _resolvePhotosIn(obj) {
     for (var k in obj) {
       var v = obj[k];
       if (k === 'photo' && typeof v === 'string' && v.indexOf('photo:') === 0) {
-        c[k] = _idbPhotoCache[v.slice(6)] || v;
+        c[k] = _photoCacheGet(v.slice(6)) || v;
       } else if (v && typeof v === 'object') {
         c[k] = _resolvePhotosIn(v);
       } else c[k] = v;
@@ -8077,14 +8069,14 @@ function _savePhoto(compressed, t) {
     // Persist the image in IndexedDB first, then write tiny 'photo:' refs to
     // localStorage so the 5MB quota is never consumed by images.
     _idbPut(t.name, compressed).then(function() {
-      _idbPhotoCache[key] = compressed;
+      _photoCacheSet(key, compressed);
       _saveRunsLocal(); _saveCurrentLocal(); _saveQPLocal();
       saveToCloud();
       showToast('📷 Photo added to all "' + t.name + '" sightings!');
       renderGarage(); renderHistory();
       var de2 = document.getElementById('detailOverlay'); if (de2) de2.remove();
     }).catch(function() {
-      _idbPhotoCache[key] = compressed;
+      _photoCacheSet(key, compressed);
       _safeSet('cs_runs', JSON.stringify(allRuns));
       _safeSet('cs_current', JSON.stringify(currentRun));
       _saveQPLocal();
@@ -8868,8 +8860,6 @@ function renderAchievements() {
       <div class="ach-req">${a.desc}</div>
       <div class="ach-xp">+${a.xp||0} XP</div>
     </div>`).join('');
-  // Expeditions now live on the same page — keep the list in sync.
-  if (typeof renderExpeditions === 'function') renderExpeditions();
 }
 
 // Hook achievement checks into all data-mutating actions
@@ -9916,9 +9906,11 @@ function expoProgress() {
 function renderExpeditions() {
   var list = document.getElementById('expoList');
   if (!list) return;
-  var exps = allChallenges().filter(function(e){ return e.kind === 'expo'; });
+  var exps = allChallenges();
+  var unlocked = new Set(getUnlockedAchievements());
+  var summary = '<div class="ach-count-row" style="margin-bottom:14px"><span id="achUnlocked">' + unlocked.size + '</span> / <span id="achTotal">' + ACHIEVEMENTS.length + '</span> achievements unlocked</div>';
   var kindLabel = function(k){ return k === 'ach' ? '<span class="ch-kind ch-kind-ach">ACHIEVEMENT</span>' : '<span class="ch-kind ch-kind-expo">EXPEDITION</span>'; };
-  list.innerHTML = exps.map(function(e, i){
+  list.innerHTML = summary + exps.map(function(e, i){
     var pct = Math.min(100, Math.round(e.count / e.goal * 100));
     var reward;
     if (e.kind === 'ach') {
@@ -10557,11 +10549,11 @@ function updateProgressionAfterLog(car) {
   checkEvolutionUnlock(car);
   renderTitleChip();
   renderLevelBar();
-  // Refresh book/achievements/expeditions/trip pages if they are the active page
+  // Refresh book/expedition/trip pages if they are the active page
   var pg = document.querySelector('.page.active');
   if (pg) {
     if (pg.id === 'page-book') renderBook();
-    if (pg.id === 'page-achievements') renderAchievements();
+    if (pg.id === 'page-expeditions') renderExpeditions();
   }
 }
 window.renderSpecsStory = renderSpecsStory;
@@ -10797,7 +10789,6 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 </body>
 </html>
-
 
 
 
