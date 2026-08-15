@@ -2261,12 +2261,8 @@ html:not(.show-favs) #favSection{display:none;}
 .inst-item-nophoto{width:100%;height:80px;background:var(--surf3);display:flex;align-items:center;justify-content:center;font-size:2rem;border-radius:var(--radius-xs) var(--radius-xs) 0 0;}
 
 /* ── CAR SEARCH ── */
-.spot-search-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:linear-gradient(135deg,var(--adim),transparent);border:1px solid var(--accent);border-radius:var(--radius-xs);color:var(--accent);font-family:'Inter',sans-serif;font-size:0.8rem;letter-spacing:1.5px;font-weight:600;padding:12px 14px;cursor:pointer;margin-bottom:14px;transition:all 0.15s;}
-.spot-search-btn:hover{background:var(--adim);}
-.spot-search-btn:active{transform:scale(0.98);}
 .car-search-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99992;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.18s ease;}
 .car-search-card{width:100%;max-width:480px;background:var(--surf);border-top:1px solid var(--border);border-radius:var(--radius-xl) var(--radius-xl) 0 0;padding:22px 20px 36px;animation:slideUpRecap 0.28s cubic-bezier(0.34,1.56,0.64,1);max-height:88vh;overflow-y:auto;}
-.car-search-handle{width:40px;height:4px;border-radius:2px;background:var(--border2);margin:0 auto 16px;}
 .car-search-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
 .car-search-title{font-family:'Inter',sans-serif;font-size:1.05rem;letter-spacing:2px;color:var(--text);}
 .car-search-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:4px;line-height:1;transition:color 0.15s;}
@@ -2298,7 +2294,6 @@ html:not(.show-favs) #favSection{display:none;}
 .csr-loading{display:flex;flex-direction:column;align-items:center;gap:12px;padding:34px 12px;}
 .csr-spinner{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;}
 .csr-suggestions{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
-.csr-sug-label{font-size:0.5rem;color:var(--muted);letter-spacing:2px;font-weight:700;margin-bottom:8px;}
 .csr-sug-chip{background:var(--surf2);border:1px solid var(--border2);border-radius:var(--r-pill);color:var(--text2);font-size:0.64rem;padding:5px 12px;cursor:pointer;transition:all 0.15s;font-family:'Inter',sans-serif;}
 .csr-sug-chip:hover{border-color:var(--accent);color:var(--accent);}
 
@@ -2859,12 +2854,23 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
                 <label for="carColor">Color</label>
                 <input id="carColor" type="text" placeholder="Rosso Corsa" autocomplete="off">
               </div>
+              <div class="ff">
+                <label for="carType">Type</label>
+                <select id="carType">
+                  <option value="" disabled selected>— Select Type —</option>
+                  <option value="supercar">Supercar</option>
+                  <option value="sports">Sports Car</option>
+                  <option value="muscle">Muscle Car</option>
+                  <option value="track">Track Car</option>
+                  <option value="exotic">Exotic</option>
+                  <option value="ev">EV</option>
+                  <option value="luxury">Luxury / Sedan</option>
+                  <option value="suv">Truck / SUV</option>
+                  <option value="classic">Classic / Vintage</option>
+                  <option value="hotrod">Hot Rod</option>
+                </select>
               </div>
-
-            <button class="spot-search-btn" onclick="openCarSearch(document.getElementById('carName').value)" title="Look up specs, value & photos — one-tap auto-fill">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              <span>SEARCH SPECS &amp; AUTO-FILL</span>
-            </button>
+            </div>
 
             <!-- Photo + Location row -->
             <div id="photoPreviewWrap" style="display:none"></div>
@@ -3254,6 +3260,10 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
         <button class="more-page-tile" onclick="goTo('settings')">
           <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
           <span class="more-tile-label">Settings</span>
+        </button>
+        <button class="more-page-tile" onclick="openCarSearch()">
+          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+          <span class="more-tile-label">Car Search</span>
         </button>
         <button class="more-page-tile" onclick="goTo('stats')">
           <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span>
@@ -5281,7 +5291,7 @@ function renderQPList(query) {
         document.getElementById('carName').value  = c.name;
         document.getElementById('carValue').value = c.value;
         document.getElementById('carColor').value = c.color||'';
-        setSpotType(c.type, c.name);
+        document.getElementById('carType').value  = c.type;
         closeQP();
         document.getElementById('qpSearch').value = '';
       };
@@ -5305,34 +5315,18 @@ function sanitizeText(str) {
 }
 
 //  GET INPUTS 
-var _spotType = '';
-var _lastTypeName = null;
-function setSpotType(t, name) { _spotType = t || ''; _lastTypeName = name || null; }
-function inferSpotType(name) {
-  if (_spotType) return _spotType;
-  const n = String(name || '').toLowerCase().trim();
-  if (!n) return '';
-  const hit = CAR_AC_DB.find(c => {
-    const cn = c.name.toLowerCase();
-    return n === cn || n.includes(cn) || cn.includes(n);
-  });
-  return hit ? (hit.type || '') : '';
-}
 function getInputs() {
-  const name = sanitizeText(document.getElementById('carName').value);
   return {
-    name:  name,
+    name:  sanitizeText(document.getElementById('carName').value),
     value: parseFloat(document.getElementById('carValue').value),
     color: sanitizeText(document.getElementById('carColor').value),
-    type:  inferSpotType(name),
+    type:  document.getElementById('carType').value, // select value, safe
   };
 }
 function clearInputs() {
   document.getElementById('carName').value  = '';
   document.getElementById('carValue').value = '';
   document.getElementById('carColor').value = '';
-  _spotType = '';
-  _lastTypeName = null;
 }
 
 //  LOG TO RUN 
@@ -8469,7 +8463,7 @@ function acceptVoiceFill() {
   document.getElementById('carName').value  = p.name  || '';
   document.getElementById('carValue').value = p.value || '';
   document.getElementById('carColor').value = p.color || '';
-  if (p.type) setSpotType(p.type, p.name);
+  if (p.type) document.getElementById('carType').value = p.type;
   dismissVoiceFill();
   showToast(' Form filled!');
 }
@@ -8644,23 +8638,19 @@ window.openCarSearch = function(prefill) {
 
   const suggestions = ['Ferrari 488','Lamborghini Huracan','Porsche 911 GT3','McLaren 720S','Dodge Charger R/T','Ford Mustang GT','Chevrolet Corvette C8','Bugatti Chiron','Tesla Model S Plaid','BMW M3'];
   const sugHTML = suggestions.map(s => `<button class="csr-sug-chip" onclick="runCarSearch('${jsEscape(s)}')">${s}</button>`).join('');
-  const safePrefill = escapeHtml(String(prefill || ''));
 
   overlay.innerHTML = `
     <div class="car-search-card" onclick="event.stopPropagation()">
-      <div class="car-search-handle"></div>
       <div class="car-search-header">
         <div class="car-search-title">🔍 CAR SEARCH</div>
         <button class="car-search-close" onclick="document.getElementById('carSearchOverlay').remove()">✕</button>
       </div>
       <div class="car-search-input-row">
         <input class="car-search-input" id="carSearchQ" placeholder="Ferrari 488, Dodge Charger…"
-          value="${safePrefill}"
+          value="${prefill||''}"
           onkeydown="if(event.key==='Enter')runCarSearch(this.value)">
         <button class="car-search-btn" onclick="runCarSearch(document.getElementById('carSearchQ').value)">SEARCH</button>
       </div>
-      <div class="csr-sug-label">POPULAR</div>
-      <div class="csr-suggestions">${sugHTML}</div>
       <button class="lens-btn" onclick="window.open('https://lens.google.com','_blank')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         Identify with Google Lens ↗
@@ -8800,7 +8790,7 @@ window.fillFromSearch = function(name, value, color, type) {
   document.getElementById('carName').value  = name;
   document.getElementById('carValue').value = value;
   document.getElementById('carColor').value = color || '';
-  setSpotType(type || 'supercar', name);
+  document.getElementById('carType').value  = type || 'supercar';
   goTo('spot');
   showToast('✅ Form filled — review and log!');
 };
@@ -9017,7 +9007,6 @@ const CAR_AC_DB = [
 let acIdx = -1;
 
 function onCarNameInput(val) {
-  if ((val || '').toLowerCase().trim() !== String(_lastTypeName || '').toLowerCase().trim()) _spotType = '';
   const wrap = document.getElementById('carAcWrap');
   const drop = document.getElementById('carAcDropdown');
   if (!val || val.length < 2) { closeCarAc(); return; }
@@ -9039,7 +9028,7 @@ function selectAcItem(idx) {
   if (!item) return;
   document.getElementById('carName').value  = item.dataset.name;
   document.getElementById('carValue').value = item.dataset.val;
-  setSpotType(item.dataset.type, item.dataset.name);
+  document.getElementById('carType').value  = item.dataset.type;
   closeCarAc();
   document.getElementById('carValue').focus();
 }
@@ -9132,7 +9121,7 @@ function runSmartCmd() {
         document.getElementById('carName').value  = parsed.name  || '';
         document.getElementById('carValue').value = parsed.value || '';
         document.getElementById('carColor').value = parsed.color || '';
-        if (parsed.type) setSpotType(parsed.type, parsed.name);
+        if (parsed.type) document.getElementById('carType').value = parsed.type;
         goTo('spot');
         showToast('🚗 Form filled — review & tap "+ TO RUN"');
         input.value = '';
@@ -10954,7 +10943,6 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 </body>
 </html>
-
 
 
 
