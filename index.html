@@ -512,6 +512,24 @@ html.cs-hidden .levelup-star,.html.cs-hidden .recap-record-tag.pop{animation-pla
 }
 .ff input::placeholder{color:var(--muted);font-weight:400;}
 
+/* ── SPOT: one clear action, details only when wanted ── */
+.spot-card{padding:22px;}
+.spot-card .card-title{margin-bottom:16px;}
+.spot-primary-label{font-size:0.58rem !important;color:var(--accent) !important;letter-spacing:2.4px !important;}
+.spot-primary-input{font-size:1.12rem !important;padding:18px 18px !important;border-color:rgba(232,184,75,0.38) !important;background:rgba(17,17,20,0.8) !important;}
+.spot-details{margin:12px 0 14px;border-top:1px solid var(--glass-border);}
+.spot-details summary{display:flex;align-items:center;gap:8px;padding:13px 2px 8px;color:var(--text2);font-size:0.72rem;font-weight:700;letter-spacing:1px;cursor:pointer;list-style:none;}
+.spot-details summary::-webkit-details-marker{display:none;}
+.spot-details summary::after{content:'+';margin-left:auto;color:var(--accent);font-size:1rem;font-weight:400;}
+.spot-details[open] summary::after{content:'−';}
+.spot-details .form-grid{margin:4px 0 12px;}
+.spot-details-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.spot-secondary-action{background:transparent;border:1px solid var(--glass-border);border-radius:var(--r-md);color:var(--text2);font-family:'Inter',sans-serif;font-size:0.68rem;font-weight:700;letter-spacing:.7px;padding:11px;cursor:pointer;}
+.spot-secondary-action:hover{border-color:rgba(232,184,75,.35);color:var(--accent);}
+.spot-primary-action{font-size:1.18rem;letter-spacing:3px;padding:18px;}
+.spot-run-link{display:block;margin:10px auto 0;background:none;border:none;color:var(--text2);font-family:'Inter',sans-serif;font-size:.68rem;letter-spacing:.6px;cursor:pointer;padding:6px;}
+.spot-run-link:hover{color:var(--accent);}
+
 /* ── ACTION BUTTONS ── */
 .btn-row{display:flex;flex-direction:column;gap:14px;margin-bottom:14px;}
 .btn-run{
@@ -1970,6 +1988,10 @@ html.show-install #installBanner{display:flex;}
   overflow:hidden;box-shadow:var(--shadow);
 }
 .car-ac-dropdown.open,.car-ac-wrap.open .car-ac-dropdown{display:block;}
+.ac-section-label{padding:9px 14px 5px;color:var(--muted);font-size:.58rem;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;background:var(--surf3);}
+.ac-item.ac-quick-pick{background:rgba(232,184,75,.045);}
+.ac-item.ac-quick-pick:hover,.ac-item.ac-quick-pick.selected{background:var(--adim);}
+.ac-item-meta{font-size:.62rem;color:var(--text2);margin-top:2px;}
 .ac-item{
   display:flex;align-items:center;gap:10px;
   padding:10px 14px;cursor:pointer;font-size:0.84rem;transition:background 0.1s;
@@ -2836,17 +2858,21 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
             <div class="level-bar-track"><div class="level-bar-fill" id="levelFill" style="width:0%"></div></div>
           </div>
 
-          <div class="card">
-            <div class="card-title">Log a Car</div>
-            <div class="form-grid">
+          <div class="card spot-card">
+            <div class="card-title">I saw a car</div>
               <div class="ff">
-                <label for="carName">Make / Model</label>
+                <label class="spot-primary-label" for="carName">Car name</label>
                 <div class="car-ac-wrap" id="carAcWrap">
-                  <input id="carName" type="text" placeholder="Ferrari 488" autocomplete="off" oninput="onCarNameInput(this.value)" onblur="setTimeout(closeCarAc,180)" onfocus="onCarNameInput(this.value)">
+                  <input class="spot-primary-input" id="carName" type="text" placeholder="What car did you see?" autocomplete="off" oninput="onCarNameInput(this.value)" onblur="setTimeout(closeCarAc,180)" onfocus="onCarNameInput(this.value)">
                   <div class="car-ac-dropdown" id="carAcDropdown"></div>
                 </div>
               </div>
-              <div class="ff">
+              <div id="photoPreviewWrap" style="display:none"></div>
+              <label class="photo-btn" style="margin:10px 0 0">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <span>Add Photo</span><input type="file" accept="image/*" style="display:none" id="photoInput" onchange="handlePhotoInput(this)">
+              </label>
+              <details class="spot-details" id="spotDetails"><summary>Add details</summary><div class="form-grid"><div class="ff">
                 <label for="carValue">Value ($)</label>
                 <input id="carValue" type="number" placeholder="280000" min="0" inputmode="numeric">
               </div>
@@ -2869,50 +2895,17 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
                   <option value="classic">Classic / Vintage</option>
                   <option value="hotrod">Hot Rod</option>
                 </select>
-              </div>
-            </div>
+              </div></div>
 
-            <!-- Photo + Location row -->
-            <div id="photoPreviewWrap" style="display:none"></div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-              <label class="photo-btn" style="margin-bottom:0">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                <span>Photo</span>
-                <input type="file" accept="image/*" style="display:none" id="photoInput" onchange="handlePhotoInput(this)">
-              </label>
-              <button class="geo-btn" id="geoBtn" onclick="captureLocation()" style="margin:0">
+              <button class="geo-btn" id="geoBtn" onclick="captureLocation()" style="margin:0;width:100%">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;flex-shrink:0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Save Location
               </button>
-            </div>
             <div class="location-chip-row" id="locationChipRow" style="display:none"></div>
-
-            <!-- Quick Picks -->
-            <div class="qp-wrap" id="qpWrap">
-              <button class="qp-trigger" onclick="toggleQP()">
-                <span>Quick Picks</span>
-                <span class="qp-arrow" id="qpArrow">▾</span>
-              </button>
-              <div class="qp-dropdown">
-                <div class="qp-header">
-                  <button class="qp-edit-btn" id="qpEditBtn" onclick="toggleQPEdit()">EDIT</button>
-                  <button class="qp-clear-btn" id="qpClearBtn" onclick="clearAllQP()" style="display:none">CLEAR ALL</button>
-                </div>
-                <div class="qp-search">
-                  <input type="text" id="qpSearch" placeholder="Search..." oninput="renderQPList(this.value)" autocomplete="off">
-                </div>
-                <div class="qp-list" id="qpList"></div>
-              </div>
-            </div>
-
-<!-- Two action buttons: run vs spotted -->
+            </details>
             <div class="btn-row">
-              <button class="btn-run" onclick="logRun()" title="Stacks this car into the current run — tap END RUN to finish and save the whole session">+ ADD TO RUN</button>
-              <button class="btn-spot" onclick="logSpotted()" title="Log this one car straight into your garage, no session needed">SAVE SOLO</button>
+              <button class="btn-run spot-primary-action" onclick="logSpotted()" title="Log this car to your collection">SPOT CAR</button>
             </div>
-            <div class="btn-hint-row">
-              <span>Stacks into the active run (below)</span>
-              <span>Saves this car alone</span>
-            </div>
+            <button class="spot-run-link" onclick="logRun()" title="Add this car to the current run instead">Add to current run instead</button>
             <div class="section" id="favSection" style="margin:12px 0 0">
               <div class="sec-row"><div class="sec-title">FAVORITES</div><button class="txt-btn" id="favToggle" onclick="goTo('garage')">Show All</button></div>
               <div class="fav-scroll" id="favList"></div>
@@ -2940,11 +2933,11 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
     <!-- GARAGE PAGE -->
     <div class="page" id="page-garage">
       <div class="sec-row" style="margin-bottom:10px">
-        <div class="sec-title">ALL SPOTTED</div>
+        <div class="sec-title">YOUR COLLECTION</div>
         <div style="display:flex;gap:6px;align-items:center;">
           <div class="garage-view-toggle">
-            <button class="gv-btn active" id="gvList" onclick="setGarageView('list')" title="List view">&#9776;</button>
-            <button class="gv-btn" id="gvGrid" onclick="setGarageView('grid')" title="Car cards">Cards</button>
+            <button class="gv-btn" id="gvList" onclick="setGarageView('list')" title="List view">&#9776;</button>
+            <button class="gv-btn active" id="gvGrid" onclick="setGarageView('grid')" title="Car cards">Cards</button>
             <button class="gv-btn" id="gvMap" onclick="setGarageView('map')" title="Map view">Map</button>
           </div>
           <button class="txt-btn" id="sortBtn" onclick="cycleSort()">Value &#8595;</button>
@@ -3241,9 +3234,9 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
           <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6"/><path d="M4.93 10.93a1.43 1.43 0 0 0-2.85 0 1.43 1.43 0 0 0 0 2.85 1.43 1.43 0 0 0 0 2.85 1.43 1.43 0 0 0 0 2.85 1.43 1.43 0 0 0 2.85 0"/><path d="M19.07 10.93a1.43 1.43 0 0 1 2.85 0 1.43 1.43 0 0 1 0 2.85 1.43 1.43 0 0 1 0 2.85 1.43 1.43 0 0 1 0 2.85 1.43 1.43 0 0 1-2.85 0"/><path d="M14 22l-5-3 5-3v6z"/><path d="M14 2v3"/><path d="M12 2h4"/><path d="M12 5H9.5a2.5 2.5 0 0 0 0 5H12"/></svg></span>
           <span class="more-tile-label">Road Trips</span>
         </button>
-        <button class="more-page-tile" onclick="goTo('history')">
+        <button class="more-page-tile" onclick="goTo('voice')">
           <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg></span>
-          <span class="more-tile-label">History</span>
+          <span class="more-tile-label">Notes</span>
         </button>
         <button class="more-page-tile" onclick="goTo('leaderboard')">
           <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
@@ -3371,9 +3364,9 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
       <span class="nav-label">Garage</span>
       <span class="nav-badge" id="navGarageBadge" style="display:none">0</span>
     </button>
-    <button class="nav-btn" onclick="goTo('voice')" id="nav-voice">
-      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span>
-      <span class="nav-label">Notes</span>
+    <button class="nav-btn" onclick="goTo('history')" id="nav-history">
+      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg></span>
+      <span class="nav-label">History</span>
     </button>
     <button class="nav-btn" onclick="goTo('more')" id="nav-more">
       <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.3" fill="currentColor" stroke="none"/></svg></span>
@@ -3593,7 +3586,7 @@ if (navigator.storage && navigator.storage.persist) { navigator.storage.persist(
 
 // GARAGE VIEW — declared here so renderGarage() works before auth fires
 let garageFilter = 'all';
-let garageView   = 'list';
+let garageView   = 'grid';
 
 // Navigation & page transition state
 let pageOrder = ['spot','garage','voice','history','achievements','settings','news','leaderboard','book','expeditions','trips','more'];
@@ -5236,7 +5229,8 @@ function toggleQP() {
 function closeQP() {
   qpOpen = false;
   qpEditMode = false;
-  document.getElementById('qpWrap').classList.remove('open');
+  var qpWrap = document.getElementById('qpWrap');
+  if (qpWrap) qpWrap.classList.remove('open');
   updateQPEditUI();
 }
 function toggleQPEdit() {
@@ -5279,6 +5273,7 @@ function clearAllQP() {
 }
 function renderQPList(query) {
   const el = document.getElementById('qpList');
+  if (!el) return;
   const q  = query.toLowerCase().trim();
   const list = q ? quickPicks.filter(c => c.name.toLowerCase().includes(q)) : quickPicks;
   if (!list.length) { el.innerHTML = '<div class="qp-empty">'+(q?'No matches':'No picks yet — log some cars!')+'</div>'; return; }
@@ -5303,7 +5298,8 @@ function renderQPList(query) {
   });
 }
 function renderQPTrigger() {
-  document.getElementById('qpWrap').style.display = quickPicks.length ? 'block' : 'none';
+  var qpWrap = document.getElementById('qpWrap');
+  if (qpWrap) qpWrap.style.display = quickPicks.length ? 'block' : 'none';
 }
 document.addEventListener('click', e => {
   if (qpOpen && !document.getElementById('qpWrap').contains(e.target)) closeQP();
@@ -5371,7 +5367,9 @@ function logRun() {
 function logSpotted() {
   var input = getInputs();
   if (!input.name) { showToast('Enter a car name!'); return; }
-  if (isNaN(input.value) || input.value < 0) { showToast('Enter a valid value!'); return; }
+  // A solo spot only needs a name. Keep value optional until the user chooses to add details.
+  if (isNaN(input.value)) input.value = 0;
+  if (input.value < 0) { showToast('Enter a valid value!'); return; }
   var name = resolveAlias(input.name);
   var photo = getPhotoAndClear();
   var car = attachPendingLocation({ name:name, value:input.value, color:input.color, type:input.type, ts:Date.now(), ...(photo ? {photo} : {}) });
@@ -9012,18 +9010,35 @@ let acIdx = -1;
 function onCarNameInput(val) {
   const wrap = document.getElementById('carAcWrap');
   const drop = document.getElementById('carAcDropdown');
-  if (!val || val.length < 2) { closeCarAc(); return; }
-  const q = val.toLowerCase();
-  const matches = CAR_AC_DB.filter(c => c.name.toLowerCase().includes(q)).slice(0, 8);
-  if (!matches.length) { closeCarAc(); return; }
+  const q = String(val || '').toLowerCase().trim();
+  const picks = quickPicks.filter(c => !q || c.name.toLowerCase().includes(q)).slice(0, 5);
+  const matches = (q.length >= 2 ? CAR_AC_DB.filter(c => c.name.toLowerCase().includes(q)) : CAR_AC_DB.slice(0, 5)).slice(0, 8);
+  if (!picks.length && !matches.length) { closeCarAc(); return; }
   acIdx = -1;
-  drop.innerHTML = matches.map((c,i) => `
+  const pickMarkup = picks.length ? '<div class="ac-section-label">Quick Picks</div>' + picks.map((c,i) => `
+    <div class="ac-item ac-quick-pick" data-idx="${i}" onmousedown="selectQuickPick(${i})">
+      <span class="ac-item-emoji">↺</span>
+      <span class="ac-item-name">${escapeHtml(c.name)}<span class="ac-item-meta">Recently spotted</span></span>
+      <span class="ac-item-val">${fmt(c.value)}</span>
+    </div>`).join('') : '';
+  const matchMarkup = matches.length ? '<div class="ac-section-label">Car matches</div>' + matches.map((c,i) => `
     <div class="ac-item" data-idx="${i}" onmousedown="selectAcItem(${i})" data-name="${c.name.replace(/"/g,'&quot;')}" data-val="${c.val}" data-type="${c.type}">
       <span class="ac-item-emoji">${c.type}</span>
       <span class="ac-item-name">${c.name}</span>
       <span class="ac-item-val">${fmt(c.val)}</span>
-    </div>`).join('');
+    </div>`).join('') : '';
+  drop.innerHTML = pickMarkup + matchMarkup;
   wrap.classList.add('open');
+}
+
+function selectQuickPick(idx) {
+  const c = quickPicks[idx];
+  if (!c) return;
+  document.getElementById('carName').value = c.name;
+  document.getElementById('carValue').value = c.value;
+  document.getElementById('carColor').value = c.color || '';
+  document.getElementById('carType').value = c.type || '';
+  closeCarAc();
 }
 
 function selectAcItem(idx) {
@@ -9042,7 +9057,7 @@ function closeCarAc() {
 
 // Keyboard navigation for autocomplete
 document.getElementById('carName').addEventListener('keydown', e => {
-  const items = document.querySelectorAll('.ac-item');
+  const items = document.querySelectorAll('.ac-item:not(.ac-quick-pick)');
   if (!items.length) return;
   if (e.key === 'ArrowDown') { e.preventDefault(); acIdx = Math.min(acIdx+1, items.length-1); items.forEach((el,i)=>el.classList.toggle('selected',i===acIdx)); }
   else if (e.key === 'ArrowUp') { e.preventDefault(); acIdx = Math.max(acIdx-1, 0); items.forEach((el,i)=>el.classList.toggle('selected',i===acIdx)); }
@@ -10946,7 +10961,6 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 </body>
 </html>
-
 
 
 
