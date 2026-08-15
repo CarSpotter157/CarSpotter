@@ -2453,9 +2453,25 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 .trip-card .tr-name{font-family:'Inter',sans-serif;font-size:1.1rem;letter-spacing:0.5px;color:var(--text);}
 .trip-card .tr-meta{font-size:0.6rem;color:var(--muted);letter-spacing:0.5px;margin-top:2px;}
 .trip-card .tr-val{font-family:'Inter',sans-serif;font-size:1.2rem;color:var(--accent);white-space:nowrap;}
+.trip-card .tr-del{flex-shrink:0;background:rgba(224,82,64,0.10);border:1px solid rgba(224,82,64,0.3);border-radius:8px;color:#ff6b5b;font-size:0.85rem;padding:6px 9px;cursor:pointer;line-height:1;transition:transform 0.12s;}
+.trip-card .tr-del:active{transform:scale(0.9);}
 .trip-card.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent);}
 .trip-card .tr-active-tag{font-size:0.5rem;font-weight:800;letter-spacing:1px;color:#080808;background:var(--accent);border-radius:99px;padding:2px 8px;margin-top:4px;display:inline-block;}
 .trip-empty{text-align:center;padding:36px 16px;color:var(--muted);font-size:0.72rem;letter-spacing:1px;line-height:1.8;}
+
+/* Persistent "trip running" live bar — echoed on every page while a trip collects */
+.trip-livebar{position:sticky;top:0;z-index:9888;display:flex;align-items:center;gap:10px;padding:9px 14px;background:linear-gradient(90deg,rgba(232,184,75,0.16),rgba(96,165,250,0.10));border-bottom:1px solid rgba(232,184,75,0.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.trip-livebar .tlb-ico{font-size:1.3rem;flex-shrink:0;animation:crestPing 2.2s ease-in-out infinite;}
+.trip-livebar .tlb-body{flex:1;min-width:0;}
+.trip-livebar .tlb-name{font-family:'Inter',sans-serif;font-size:0.82rem;letter-spacing:1px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.trip-livebar .tlb-name .tlb-live{font-size:0.5rem;font-weight:800;letter-spacing:2px;color:#080808;background:var(--accent);border-radius:4px;padding:1px 5px;margin-right:6px;vertical-align:1px;animation:tripLivePulse 1.4s ease-in-out infinite;}
+@keyframes tripLivePulse{0%,100%{opacity:1;}50%{opacity:0.45;}}
+.trip-livebar .tlb-meta{font-size:0.56rem;color:var(--text2);letter-spacing:0.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.trip-livebar .tlb-actions{display:flex;gap:8px;flex-shrink:0;}
+.trip-livebar .tlb-btn{font-size:0.56rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;border:none;border-radius:99px;padding:8px 12px;cursor:pointer;transition:transform 0.12s;}
+.trip-livebar .tlb-btn:active{transform:scale(0.95);}
+.trip-livebar .tlb-btn--end{background:var(--accent);color:#080808;}
+.trip-livebar .tlb-btn--view{background:var(--surf2);border:1px solid var(--border2);color:var(--text);}
 
 /* Trip detail sheet */
 .trip-detail-sheet{position:fixed;inset:0;z-index:99990;background:rgba(0,0,0,0.86);display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.18s ease;}
@@ -2781,6 +2797,9 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
       <div id="userPillWrap"></div>
     </div>
   </header>
+
+  <!-- Persistent road-trip running indicator — shown on every page while a trip is active -->
+  <div class="trip-livebar" id="tripLiveBar" style="display:none"></div>
 
   <div class="pages">
 
@@ -5330,6 +5349,7 @@ function logRun() {
   clearInputs();
   renderQPTrigger();
   renderSpot();
+  renderTripLiveBar();
   if (garageView === 'map') renderGarage();
   playSound('log');
   rewardLog(car, true, { isFirst: isFirst });
@@ -5376,6 +5396,7 @@ function logSpotted() {
   renderGarage();
   notify('Discovery Recorded — ' + name + ' added to your collection.', { priority:'quiet', group:'logsolo' });
   setTimeout(checkNewAchievements, 400);
+  if (window.attachRunToTrip) window.attachRunToTrip(entry); // journal solo spots into the active trip too
 }
 
 //  REMOVE FROM RUN 
@@ -10047,9 +10068,11 @@ function createTrip() {
   if (!name) { showToast('Give your trip a name!'); nameEl.focus(); return; }
   var trip = { id: Date.now(), name: name, emoji: emoEl.value, created: Date.now(), runIds: [], total: 0, carCount: 0 };
   _progress.trips.unshift(trip);
+  _progress.activeTripId = trip.id; // launching a trip starts collection immediately
   saveProgress();
   nameEl.value = '';
   renderTrips();
+  renderTripLiveBar();
   playSound('log');
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     showToast('🛣️ ' + name + ' launched! Runs will be added to it.');
@@ -10072,7 +10095,7 @@ function celebrateTripLaunch(trip, done) {
       '</div>' +
       '<div class="trip-cer-body">' +
         '<div class="trip-cer-route"><span class="dot"></span><div class="trip-cer-line"></div><span class="trip-cer-route-end">🏁</span></div>' +
-        '<div class="trip-cer-sub">Every completed run is now journaled into this trip</div>' +
+        '<div class="trip-cer-sub">Trip is RUNNING — every car you log is collected. End it anytime to close the journey.</div>' +
         '<div class="trip-cer-dismiss">Tap to continue</div>' +
       '</div>' +
     '</div>';
@@ -10102,11 +10125,13 @@ function attachRunToTrip(run) {
     trip.carCount += (run.cars || []).length;
     saveProgress();
   }
+  renderTripLiveBar();
 }
 function setActiveTrip(id) {
   _progress.activeTripId = (id === _progress.activeTripId) ? null : id;
   saveProgress();
   renderTrips();
+  renderTripLiveBar();
 }
 function deleteTrip(id) {
   if (!confirm('Delete this trip? Runs stay in your history.')) return;
@@ -10114,6 +10139,82 @@ function deleteTrip(id) {
   if (_progress.activeTripId === id) _progress.activeTripId = null;
   saveProgress();
   renderTrips();
+  renderTripLiveBar();
+}
+
+// Persistent "trip running" bar echoed below the header on every page while a trip collects.
+function renderTripLiveBar() {
+  var bar = document.getElementById('tripLiveBar');
+  if (!bar) return;
+  var trip = _progress.activeTripId ? tripById(_progress.activeTripId) : null;
+  if (!trip) { bar.style.display = 'none'; bar.innerHTML = ''; return; }
+  var pending = currentRun.length;
+  bar.style.display = 'flex';
+  bar.innerHTML =
+    '<div class="tlb-ico">' + (trip.emoji || '🛣️') + '</div>' +
+    '<div class="tlb-body">' +
+      '<div class="tlb-name"><span class="tlb-live">TRIP RUNNING</span>' + escapeHtml(trip.name) + '</div>' +
+      '<div class="tlb-meta">' + (trip.carCount || 0) + ' car' + ((trip.carCount||0) === 1 ? '' : 's') +
+        ' collected · ' + fmt(trip.total || 0) +
+        (pending ? ' · +' + pending + ' in current run' : '') + '</div>' +
+    '</div>' +
+    '<div class="tlb-actions">' +
+      '<button class="tlb-btn tlb-btn--view" onclick="goTo(\'trips\');return false;">View</button>' +
+      '<button class="tlb-btn tlb-btn--end" onclick="endTrip();return false;">End Trip</button>' +
+    '</div>';
+}
+
+// Ends the active trip: stops collection, closes the live bar, pops the trip-complete ceremony.
+function endTrip() {
+  var trip = _progress.activeTripId ? tripById(_progress.activeTripId) : null;
+  if (!trip) { renderTripLiveBar(); return; }
+  _progress.activeTripId = null;
+  saveProgress();
+  renderTrips();
+  renderTripLiveBar();
+  playSound('end');
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    showToast('🏁 ' + trip.name + ' ended — ' + (trip.carCount||0) + ' cars · ' + fmt(trip.total||0));
+    return;
+  }
+  enqueueCeremony(function(done){ celebrateTripEnd(trip, done); });
+}
+function celebrateTripEnd(trip, done) {
+  if (document.querySelector('.trip-cer')) { if (done) done(); return; }
+  var overlay = document.createElement('div');
+  overlay.className = 'trip-cer';
+  overlay.innerHTML =
+    '<div class="trip-cer-ticket">' +
+      '<div class="trip-cer-head">' +
+        '<div class="trip-cer-ico">🏁</div>' +
+        '<div>' +
+          '<div class="trip-cer-eyebrow">Journey Complete</div>' +
+          '<div class="trip-cer-name" style="color:#4ade80;">' + escapeHtml(trip.name) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="trip-cer-body">' +
+        '<div class="trip-cer-route"><span class="dot"></span><div class="trip-cer-line"></div><span class="trip-cer-route-end">🏁</span></div>' +
+        '<div class="trip-cer-sub" style="font-size:0.72rem;text-transform:none;letter-spacing:1px;line-height:1.7;">' +
+          (trip.carCount||0) + ' car' + ((trip.carCount||0) === 1 ? '' : 's') + ' collected · ' +
+          fmtFull(trip.total||0) + ' total<br>' +
+          (trip.runIds ? trip.runIds.length : 0) + ' run' + ((trip.runIds||[]).length === 1 ? '' : 's') + ' journaled' +
+        '</div>' +
+        '<div class="trip-cer-dismiss">Tap to finish</div>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  var closed = false;
+  function close() {
+    if (closed) return;
+    closed = true;
+    overlay.style.transition = 'opacity 0.35s ease';
+    overlay.style.opacity = '0';
+    setTimeout(function(){ if (overlay.parentNode) overlay.parentNode.removeChild(overlay); if (done) done(); }, 360);
+  }
+  overlay.onclick = function(){ if (overlay.classList.contains('stage-2')) close(); else overlay.classList.add('stage-2'); };
+  setTimeout(function(){ overlay.classList.add('stage-1'); playSound('page'); haptic([20, 30]); }, 150);
+  setTimeout(function(){ overlay.classList.add('stage-2'); playSound('stamp'); playSound('collect'); haptic([30, 40, 30]); }, 1150);
+  setTimeout(close, 6500);
 }
 function renderTrips() {
   var hero = document.getElementById('tripHero');
@@ -10128,7 +10229,7 @@ function renderTrips() {
     '</div>';
   var list = document.getElementById('tripList');
   if (!_progress.trips.length) {
-    list.innerHTML = '<div class="trip-empty">No trips yet.<br>Launch one, then every completed run is journaled into it automatically.</div>';
+    list.innerHTML = '<div class="trip-empty">No trips yet.<br>Launch one, then every car you log is collected into it until you end the trip.</div>';
     return;
   }
   list.innerHTML = _progress.trips.map(function(t, i){
@@ -10138,9 +10239,10 @@ function renderTrips() {
       '<div class="tr-body">' +
         '<div class="tr-name">' + escapeHtml(t.name) + '</div>' +
         '<div class="tr-meta">' + (t.runIds.length) + ' run' + (t.runIds.length === 1 ? '' : 's') + ' · ' + (t.carCount || 0) + ' cars' + (active ? ' · collecting now' : '') + '</div>' +
-        (active ? '<div class="tr-active-tag">ACTIVE — ADDING RUNS</div>' : '') +
+        (active ? '<div class="tr-active-tag">ACTIVE — COLLECTING CARS</div>' : '') +
       '</div>' +
       '<div class="tr-val">' + fmt(t.total || 0) + '</div>' +
+      '<button class="tr-del" title="Delete trip" onclick="event.stopPropagation();deleteTrip(\'' + t.id + '\')">🗑</button>' +
     '</div>';
   }).join('');
 }
@@ -10174,10 +10276,12 @@ function openTripDetail(id) {
         '<div class="td-stat"><div class="ts-v">' + (t.runIds.length) + '</div><div class="ts-l">Runs</div></div>' +
       '</div>' +
       '<div style="display:flex;gap:8px;margin-bottom:16px;">' +
-        '<button style="flex:1;background:var(--surf2);border:1px solid var(--border2);border-radius:var(--radius-xs);color:var(--text);font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:11px;cursor:pointer;" onclick="setActiveTrip(\'' + t.id + '\');document.querySelector(\'.trip-detail-sheet\').remove();renderTrips()">' + (String(_progress.activeTripId) === String(t.id) ? 'STOP ADDING RUNS' : 'ADD RUNS TO THIS') + '</button>' +
+        (String(_progress.activeTripId) === String(t.id)
+          ? '<button style="flex:1;background:var(--accent);border:none;border-radius:var(--radius-xs);color:#080808;font-size:0.68rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:11px;cursor:pointer;" onclick="endTrip();document.querySelector(\'.trip-detail-sheet\').remove();renderTrips()">END TRIP</button>'
+          : '<button style="flex:1;background:var(--surf2);border:1px solid var(--border2);border-radius:var(--radius-xs);color:var(--text);font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:11px;cursor:pointer;" onclick="setActiveTrip(\'' + t.id + '\');document.querySelector(\'.trip-detail-sheet\').remove();renderTrips()">START COLLECTING</button>') +
         '<button style="flex:1;background:rgba(224,82,64,0.12);border:1px solid rgba(224,82,64,0.35);border-radius:var(--radius-xs);color:#ff6b5b;font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:11px;cursor:pointer;" onclick="deleteTrip(\'' + t.id + '\');document.querySelector(\'.trip-detail-sheet\').remove();renderTrips()">DELETE</button>' +
       '</div>' +
-      (runs || '<div class="trip-empty">No runs journaled yet — complete a run while this trip is active.</div>') +
+      (runs || '<div class="trip-empty">Nothing collected yet — log cars while this trip is active.</div>') +
     '</div>';
   document.body.appendChild(overlay);
 }
@@ -10582,6 +10686,7 @@ window.mergeCloudProgression = function(cloud) {
     else if (cloud.activeTripId && !tripById(cloud.activeTripId)) _progress.activeTripId = cloud.activeTripId;
     saveProgress();
     renderTitleChip();
+    renderTripLiveBar();
   } catch(e) {}
 };
 window.renderBook = renderBook;
@@ -10597,6 +10702,8 @@ window.showBookAllShelf = showBookAllShelf;
 window.claimExpo = claimExpo;
 window.updateProgressionAfterLog = updateProgressionAfterLog;
 window.attachRunToTrip = attachRunToTrip;
+window.renderTripLiveBar = renderTripLiveBar;
+window.endTrip = endTrip;
 window.enqueueMoment = enqueueMoment;
 window.checkEvolutionUnlock = checkEvolutionUnlock;
 
@@ -10775,6 +10882,7 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
   renderSpot();
   renderGarage();
   renderAchievements();
+  renderTripLiveBar();
   refreshOfflineStatus();
   initSecretThemeTap();
   // Progression expansion init
