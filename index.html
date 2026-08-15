@@ -9475,13 +9475,15 @@ async function loadNews() {
 // ══════════════════════════════════════════════════════════════════
 
 // ---- persisted progression state (cs_progress) ----
-var _progressV = 1;
+var _progressV = 1; // keep — a bumped version would wipe every user's existing trips/titles
 function _defaultProgress() {
   return {
     v: _progressV,
     titlesUnlocked: {},      // { titleId: true }
     trips: [],               // [{ id, name, emoji, created, runIds[], total, carCount }]
     activeTripId: null,
+    activeTripVer: 0,        // Lamport version of the active-trip choice — gates cloud adoption
+    deletedTripIds: [],      // trip tombstones — a deleted trip must never resurrect
     expoClaimed: {},         // { expeditionId: ts }
     mysteryPeeked: {},       // { modelKey: true }
     storiesRead: {},         // { modelKey: true }
@@ -10068,6 +10070,7 @@ function createTrip() {
   if (!name) { showToast('Give your trip a name!'); nameEl.focus(); return; }
   var trip = { id: Date.now(), name: name, emoji: emoEl.value, created: Date.now(), runIds: [], total: 0, carCount: 0 };
   _progress.trips.unshift(trip);
+  _progress.activeTripVer = _bumpVer('progression'); // mark this active-trip choice as newest
   _progress.activeTripId = trip.id; // launching a trip starts collection immediately
   saveProgress();
   nameEl.value = '';
@@ -10128,7 +10131,13 @@ function attachRunToTrip(run) {
   renderTripLiveBar();
 }
 function setActiveTrip(id) {
-  _progress.activeTripId = (id === _progress.activeTripId) ? null : id;
+  if (String(id) === String(_progress.activeTripId)) {
+    _progress.activeTripId = null; // ending collection
+    _progress.activeTripVer = _bumpVer('progression');
+  } else {
+    _progress.activeTripId = id;
+    _progress.activeTripVer = _bumpVer('progression');
+  }
   saveProgress();
   renderTrips();
   renderTripLiveBar();
@@ -10136,7 +10145,12 @@ function setActiveTrip(id) {
 function deleteTrip(id) {
   if (!confirm('Delete this trip? Runs stay in your history.')) return;
   _progress.trips = _progress.trips.filter(function(t){ return String(t.id) !== String(id); });
-  if (_progress.activeTripId === id) _progress.activeTripId = null;
+  if (!_progress.deletedTripIds) _progress.deletedTripIds = [];
+  if (_progress.deletedTripIds.indexOf(String(id)) === -1) _progress.deletedTripIds.push(String(id));
+  if (String(_progress.activeTripId) === String(id)) {
+    _progress.activeTripId = null;
+    _progress.activeTripVer = _bumpVer('progression');
+  }
   saveProgress();
   renderTrips();
   renderTripLiveBar();
@@ -10169,6 +10183,7 @@ function endTrip() {
   var trip = _progress.activeTripId ? tripById(_progress.activeTripId) : null;
   if (!trip) { renderTripLiveBar(); return; }
   _progress.activeTripId = null;
+  _progress.activeTripVer = _bumpVer('progression'); // ending outranks any stale cloud activeTripId
   saveProgress();
   renderTrips();
   renderTripLiveBar();
@@ -10667,13 +10682,24 @@ window.getProgression = getProgression;
 window.mergeCloudProgression = function(cloud) {
   if (!cloud || typeof cloud !== 'object') return;
   try {
-    // Trips: union by id, prefer local on conflict
+    // Trip tombstones: union deleted ids in both directions. A tombstoned id must
+    // never reappear even if cloud's snapshot still lists it (the race between our
+    // delete write and the listener echo / the txWrite rebase is exactly what
+    // used to resurrect deleted trips).
+    var del = _progress.deletedTripIds || (_progress.deletedTripIds = []);
+    (cloud.deletedTripIds || []).forEach(function(id){
+      if (del.indexOf(String(id)) === -1) del.push(String(id));
+    });
+    function tripDead(id){ return del.indexOf(String(id)) !== -1; }
+
+    // Trips: union by id, but tombstoned trips are filtered out on both sides.
     var localTrips = {};
-    _progress.trips.forEach(function(t){ localTrips[String(t.id)] = t; });
+    _progress.trips.forEach(function(t){ if (!tripDead(t.id)) localTrips[String(t.id)] = t; });
     (cloud.trips || []).forEach(function(t){
-      if (t && t.id && !localTrips[String(t.id)]) { localTrips[String(t.id)] = t; }
+      if (t && t.id && !tripDead(t.id) && !localTrips[String(t.id)]) localTrips[String(t.id)] = t;
     });
     _progress.trips = Object.keys(localTrips).map(function(k){ return localTrips[k]; });
+
     // Flags: union (a milestone/claim/peek that happened anywhere stays true)
     ['expoClaimed','mysteryPeeked','storiesRead','milestones','titlesUnlocked'].forEach(function(key){
       var src = cloud[key];
@@ -10681,9 +10707,29 @@ window.mergeCloudProgression = function(cloud) {
         Object.keys(src).forEach(function(k){ _progress[key][k] = src[k]; });
       }
     });
-    // Active trip: prefer local if it exists locally, else cloud
-    if (cloud.activeTripId && !_progress.activeTripId) _progress.activeTripId = cloud.activeTripId;
-    else if (cloud.activeTripId && !tripById(cloud.activeTripId)) _progress.activeTripId = cloud.activeTripId;
+
+    // Active trip: Lamport-gated. Cloud only wins when it is strictly newer AND the
+    // trip still exists locally AND is not tombstoned. This stops a stale cloud doc
+    // from re-activating a trip we just ended (activeTripVer bumps on every end).
+    // A legacy tie both-at-zero (pre-version docs) still restores an existing active
+    // trip from cloud — that's the old intended behavior, not a resurrection.
+    var lv = _progress.activeTripVer || 0;
+    var cv = cloud.activeTripVer || 0;
+    var caid = cloud.activeTripId;
+    if (cv > lv || (cv === lv && cv === 0 && !_progress.activeTripId && caid && !tripDead(caid) && tripById(caid))) {
+      if (caid && !tripDead(caid) && tripById(caid)) {
+        _progress.activeTripId = caid;
+      } else {
+        _progress.activeTripId = null; // the newer doc ended or deleted it — respect that
+      }
+      _progress.activeTripVer = cv;
+    }
+    // A locally-active trip that was deleted (here or on another device) must stop
+    // collecting rather than keep pointing at a ghost.
+    if (_progress.activeTripId && !tripById(_progress.activeTripId)) {
+      _progress.activeTripId = null;
+      _progress.activeTripVer = _bumpVer('progression');
+    }
     saveProgress();
     renderTitleChip();
     renderTripLiveBar();
