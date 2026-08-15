@@ -3849,12 +3849,15 @@ function _saveAllLocal() {
 //  FIREBASE AUTH & SYNC 
 
 window.signInGoogle = function() {
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function(e) {
+  var provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  auth.signInWithPopup(provider).catch(function(e) {
+    if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return;
     showToast('Sign in failed: ' + e.message);
   });
 };
 function signOutUser() {
-  if (!confirm('Sign out?')) return;
+  if (!confirm('Sign out?\n\nYour data stays on this device.')) return;
   if (syncUnsub) { syncUnsub(); syncUnsub = null; }
   auth.signOut();
 }
@@ -10943,7 +10946,6 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 </body>
 </html>
-
 
 
 
