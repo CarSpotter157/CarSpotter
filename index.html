@@ -993,7 +993,7 @@ html:not(.show-qp) #qpWrap{display:none;}
 }
 .ri{flex:1;min-width:0;}
 .rn{font-size:0.92rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:-0.2px;}
-.rc{font-size:0.58rem;color:var(--text2);margin-top:3px;letter-spacing:0.3px;}
+.rc{font-size:0.58rem;color:var(--text2);margin-top:3px;letter-spacing:0.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .rv{font-family:Calibri,'Inter',sans-serif;font-size:1.2rem;color:var(--accent);flex-shrink:0;font-variant-numeric:tabular-nums;font-feature-settings:'tnum' 1;-webkit-font-feature-settings:'tnum' 1;letter-spacing:0.5px;}
 .star-btn{background:none;border:none;font-size:1rem;color:var(--muted);cursor:pointer;transition:all 0.2s;flex-shrink:0;padding:8px;}
 .star-btn:hover{color:var(--accent);transform:scale(1.2);}
@@ -1139,14 +1139,21 @@ html:not(.show-qp) #qpWrap{display:none;}
 .garage-row.evo-silver{--evo-ring:#c0c0c0;--evo-tint:rgba(192,192,192,0.1);}
 .garage-row.evo-gold{--evo-ring:#f5c842;--evo-tint:rgba(245,200,66,0.12);}
 .garage-row.evo-platinum{--evo-ring:#7fd1f7;--evo-tint:rgba(127,209,247,0.12);}
-.garage-row.evo-diamond{--evo-ring:#9ff2ff;--evo-tint:rgba(159,242,255,0.12);}
-.garage-row.evo-bronze,.garage-row.evo-silver,.garage-row.evo-gold,.garage-row.evo-platinum,.garage-row.evo-diamond{
+.garage-row.evo-diamond{--evo-ring:#e6fbff;--evo-tint:rgba(230,251,255,0.12);}
+.garage-row.evo-obsidian{--evo-ring:#8b7cff;--evo-tint:rgba(139,124,255,0.14);}
+.garage-row.evo-bronze,.garage-row.evo-silver,.garage-row.evo-gold,.garage-row.evo-platinum,.garage-row.evo-diamond,.garage-row.evo-obsidian{
   border-color:var(--evo-ring);
   background:linear-gradient(var(--glass-card),var(--glass-card)) padding-box,
     linear-gradient(90deg,var(--evo-ring),rgba(255,255,255,0.5) 50%,var(--evo-ring)) border-box;
   box-shadow:0 0 0 1px var(--evo-ring),0 0 18px -6px var(--evo-ring),var(--shadow-sm);
 }
-.garage-row.evo-bronze:hover,.garage-row.evo-silver:hover,.garage-row.evo-gold:hover,.garage-row.evo-platinum:hover,.garage-row.evo-diamond:hover{border-color:var(--evo-ring);box-shadow:0 0 0 1px var(--evo-ring),0 0 24px -6px var(--evo-ring),var(--shadow);}
+.garage-row.evo-obsidian{
+  background:linear-gradient(150deg,rgba(20,18,38,0.9),rgba(38,32,84,0.85)) padding-box,
+    linear-gradient(90deg,#141226,#8b7cff 50%,#141226) border-box;
+  border-color:#6c5ce0;
+  box-shadow:0 0 0 1px #6c5ce0,0 0 0 3px rgba(139,124,255,0.2),0 0 22px -6px #8b7cff,var(--shadow-sm);
+}
+.garage-row.evo-bronze:hover,.garage-row.evo-silver:hover,.garage-row.evo-gold:hover,.garage-row.evo-platinum:hover,.garage-row.evo-diamond:hover,.garage-row.evo-obsidian:hover{border-color:var(--evo-ring);box-shadow:0 0 0 1px var(--evo-ring),0 0 24px -6px var(--evo-ring),var(--shadow);}
 .g-rank{font-family:'Inter',sans-serif;font-size:0.7rem;color:var(--muted);min-width:26px;}
 .g-emoji{
   width:38px;height:38px;border-radius:9px;
@@ -1359,34 +1366,50 @@ html:not(.show-qp) #qpWrap{display:none;}
 .collector-card.evo-silver{--evo-ring:#c0c0c0;--evo-tint:rgba(192,192,192,0.14);}
 .collector-card.evo-gold{--evo-ring:#f5c842;--evo-tint:rgba(245,200,66,0.16);}
 .collector-card.evo-platinum{--evo-ring:#7fd1f7;--evo-tint:rgba(127,209,247,0.16);}
-.collector-card.evo-diamond{--evo-ring:#9ff2ff;--evo-tint:rgba(159,242,255,0.16);}
-.collector-card.evo-bronze,.collector-card.evo-silver,.collector-card.evo-gold,.collector-card.evo-platinum,.collector-card.evo-diamond{
+.collector-card.evo-diamond{--evo-ring:#f4fcff;--evo-tint:rgba(244,252,255,0.2);}
+.collector-card.evo-obsidian{--evo-ring:#8b7cff;--evo-tint:rgba(139,124,255,0.2);}
+.collector-card.evo-bronze,.collector-card.evo-silver,.collector-card.evo-gold,.collector-card.evo-platinum,.collector-card.evo-diamond,.collector-card.evo-obsidian{
   border-color:var(--evo-ring);
   background:linear-gradient(var(--glass-card),var(--glass-card)) padding-box,
     linear-gradient(135deg,var(--evo-ring),rgba(255,255,255,0.55) 45%,var(--evo-ring)) border-box;
   box-shadow:0 0 0 1px var(--evo-ring),0 0 26px -4px var(--evo-ring),var(--shadow);
   animation:evoCardIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
 }
-.collector-card.evo-bronze::before,.collector-card.evo-silver::before,.collector-card.evo-gold::before,.collector-card.evo-platinum::before,.collector-card.evo-diamond::before{
+/* Diamond cut: icy-white + a crisp outer halo so it reads clearly above Platinum. */
+.collector-card.evo-diamond{
+  box-shadow:0 0 0 1px #d9fbff,0 0 0 3px rgba(244,252,255,0.28),0 0 38px -6px #f4fcff,var(--shadow);
+  animation:evoCardIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both,evoDiamondTwinkle 3.4s ease-in-out infinite;
+}
+/* Obsidian: dark glass cut with a violet edge-glow — unmistakably the top tier. */
+.collector-card.evo-obsidian{
+  background:linear-gradient(150deg,rgba(20,18,38,0.92),rgba(38,32,84,0.85)) padding-box,
+    linear-gradient(135deg,#141226,#8b7cff 48%,#141226) border-box;
+  border-color:#6c5ce0;
+  box-shadow:0 0 0 1px #6c5ce0,0 0 0 3px rgba(139,124,255,0.22),0 6px 34px -6px #8b7cff,var(--shadow);
+  animation:evoCardIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both,evoObsidianGlow 3.8s ease-in-out infinite;
+}
+.collector-card.evo-bronze::before,.collector-card.evo-silver::before,.collector-card.evo-gold::before,.collector-card.evo-platinum::before,.collector-card.evo-diamond::before,.collector-card.evo-obsidian::before{
   content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:2;opacity:0.4;
   background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,0.28) 50%,transparent 60%);
   background-size:220% 100%;background-repeat:no-repeat;
   animation:evoShimmer 4.5s ease-in-out infinite;
 }
-.collector-card.evo-bronze::after,.collector-card.evo-silver::after,.collector-card.evo-gold::after,.collector-card.evo-platinum::after,.collector-card.evo-diamond::after{
+.collector-card.evo-bronze::after,.collector-card.evo-silver::after,.collector-card.evo-gold::after,.collector-card.evo-platinum::after,.collector-card.evo-diamond::after,.collector-card.evo-obsidian::after{
   content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:inherit;z-index:3;pointer-events:none;
   background:linear-gradient(90deg,transparent,var(--evo-ring),transparent);
   opacity:0.85;
 }
-.collector-card.evo-bronze .gc-tier-chip,.collector-card.evo-silver .gc-tier-chip,.collector-card.evo-gold .gc-tier-chip,.collector-card.evo-platinum .gc-tier-chip,.collector-card.evo-diamond .gc-tier-chip{border-color:var(--evo-ring);color:var(--evo-ring);background:var(--evo-tint);}
-.collector-card.evo-bronze .gc-evo-chip,.collector-card.evo-silver .gc-evo-chip,.collector-card.evo-gold .gc-evo-chip,.collector-card.evo-platinum .gc-evo-chip,.collector-card.evo-diamond .gc-evo-chip{
+.collector-card.evo-bronze .gc-tier-chip,.collector-card.evo-silver .gc-tier-chip,.collector-card.evo-gold .gc-tier-chip,.collector-card.evo-platinum .gc-tier-chip,.collector-card.evo-diamond .gc-tier-chip,.collector-card.evo-obsidian .gc-tier-chip{border-color:var(--evo-ring);color:var(--evo-ring);background:var(--evo-tint);}
+.collector-card.evo-bronze .gc-evo-chip,.collector-card.evo-silver .gc-evo-chip,.collector-card.evo-gold .gc-evo-chip,.collector-card.evo-platinum .gc-evo-chip,.collector-card.evo-diamond .gc-evo-chip,.collector-card.evo-obsidian .gc-evo-chip{
   background:var(--evo-tint);border:1px solid var(--evo-ring);border-radius:999px;padding:2px 6px;margin-left:5px;
   animation:evoChipPulse 2.4s ease-in-out infinite;
 }
-.collector-card.evo-bronze:hover,.collector-card.evo-silver:hover,.collector-card.evo-gold:hover,.collector-card.evo-platinum:hover,.collector-card.evo-diamond:hover{border-color:var(--evo-ring);box-shadow:0 0 0 2px var(--evo-ring),0 0 40px -4px var(--evo-ring),var(--shadow-lg);}
+.collector-card.evo-bronze:hover,.collector-card.evo-silver:hover,.collector-card.evo-gold:hover,.collector-card.evo-platinum:hover,.collector-card.evo-diamond:hover,.collector-card.evo-obsidian:hover{border-color:var(--evo-ring);box-shadow:0 0 0 2px var(--evo-ring),0 0 40px -4px var(--evo-ring),var(--shadow-lg);}
 @keyframes evoCardIn{0%{opacity:0;transform:translateY(16px) scale(0.94)}60%{opacity:1;transform:translateY(-3px) scale(1.02)}100%{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes evoShimmer{0%{background-position:220% 0}100%{background-position:-120% 0}}
 @keyframes evoChipPulse{0%,100%{box-shadow:0 0 2px var(--evo-ring)}50%{box-shadow:0 0 10px var(--evo-ring)}}
+@keyframes evoDiamondTwinkle{0%,100%{filter:brightness(1)}50%{filter:brightness(1.18)}}
+@keyframes evoObsidianGlow{0%,100%{box-shadow:0 0 0 1px #6c5ce0,0 0 0 3px rgba(139,124,255,0.22),0 6px 34px -6px rgba(139,124,255,0.4),var(--shadow);}50%{box-shadow:0 0 0 1px #8b7cff,0 0 0 4px rgba(139,124,255,0.35),0 6px 44px -4px rgba(139,124,255,0.7),var(--shadow);}}
 .gc-badge{
   font-size:0.42rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;
   background:var(--surf2);border:1px solid var(--border);border-radius:4px;padding:2px 6px;color:var(--text2);
@@ -2071,16 +2094,18 @@ body.compact-mode .rarity-pill{display:none;}
 body.carbon-on .card,
 body.carbon-on .hist-item,
 body.carbon-on .garage-row,
+body.carbon-on .garage-card,
 body.carbon-on .score-banner,
 body.carbon-on .run-item,
 body.carbon-on .bottom-nav,
 body.carbon-on .app-header,
 body.carbon-on .recap-card,
 body.carbon-on .modal-card{
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%23111'/%3E%3Cpolygon points='0,4 4,0 8,0 4,4' fill='%23222'/%3E%3Cpolygon points='0,4 4,0 4,4 0,8' fill='%23282828'/%3E%3Cpolygon points='4,0 8,0 8,4 4,4' fill='%231a1a1a'/%3E%3Cpolygon points='8,4 12,0 16,0 12,4' fill='%23222'/%3E%3Cpolygon points='8,4 12,0 12,4 8,8' fill='%23282828'/%3E%3Cpolygon points='12,0 16,0 16,4 12,4' fill='%231a1a1a'/%3E%3Cpolygon points='0,12 4,8 8,8 4,12' fill='%231e1e1e'/%3E%3Cpolygon points='0,12 4,8 4,12 0,16' fill='%23242424'/%3E%3Cpolygon points='4,8 8,8 8,12 4,12' fill='%23181818'/%3E%3Cpolygon points='8,12 12,8 16,8 12,12' fill='%231e1e1e'/%3E%3Cpolygon points='8,12 12,8 12,12 8,16' fill='%23242424'/%3E%3Cpolygon points='12,8 16,8 16,12 12,12' fill='%23181818'/%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpolygon points='0,4 4,0 8,0 4,4' fill='rgba(0,0,0,0.28)'/%3E%3Cpolygon points='0,4 4,0 4,4 0,8' fill='rgba(255,255,255,0.05)'/%3E%3Cpolygon points='4,0 8,0 8,4 4,4' fill='rgba(0,0,0,0.36)'/%3E%3Cpolygon points='8,4 12,0 16,0 12,4' fill='rgba(0,0,0,0.28)'/%3E%3Cpolygon points='8,4 12,0 12,4 8,8' fill='rgba(255,255,255,0.05)'/%3E%3Cpolygon points='12,0 16,0 16,4 12,4' fill='rgba(0,0,0,0.36)'/%3E%3Cpolygon points='0,12 4,8 8,8 4,12' fill='rgba(255,255,255,0.05)'/%3E%3Cpolygon points='0,12 4,8 4,12 0,16' fill='rgba(0,0,0,0.28)'/%3E%3Cpolygon points='4,8 8,8 8,12 4,12' fill='rgba(0,0,0,0.36)'/%3E%3Cpolygon points='8,12 12,8 16,8 12,12' fill='rgba(255,255,255,0.05)'/%3E%3Cpolygon points='8,12 12,8 12,12 8,16' fill='rgba(0,0,0,0.28)'/%3E%3Cpolygon points='12,8 16,8 16,12 12,12' fill='rgba(0,0,0,0.36)'/%3E%3C/svg%3E");
   background-size:16px 16px;
+  background-blend-mode:overlay;
 }
-.carbon-preview{width:24px;height:24px;border-radius:5px;flex-shrink:0;border:1px solid var(--border2);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='%23111'/%3E%3Cpolygon points='0,4 4,0 8,0 4,4' fill='%23222'/%3E%3Cpolygon points='0,4 4,0 4,4 0,8' fill='%23282828'/%3E%3Cpolygon points='4,0 8,0 8,4 4,4' fill='%231a1a1a'/%3E%3Cpolygon points='8,4 12,0 16,0 12,4' fill='%23222'/%3E%3Cpolygon points='8,4 12,0 12,4 8,8' fill='%23282828'/%3E%3Cpolygon points='12,0 16,0 16,4 12,4' fill='%231a1a1a'/%3E%3C/svg%3E");background-size:16px 16px;}
+.carbon-preview{width:24px;height:24px;border-radius:5px;flex-shrink:0;border:1px solid var(--border2);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpolygon points='0,4 4,0 8,0 4,4' fill='rgba(0,0,0,0.28)'/%3E%3Cpolygon points='0,4 4,0 4,4 0,8' fill='rgba(255,255,255,0.05)'/%3E%3Cpolygon points='4,0 8,0 8,4 4,4' fill='rgba(0,0,0,0.36)'/%3E%3Cpolygon points='8,4 12,0 16,0 12,4' fill='rgba(0,0,0,0.28)'/%3E%3Cpolygon points='8,4 12,0 12,4 8,8' fill='rgba(255,255,255,0.05)'/%3E%3Cpolygon points='12,0 16,0 16,4 12,4' fill='rgba(0,0,0,0.36)'/%3E%3Cpolygon points='0,12 4,8 8,8 4,12' fill='rgba(255,255,255,0.05)'/%3E%3Cpolygon points='0,12 4,8 4,12 0,16' fill='rgba(0,0,0,0.28)'/%3E%3Cpolygon points='4,8 8,8 8,12 4,12' fill='rgba(0,0,0,0.36)'/%3E%3Cpolygon points='8,12 12,8 16,8 12,12' fill='rgba(255,255,255,0.05)'/%3E%3Cpolygon points='8,12 12,8 12,12 8,16' fill='rgba(0,0,0,0.28)'/%3E%3Cpolygon points='12,8 16,8 16,12 12,12' fill='rgba(0,0,0,0.36)'/%3E%3C/svg%3E");background-size:16px 16px;}
 .carbon-toggle-row{display:flex;align-items:center;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
 
 /* ── TUTORIAL ── */
@@ -2166,6 +2191,8 @@ html:not(.show-favs) #favSection{display:none;}
 #leafletMap{width:100%;height:340px;z-index:1;}
 .map-hud{position:absolute;top:10px;right:10px;z-index:1000;pointer-events:none;}
 .map-badge{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:0.68rem;font-weight:700;letter-spacing:1px;color:var(--text);pointer-events:auto;backdrop-filter:blur(6px);box-shadow:0 2px 8px rgba(0,0,0,.25);}
+.map-log-btn{display:block;margin-top:8px;background:var(--accent);color:#080808;border:none;border-radius:8px;padding:7px 10px;font-family:'Inter',sans-serif;font-size:0.6rem;font-weight:800;letter-spacing:1px;cursor:pointer;pointer-events:auto;box-shadow:0 2px 10px rgba(0,0,0,.3);}
+.map-log-btn:active{transform:scale(0.97);}
 .map-empty{background:rgba(17,17,20,0.72);backdrop-filter:blur(12px) saturate(1.2);-webkit-backdrop-filter:blur(12px) saturate(1.2);border:1px solid rgba(255,255,255,0.06);border-radius:var(--r-md);padding:32px 20px;text-align:center;color:var(--text2);font-size:0.78rem;line-height:1.6;box-shadow:0 2px 12px rgba(0,0,0,0.35);}
 .garage-map-list{display:flex;flex-direction:column;gap:6px;}
 .garage-map-row{background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:0.74rem;color:var(--text);cursor:pointer;transition:border-color .15s;}
@@ -2276,6 +2303,8 @@ html:not(.show-favs) #favSection{display:none;}
 .lens-btn:hover{border-color:var(--accent);color:var(--accent);}
 .csr-wiki-link{display:inline-block;font-size:0.64rem;color:var(--accent);margin-bottom:12px;text-decoration:none;}
 .csr-wiki-link:hover{text-decoration:underline;}
+.csr-google-link{display:inline-block;font-size:0.64rem;color:#60a5fa;margin-bottom:12px;margin-right:12px;text-decoration:none;}
+.csr-google-link:hover{text-decoration:underline;}
 .csr-img-wrap{width:100%;height:170px;background:var(--surf2);border-radius:var(--radius-sm);overflow:hidden;margin-bottom:14px;border:1px solid var(--border);}
 .csr-img{width:100%;height:100%;object-fit:cover;}
 .csr-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;}
@@ -3396,7 +3425,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
   <div class="act-list" id="actList"></div>
 </div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v30</div>
+<div class="version-tag" id="versionTag">v31</div>
 
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
@@ -4963,6 +4992,12 @@ function doUndo() {
     allRuns = data.prevRuns;
     currentRun = data.prevRun;
     headlinerIdx = data.prevHL;
+    // Undo restores deleted runs — pull their ids back out of the tombstone list
+    const restoredIds = new Set(allRuns.map(r => r.id));
+    const beforeTomb = _deletedRuns.length;
+    _deletedRuns = _deletedRuns.filter(id => !restoredIds.has(id));
+    if (_deletedRuns.length !== beforeTomb) _bumpVer('deletedRuns');
+    _persistDeleted();
     _bumpVer('runs');
     _saveRunsLocal();
     saveCurrentRun();
@@ -5326,6 +5361,16 @@ function getInputs() {
     type:  document.getElementById('carType').value, // select value, safe
   };
 }
+// Debounce identical rapid submissions (double-tap on a log button) so a car is
+// never recorded twice — duplicating its photo and double-counting its spot.
+var _lastLogSig = null;
+function _logGuard(sig) {
+  var now = Date.now();
+  var last = _lastLogSig;
+  if (last && last.sig === sig && now - last.ts < 700) return false;
+  _lastLogSig = { sig: sig, ts: now };
+  return true;
+}
 function clearInputs() {
   document.getElementById('carName').value  = '';
   document.getElementById('carValue').value = '';
@@ -5338,6 +5383,7 @@ function logRun() {
   var input = getInputs();
   if (!input.name) { showToast('Enter a car name!'); return; }
   if (isNaN(input.value) || input.value < 0) { showToast('Enter a valid value!'); return; }
+  if (!_logGuard(input.name + '|' + input.value + '|' + input.color + '|' + input.type)) return;
   var name = resolveAlias(input.name);
   var prevRun = JSON.parse(JSON.stringify(currentRun));
   var prevHL = headlinerIdx;
@@ -5372,6 +5418,7 @@ function logSpotted() {
   var input = getInputs();
   if (!input.name) { showToast('Enter a car name!'); return; }
   if (isNaN(input.value) || input.value < 0) { showToast('Enter a valid value!'); return; }
+  if (!_logGuard(input.name + '|' + input.value + '|' + input.color + '|' + input.type)) return;
   var name = resolveAlias(input.name);
   var photo = getPhotoAndClear();
   var car = attachPendingLocation({ name:name, value:input.value, color:input.color, type:input.type, ts:Date.now(), ...(photo ? {photo} : {}) });
@@ -5441,7 +5488,7 @@ function toggleHeadliner(i) {
 }
 
 //  UNICORN ALERT 
-function showUnicornAlert(total) {
+function showUnicornAlert(total, done) {
   const overlay = document.createElement('div');
   overlay.className = 'unicorn-overlay';
   overlay.id = 'unicornOverlay';
@@ -5463,7 +5510,7 @@ function showUnicornAlert(total) {
     <div class="unicorn-sub">You just crossed $1,000,000</div>
     <div class="unicorn-total">${fmtFull(total)}</div>
     <div class="unicorn-dismiss">Tap anywhere to continue</div>`;
-  overlay.onclick = () => overlay.remove();
+  overlay.onclick = () => { if (overlay.parentNode) overlay.remove(); if (typeof done === 'function') done(); };
   document.body.appendChild(overlay);
 }
 
@@ -5514,21 +5561,21 @@ function endRun() {
   // achievement/XP cascade below would otherwise keep re-arming for ~2.7s+.
   flushSyncNow();
   playSound('end');
-  showRecap({ total, cars: runCars, headliner, isRec: isRec || isFirstRec, prevBest });
+  enqueueCeremony(function(done){ showRecap({ total, cars: runCars, headliner, isRec: isRec || isFirstRec, prevBest }, done); });
   if (isRec || isFirstRec) {
     recordActivity('record', '🏆 New personal record — ' + fmtFull(total) + ' in one run!', { icon: '🏆' });
   } else {
     recordActivity('run', '🏁 Run complete — ' + fmtFull(total) + ' across ' + runCars.length + ' car' + (runCars.length !== 1 ? 's' : ''), { icon: '🏁' });
   }
   if (total >= 1000000) {
-    setTimeout(function(){ showUnicornAlert(total); playSound('level'); haptic([20,40,20,60,20]); }, 700);
+    setTimeout(function(){ enqueueCeremony(function(done){ showUnicornAlert(total, done); playSound('level'); haptic([20,40,20,60,20]); }); }, 700);
   }
   setTimeout(checkNewAchievements, 1200);
   if (window.attachRunToTrip) window.attachRunToTrip(run);
 }
 
 //  RUN RECAP 
-function showRecap({ total, cars, headliner, isRec, prevBest }) {
+function showRecap({ total, cars, headliner, isRec, prevBest }, done) {
   // Build top 3 cars (headliner prioritized as #1 if present)
   const sorted = [...cars].sort((a,b) => b.value - a.value);
   let top3 = sorted.slice(0, headliner ? 4 : 3);
@@ -5604,9 +5651,18 @@ function showRecap({ total, cars, headliner, isRec, prevBest }) {
         ${stats.map(s => `<div class="recap-stat"><div class="recap-stat-v">${s.v}</div><div class="recap-stat-l">${s.l}</div></div>`).join('')}
       </div>
       ${vsHTML}
-      <button class="recap-btn" onclick="document.getElementById('recapOverlay').remove()">Done</button>
+      <button class="recap-btn" id="recapDoneBtn">Done</button>
     </div>`;
-  overlay.onclick = () => overlay.remove();
+  var recapClosed = false;
+  function closeRecapNow() {
+    if (recapClosed) return;
+    recapClosed = true;
+    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    if (typeof done === 'function') done();
+  }
+  overlay.onclick = closeRecapNow;
+  var recapDoneBtn = overlay.querySelector('#recapDoneBtn');
+  if (recapDoneBtn) recapDoneBtn.onclick = function(e){ e.stopPropagation(); closeRecapNow(); };
   document.body.appendChild(overlay);
 
   // The moment: count the total up, drop confetti, fanfare
@@ -5760,6 +5816,7 @@ function deleteCarEverywhere(name) {
   const prevRuns = JSON.parse(JSON.stringify(allRuns));
   const prevRun  = JSON.parse(JSON.stringify(currentRun));
   const prevHL   = headlinerIdx;
+  var prevRunIds = allRuns.map(r => r.id);
   allRuns = allRuns.map(run => {
     const remaining = run.cars.filter(c=>c.name.toLowerCase()!==key);
     const newTotal  = remaining.reduce((s,c)=>s+c.value,0);
@@ -5767,6 +5824,12 @@ function deleteCarEverywhere(name) {
     const headliner = (run.headliner && run.headliner.name.toLowerCase()===key) ? null : run.headliner;
     return { ...run, cars: remaining, total: newTotal, headliner, _v:(run._v || 0) + 1 };
   }).filter(run=>run.cars.length>0);
+  // Tombstone any run that emptied out so a stale cloud snapshot can't resurrect
+  // it on the next merge even if the user refreshes before the delete reaches the cloud.
+  var keepSet = new Set(allRuns.map(r => r.id));
+  var tombAdded = false;
+  prevRunIds.forEach(id => { if (!keepSet.has(id) && _deletedRuns.indexOf(id) === -1) { _deletedRuns.push(id); tombAdded = true; } });
+  if (tombAdded) { _bumpVer('deletedRuns'); _persistDeleted(); }
   _bumpVer('runs');
   _saveRunsLocal();
   // Fix headlinerIdx: check index in OLD currentRun BEFORE filtering
@@ -6029,12 +6092,12 @@ function renderGarage() {
     var allCarsForMap = getAllCars();
     var mapped = allCarsForMap.filter(function(car){ return car.location && isFinite(car.location.lat) && isFinite(car.location.lng); });
     if (!mapped.length) {
-      el.innerHTML = '<div class="map-empty"><span style="font-size:2rem;display:block;margin-bottom:10px">📍</span><strong style="display:block;margin-bottom:6px;color:var(--text)">No mapped spots yet</strong>Use the Pin button when logging a car and it will appear here.</div>';
+      el.innerHTML = '<div class="map-empty"><span style="font-size:2rem;display:block;margin-bottom:10px">📍</span><strong style="display:block;margin-bottom:6px;color:var(--text)">No mapped spots yet</strong>Use the Pin button when logging a car and it will appear here.<button class="ge-btn" style="margin-top:14px" onclick="goTo(\'spot\');captureLocation();">📌 LOG A CAR AT A SPOT</button></div>';
       return;
     }
     var clusters = clusterCars(mapped);
     var clusterCount = clusters.length;
-    el.innerHTML = '<div class="garage-map-wrap" style="position:relative"><div id="leafletMap"></div><div class="map-hud"><div class="map-badge">' + clusterCount + ' mapped spot' + (clusterCount !== 1 ? 's' : '') + '</div></div></div><div class="garage-map-list" id="mapCarList"></div>';
+    el.innerHTML = '<div class="garage-map-wrap" style="position:relative"><div id="leafletMap"></div><div class="map-hud"><div class="map-badge">' + clusterCount + ' mapped spot' + (clusterCount !== 1 ? 's' : '') + '</div><button class="map-log-btn" onclick="goTo(\'spot\');captureLocation();">＋ LOG AT A SPOT</button></div></div><div class="garage-map-list" id="mapCarList"></div>';
     var listEl = document.getElementById('mapCarList');
     listEl.innerHTML = mapped.map(function(car){
       var rarity = getRarity(car.value);
@@ -6842,6 +6905,18 @@ function recordDiscovery(car, xp) {
       photoRef = 'photo:' + pKey;
     }
     else if (car.photo) photoRef = car.photo;
+    if (!photoRef) {
+      // No photo at log time — pull the best known image (cached user photo, QP) so
+      // recent discovery cards carry the car's image immediately.
+      var known = resolveDiscoveryPhoto('', car.name);
+      if (known && String(known).indexOf('data:') === 0) {
+        var pKey2 = (car.name || '').toLowerCase();
+        _photoCacheSet(pKey2, known);
+        photoRef = 'photo:' + pKey2;
+      } else if (known) {
+        photoRef = known;
+      }
+    }
     list.unshift({ n: car.name, v: car.value || 0, t: car.type || '', r: tierOf(car.value || 0), xp: xp || 0, d: Date.now(), p: photoRef });
     if (list.length > 10) list.length = 10;
     localStorage.setItem('cs_discoveries', JSON.stringify(list));
@@ -6849,7 +6924,14 @@ function recordDiscovery(car, xp) {
   } catch(e) {}
 }
 function resolveDiscoveryPhoto(p, name) {
-  if (!p) return _photoCacheGet(_photoCacheKey(name));
+  if (!p) {
+    var cached = _photoCacheGet(_photoCacheKey(name));
+    if (cached) return cached;
+    var qp = (typeof quickPicks !== 'undefined') && quickPicks.find(function(q) { return String(q.name).toLowerCase() === String(name).toLowerCase(); });
+    var qpPhoto = qp && qp.photo;
+    if (qpPhoto) return (String(qpPhoto).indexOf('photo:') === 0) ? (_photoCacheGet(qpPhoto.slice(6)) || qpPhoto) : qpPhoto;
+    return '';
+  }
   if (p.indexOf('photo:') === 0) return _photoCacheGet(p.slice(6)) || _photoCacheGet(_photoCacheKey(name));
   return p;
 }
@@ -7160,7 +7242,7 @@ function rewardLog(car, popTotal, opts) {
   if (popTotal) popRunTotal();
   if (after.level > before.level) {
     levelUpPulse();
-    cardDone.then(function() { celebrateLevelUp(after); });
+    cardDone.then(function() { enqueueCeremony(function(done){ celebrateLevelUp(after, done); }); });
   }
   if (window.updateProgressionAfterLog) setTimeout(function(){ updateProgressionAfterLog(car); }, 900);
   maybeCarPersonality(car);
@@ -7233,12 +7315,25 @@ function confettiBurst(container, count, colors) {
 }
 
 //  LEVEL UP — the big milestone overlay
-function celebrateLevelUp(info) {
-  if (document.querySelector('.levelup-overlay')) return;
+function celebrateLevelUp(info, done) {
+  if (document.querySelector('.levelup-overlay')) { if (typeof done === 'function') done(); return; }
   var t = titleForXP(_xpTotal);
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var unlockedTheme = themeUnlockedAtLevel(info.level);
   recordActivity('levelup', (unlockedTheme ? '🎨 ' : '⭐ ') + 'Reached Level ' + info.level + ' — ' + t.name + (unlockedTheme ? ' · ' + unlockedTheme.name + ' theme unlocked' : ''), { icon: unlockedTheme ? '🎨' : '⭐' });
+  // Expanded reward stack: theme, title milestone, milestone bonus XP, and the rank row.
+  var TITLE_UNLOCK_LEVELS = [4, 5, 6, 7, 9, 11, 12, 13, 15, 16];
+  var bonusXP = (info.level % 5 === 0) ? info.level * 25 : 0;
+  var rewardRows = [];
+  if (unlockedTheme) rewardRows.push({ c: unlockedTheme.accent, tag: '🎨 NEW THEME UNLOCKED', name: unlockedTheme.name, sub: 'Tap to continue — apply it in Settings → Theme' });
+  if (TITLE_UNLOCK_LEVELS.indexOf(info.level) !== -1) rewardRows.push({ c: '', tag: t.emoji + ' TITLE EARNED', name: t.name.toUpperCase(), sub: 'A brand-new spotter rank to wear with pride' });
+  if (bonusXP) rewardRows.push({ c: '#60a5fa', tag: '⚡ MILESTONE BONUS', name: '+' + bonusXP + ' XP', sub: 'Reaching Level ' + info.level + ' credits a one-time bonus' });
+  if (!rewardRows.length) rewardRows.push({ c: '', tag: '🏷️ RANK ' + info.level + ' REACHED', name: t.name.toUpperCase(), sub: info.into + ' / ' + info.need + ' XP until the next rank — keep spotting!' });
+  var rewardHTML = rewardRows.map(function(r) {
+    return '<div class="levelup-earned" style="' + (r.c ? 'color:' + r.c : '') + '">' + r.tag + '</div>' +
+      '<div class="levelup-earned-name" style="' + (r.c ? 'color:' + r.c : '') + '">' + r.name + '</div>' +
+      '<div class="levelup-earned-sub" style="color:var(--muted)">' + r.sub + '</div>';
+  }).join('<div style="height:1px;background:var(--glass-border);margin:8px 0"></div>');
   var overlay = document.createElement('div');
   overlay.className = 'levelup-overlay' + (reduced ? '' : ' stage-anticipate');
   overlay.innerHTML =
@@ -7247,9 +7342,7 @@ function celebrateLevelUp(info) {
       '<div class="levelup-eyebrow">New Rank Reached</div>' +
       '<div class="levelup-num" id="levelUpNum">0</div>' +
       '<div class="levelup-sub">' + t.name.toUpperCase() + '</div>' +
-      '<div class="levelup-reward" id="levelUpReward">' + (unlockedTheme
-        ? '<div class="levelup-earned">🎨 NEW THEME UNLOCKED</div><div class="levelup-earned-name" style="color:' + unlockedTheme.accent + '">' + unlockedTheme.name + '</div><div class="levelup-earned-sub">Tap to continue — apply it in Settings → Theme</div>'
-        : '<div class="levelup-earned">RANK <b>' + info.level + '</b> REACHED</div><div class="levelup-earned-sub" style="color:var(--muted)">' + info.into + ' / ' + info.need + ' XP until the next rank — keep spotting!</div>') + '</div>' +
+      '<div class="levelup-reward" id="levelUpReward">' + rewardHTML + '</div>' +
       '<div class="levelup-bar"><div class="levelup-fill" id="levelUpFill"></div></div>' +
       '<div class="levelup-bar-lbl" id="levelUpBarLbl"></div>' +
       '<div class="levelup-dismiss">Tap anywhere to continue</div>' +
@@ -7258,7 +7351,8 @@ function celebrateLevelUp(info) {
     if (unlockedTheme && _themeUnlocked(THEMES.indexOf(unlockedTheme))) {
       try { applyTheme(THEMES.indexOf(unlockedTheme)); renderThemeBar(); } catch(e){}
     }
-    overlay.remove();
+    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    if (typeof done === 'function') done();
   };
   document.body.appendChild(overlay);
   // 0.45s of anticipation (charging ring + sweep) before the card lands.
@@ -7292,12 +7386,27 @@ function fetchRefImagesForAllCars() {
 var _imgRenderTimer = null;
 var _refImgSaveTimer = null;
 function fetchAndStoreRefImage(car) {
-  if (car.photo) return;
+  var cur = car.photo;
+  if (cur && (String(cur).indexOf('data:') === 0 || String(cur).indexOf('http') === 0)) return;
+  // A bare `photo:` ref whose cache entry is gone, or no photo at all, is still
+  // unresolved — fetch a reference image so "recent spots" don't stay empty.
   fetchCarImage(car.name).then(function(url) {
     if (url) {
       car.photo = url;
       var qp = quickPicks.find(function(q) { return q.name.toLowerCase() === car.name.toLowerCase(); });
       if (qp && !qp.photo) qp.photo = url;
+      // Backfill the most recent discovery card for this car so "Recent spots"
+      // don't stay image-less after the reference photo resolves.
+      try {
+        var disc = JSON.parse(localStorage.getItem('cs_discoveries') || '[]');
+        var discChanged = false;
+        disc = disc.map(function(rec) {
+          if (String(rec.n).toLowerCase() === String(car.name).toLowerCase() &&
+              (!rec.p || String(rec.p).indexOf('photo:') === 0)) { rec.p = url; discChanged = true; }
+          return rec;
+        });
+        if (discChanged) { localStorage.setItem('cs_discoveries', JSON.stringify(disc)); renderDiscoveries(); }
+      } catch(e) {}
       clearTimeout(_refImgSaveTimer);
       _refImgSaveTimer = setTimeout(saveToCloud, 500);
       clearTimeout(_imgRenderTimer);
@@ -7964,8 +8073,10 @@ function _patchPhotosFromCache() {
         var ref = _photoCacheGet(refKey) || _photoCacheGet(key);
         if (ref) car.photo = ref;
         else { car.photo = ''; _photoLazyLoad(refKey || key); }
-      } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0) {
-        // Prefer the user's own photo over a stock/reference image.
+      } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0 &&
+                 !(car.photo && car.photo.indexOf('data:') === 0) && car.photo !== cached) {
+        // Prefer the user's own photo over a stock/reference image — never let a
+        // stale cache entry replace a freshly-attached in-memory photo.
         car.photo = cached;
       } else if (!car.photo && cached) {
         car.photo = cached;
@@ -7982,7 +8093,8 @@ function _patchPhotosFromCache() {
       var ref = _photoCacheGet(refKey) || _photoCacheGet(key);
       if (ref) car.photo = ref;
       else { car.photo = ''; _photoLazyLoad(refKey || key); }
-    } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0) {
+    } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0 &&
+               !(car.photo && car.photo.indexOf('data:') === 0) && car.photo !== cached) {
       car.photo = cached;
     } else if (!car.photo && cached) {
       car.photo = cached;
@@ -7998,7 +8110,8 @@ function _patchPhotosFromCache() {
       var ref = _photoCacheGet(refKey) || _photoCacheGet(key);
       if (ref) car.photo = ref;
       else { car.photo = ''; _photoLazyLoad(refKey || key); }
-    } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0) {
+    } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0 &&
+               !(car.photo && car.photo.indexOf('data:') === 0) && car.photo !== cached) {
       car.photo = cached;
     } else if (!car.photo && cached) {
       car.photo = cached;
@@ -8766,6 +8879,7 @@ window.runCarSearch = async function(query) {
         ${s.weight     ? `<div class="csr-cell"><div class="csr-cell-lbl">Weight</div><div class="csr-cell-val">${s.weight}</div><div class="csr-cell-unit">lbs</div></div>` : ''}
       </div>
       ${wikiUrl ? `<a href="${wikiUrl}" target="_blank" rel="noopener" class="csr-wiki-link">Wikipedia ↗</a>` : ''}
+      <a href="${'https://www.google.com/search?q=' + encodeURIComponent(query + ' average market price car')}" target="_blank" rel="noopener" class="csr-google-link">💲 Avg market price on Google ↗</a>
       <button class="csr-fill-btn" onclick="fillFromSearch('${jsEscape(query)}',${guessVal},'','${guessType}')">➕ LOG THIS CAR</button>
     </div>`;
   } else if (wikiSummary || wikiImg) {
@@ -8776,6 +8890,7 @@ window.runCarSearch = async function(query) {
       <div class="csr-name">${escapeHtml(query)}</div>
       ${wikiSummary ? `<div class="csr-tagline">${escapeHtml(wikiSummary)}</div>` : ''}
       ${wikiUrl ? `<a href="${wikiUrl}" target="_blank" rel="noopener" class="csr-wiki-link">Read more on Wikipedia ↗</a>` : ''}
+      <a href="${'https://www.google.com/search?q=' + encodeURIComponent(query + ' average market price car')}" target="_blank" rel="noopener" class="csr-google-link">💲 Avg market price on Google ↗</a>
       <button class="csr-fill-btn" onclick="fillFromSearch('${jsEscape(query)}',${guessVal},'','${guessType}')">➕ LOG THIS CAR</button>
     </div>`;
   } else {
@@ -8783,6 +8898,7 @@ window.runCarSearch = async function(query) {
       <div class="csr-img-ph" style="margin-bottom:10px">🚘</div>
       <div class="csr-name">${escapeHtml(query)}</div>
       <div class="csr-tagline" style="color:var(--muted)">Nothing found — check the spelling or try a more specific name like "Porsche 911 GT3 RS".</div>
+      <a href="${'https://www.google.com/search?q=' + encodeURIComponent(query + ' car specs price')}" target="_blank" rel="noopener" class="csr-google-link">💲 Search Google for specs & avg price ↗</a>
       <button class="csr-fill-btn" onclick="fillFromSearch('${jsEscape(query)}',${guessVal},'','${guessType}')">➕ LOG ANYWAY</button>
     </div>`;
   }
@@ -9419,6 +9535,16 @@ function switchSource(i) {
   loadNews();
 }
 
+// Deterministic gradient + emoji placeholder for feeds without thumbnails (e.g. Car & Driver).
+function newsFallbackImg(seed) {
+  try {
+    var hue = Math.abs(String(seed || '').split('').reduce(function(a, ch) { return (a + ch.charCodeAt(0)) % 360; }, 0));
+    var hue2 = (hue + 55) % 360;
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(' + hue + ',32%,17%)"/><stop offset="1" stop-color="hsl(' + hue2 + ',42%,28%)"/></linearGradient></defs><rect width="800" height="400" fill="url(#g)"/><text x="400" y="235" font-size="150" text-anchor="middle">🚘</text></svg>';
+    return 'data:image/svg+xml,' + encodeURIComponent(svg);
+  } catch(e) { return 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400"><rect width="800" height="400" fill="#1a1a1f"/><text x="400" y="235" font-size="150" text-anchor="middle">🚘</text></svg>'); }
+}
+
 function extractNewsImg(item) {
   if (item.thumbnail && item.thumbnail.length > 4) return item.thumbnail;
   if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.startsWith('image')) return item.enclosure.link;
@@ -9439,11 +9565,9 @@ async function loadNews() {
     var hl = document.getElementById('newsHeadliner');
     if (hl) {
       var first = data.items[0];
-      var hlImg = extractNewsImg(first);
-      hl.style.display = hlImg ? 'block' : 'none';
-      if (hlImg) {
-        hl.innerHTML = '<img src="' + hlImg + '" alt="" onerror="this.outerHTML=\'<div style=width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surf2)></div>\'"><div class="hl-overlay"><div class="hl-source">' + NEWS_SOURCES[activeSource].name + '</div><div class="hl-title">' + escapeHtml(first.title || '') + '</div><div class="hl-date">' + (first.pubDate ? new Date(first.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '') + '</div></div>';
-      }
+      var hlImg = extractNewsImg(first) || newsFallbackImg((first.title || '') + NEWS_SOURCES[activeSource].name);
+      hl.style.display = 'block';
+      hl.innerHTML = '<img src="' + hlImg + '" alt="" onerror="this.outerHTML=\'<div style=width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surf2)></div>\'"><div class="hl-overlay"><div class="hl-source">' + NEWS_SOURCES[activeSource].name + '</div><div class="hl-title">' + escapeHtml(first.title || '') + '</div><div class="hl-date">' + (first.pubDate ? new Date(first.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '') + '</div></div>';
       window._hlLink = first.link || '#';
     }
     el.innerHTML = data.items.map(function(item, idx) {
@@ -9784,7 +9908,7 @@ function _mysteryInfo(name) {  var stats = bookMakeStats();
   return null;
 }
 function celebrateMystery(name, info, done) {
-  if (document.querySelector('.mys-overlay')) return;
+  if (document.querySelector('.mys-overlay')) { if (typeof done === 'function') done(); return; }
   var overlay = document.createElement('div');
   overlay.className = 'mys-overlay';
   overlay.innerHTML =
@@ -9990,7 +10114,7 @@ function claimExpo(id) {
 }
 
 function celebrateExpo(ex, isExpo, done) {
-  if (document.querySelector('.expo-cer')) return;
+  if (document.querySelector('.expo-cer')) { if (typeof done === 'function') done(); return; }
   var overlay = document.createElement('div');
   overlay.className = 'expo-cer';
   var goalLabel = isExpo ? 'Expedition Conquered' : 'Achievement Logged';
@@ -10087,7 +10211,7 @@ function createTrip() {
   enqueueCeremony(function(done){ celebrateTripLaunch(trip, done); });
 }
 function celebrateTripLaunch(trip, done) {
-  if (document.querySelector('.trip-cer')) return;
+  if (document.querySelector('.trip-cer')) { if (typeof done === 'function') done(); return; }
   var overlay = document.createElement('div');
   overlay.className = 'trip-cer';
   overlay.innerHTML =
@@ -10343,7 +10467,8 @@ var EVOLUTION_TIERS = [
   { min: 3,  name:'Silver',  icon:'🥈', color:'#c0c0c0' },
   { min: 5,  name:'Gold',    icon:'🥇', color:'#f5c842' },
   { min: 8,  name:'Platinum',icon:'💎', color:'#7fd1f7' },
-  { min: 12, name:'Diamond', icon:'💠', color:'#9ff2ff' }
+  { min: 12, name:'Diamond', icon:'💠', color:'#f4fcff' },
+  { min: 18, name:'Obsidian',icon:'⬛', color:'#8b7cff' }
 ];
 function evolutionFor(name) {
   var all = _allSpottedFlat();
@@ -10434,7 +10559,8 @@ function pumpMoment() {
       document.querySelector('.evo-overlay') || document.querySelector('.title-overlay') ||
       document.querySelector('.expo-cer') || document.querySelector('.make-cer') ||
       document.querySelector('.mys-overlay') || document.querySelector('.trip-cer') ||
-      document.querySelector('.levelup-overlay')) {
+      document.querySelector('.levelup-overlay') || document.querySelector('.recap-overlay') ||
+      document.querySelector('.unicorn-overlay')) {
     setTimeout(pumpMoment, 250);
     return;
   }
@@ -10514,7 +10640,8 @@ function enqueueCeremony(fn) {
 function pumpCeremony() {
   if (_cerBusy || !_cerQueue.length) return;
   var blockers = ['.cc-overlay', '.cc-quick', '.moment-overlay', '.levelup-overlay',
-    '.evo-overlay', '.title-overlay', '.expo-cer', '.make-cer', '.mys-overlay', '.trip-cer'];
+    '.evo-overlay', '.title-overlay', '.expo-cer', '.make-cer', '.mys-overlay', '.trip-cer',
+    '.recap-overlay', '.unicorn-overlay'];
   var blocked = blockers.some(function(sel){ return document.querySelector(sel); });
   if (blocked) { setTimeout(pumpCeremony, 250); return; }
   _cerBusy = true;
@@ -10556,7 +10683,7 @@ function checkEvolutionUnlock(car) {
 }
 
 function celebrateEvolution(car, oldTier, newTier, count, done) {
-  if (document.querySelector('.evo-overlay')) return;
+  if (document.querySelector('.evo-overlay')) { if (typeof done === 'function') done(); return; }
   var photo = car.photo || (_idbPhotoCache[car.name.toLowerCase()] || '');
   var imgHTML = photo
     ? '<img src="' + photo + '" alt="" onerror="this.parentElement.innerHTML=\'' + tierEmoji(tierOf(car.value || 0)) + '\'">'
@@ -10873,6 +11000,8 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
       if (watchId && navigator.geolocation) { navigator.geolocation.clearWatch(watchId); watchId = null; }
       if (lat !== undefined && lng !== undefined) {
         applyLocation({ lat: lat, lng: lng, label: 'Map pin' });
+        // Land on the log form with the pin ready so the car can be logged at this spot.
+        if (typeof window.goTo === 'function') window.goTo('spot');
       }
       var el = document.getElementById('mapPickerOverlay');
       if (el) el.remove();
@@ -10946,6 +11075,7 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 </body>
 </html>
+
 
 
 
