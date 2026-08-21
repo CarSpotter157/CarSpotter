@@ -364,15 +364,6 @@ html.cs-hidden .levelup-star,.html.cs-hidden .recap-record-tag.pop{animation-pla
 .nav-btn.active .nav-icon svg{stroke:var(--accent);filter:drop-shadow(0 0 4px rgba(232,184,75,0.2));}
 .nav-label{font-size:0.43rem;letter-spacing:2px;text-transform:uppercase;font-weight:600;transition:all 0.3s var(--ease);opacity:0.5;}
 .nav-btn.active .nav-label{opacity:1;letter-spacing:2.5px;}
-.nav-btn.locked{opacity:0.45;cursor:not-allowed;pointer-events:auto;}
-.nav-btn.locked .nav-icon{filter:grayscale(1);}
-.nav-btn.locked .nav-icon::after{
-  content:'🔒';position:absolute;top:-4px;right:-4px;font-size:0.55rem;
-  background:var(--surf);border:1px solid var(--border);border-radius:50%;
-  width:14px;height:14px;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 2px 6px rgba(0,0,0,0.3);
-}
-.nav-btn.locked .nav-label{opacity:0.3;}
 
 /* ── ROAD DECO ── */
 .road-deco{position:fixed;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));left:0;right:0;height:1px;overflow:hidden;z-index:5;pointer-events:none;}
@@ -2194,10 +2185,6 @@ html:not(.show-favs) #favSection{display:none;}
 .more-page-tile:active{transform:scale(0.96);}
 .more-tile-icon{color:var(--accent);display:flex;align-items:center;justify-content:center;}
 .more-tile-label{font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);}
-.more-page-tile.locked{opacity:0.45;cursor:not-allowed;background:var(--surf);border-color:var(--border);}
-.more-page-tile.locked .more-tile-icon{filter:grayscale(1);opacity:0.5;}
-.more-page-tile.locked .more-tile-label{opacity:0.3;color:var(--muted);}
-.more-page-tile.locked::after{content:'🔒';position:absolute;top:8px;right:8px;font-size:0.6rem;}
 
 /* ── MAP ── */
 .garage-map-wrap{position:relative;border-radius:var(--r-md);overflow:hidden;margin-bottom:12px;border:1px solid var(--border);}
@@ -3438,7 +3425,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
   <div class="act-list" id="actList"></div>
 </div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v32</div>
+<div class="version-tag" id="versionTag">v31</div>
 
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
@@ -5181,7 +5168,6 @@ function stopFavRotation(){if(favTimer){clearInterval(favTimer);favTimer=null}}
 //  NAV 
 function goTo(page) {
   if (page === 'achievements') page = 'expeditions';
-  if (!isFeatureUnlocked(page)) { showLockedToast(page); return; }
   var prev = document.querySelector('.page.active');
   if (prev && prev.id==='page-spot' && page!=='spot') stopFavRotation();
   if (prev) {
@@ -5418,10 +5404,8 @@ function logRun() {
   rewardLog(car, true, { isFirst: isFirst });
   if (car.value >= 500000) {
     recordActivity('find', '🔥 ' + tierMeta(tierOf(car.value)).label + ': ' + name + ' worth ' + fmtFull(car.value) + ' logged!', { icon: '🔥' });
-    triggerExpensiveCarMoment(car, name, true);
   } else if (car.value >= 150000 && isFirst) {
     recordActivity('find', '✨ First-ever spot of ' + name + ' (' + fmtFull(car.value) + ')', { icon: '✨' });
-    triggerExpensiveCarMoment(car, name, false);
   }
   pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, input.type + ' ' + name + ' removed');
   notify('Discovery Recorded — ' + name + ' added to this run.', { priority:'quiet', group:'logrun' });
@@ -5453,10 +5437,8 @@ function logSpotted() {
   rewardLog(car, false, { mode:'solo', isFirst: isFirst, isBest: input.value > prevBestCar });
   if (car.value >= 500000) {
     recordActivity('find', '🔥 ' + tierMeta(tierOf(car.value)).label + ': ' + name + ' worth ' + fmtFull(car.value) + ' discovered!', { icon: '🔥' });
-    triggerExpensiveCarMoment(car, name, true);
   } else if (car.value >= 150000 && isFirst) {
     recordActivity('find', '✨ First-ever spot of ' + name + ' (' + fmtFull(car.value) + ')', { icon: '✨' });
-    triggerExpensiveCarMoment(car, name, false);
   }
   pushUndo('history', prevRuns, input.type + ' ' + name + ' removed');
   clearInputs();
@@ -6856,69 +6838,10 @@ function renderLevelBar() {
     fill.style.width = target + '%';
   }
   if (window.renderTitleChip) renderTitleChip();
-  updateNavLocks();
 }
 function levelUpPulse() {
   var fill = document.getElementById('levelFill');
   if (fill) { fill.classList.remove('glow'); void fill.offsetWidth; fill.classList.add('glow'); }
-}
-
-//  FEATURE UNLOCKS — progressive disclosure by level
-var _featureUnlocks = {
-  garage:        2,  // view collected cars
-  history:       3,  // past runs
-  achievements:  4,  // expedition logbook
-  news:          5,  // car news feed
-  trips:         6,  // road trips
-  expeditions:   7,  // marque hunts
-  settings:      8,  // themes, carbon, aliases
-  leaderboard:   9,  // global rankings
-  stats:        10,  // detailed analytics
-  voice:        11,  // voice logging
-  book:         12,  // expedition journal
-};
-
-function isFeatureUnlocked(feature) {
-  var req = _featureUnlocks[feature];
-  if (!req) return true;
-  return xpInfo(_xpTotal).level >= req;
-}
-
-function getLockedFeatures() {
-  var info = xpInfo(_xpTotal);
-  return Object.keys(_featureUnlocks).filter(function(f){ return info.level < _featureUnlocks[f]; });
-}
-
-// Show a friendly toast when a locked feature is tapped
-function showLockedToast(feature) {
-  var req = _featureUnlocks[feature];
-  var info = xpInfo(_xpTotal);
-  var left = req - info.level;
-  var label = feature.charAt(0).toUpperCase() + feature.slice(1);
-  showToast('🔒 ' + label + ' unlocks at Level ' + req + ' (' + left + ' more level' + (left===1?'':'s') + ')');
-}
-
-function updateNavLocks() {
-  var info = xpInfo(_xpTotal);
-  Object.keys(_featureUnlocks).forEach(function(feature) {
-    var btn = document.getElementById('nav-' + feature);
-    if (btn) {
-      var locked = info.level < _featureUnlocks[feature];
-      btn.classList.toggle('locked', locked);
-      if (locked) btn.setAttribute('aria-label', feature + ' unlocks at Level ' + _featureUnlocks[feature]);
-      else btn.removeAttribute('aria-label');
-    }
-  });
-  // More page tiles (by onclick)
-  var info2 = xpInfo(_xpTotal);
-  document.querySelectorAll('.more-page-tile[onclick]').forEach(function(tile) {
-    var m = tile.getAttribute('onclick').match(/goTo\(['"]([^'"]+)['"]\)/);
-    if (m) {
-      var feature = m[1];
-      var locked = _featureUnlocks[feature] && info2.level < _featureUnlocks[feature];
-      tile.classList.toggle('locked', locked);
-    }
-  });
 }
 
 //  HAPTICS — tasteful buzz on supported devices
@@ -7432,9 +7355,8 @@ function celebrateLevelUp(info, done) {
     if (typeof done === 'function') done();
   };
   document.body.appendChild(overlay);
-  // Anticipation scales with level — higher levels get more buildup
-  var levelAnticipate = reduced ? 0 : Math.min(2500, 450 + (info.level - 1) * 120);
-  setTimeout(function() {, levelAnticipate
+  // 0.45s of anticipation (charging ring + sweep) before the card lands.
+  setTimeout(function() {
     overlay.classList.add('stage-reveal');
     if (!reduced) { overlay.classList.remove('stage-anticipate'); }
     confettiBurst(overlay, 60, reduced ? [] : ['#f5c842','#ffd75e','#fff','#ff5733']);
@@ -10623,44 +10545,6 @@ function showMilestoneToast(m) {
   });
 }
 
-// Trigger a special suspense moment for expensive car finds
-function triggerExpensiveCarMoment(car, name, isHyper) {
-  var value = car.value || 0;
-  var tier = tierOf(value);
-  var meta = tierMeta(tier);
-  if (isHyper) {
-    // Hyper/Legend tier (500k+) - LONG anticipation
-    enqueueMoment({
-      emoji: meta.icon || '👑',
-      eyebrow: 'Hypercar Spotted',
-      title: name,
-      desc: meta.label + ' — ' + fmtFull(value),
-      sub: 'Something extraordinary awaits...',
-      anticipateDuration: 3500,  // 3.5s anticipation
-      celebrateDelay: 1500,      // 1.5s after reveal
-      colors: [meta.color || '#f5c842', '#ffd75e', '#fff', '#ff5733'],
-      particles: 30
-    });
-    playSound('level');
-    haptic([30, 50, 30, 80, 30, 120]);
-  } else {
-    // Super tier (150k+) - moderate anticipation
-    enqueueMoment({
-      emoji: meta.icon || '✨',
-      eyebrow: 'Supercar Spotted',
-      title: name,
-      desc: meta.label + ' — ' + fmtFull(value),
-      sub: 'A remarkable find...',
-      anticipateDuration: 2200,  // 2.2s anticipation
-      celebrateDelay: 1200,      // 1.2s after reveal
-      colors: [meta.color || '#60a5fa', '#c084fc', '#fff', '#f5c842'],
-      particles: 20
-    });
-    playSound('crystal');
-    haptic([40, 60, 40, 80]);
-  }
-}
-
 // ---- 3-STAGE UNLOCK MOMENT ENGINE — Anticipation → Reveal → Celebration ----
 var _momentQueue = [];
 var _momentBusy = false;
@@ -10720,11 +10604,9 @@ function showMoment(cfg, done) {
   overlay.onclick = close;
   playSound('shimmer');
   haptic([40, 60, 40, 30, 80]);
-  // Stage 2 — reveal (configurable anticipation)
-  var anticipateMs = Math.max(800, cfg.anticipateDuration || 1100);
-  setTimeout(function(){ overlay.classList.add('stage-reveal'); playSound('impact'); }, anticipateMs);
-  // Stage 3 — celebration (configurable delay after reveal)
-  var celebrateMs = anticipateMs + (cfg.celebrateDelay || 1000);
+  // Stage 2 — reveal
+  setTimeout(function(){ overlay.classList.add('stage-reveal'); playSound('impact'); }, 1100);
+  // Stage 3 — celebration: confetti + particle burst + white flash
   setTimeout(function() {
     overlay.classList.add('stage-celebrate');
     confettiBurst(overlay, 60, cfg.colors || ['#f5c842', '#ffd75e', '#fff', '#ff5733']);
@@ -11193,7 +11075,6 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 </body>
 </html>
-
 
 
 
