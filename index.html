@@ -11093,10 +11093,27 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
 
   function tutorialData(){
     return [
-      { eyebrow:'Step 1 of 3', title:'Runs are your live scorecard', desc:'Use + TO RUN while you are spotting. Each car stacks into the current run, the value counter climbs, and END RUN saves the whole session into history.', visual:'<div class="tutorial-mini-run"><div class="tutorial-mini-row"><strong>Ferrari 488</strong><span>$280,000</span></div><div class="tutorial-mini-row"><strong>Porsche 911 GT3</strong><span>$170,000</span></div><div class="tutorial-mini-row"><strong>McLaren 720S</strong><span>$300,000</span></div></div>' },
-      { eyebrow:'Step 2 of 3', title:'Smart Fill turns notes into logs', desc:'Type or dictate rough notes like "red Ferrari 488 worth 280 thousand", then tap Smart Fill to auto-populate the form so you can log faster.', visual:'<div class="tutorial-smart"><div class="tutorial-smart-badge">Smart Fill</div><div class="setting-desc" style="margin:0;">Works best from the Notes tab. It reads your latest note, guesses the make, value, color, and type, then fills the spot form for review.</div></div>' },
-      { eyebrow:'Step 3 of 3', title:'Sync keeps your garage in one place', desc:'Everything saves locally first. If you go offline, CarSpotter keeps logging. When you reconnect, runs, garage, notes, and spots sync back up.', visual:'<div class="tutorial-map"></div><div class="tutorial-mini-sync" style="margin-top:10px;"><strong>Offline capture</strong><span>Saved instantly</span></div><div class="tutorial-mini-sync"><strong>Back online</strong><span>Auto-syncs in the background</span></div>' }
-    ];
+  {
+    eyebrow:'Step 1 of 3',
+    title:'Start spotting',
+    desc:'When you see a car, tap + TO RUN to add it to your current run.',
+    visual:'<div class="tutorial-smart"><div class="tutorial-smart-badge">👀 Spot a car</div><div class="setting-desc" style="margin:0;">Your run keeps track of the cars you spot and their total value.</div></div>'
+  },
+
+  {
+    eyebrow:'Step 2 of 3',
+    title:'Build your run',
+    desc:'Add the car you spotted, then watch it appear in your run and increase your total.',
+    visual:'<div class="tutorial-smart"><div class="tutorial-smart-badge">🏎️ Add a car</div><div class="setting-desc" style="margin:0;">Every car you spot gets added to your current run.</div></div>'
+  },
+
+  {
+    eyebrow:'Step 3 of 3',
+    title:'Build your collection',
+    desc:'When you finish a run, your spotted cars are saved to your Garage so you can look back at your collection.',
+    visual:'<div class="tutorial-smart"><div class="tutorial-smart-badge">🏆 Your Garage</div><div class="setting-desc" style="margin:0;">Keep spotting cars and build your collection over time.</div></div>'
+  }
+];
   }
   function renderTutorial(){
     var overlay = document.getElementById('tutorialOverlay');
