@@ -2111,117 +2111,190 @@ body.carbon-on .modal-card{
 
 /* ── TUTORIAL ── */
 /* ── INTERACTIVE TUTORIAL (Coach Marks) ── */
-.tutorial-overlay{
-  position:fixed;
-  inset:0;
-  z-index:100000;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:20px;
-  background:rgba(0,0,0,.72);
-  backdrop-filter:blur(6px);
-}
+.tutor-overlay{position:fixed;inset:0;z-index:100000;pointer-events:none;animation:fadeIn 0.3s ease;}
+.tutor-overlay.active{pointer-events:auto;}
+.tutor-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.75);opacity:0;transition:opacity 0.3s ease;}
+.tutor-overlay.active .tutor-backdrop{opacity:1;}
+.tutor-spotlight{position:absolute;border-radius:var(--r-md);box-shadow:0 0 0 9999px rgba(0,0,0,0.75);transition:all 0.4s var(--spring-soft);pointer-events:none;z-index:1;}
+.tutor-spotlight::before{content:'';position:absolute;inset:-3px;border:2px solid var(--accent);border-radius:inherit;animation:tutorPulse 1.5s ease-in-out infinite;}
+@keyframes tutorPulse{0%,100%{opacity:0.6;transform:scale(1);}50%{opacity:1;transform:scale(1.03);}}
+.tutor-card{position:fixed;z-index:2;background:var(--surf);border:1px solid var(--glass-border);border-radius:var(--r-lg);padding:20px;max-width:300px;box-shadow:var(--shadow-lg);animation:tutorCardIn 0.35s var(--spring-soft) both;pointer-events:auto;}
+@keyframes tutorCardIn{from{opacity:0;transform:translateY(12px) scale(0.95);}to{opacity:1;transform:translateY(0) scale(1);}}
+.tutor-card.hidden{display:none;}
+.tutor-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.tutor-step-badge{background:var(--accent);color:#080808;font-size:0.6rem;font-weight:800;letter-spacing:1px;padding:4px 10px;border-radius:var(--r-pill);white-space:nowrap;}
+.tutor-progress{flex:1;height:4px;background:var(--surf3);border-radius:99px;overflow:hidden;}
+.tutor-progress-fill{height:100%;background:var(--accent);border-radius:99px;transition:width 0.4s var(--ease);width:0%;}
+.tutor-title{font-family:'Inter',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:6px;}
+.tutor-desc{font-size:0.8rem;color:var(--text2);line-height:1.5;margin-bottom:16px;}
+.tutor-action{display:flex;gap:8px;}
+.tutor-btn{flex:1;padding:12px 16px;border-radius:var(--r-md);font-family:'Inter',sans-serif;font-size:0.8rem;font-weight:700;letter-spacing:0.5px;cursor:pointer;transition:all 0.15s;}
+.tutor-btn-primary{background:var(--accent);color:#080808;border:none;}
+.tutor-btn-primary:active{transform:scale(0.96);}
+.tutor-btn-secondary{background:transparent;color:var(--text2);border:1px solid var(--border2);}
+.tutor-btn-secondary:active{background:var(--adim);}
+.tutor-hint{font-size:0.65rem;color:var(--muted);margin-top:12px;text-align:center;}
+.tutor-arrow{position:absolute;width:0;height:0;border:8px solid transparent;pointer-events:none;z-index:3;}
+.tutor-card[data-position="bottom"] .tutor-arrow{bottom:100%;left:50%;margin-left:-8px;border-bottom-color:var(--surf);border-top:none;}
+.tutor-card[data-position="top"] .tutor-arrow{top:100%;left:50%;margin-left:-8px;border-top-color:var(--surf);border-bottom:none;}
+.tutor-card[data-position="left"] .tutor-arrow{left:100%;top:50%;margin-top:-8px;border-left-color:var(--surf);border-right:none;}
+.tutor-card[data-position="right"] .tutor-arrow{right:100%;top:50%;margin-top:-8px;border-right-color:var(--surf);border-left:none;}
+.tutor-card[data-position="center"] .tutor-arrow{display:none;}
+.tutor-finger{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--adim);color:var(--accent);font-size:1rem;animation:tutorTap 1.2s ease-in-out infinite;}
+@keyframes tutorTap{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.3);opacity:0.6;}}
+.tutor-skip{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;padding:8px;cursor:pointer;z-index:10;}
+.tutor-skip:hover{color:var(--accent);}
+.tutor-ghost-input{position:absolute;inset:0;opacity:0;pointer-events:auto;z-index:10;}
 
-.tutorial-card{
-  width:min(520px,100%);
-  background:var(--surf);
-  border:1px solid var(--glass-border);
-  border-radius:var(--r-lg);
-  padding:28px;
-  box-shadow:var(--shadow-lg);
-  color:var(--text);
-  animation:tutorialCardIn .3s ease;
+/* ── ONBOARDING SIM — a playable miniature of CarSpotter ──
+   Not a slideshow, not coach marks. The user performs real actions
+   (pick a car → log it → stack the run → end run → browse garage →
+   simulated sign-in) against demo data inside a polished popup. */
+.ob-backdrop{position:fixed;inset:0;z-index:100010;background:rgba(3,3,5,0.88);
+  backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);
+  display:flex;align-items:center;justify-content:center;padding:14px;animation:fadeIn 0.28s ease;}
+.ob-panel{position:relative;width:min(430px,100%);height:min(92vh,800px);
+  display:flex;flex-direction:column;background:linear-gradient(180deg,var(--surf2),var(--surf));
+  border:1px solid var(--border2);border-radius:var(--r-hero);overflow:hidden;
+  box-shadow:var(--shadow-lg),0 40px 120px rgba(0,0,0,0.65);
+  animation:obPanelIn 0.55s var(--spring-soft) both;}
+@keyframes obPanelIn{from{opacity:0;transform:translateY(26px) scale(0.95);}to{opacity:1;transform:none;}}
+.ob-head{flex-shrink:0;display:flex;align-items:center;gap:12px;padding:14px 16px 12px;border-bottom:1px solid var(--glass-border);}
+.ob-logo{font-family:'Inter',sans-serif;font-size:1.02rem;letter-spacing:2px;color:var(--text);line-height:1;}
+.ob-logo span{color:var(--accent);}
+.ob-dots{flex:1;display:flex;justify-content:center;gap:6px;}
+.ob-dot{width:6px;height:6px;border-radius:50%;background:var(--surf3);transition:all 0.35s var(--ease);}
+.ob-dot.done{background:var(--accent-d);}
+.ob-dot.on{background:var(--accent);box-shadow:0 0 8px rgba(232,184,75,0.55);transform:scale(1.25);}
+.ob-skip{background:none;border:1px solid var(--glass-border);border-radius:999px;color:var(--text2);
+  font-family:'Inter',sans-serif;font-size:0.56rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  padding:7px 13px;cursor:pointer;transition:color 0.2s,border-color 0.2s;flex-shrink:0;-webkit-appearance:none;}
+.ob-skip:hover{color:var(--accent);border-color:rgba(232,184,75,0.35);}
+.ob-body{flex:1;min-height:0;display:flex;flex-direction:column;padding:20px 18px 16px;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;}
+.ob-foot{flex-shrink:0;padding:12px 18px calc(14px + env(safe-area-inset-bottom,0px));
+  border-top:1px solid var(--glass-border);display:flex;gap:10px;}
+.ob-btn{flex:1;background:var(--accent);color:#080808;border:none;border-radius:var(--r-md);
+  font-family:'Inter',sans-serif;font-size:0.85rem;font-weight:700;letter-spacing:2px;padding:14px;
+  cursor:pointer;transition:transform 0.15s,box-shadow 0.2s;box-shadow:0 4px 18px rgba(232,184,75,0.3);
+  -webkit-appearance:none;}
+.ob-btn:active{transform:scale(0.97);}
+.ob-eyebrow{font-size:0.52rem;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+.ob-title{font-family:'Inter',sans-serif;font-size:1.45rem;letter-spacing:0.5px;line-height:1.15;margin-bottom:6px;}
+.ob-sub{font-size:0.74rem;color:var(--text2);line-height:1.6;margin-bottom:16px;}
+/* Step 1 — car pick grid */
+.ob-cargrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ob-car{position:relative;background:var(--surf2);border:1px solid var(--glass-border);border-radius:var(--r-lg);
+  padding:14px 12px;cursor:pointer;text-align:left;font-family:'Inter',sans-serif;color:inherit;
+  appearance:none;-webkit-appearance:none;transition:border-color 0.25s var(--ease),transform 0.25s var(--ease),opacity 0.25s;
+  animation:fadeUp 0.35s var(--ease) both;}
+.ob-car:hover{border-color:rgba(232,184,75,0.4);transform:translateY(-2px);}
+.ob-car:active{transform:scale(0.95);}
+.ob-car .oc-emoji{font-size:1.6rem;line-height:1;margin-bottom:8px;display:block;}
+.ob-car .oc-name{font-size:0.78rem;font-weight:700;letter-spacing:0.2px;margin-bottom:2px;display:block;}
+.ob-car .oc-val{font-family:'Inter',sans-serif;font-size:0.85rem;color:var(--accent);letter-spacing:0.5px;display:block;}
+.oc-check{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;background:var(--accent);
+  color:#080808;font-size:0.62rem;font-weight:800;display:none;align-items:center;justify-content:center;}
+.ob-car.picked{border-color:var(--accent);background:linear-gradient(180deg,var(--adim),transparent);
+  box-shadow:0 0 0 1px var(--accent),0 8px 24px -8px rgba(232,184,75,0.4);}
+.ob-car.picked .oc-check{display:flex;animation:titlePop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;}
+.ob-car.dim{opacity:0.35;pointer-events:none;}
+/* logged receipt */
+.ob-receipt{background:var(--glass-card);border:1px solid var(--accent);border-radius:var(--r-lg);padding:16px;
+  animation:popIn 0.4s var(--spring-soft) both;box-shadow:0 0 24px -6px rgba(232,184,75,0.35);}
+.ob-receipt-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:0.82rem;font-weight:600;}
+.ob-receipt-row+.ob-receipt-row{border-top:1px dashed var(--border2);}
+.ob-receipt-total{margin-top:8px;padding-top:11px;border-top:1px solid var(--glass-border);
+  display:flex;justify-content:space-between;align-items:baseline;}
+.ob-receipt-total b{font-size:0.52rem;letter-spacing:2px;color:var(--text2);text-transform:uppercase;}
+.ob-receipt-total span{font-family:'Inter',sans-serif;font-size:1.5rem;color:var(--accent);letter-spacing:0.5px;font-variant-numeric:tabular-nums;}
+/* Step 2 — run sim */
+.ob-run{background:var(--glass-card);border:1px solid var(--glass-border);border-radius:var(--r-lg);padding:4px 12px;margin-bottom:14px;}
+.ob-runrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--glass-border);animation:driveIn 0.35s ease both;}
+.ob-runrow:last-of-type{border-bottom:none;}
+.ob-run-emoji{width:32px;height:32px;border-radius:9px;background:var(--surf2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:0.95rem;flex-shrink:0;}
+.ob-run-name{flex:1;font-size:0.82rem;font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ob-run-val{font-family:'Inter',sans-serif;font-size:0.9rem;color:var(--accent);}
+.ob-runtotrow{display:flex;justify-content:space-between;align-items:baseline;padding:12px 0 7px;border-top:1px solid var(--glass-border);}
+.ob-runtotrow b{font-size:0.5rem;letter-spacing:2px;text-transform:uppercase;color:var(--text2);}
+#obRunTotal{font-family:'Inter',sans-serif;font-size:1.35rem;color:var(--accent);font-variant-numeric:tabular-nums;display:inline-block;}
+#obRunTotal.pop{animation:runTotalPop 0.45s cubic-bezier(0.34,1.56,0.64,1);}
+.ob-addrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+.ob-addchip{display:inline-flex;align-items:center;background:var(--surf2);border:1px dashed var(--border2);border-radius:999px;
+  color:var(--text2);font-family:'Inter',sans-serif;font-size:0.64rem;font-weight:600;padding:8px 13px;cursor:pointer;
+  transition:border-color 0.2s,color 0.2s,transform 0.15s;appearance:none;-webkit-appearance:none;animation:fadeUp 0.3s var(--ease) both;}
+.ob-addchip:hover{border-color:var(--accent);color:var(--accent);}
+.ob-addchip:active{transform:scale(0.94);}
+.ob-savednote{display:flex;align-items:center;gap:10px;background:rgba(52,199,89,0.08);
+  border:1px solid rgba(52,199,89,0.35);border-radius:var(--r-md);padding:11px 13px;font-size:0.72rem;
+  line-height:1.55;color:#4cd964;animation:popIn 0.4s var(--spring-soft) both;margin-bottom:6px;}
+/* Step 3 — garage sim */
+.ob-gstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.ob-gstat{background:var(--surf);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 8px;text-align:center;}
+.ob-gstat b{font-family:'Inter',sans-serif;font-size:1.05rem;color:var(--accent);letter-spacing:0.5px;display:block;line-height:1;}
+.ob-gstat span{font-size:0.42rem;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-top:3px;display:block;}
+.ob-ggrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding-bottom:6px;}
+.ob-gcard{position:relative;background:var(--glass-card);border:1px solid var(--glass-border);border-radius:var(--r-md);
+  overflow:hidden;cursor:pointer;transition:border-color 0.25s var(--ease),transform 0.25s var(--ease);
+  animation:gcFloatIn 0.5s var(--spring) both;-webkit-tap-highlight-color:transparent;user-select:none;}
+.ob-gcard:hover{border-color:rgba(232,184,75,0.4);transform:translateY(-3px);}
+.ob-gcard:active{transform:scale(0.96);}
+.ob-gcard.mine{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 10px 26px -10px rgba(232,184,75,0.5);}
+.obg-media{height:76px;display:flex;align-items:center;justify-content:center;font-size:2.2rem;
+  background:linear-gradient(160deg,#232328,#151518);position:relative;}
+.obg-body{padding:9px 11px 11px;}
+.obg-name{font-size:0.72rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.obg-val{font-family:'Inter',sans-serif;font-size:0.8rem;color:var(--accent);margin-top:2px;}
+.obg-tier{position:absolute;top:7px;left:7px;font-size:0.4rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+  color:#fff;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  border:1px solid var(--glass-border);border-radius:999px;padding:2px 7px;}
+.obg-yours{position:absolute;top:7px;right:7px;font-size:0.4rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+  color:#080808;background:var(--accent);border-radius:999px;padding:2px 7px;box-shadow:0 0 10px rgba(232,184,75,0.5);}
+/* detail sheet (slides up inside the panel) */
+.ob-detail-back{position:absolute;inset:0;z-index:4;background:rgba(0,0,0,0.45);animation:fadeIn 0.2s ease;}
+.ob-detail{position:absolute;left:0;right:0;bottom:0;z-index:5;background:var(--surf);
+  border-top:1px solid var(--border2);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:18px 18px 22px;
+  box-shadow:0 -14px 44px rgba(0,0,0,0.5);animation:slideUpRecap 0.32s cubic-bezier(0.34,1.56,0.64,1) both;}
+.obd-handle{width:36px;height:3px;background:var(--border2);border-radius:2px;margin:0 auto 14px;}
+.obd-close{position:absolute;top:12px;right:12px;background:var(--surf2);border:none;color:var(--text2);
+  width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:0.85rem;line-height:1;}
+.obd-close:hover{color:var(--red);}
+.obd-hero{height:104px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;
+  background:linear-gradient(160deg,#232328,#151518);border-radius:var(--r-md);position:relative;}
+.obd-name{font-family:'Inter',sans-serif;font-size:1.15rem;font-weight:700;margin-top:12px;}
+.obd-type{font-size:0.6rem;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.obd-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 10px;}
+.obd-stat{background:var(--surf2);border:1px solid var(--border);border-radius:var(--radius-xs);padding:9px 6px;text-align:center;}
+.obd-stat b{font-family:'Inter',sans-serif;font-size:0.9rem;color:var(--text);display:block;line-height:1.1;}
+.obd-stat span{font-size:0.38rem;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;font-weight:700;display:block;margin-top:3px;}
+/* Step 4 — simulated sign-in */
+.ob-auth{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px 4px;}
+.ob-auth-logo{font-family:'Inter',sans-serif;font-size:2.4rem;letter-spacing:2px;color:var(--text);line-height:1;}
+.ob-auth-logo span{color:var(--accent);}
+.ob-auth-title{font-size:1.05rem;font-weight:700;margin-top:12px;}
+.ob-auth-desc{font-size:0.74rem;color:var(--text2);line-height:1.65;max-width:290px;margin:6px 0 20px;}
+.ob-signedin{display:flex;flex-direction:column;align-items:center;gap:8px;animation:popIn 0.45s var(--spring-soft) both;}
+.ob-signcheck{width:54px;height:54px;border-radius:50%;background:rgba(52,199,89,0.12);
+  border:1px solid rgba(52,199,89,0.5);color:var(--green);font-size:1.5rem;
+  display:flex;align-items:center;justify-content:center;animation:titlePop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;}
+.ob-signcheck-txt{font-weight:700;font-size:0.95rem;}
+.ob-signcheck-sub{font-size:0.68rem;color:var(--text2);}
+.ob-spin{width:15px;height:15px;border:2px solid rgba(51,51,51,0.3);border-top-color:#333;border-radius:50%;
+  animation:spin 0.8s linear infinite;display:inline-block;vertical-align:-3px;margin-right:8px;}
+/* Step 5 — finish */
+.ob-finish{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+.ob-finish-title{font-family:'Inter',sans-serif;font-size:2.3rem;letter-spacing:1px;line-height:1.1;}
+.ob-flow{display:flex;align-items:center;gap:8px;margin:16px 0 8px;flex-wrap:wrap;justify-content:center;}
+.ob-flow-chip{background:var(--surf2);border:1px solid var(--border2);border-radius:999px;padding:7px 14px;
+  font-size:0.66rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text2);
+  animation:popIn 0.4s var(--spring-soft) both;}
+.ob-flow-chip.gold{color:var(--accent);border-color:rgba(232,184,75,0.4);background:var(--adim);}
+.ob-flow-arrow{color:var(--accent);font-size:0.8rem;}
+@media (prefers-reduced-motion:reduce){
+  .ob-panel,.ob-car,.ob-gcard,.ob-runrow,.ob-receipt,.ob-savednote,.ob-signcheck,.ob-flow-chip,.ob-detail,.ob-detail-back{animation:none !important;}
 }
-
-.tutorial-close{
-  float:right;
-  background:transparent;
-  border:0;
-  color:var(--muted);
-  font-size:20px;
-  cursor:pointer;
-}
-
-.tutorial-steps{
-  display:flex;
-  gap:6px;
-  margin-bottom:20px;
-}
-
-.tutorial-step-dot{
-  width:28px;
-  height:4px;
-  border-radius:99px;
-  background:var(--surf3);
-}
-
-.tutorial-step-dot.active{
-  background:var(--accent);
-}
-
-.tutorial-eyebrow{
-  color:var(--accent);
-  font-size:.7rem;
-  font-weight:800;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  margin-bottom:8px;
-}
-
-.tutorial-title{
-  font-size:1.5rem;
-  font-weight:800;
-  margin-bottom:10px;
-}
-
-.tutorial-desc{
-  color:var(--text2);
-  font-size:.9rem;
-  line-height:1.55;
-}
-
-.tutorial-visual{
-  margin:20px 0;
-}
-
-.tutorial-actions{
-  display:flex;
-  gap:10px;
-  margin-top:20px;
-}
-
-.tutorial-skip,
-.tutorial-next{
-  padding:11px 18px;
-  border-radius:var(--r-md);
-  font-weight:700;
-  cursor:pointer;
-}
-
-.tutorial-skip{
-  background:transparent;
-  color:var(--text2);
-  border:1px solid var(--border2);
-}
-
-.tutorial-next{
-  flex:1;
-  background:var(--accent);
-  color:#080808;
-  border:0;
-}
-
-@keyframes tutorialCardIn{
-  from{
-    opacity:0;
-    transform:translateY(12px) scale(.97);
-  }
-  to{
-    opacity:1;
-    transform:translateY(0) scale(1);
-  }
-}
+@media(max-width:380px){.ob-cargrid{gap:8px;}.ob-car .oc-name{font-size:0.72rem;}.ob-title{font-size:1.25rem;}}
 
 /* ── NEWS ── */
 .news-card{
@@ -3263,11 +3336,11 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
           <div class="setting-icon">Guide</div>
           <div class="setting-copy">
             <div class="card-title">HELP & ONBOARDING</div>
-            <div class="setting-desc">Replay the quick 3-step intro any time to show how runs, Smart Fill, and syncing work.</div>
+            <div class="setting-desc">Replay the interactive walkthrough — practice logging a run, explore a demo Garage, and see why signing in matters. Uses demo data only; nothing touches your real collection.</div>
           </div>
         </div>
-        <button class="setting-link" onclick="openTutorial(true)" title="Replay the 3-step getting started guide">
-          <span>Show onboarding tutorial</span>
+        <button class="setting-link" onclick="openOnboarding(true)" title="Replay the interactive walkthrough">
+          <span>Show interactive walkthrough</span>
           <span>Open</span>
         </button>
       </div>
@@ -3524,7 +3597,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
   <div class="act-list" id="actList"></div>
 </div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v32.5</div>
+<div class="version-tag" id="versionTag">v31</div>
 
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
@@ -3727,10 +3800,6 @@ let garageView   = 'list';
 let pageOrder = ['spot','garage','voice','history','achievements','settings','news','leaderboard','book','expeditions','trips','more'];
 let currentPage = 'spot';
 let runTotalAnimated = 0;
-
-// Tutorial state
-let tutorialTimer = null;
-let tutorialStep = 0;
 
 // Achievements — declared here so getUnlockedAchievements() works at any point
 
@@ -11168,52 +11237,334 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
 
   function closeMapPicker(){ window._closeMapPicker(); }
 
-  function tutorialData(){
-    return [
-  {
-    eyebrow:'Step 1 of 3',
-    title:'Start spotting',
-    desc:'When you see a car, tap + TO RUN to add it to your current run.',
-    visual:'<div class="tutorial-smart"><div class="tutorial-smart-badge">👀 Spot a car</div><div class="setting-desc" style="margin:0;">Your run keeps track of the cars you spot and their total value.</div></div>'
-  },
+  // ══════════════════════════════════════════════════════════════════
+  //  FIRST-RUN ONBOARDING — interactive simulation
+  //  A miniature, playable version of CarSpotter that teaches by doing.
+  //  Runs entirely on its own demo data: it NEVER reads or writes the
+  //  real garage, runs, spots, quick picks, XP, or account. The only
+  //  shared state is the first-launch flag (cs_tutorial_done) so the
+  //  existing first-launch + Skip behavior keeps working.
+  // ══════════════════════════════════════════════════════════════════
+  var OB_DONE_KEY = 'cs_tutorial_done';
 
-  {
-    eyebrow:'Step 2 of 3',
-    title:'Build your run',
-    desc:'Add the car you spotted, then watch it appear in your run and increase your total.',
-    visual:'<div class="tutorial-smart"><div class="tutorial-smart-badge">🏎️ Add a car</div><div class="setting-desc" style="margin:0;">Every car you spot gets added to your current run.</div></div>'
-  },
+  var OB_SHOWROOM = [
+    { id:'f488', name:'Ferrari 488',     value:280000, emoji:'🏎️', type:'Supercar' },
+    { id:'gt3',  name:'Porsche 911 GT3', value:170000, emoji:'🏁', type:'Sports'   },
+    { id:'p720', name:'McLaren 720S',    value:300000, emoji:'🔥', type:'Supercar' },
+    { id:'bm4',  name:'BMW M4',          value:80000,  emoji:'🚗', type:'Sports'   }
+  ];
+  var OB_MORECARS = [
+    { id:'hura', name:'Lamborghini Huracan', value:220000, emoji:'🏎️', type:'Supercar' },
+    { id:'vant', name:'Aston Martin Vantage', value:145000, emoji:'👑', type:'Luxury'  },
+    { id:'plai', name:'Tesla Model S Plaid',  value:90000,  emoji:'⚡', type:'EV'      },
+    { id:'hell', name:'Challenger Hellcat',   value:68000,  emoji:'🐎', type:'Muscle'  }
+  ];
+  var OB_STEPS = ['Spot', 'Run', 'Garage', 'Sync', 'Ready'];
+  var OB = { open:false, ov:null, esc:null, step:0, pickedId:null, run:[], saved:false, signed:false, detail:null };
 
-  {
-    eyebrow:'Step 3 of 3',
-    title:'Build your collection',
-    desc:'When you finish a run, your spotted cars are saved to your Garage so you can look back at your collection.',
-    visual:'<div class="tutorial-smart"><div class="tutorial-smart-badge">🏆 Your Garage</div><div class="setting-desc" style="margin:0;">Keep spotting cars and build your collection over time.</div></div>'
+  function obFind(id){ return OB_SHOWROOM.concat(OB_MORECARS).filter(function(c){ return c.id === id; })[0]; }
+  function obTotal(){ return OB.run.reduce(function(s,c){ return s + c.value; }, 0); }
+
+  function obSetDots(){
+    if (!OB.ov) return;
+    OB.ov.querySelectorAll('.ob-dot').forEach(function(d, i){
+      d.classList.toggle('on', i === OB.step);
+      d.classList.toggle('done', i < OB.step);
+    });
   }
-];
+  function obFootContinue(){
+    return '<button class="ob-btn" onclick="__ob.next()">CONTINUE&nbsp;&nbsp;\u2192</button>';
   }
-  function renderTutorial(){
-    var overlay = document.getElementById('tutorialOverlay');
-    if (!overlay) return;
-    var steps = tutorialData();
-    var step = steps[tutorialStep];
-    overlay.innerHTML = '<div class="tutorial-card" onclick="event.stopPropagation()"><button class="tutorial-close" onclick="closeTutorial()">x</button><div class="tutorial-steps">' + steps.map(function(_, i){ return '<div class="tutorial-step-dot ' + (i === tutorialStep ? 'active' : '') + '"></div>'; }).join('') + '</div><div class="tutorial-eyebrow">' + step.eyebrow + '</div><div class="tutorial-title">' + step.title + '</div><div class="tutorial-desc">' + step.desc + '</div><div class="tutorial-visual">' + step.visual + '</div><div class="tutorial-actions"><button class="tutorial-skip" onclick="closeTutorial()">Skip</button><button class="tutorial-next" onclick="nextTutorialStep()">' + (tutorialStep === steps.length - 1 ? 'Start Spotting' : 'Next') + '</button></div></div>';
+  function obGoto(n){
+    OB.detail = null;
+    OB.step = Math.max(0, Math.min(n, OB_STEPS.length - 1));
+    obRender();
   }
-  window.openTutorial = function(force){
-    if (!force && localStorage.getItem('cs_tutorial_done')) return;
-    var overlay = document.getElementById('tutorialOverlay');
-    if (!overlay) {
-      overlay = document.createElement('div');
-      overlay.id = 'tutorialOverlay';
-      overlay.className = 'tutorial-overlay';
-      overlay.onclick = function(){ closeTutorial(); };
-      document.body.appendChild(overlay);
+  function obRender(){
+    if (!OB.ov || !OB.open) return;
+    obSetDots();
+    var body = document.getElementById('obBody');
+    var foot = document.getElementById('obFoot');
+    var fh = '';
+    switch (OB.step) {
+      case 0: body.innerHTML = obBodySpot();   fh = OB.run.length ? obFootContinue() : ''; break;
+      case 1: body.innerHTML = obBodyRun();    fh = obFootContinue(); break;
+      case 2: body.innerHTML = obBodyGarage(); fh = obFootContinue(); break;
+      case 3: body.innerHTML = obBodyAuth();   fh = OB.signed ? obFootContinue() : ''; break;
+      case 4: body.innerHTML = obBodyFinish(); fh = ''; break;
     }
-    tutorialStep = 0;
-    renderTutorial();
+    foot.style.display = fh ? 'flex' : 'none';
+    foot.innerHTML = fh;
+    if (!(OB.step === 2 && OB.detail)) body.scrollTop = 0;
+  }
+
+  // ── Step 1 · Spot & Log ──────────────────────────────────────────
+  function obCarCardHTML(c, i, state){
+    var cls = 'ob-car' + (state === 'picked' ? ' picked' : state === 'dim' ? ' dim' : '');
+    return '<button class="' + cls + '" style="animation-delay:' + (i * 0.06) + 's"' +
+      (state === 'pick' ? ' onclick="__ob.pick(\'' + c.id + '\')"' : ' tabindex="-1"') + '>' +
+      '<span class="oc-check">\u2713</span>' +
+      '<span class="oc-emoji">' + c.emoji + '</span>' +
+      '<span class="oc-name">' + escapeHtml(c.name) + '</span>' +
+      '<span class="oc-val">' + fmtFull(c.value) + '</span>' +
+      '</button>';
+  }
+  function obBodySpot(){
+    var picked = obFind(OB.pickedId);
+    var h = '<div class="ob-eyebrow">Step 1 \u00B7 Spot &amp; Log</div>';
+    if (!picked) {
+      h += '<div class="ob-title">Pick the car you spotted.</div>' +
+        '<div class="ob-sub">This is the Spot page. Tap whichever one you \u201Csaw\u201D \u2014 it\u2019s a demo, so anything goes.</div>' +
+        '<div class="ob-cargrid">' +
+        OB_SHOWROOM.map(function(c, i){ return obCarCardHTML(c, i, 'pick'); }).join('') +
+        '</div>';
+    } else if (!OB.run.length) {
+      h += '<div class="ob-title">Now log it.</div>' +
+        '<div class="ob-sub">' + escapeHtml(picked.name) + ' selected. Tap the gold button \u2014 the same one you\u2019ll use in the real app.</div>' +
+        '<div class="ob-cargrid" style="margin-bottom:16px">' +
+        OB_SHOWROOM.map(function(c, i){ return obCarCardHTML(c, i, c.id === picked.id ? 'picked' : 'dim'); }).join('') +
+        '</div>' +
+        '<button class="btn-run" onclick="__ob.log()">\uFF0B&nbsp;&nbsp;LOG IT</button>';
+    } else {
+      var car = OB.run[0];
+      h += '<div class="ob-title">Logged!</div>' +
+        '<div class="ob-sub">The car is now in your current run and the total climbed instantly.</div>' +
+        '<div class="ob-receipt">' +
+          '<div class="ob-receipt-row"><span>' + car.emoji + ' ' + escapeHtml(car.name) + '</span><span>' + fmtFull(car.value) + '</span></div>' +
+          '<div class="ob-receipt-total"><b>Run Total</b><span>' + fmtFull(obTotal()) + '</span></div>' +
+        '</div>';
+    }
+    return h;
+  }
+
+  // ── Step 2 · Your Run ────────────────────────────────────────────
+  function obRunRow(c){
+    return '<div class="ob-runrow">' +
+      '<span class="ob-run-emoji">' + c.emoji + '</span>' +
+      '<span class="ob-run-name">' + escapeHtml(c.name) + '</span>' +
+      '<span class="ob-run-val">' + fmtFull(c.value) + '</span>' +
+      '</div>';
+  }
+  function obBodyRun(){
+    var h = '<div class="ob-eyebrow">Step 2 \u00B7 Your Run</div>' +
+      '<div class="ob-title">Nice. It\u2019s in your run.</div>' +
+      '<div class="ob-sub">A run holds every car from one outing. Stack more and watch the total climb \u2014 then finish it to save.</div>' +
+      '<div class="ob-run">';
+    OB.run.forEach(function(c){ h += obRunRow(c); });
+    h += '<div class="ob-runtotrow"><b>Run Total</b><span id="obRunTotal">' + fmtFull(obTotal()) + '</span></div></div>';
+    if (!OB.saved) {
+      var left = OB_SHOWROOM.filter(function(c){ return !OB.run.some(function(x){ return x.id === c.id; }); });
+      if (left.length) {
+        h += '<div class="ob-sub" style="margin-bottom:8px;">Spotted another? Tap to stack it:</div>' +
+          '<div class="ob-addrow">' +
+          left.map(function(c, i){
+            return '<button class="ob-addchip" style="animation-delay:' + (i * 0.05) + 's" onclick="__ob.add(\'' + c.id + '\')">\uFF0B ' + escapeHtml(c.name) + ' \u00B7 ' + fmt(c.value) + '</button>';
+          }).join('') +
+          '</div>';
+      }
+      h += '<button class="btn-end" style="margin-top:4px" onclick="__ob.endRun()">END RUN &amp; SAVE</button>';
+    } else {
+      h += '<div class="ob-savednote"><span>\u2713</span><span><strong>Run saved to History.</strong><br>Your best run becomes your all-time record.</span></div>';
+    }
+    return h;
+  }
+
+  // ── Step 3 · Garage ─────────────────────────────────────────────
+  function obGarageList(){
+    var picked = obFind(OB.pickedId);
+    var rest = OB_SHOWROOM.filter(function(c){ return c.id !== OB.pickedId; }).concat(OB_MORECARS)
+      .sort(function(a,b){ return b.value - a.value; });
+    return picked ? [picked].concat(rest) : rest;
+  }
+  function obDetailSheet(c){
+    var r = getRarity(c.value);
+    return '<div class="ob-detail">' +
+      '<div class="obd-handle"></div>' +
+      '<button class="obd-close" aria-label="Close" onclick="__ob.closeCar()">\u2715</button>' +
+      '<div class="obd-hero">' + c.emoji +
+        '<span class="obg-tier" style="top:10px;left:12px;color:' + r.color + ';border-color:' + r.color + '88;">' + r.label + '</span>' +
+      '</div>' +
+      '<div class="obd-name">' + escapeHtml(c.name) + '</div>' +
+      '<div class="obd-type">' + c.type + ' \u00B7 spotted once</div>' +
+      '<div class="obd-stats">' +
+        '<div class="obd-stat"><b style="color:var(--accent)">' + fmtFull(c.value) + '</b><span>Value</span></div>' +
+        '<div class="obd-stat"><b style="color:' + r.color + '">' + r.label + '</b><span>Rarity</span></div>' +
+        '<div class="obd-stat"><b>+' + rarityXP(c.value) + '</b><span>XP each</span></div>' +
+      '</div>' +
+      '<div style="font-size:0.66rem;color:var(--muted);line-height:1.6;">Spot this car again someday and sightings stack up. Rarer cars pay out more XP \u2014 that\u2019s what levels up your spotter rank.</div>' +
+      '</div>';
+  }
+  function obBodyGarage(){
+    var cars = obGarageList();
+    var tot = cars.reduce(function(s,c){ return s + c.value; }, 0);
+    var pickedName = obFind(OB.pickedId) ? obFind(OB.pickedId).name : '';
+    var h = '<div class="ob-eyebrow">Step 3 \u00B7 Your Garage</div>' +
+      '<div class="ob-title">Your collection lives here.</div>' +
+      '<div class="ob-sub">Your Garage is your collection of cars you\u2019ve spotted \u2014 ' + escapeHtml(pickedName) + ' is already in it. Tap any car to look it over.</div>' +
+      '<div class="ob-gstats">' +
+        '<div class="ob-gstat"><b>' + cars.length + '</b><span>Cars</span></div>' +
+        '<div class="ob-gstat"><b>' + fmt(tot) + '</b><span>Total</span></div>' +
+        '<div class="ob-gstat"><b>' + fmt(tot / cars.length) + '</b><span>Avg</span></div>' +
+      '</div>' +
+      '<div class="ob-ggrid">' +
+      cars.map(function(c, i){
+        var r = getRarity(c.value);
+        var mine = c.id === OB.pickedId;
+        return '<div class="ob-gcard' + (mine ? ' mine' : '') + '" role="button" tabindex="0" style="animation-delay:' + (i * 0.05) + 's" onclick="__ob.car(\'' + c.id + '\')">' +
+          '<div class="obg-media">' + c.emoji +
+            '<span class="obg-tier" style="color:' + r.color + ';border-color:' + r.color + '77;">' + r.label + '</span>' +
+            (mine ? '<span class="obg-yours">You spotted this</span>' : '') +
+          '</div>' +
+          '<div class="obg-body"><div class="obg-name">' + escapeHtml(c.name) + '</div><div class="obg-val">' + fmtFull(c.value) + '</div></div>' +
+        '</div>';
+      }).join('') +
+      '</div>';
+    if (OB.detail) {
+      var dc = obFind(OB.detail);
+      if (dc) h += '<div class="ob-detail-back" onclick="__ob.closeCar()"></div>' + obDetailSheet(dc);
+    }
+    return h;
+  }
+
+  // ── Step 4 · Simulated sign-in ───────────────────────────────────
+  function obBodyAuth(){
+    var h = '<div class="ob-eyebrow">Step 4 \u00B7 Sign in &amp; Save</div>';
+    h += '<div class="ob-auth">';
+    h += '<div class="ob-auth-logo">Car<span>Spotter</span></div>';
+    h += '<div class="ob-auth-title">Keep your CarSpotter collection</div>';
+    h += '<div class="ob-auth-desc">Sign in to save and sync your Garage, runs, notes, and spots across devices.</div>';
+    if (!OB.signed) {
+      h += '<button class="btn-google" id="obGoogleBtn" onclick="__ob.signIn()">' +
+        '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" height="20" alt=""> Continue with Google</button>';
+      h += '<div style="font-size:0.62rem;color:var(--muted);margin-top:12px;line-height:1.6;">Demo only \u2014 nothing is sent and your account is not touched.</div>';
+    } else {
+      h += '<div class="ob-signedin">' +
+        '<div class="ob-signcheck">\u2713</div>' +
+        '<div class="ob-signcheck-txt">Signed in</div>' +
+        '<div class="ob-signcheck-sub">Your collection is synced.</div>' +
+        '</div>';
+    }
+    h += '</div>';
+    return h;
+  }
+
+  // ── Step 5 · Finish ─────────────────────────────────────────────
+  function obBodyFinish(){
+    return '<div class="ob-finish">' +
+      '<div style="font-size:2.4rem;line-height:1;margin-bottom:6px;">\uD83C\uDFC1</div>' +
+      '<div class="ob-finish-title">You\u2019re ready.</div>' +
+      '<div class="ob-flow">' +
+        '<span class="ob-flow-chip gold" style="animation-delay:0.05s">Spot cars</span><span class="ob-flow-arrow">\u2192</span>' +
+        '<span class="ob-flow-chip" style="animation-delay:0.15s">Log them</span><span class="ob-flow-arrow">\u2192</span>' +
+        '<span class="ob-flow-chip" style="animation-delay:0.25s">Build your Garage</span>' +
+      '</div>' +
+      '<div style="font-size:0.68rem;color:var(--muted);margin-top:4px;">Everything you practiced here works exactly the same in the real app.</div>' +
+      '<button class="btn-run" style="margin-top:24px;max-width:240px;font-size:1rem;letter-spacing:3px;padding:16px;" onclick="__ob.finish()">START SPOTTING</button>' +
+      '</div>';
+  }
+
+  // ── Actions ─────────────────────────────────────────────────────
+  window.__ob = {
+    pick: function(id){
+      if (OB.run.length) return;
+      OB.pickedId = id;
+      try { playSound('tick'); haptic(8); } catch(e) {}
+      obRender();
+    },
+    log: function(){
+      var c = obFind(OB.pickedId);
+      if (!c || OB.run.length) return;
+      OB.run.push({ id:c.id, name:c.name, value:c.value, emoji:c.emoji });
+      try { playSound('log'); haptic(12); } catch(e) {}
+      obRender();
+    },
+    next: function(){ obGoto(OB.step + 1); },
+    add: function(id){
+      if (OB.saved) return;
+      var c = obFind(id);
+      if (!c || OB.run.some(function(x){ return x.id === id; })) return;
+      OB.run.push({ id:c.id, name:c.name, value:c.value, emoji:c.emoji });
+      try { playSound('log'); haptic(10); } catch(e) {}
+      obRender();
+      var t = document.getElementById('obRunTotal');
+      if (t) { t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop'); }
+    },
+    endRun: function(){
+      if (!OB.run.length || OB.saved) return;
+      OB.saved = true;
+      try { playSound('end'); haptic([15,30,15]); } catch(e) {}
+      obRender();
+    },
+    car: function(id){ OB.detail = id; obRender(); },
+    closeCar: function(){ OB.detail = null; obRender(); },
+    signIn: function(){
+      if (OB.signed) return;
+      var b = document.getElementById('obGoogleBtn');
+      if (!b) return;
+      b.disabled = true;
+      b.innerHTML = '<span class="ob-spin"></span>Signing in\u2026';
+      setTimeout(function(){
+        OB.signed = true;
+        try { playSound('collect'); haptic([12,25,12]); } catch(e) {}
+        obRender();
+      }, 950);
+    },
+    finish: function(){
+      closeOnboarding();
+      try { showToast('\uD83C\uDFC1 Walkthrough complete \u2014 demo data discarded.'); } catch(e) {}
+    },
+    close: function(){ closeOnboarding(); }
   };
-  window.nextTutorialStep = function(){ tutorialStep += 1; if (tutorialStep >= tutorialData().length) closeTutorial(); else renderTutorial(); };
-  window.closeTutorial = function(){ localStorage.setItem('cs_tutorial_done', '1'); var overlay = document.getElementById('tutorialOverlay'); if (overlay) overlay.remove(); if (tutorialTimer) { clearInterval(tutorialTimer); tutorialTimer = null; } };
+
+  function obReset(){
+    OB.step = 0; OB.pickedId = null; OB.run = [];
+    OB.saved = false; OB.signed = false; OB.detail = null;
+  }
+  function openOnboarding(force){
+    if (!force && localStorage.getItem(OB_DONE_KEY)) return;
+    if (OB.open && OB.ov) { obReset(); obGoto(0); return; }
+    var ov = document.createElement('div');
+    ov.className = 'ob-backdrop';
+    ov.id = 'obBackdrop';
+    ov.setAttribute('role', 'dialog');
+    ov.setAttribute('aria-modal', 'true');
+    ov.setAttribute('aria-label', 'CarSpotter interactive walkthrough');
+    ov.innerHTML =
+      '<div class="ob-panel">' +
+        '<div class="ob-head">' +
+          '<div class="ob-logo">Car<span>Spotter</span></div>' +
+          '<div class="ob-dots">' +
+            OB_STEPS.map(function(s, i){ return '<span class="ob-dot" data-i="' + i + '" title="' + s + '"></span>'; }).join('') +
+          '</div>' +
+          '<button class="ob-skip" onclick="__ob.close()">Skip</button>' +
+        '</div>' +
+        '<div class="ob-body" id="obBody"></div>' +
+        '<div class="ob-foot" id="obFoot" style="display:none"></div>' +
+      '</div>';
+    ov.addEventListener('click', function(e){ if (e.target === ov) closeOnboarding(); });
+    OB.esc = function(e){ if (e.key === 'Escape') { e.preventDefault(); closeOnboarding(); } };
+    document.addEventListener('keydown', OB.esc);
+    document.body.appendChild(ov);
+    OB.ov = ov;
+    OB.open = true;
+    obReset();
+    obGoto(0);
+  }
+  function closeOnboarding(){
+    if (!OB.open) return;
+    try { localStorage.setItem(OB_DONE_KEY, '1'); } catch(e) {}
+    if (OB.esc) { document.removeEventListener('keydown', OB.esc); OB.esc = null; }
+    OB.open = false;
+    var ov = OB.ov;
+    OB.ov = null;
+    if (ov) {
+      ov.style.transition = 'opacity 0.25s ease';
+      ov.style.opacity = '0';
+      setTimeout(function(){ if (ov.parentNode) ov.parentNode.removeChild(ov); }, 260);
+    }
+  }
+  window.openOnboarding = openOnboarding;
+  window.closeOnboarding = closeOnboarding;
 
   var settingsPage = document.getElementById('page-settings');
   if (settingsPage) settingsPage.innerHTML = settingsPage.innerHTML.replace("CarSpotter''s", "CarSpotter's");
@@ -11227,9 +11578,10 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
   // Progression expansion init
   if (window.renderTitleChip) renderTitleChip();
   if (window.checkTitleUnlock) setTimeout(function(){ checkTitleUnlock(true); }, 600);
-// One-shot tutorial check on first launch — shown to signed-in and guest users alike
-  if (!localStorage.getItem('cs_tutorial_done') && !document.getElementById('tutorialOverlay')) {
-    setTimeout(function(){ openTutorial(false); }, 2500);
+// One-shot onboarding on first launch — shown to signed-in and guest users alike.
+// Same cs_tutorial_done flag and skip/close behavior as before; only the experience changed.
+  if (!localStorage.getItem(OB_DONE_KEY)) {
+    setTimeout(function(){ openOnboarding(false); }, 2200);
   }
 })();
 </script>
