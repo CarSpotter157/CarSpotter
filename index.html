@@ -7171,7 +7171,9 @@ function renderDiscoveries() {
       : '<div class="disc-img-ph">' + tierEmoji(rec.r) + '</div>';
     var date = new Date(rec.d).toLocaleDateString('en-US', { month:'short', day:'numeric' });
     var safeName = escapeHtml(rec.n);
-    return '<div class="disc-card" onclick="openDiscovery(\'' + jsEscape(rec.n) + '\',' + (rec.v || 0) + ',\'' + jsEscape(rec.t || '') + '\')">' +
+    var carData = { name: rec.n, value: rec.v || 0, type: rec.t || '', color: '', photo: img, location: null, runDate: date, spotCount: 1 };
+    var json = JSON.stringify(carData).replace(/"/g, '"');
+    return '<div class="disc-card" onclick="showCarInstances(' + json + ')">' +
       imgHTML +
       '<div class="disc-body">' +
         '<div class="disc-name" title="' + safeName + '">' + safeName + '</div>' +
@@ -7183,9 +7185,6 @@ function renderDiscoveries() {
       '</div>' +
     '</div>';
   }).join('');
-}
-function openDiscovery(name, value, type) {
-  showSpecsCard({ name:name, value:value, type:type, color:'', photo:'' });
 }
 
 //  MODE SELECTION — full card for headliner-worthy tiers (super/hyper/legend);
@@ -8521,16 +8520,13 @@ function handlePhotoInput(input) {
   reader.onerror = function() { showToast('Could not read photo'); };
   reader.onload = (e) => {
     const raw = e.target.result;
-    pendingPhotoDataUrl = raw;
-    const wrap = document.getElementById('photoPreviewWrap');
-    wrap.style.display = 'block';
-    wrap.innerHTML = `<div class="photo-preview-wrap">
-      <img class="photo-preview-img" src="${raw}" alt="Car photo">
-      <button class="photo-remove" onclick="removePhoto()"></button>
-    </div>`;
-    showToast(' Photo attached!');
     const img = new Image();
-    img.onerror = function() { /* keep raw photo on load failure */ };
+    img.onerror = function() {
+      // Fallback: use raw if image fails to load
+      pendingPhotoDataUrl = raw;
+      showPhotoPreview(raw);
+      showToast(' Photo attached!');
+    };
     img.onload = () => {
       try {
         const MAX = 800;
@@ -8543,17 +8539,28 @@ function handlePhotoInput(input) {
         c.width = w; c.height = h;
         c.getContext('2d').drawImage(img, 0, 0, w, h);
         const compressed = c.toDataURL('image/jpeg', 0.6);
-        if (pendingPhotoDataUrl === raw) {
-          pendingPhotoDataUrl = compressed;
-          const imgEl = wrap.querySelector('.photo-preview-img');
-          if (imgEl) imgEl.src = compressed;
-        }
-      } catch(err) { /* keep raw photo on compression failure */ }
+        pendingPhotoDataUrl = compressed;
+        showPhotoPreview(compressed);
+        showToast(' Photo attached!');
+      } catch(err) {
+        pendingPhotoDataUrl = raw;
+        showPhotoPreview(raw);
+        showToast(' Photo attached!');
+      }
     };
     img.src = raw;
   };
   reader.readAsDataURL(file);
   input.value = '';
+}
+
+function showPhotoPreview(dataUrl) {
+  const wrap = document.getElementById('photoPreviewWrap');
+  wrap.style.display = 'block';
+  wrap.innerHTML = `<div class="photo-preview-wrap">
+    <img class="photo-preview-img" src="${dataUrl}" alt="Car photo">
+    <button class="photo-remove" onclick="removePhoto()"></button>
+  </div>`;
 }
 
 function removePhoto() {
