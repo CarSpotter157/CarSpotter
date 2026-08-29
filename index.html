@@ -6697,6 +6697,7 @@ async function showSpecsCard(car) {
 }
 
 function showCarInstances(car, originEl) {
+  if (typeof car === 'string') { try { car = JSON.parse(car); } catch(e) {} }
   var instances = (car.instances && car.instances.length) ? car.instances : [{name:car.name,photo:car.photo,value:car.value,type:car.type,color:car.color,runDate:car.runDate||'Unknown',location:car.location}];
   var rarity = getRarity(car.value);
   var heroPhoto = null, heroBadge = '';
@@ -7172,12 +7173,13 @@ function renderDiscoveries() {
     var date = new Date(rec.d).toLocaleDateString('en-US', { month:'short', day:'numeric' });
     var safeName = escapeHtml(rec.n);
     var carData = { name: rec.n, value: rec.v || 0, type: rec.t || '', color: '', photo: img, location: null, runDate: date, spotCount: 1 };
-    var json = JSON.stringify(carData).replace(/"/g, '"');
-    return '<div class="disc-card" onclick="showCarInstances(' + json + ')">' +
+var json = JSON.stringify(carData).replace(/"/g, '"');
+    var jsonEscaped = json.replace(/"/g, '"');
+    return '<div class="disc-card" onclick="showCarInstances(' + jsonEscaped + ')">' +
       imgHTML +
-      '<div class="disc-body">' +
+      '<div class="disc-body">
         '<div class="disc-name" title="' + safeName + '">' + safeName + '</div>' +
-        '<div class="disc-meta">' +
+        '<div class="disc-meta">
           '<span class="disc-rarity" style="color:' + meta.color + '">' + tierEmoji(rec.r) + ' ' + meta.label.replace(' Spot','') + '</span>' +
           '<span class="disc-xp">+' + rec.xp + '</span>' +
         '</div>' +
