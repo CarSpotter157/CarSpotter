@@ -3610,16 +3610,42 @@ if (sessionStorage.getItem(_pendingKey) && !window.location.hash) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
 <script>
-firebase.initializeApp({
-  apiKey: "AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug",
-  authDomain: "carspotter-d5d82.firebaseapp.com",
-  projectId: "carspotter-d5d82",
-  storageBucket: "carspotter-d5d82.firebasestorage.app",
-  messagingSenderId: "1052055414051",
-  appId: "1:1052055414051:web:cd8ee5100f9e591d739896"
-});
-const auth = firebase.auth();
-const db   = firebase.firestore();
+// BUGFIX: previously this block assumed the Firebase CDN scripts always load.
+// If they don't (offline first launch, ad-blocker, flaky connection, CDN outage —
+// all realistic for a car-spotting app used on the road), `firebase` is undefined,
+// this throws, and — because `auth`/`db` are declared with const — every later
+// reference to them stays in the temporal dead zone forever. That uncaught error
+// used to abort the rest of the app's startup script entirely (nothing below ever
+// ran: achievements grid stayed empty, onboarding never opened, stat counters
+// crashed mid-animation). Now a load failure degrades gracefully to guest/offline
+// mode instead of bricking the whole app.
+window._fbReady = false;
+try {
+  if (typeof firebase === 'undefined') throw new Error('Firebase SDK failed to load');
+  firebase.initializeApp({
+    apiKey: "AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug",
+    authDomain: "carspotter-d5d82.firebaseapp.com",
+    projectId: "carspotter-d5d82",
+    storageBucket: "carspotter-d5d82.firebasestorage.app",
+    messagingSenderId: "1052055414051",
+    appId: "1:1052055414051:web:cd8ee5100f9e591d739896"
+  });
+  window._fbReady = true;
+} catch(e) {
+  console.warn('CarSpotter: Firebase unavailable, continuing offline in guest mode.', e);
+}
+
+// auth/db are used as bare identifiers everywhere below (across script tags on
+// this page they share one global scope), so give them safe stand-ins when
+// Firebase didn't load rather than leaving them uninitialized.
+const auth = window._fbReady ? firebase.auth() : {
+  onAuthStateChanged: function(cb) { try { cb(null); } catch(e) {} return function(){}; },
+  getRedirectResult: function() { return Promise.resolve({ user: null }); },
+  signOut: function() { return Promise.resolve(); },
+  signInWithPopup: function() { return Promise.reject({ code:'auth/network-request-failed', message:'Offline — sign-in unavailable.' }); },
+  currentUser: null
+};
+const db = window._fbReady ? firebase.firestore() : null;
 
 // Find the OAuth client ID from Firebase auth internals
 var oauthClientId = '';
@@ -4046,6 +4072,7 @@ function _saveAllLocal() {
 //  FIREBASE AUTH & SYNC 
 
 window.signInGoogle = function() {
+  if (!window._fbReady) { showToast('Sign-in needs a connection — try again once you\'re back online.'); return; }
   var provider = new firebase.auth.GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
   auth.signInWithPopup(provider).catch(function(e) {
@@ -6317,7 +6344,13 @@ function renderGarage() {
     }).join('');
     setTimeout(function(){
       var mapEl = document.getElementById('leafletMap');
-      if (!mapEl || !window.L) return;
+      if (!mapEl) return;
+      if (!window.L) {
+        // Leaflet didn't load (offline/CDN blocked) — show a clear message
+        // instead of leaving a blank gray box with no explanation.
+        mapEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--muted);font-size:0.75rem;text-align:center;padding:20px;">Map unavailable offline.<br>Your spots are listed below.</div>';
+        return;
+      }
       if (window._csLeafletMap) { try { window._csLeafletMap.remove(); } catch(e){} window._csLeafletMap = null; }
       var bounds = [];
       var map = L.map('leafletMap', { zoomControl: true, attributionControl: true }).setView([mapped[0].location.lat, mapped[0].location.lng], 13);
@@ -10059,7 +10092,10 @@ function openMakeSheet(make) {
     var just = _lastSpottedName && _modelKey(m.name) === _modelKey(_lastSpottedName) ? ' just-spotted' : '';
     if (m.found) {
       var photo = _idbPhotoCache[key] || '';
-      return '<div class="book-car-tile spotted' + just + '" style="animation-delay:' + (i * 0.02) + 's" onclick="openDiscovery(\'' + jsEscape(m.name) + '\',' + m.val + ',\'' + (m.type || '') + '\')">' +
+      // BUGFIX: this used to call openDiscovery(...), a function that doesn't
+      // exist anywhere in the app — every tap on a spotted tile silently threw
+      // and did nothing. Route to the same car-detail view used elsewhere.
+      return '<div class="book-car-tile spotted' + just + '" style="animation-delay:' + (i * 0.02) + 's" onclick="openFeatured(decodeURIComponent(\'' + encodeURIComponent(JSON.stringify({ name: m.name, value: m.val, type: m.type || '', photo: photo || '' })).replace(/'/g, '%27') + '\'))">' +
         (photo ? '<img class="bct-img" src="' + photo + '" alt="">' : '<div class="bct-ph">' + tierEmoji(tierOf(m.val)) + '</div>') +
         '<div class="bct-name">' + m.name + '</div>' +
         '<div class="bct-meta">' + fmt(m.val) + ' · spotted</div>' +
@@ -10278,7 +10314,10 @@ function renderExpeditions() {
   if (!list) return;
   var exps = allChallenges();
   var unlocked = new Set(getUnlockedAchievements());
-  var summary = '<div class="ach-count-row" style="margin-bottom:14px"><span id="achUnlocked">' + unlocked.size + '</span> / <span id="achTotal">' + ACHIEVEMENTS.length + '</span> achievements unlocked</div>';
+  // BUGFIX: was reusing id="achUnlocked"/id="achTotal", duplicating IDs already
+  // used on the Achievements page (both pages exist in the DOM at once), which
+  // made document.getElementById for those ids unreliable. Scoped to this page.
+  var summary = '<div class="ach-count-row" style="margin-bottom:14px"><span id="expoAchUnlocked">' + unlocked.size + '</span> / <span id="expoAchTotal">' + ACHIEVEMENTS.length + '</span> achievements unlocked</div>';
   var kindLabel = function(k){ return k === 'ach' ? '<span class="ch-kind ch-kind-ach">ACHIEVEMENT</span>' : '<span class="ch-kind ch-kind-expo">EXPEDITION</span>'; };
   list.innerHTML = summary + exps.map(function(e, i){
     var pct = Math.min(100, Math.round(e.count / e.goal * 100));
@@ -11169,6 +11208,16 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
   }
 
   function openMapPicker(){
+    // BUGFIX: this used to call L.map(...) with no check that Leaflet actually
+    // loaded. If the Leaflet CDN is blocked or the device is offline (very
+    // plausible — this is a "pin where you spotted the car" feature used on
+    // the road), it threw an uncaught "L is not defined" and left a dead,
+    // unclosable overlay with no map on screen. Now it fails with a clear
+    // message and no stuck UI.
+    if (typeof L === 'undefined') {
+      showToast('Map unavailable offline — try "Use Current Location" instead.');
+      return;
+    }
     var picker = document.createElement('div');
     picker.className = 'map-picker-overlay';
     picker.id = 'mapPickerOverlay';
