@@ -4440,6 +4440,10 @@ function _buildCloudPayload() {
     quickPicks:   { ver: _fieldVer.qp || 0, items: quickPicks || [] },
     deletedQP:    { ver: _fieldVer.deletedQP || 0, ids: _deletedQP },
     notes:        { ver: _fieldVer.notes || 0, text: localStorage.getItem('cs_notes') || '' },
+    // Recent Discoveries (the trophy-case strip on Garage) used to be pure
+    // localStorage and never synced at all — a device switch always showed an
+    // empty/local-only list. Wired into the same version-wins sync as notes.
+    discoveries:  { ver: _fieldVer.discoveries || 0, items: (function(){ try { return JSON.parse(localStorage.getItem('cs_discoveries') || '[]'); } catch(e) { return []; } })() },
     xp:           { ver: _fieldVer.xp || 0, value: _xpTotal || 0 },
     favorites:    { ver: _fieldVer.favorites || 0, names: Array.from(favoriteNames), removed: _removedFavs || [] },
     aliases:      { ver: _fieldVer.aliases || 0, map: aliases || {} },
@@ -4575,6 +4579,15 @@ function _applyCloud(c) {
       _fieldVer.notes = c.notes.ver;
       var na = document.getElementById('notesArea');
       if (na && document.activeElement !== na) na.value = nt;
+      changed = true;
+    }
+    // discoveries — whole-field version wins (same pattern as notes/settings;
+    // it's a derived "last 10" convenience list, not authoritative data, so a
+    // simple version-wins swap is enough to make it follow you across devices)
+    if (c.discoveries && c.discoveries.ver != null && c.discoveries.ver > (_fieldVer.discoveries || 0) && Array.isArray(c.discoveries.items)) {
+      try { localStorage.setItem('cs_discoveries', JSON.stringify(c.discoveries.items)); } catch(e){}
+      _fieldVer.discoveries = c.discoveries.ver;
+      if (typeof renderDiscoveries === 'function') renderDiscoveries();
       changed = true;
     }
     // xp — monotonic max (never loses XP already earned)
@@ -7166,6 +7179,8 @@ function recordDiscovery(car, xp) {
     list.unshift({ n: car.name, v: car.value || 0, t: car.type || '', r: tierOf(car.value || 0), xp: xp || 0, d: Date.now(), p: photoRef });
     if (list.length > 10) list.length = 10;
     localStorage.setItem('cs_discoveries', JSON.stringify(list));
+    _bumpVer('discoveries');
+    saveToCloud();
     renderDiscoveries();
   } catch(e) {}
 }
@@ -7184,6 +7199,8 @@ function resolveDiscoveryPhoto(p, name) {
 function clearDiscoveries() {
   if (!confirm('Clear your recent discoveries?')) return;
   try { localStorage.removeItem('cs_discoveries'); } catch(e) {}
+  _bumpVer('discoveries');
+  saveToCloud();
   renderDiscoveries();
 }
 function renderDiscoveries() {
