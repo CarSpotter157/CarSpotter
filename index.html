@@ -51,7 +51,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'; this.onload=null" rel="stylesheet"/>
 <style>
 /* ═══════════════════════════════════════════════
-   CARSPOTTER v39
+   CARSPOTTER v40
    Vibe: Apple-clean meets car dashboard
    — Generous whitespace, clear hierarchy
    — Inter everywhere, clean and modern
@@ -3382,6 +3382,288 @@ body.theme-light .qp-dropdown .qp-item{border-color:#e5e5ea;}
   .page-enter-forward,.page-enter-back,.page-enter-garage,.page-enter-achievements,.page-enter-trips,.card,.more-page-tile,.hist-item,.garage-card.anim-stagger,.cc-card.collecting,.cc-collected,.cc-quick,.cc-quick-thumb,.cc-quick-emoji,.cc-quick-ring,.nav-badge.pop{animation-duration:.01ms!important;}
 }
 </style>
+
+<style id="carspotter-light-v40">
+/* =========================================================
+   CARSPOTTER v40 — LIGHT MODE REDESIGN
+   Designed as a first-class interface, not a dark-mode inversion.
+   Visual direction: iOS / Apple native utility app.
+   ========================================================= */
+body.theme-light {
+  color-scheme: light;
+  --bg: #f2f2f7;
+  --surf: #ffffff;
+  --surf2: #f2f2f7;
+  --surf3: #e5e5ea;
+  --border: rgba(60,60,67,.18);
+  --border2: rgba(60,60,67,.29);
+  --accent: #007aff;
+  --accent-d: #006ee6;
+  --adim: rgba(0,122,255,.10);
+  --text: #1c1c1e;
+  --text2: #636366;
+  --muted: #8e8e93;
+  --green: #34c759;
+  --red: #ff3b30;
+  --glass: rgba(255,255,255,.82);
+  --glass-card: #ffffff;
+  --glass-border: rgba(60,60,67,.14);
+  --shadow: 0 10px 30px rgba(0,0,0,.07);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.04), 0 5px 18px rgba(0,0,0,.035);
+  --shadow-lg: 0 18px 48px rgba(0,0,0,.11);
+  background:#f2f2f7;
+  color:#1c1c1e;
+}
+
+/* App canvas: a very subtle grouped-background treatment. */
+body.theme-light .app-shell,
+body.theme-light .app-main,
+body.theme-light .page-wrap { background:#f2f2f7; }
+body.theme-light .app-shell::before { display:none; }
+
+/* Headers are deliberately flat. iOS relies on hierarchy and separators,
+   not dark cards or gradients. */
+body.theme-light .page-header {
+  background:rgba(242,242,247,.88) !important;
+  border-color:transparent !important;
+  box-shadow:none !important;
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+body.theme-light .page-header .sec-title,
+body.theme-light .notes-header .sec-title { color:#1c1c1e; }
+
+/* Main cards become white sheets sitting on the grouped background. */
+body.theme-light .card,
+body.theme-light .setting-card,
+body.theme-light .history-card,
+body.theme-light .trip-card,
+body.theme-light .achievement-card,
+body.theme-light .more-tile,
+body.theme-light .garage-summary,
+body.theme-light .garage-controls,
+body.theme-light .run-card,
+body.theme-light .note-card,
+body.theme-light .modal-card,
+body.theme-light .score-banner,
+body.theme-light .featured-hero,
+body.theme-light .cc-card,
+body.theme-light .collector-card,
+body.theme-light .recap-p-card,
+body.theme-light .evo-card {
+  background:#fff !important;
+  color:#1c1c1e;
+  border-color:rgba(60,60,67,.16) !important;
+  box-shadow:0 1px 2px rgba(0,0,0,.035), 0 6px 20px rgba(0,0,0,.035) !important;
+}
+
+/* Cards that are meant to read as grouped settings use the iOS inset-grouped
+   treatment: white rows, quiet separators, no visible heavy outline. */
+body.theme-light .setting-card {
+  border-radius:20px;
+  overflow:hidden;
+}
+body.theme-light .setting-row {
+  border-color:rgba(60,60,67,.12) !important;
+}
+body.theme-light .setting-icon {
+  background:#f2f2f7 !important;
+  color:#007aff !important;
+}
+
+/* Typography: black primary labels, Apple's familiar secondary gray. */
+body.theme-light .card-title,
+body.theme-light .sec-title,
+body.theme-light .ff label,
+body.theme-light .s-lbl,
+body.theme-light .setting-head .card-title {
+  color:#1c1c1e !important;
+}
+body.theme-light .setting-desc,
+body.theme-light .txt-btn,
+body.theme-light .subtle,
+body.theme-light .s-sub,
+body.theme-light .ff .hint,
+body.theme-light .notes-sub,
+body.theme-light .ach-count-row {
+  color:#636366 !important;
+}
+body.theme-light .muted,
+body.theme-light .card .muted,
+body.theme-light .s-subtle { color:#8e8e93 !important; }
+
+/* Inputs: system-like filled fields, not outlined dark-theme boxes. */
+body.theme-light input,
+body.theme-light select,
+body.theme-light textarea,
+body.theme-light .search-input,
+body.theme-light .qp-dropdown,
+body.theme-light .edit-field input,
+body.theme-light .edit-field select,
+body.theme-light .ff input,
+body.theme-light .ff select {
+  background:#f2f2f7 !important;
+  color:#1c1c1e !important;
+  border:1px solid transparent !important;
+  box-shadow:none !important;
+  -webkit-appearance:none;
+}
+body.theme-light input:focus,
+body.theme-light select:focus,
+body.theme-light textarea:focus,
+body.theme-light .ff input:focus,
+body.theme-light .ff select:focus {
+  background:#fff !important;
+  border-color:#007aff !important;
+  box-shadow:0 0 0 3px rgba(0,122,255,.14) !important;
+}
+body.theme-light input::placeholder,
+body.theme-light textarea::placeholder { color:#8e8e93 !important; opacity:1; }
+
+/* Buttons: one clear blue action, neutral secondary actions. */
+body.theme-light .btn-run,
+body.theme-light .btn-primary,
+body.theme-light .btn-main,
+body.theme-light button.primary {
+  background:#007aff !important;
+  color:#fff !important;
+  border:0 !important;
+  box-shadow:0 2px 7px rgba(0,122,255,.22) !important;
+}
+body.theme-light .btn-run:hover,
+body.theme-light .btn-primary:hover,
+body.theme-light .btn-main:hover { background:#0071e3 !important; }
+body.theme-light .btn-run:active,
+body.theme-light .btn-primary:active,
+body.theme-light .btn-main:active { background:#006edb !important; }
+body.theme-light .btn-spot,
+body.theme-light .btn-secondary,
+body.theme-light .sort-pref-btn,
+body.theme-light .btn-ghost {
+  background:#e9e9ee !important;
+  color:#007aff !important;
+  border:0 !important;
+  box-shadow:none !important;
+}
+body.theme-light .btn-spot:hover,
+body.theme-light .btn-secondary:hover,
+body.theme-light .sort-pref-btn:hover,
+body.theme-light .btn-ghost:hover { background:#dedee3 !important; }
+body.theme-light .txt-btn { color:#007aff !important; }
+
+/* Navigation: translucent system bar with blue selected item. */
+body.theme-light .bottom-nav {
+  background:rgba(255,255,255,.86) !important;
+  border-top:1px solid rgba(60,60,67,.16) !important;
+  box-shadow:0 -5px 22px rgba(0,0,0,.035) !important;
+  backdrop-filter:saturate(180%) blur(24px);
+  -webkit-backdrop-filter:saturate(180%) blur(24px);
+}
+body.theme-light .nav-item,
+body.theme-light .nav-btn { color:#8e8e93 !important; }
+body.theme-light .nav-item.active,
+body.theme-light .nav-btn.active,
+body.theme-light .nav-icon.active { color:#007aff !important; }
+body.theme-light .nav-item.active{font-weight:700;}
+
+/* Garage: white content, clean search, no dark/photo chrome unless it sits over
+   an actual image. */
+body.theme-light .garage-controls,
+body.theme-light .garage-summary { box-shadow:0 1px 2px rgba(0,0,0,.03) !important; }
+body.theme-light .gc-search,
+body.theme-light .gc-filter,
+body.theme-light .garage-search,
+body.theme-light .garage-control { background:#f2f2f7 !important; color:#1c1c1e !important; }
+body.theme-light .gc-photo-badge,
+body.theme-light .detail-hero-badge { background:rgba(28,28,30,.70) !important; color:#fff !important; }
+body.theme-light .gc-card,
+body.theme-light .garage-card { box-shadow:0 2px 10px rgba(0,0,0,.06) !important; }
+
+/* More tiles: Apple utility-card feel, with restrained icon containers. */
+body.theme-light .more-tile {
+  border-radius:20px;
+  min-height:118px;
+}
+body.theme-light .more-tile .tile-icon { color:#007aff !important; }
+body.theme-light .more-tile .tile-icon-wrap,
+body.theme-light .more-tile .icon-wrap { background:#f2f2f7 !important; color:#007aff !important; }
+body.theme-light .more-tile:hover { border-color:rgba(0,122,255,.20) !important; box-shadow:0 5px 18px rgba(0,0,0,.055) !important; }
+
+/* Achievements: preserve rarity colors but make the surrounding UI neutral. */
+body.theme-light .achievement-card { background:#fff !important; }
+body.theme-light .achievement-card .ach-title,
+body.theme-light .achievement-card strong { color:#1c1c1e; }
+
+/* Score/progress: system blue instead of gold. */
+body.theme-light .s-num,
+body.theme-light .cs-run-progress-value { color:#007aff !important; }
+body.theme-light .score-banner::after { background:linear-gradient(90deg,transparent,#007aff,transparent) !important; }
+body.theme-light .score-divider { background:linear-gradient(180deg,transparent,#007aff,transparent) !important; }
+body.theme-light .card-title::after { background:#007aff !important; }
+body.theme-light .cs-run-progress { background:#fff !important; border-color:rgba(60,60,67,.14) !important; }
+body.theme-light .cs-run-progress-track { background:#e5e5ea !important; }
+body.theme-light .cs-run-progress-fill { background:#007aff !important; }
+
+/* Toggles: unmistakably native. */
+body.theme-light .toggle-pill {
+  background:#e5e5ea !important;
+  border:0 !important;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.035) !important;
+}
+body.theme-light .toggle-pill.on { background:#34c759 !important; }
+body.theme-light .toggle-knob {
+  background:#fff !important;
+  box-shadow:0 1px 3px rgba(0,0,0,.22) !important;
+}
+
+/* Sheets / overlays. */
+body.theme-light .modal-backdrop,
+body.theme-light .overlay { background:rgba(0,0,0,.30) !important; }
+body.theme-light .modal-card { border-radius:24px !important; }
+body.theme-light .toast { background:rgba(28,28,30,.94) !important; color:#fff !important; }
+body.theme-light .qp-dropdown { background:#fff !important; box-shadow:0 12px 32px rgba(0,0,0,.13) !important; }
+body.theme-light .qp-dropdown .qp-item:hover { background:#f2f2f7 !important; }
+body.theme-light .qp-dropdown .qp-item { border-color:#e5e5ea !important; }
+
+/* Native-looking dividers and pills. */
+body.theme-light hr { border-color:rgba(60,60,67,.12) !important; }
+body.theme-light .pill,
+body.theme-light .chip { background:#e9e9ee !important; color:#636366 !important; border-color:transparent !important; }
+body.theme-light .pill.active,
+body.theme-light .chip.active { background:#007aff !important; color:#fff !important; }
+
+/* Photo/image placeholders should stay neutral. */
+body.theme-light .recap-p-media,
+body.theme-light .disc-img,
+body.theme-light .cc-quick-thumb,
+body.theme-light .book-sil {
+  background:#e5e5ea !important;
+}
+body.theme-light .make-cer-panel,
+body.theme-light .expo-cer-paper,
+body.theme-light .trip-cer-ticket { background:#fff !important; }
+
+/* Remove leftover dark-theme decorative chrome from light mode. */
+body.theme-light .track-deco::before { opacity:.018 !important; }
+body.theme-light .ambient-glow,
+body.theme-light .scanline,
+body.theme-light .noise-overlay { opacity:0 !important; }
+
+/* Respect reduced-motion, while normal motion stays slower and soft. */
+body.theme-light .more-tile,
+body.theme-light .card,
+body.theme-light button,
+body.theme-light input,
+body.theme-light .toggle-pill {
+  transition-duration:.24s !important;
+}
+
+/* Apple-like desktop width without turning the interface into a giant white page. */
+@media (min-width:900px){
+  body.theme-light .page { max-width:760px; margin-left:auto; margin-right:auto; }
+}
+</style>
+
 </head>
 <body>
 <!-- AUTH OVERLAY -->
@@ -3935,7 +4217,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <div class="act-list" id="actList"></div>
 </div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE &mdash; Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v39</div>
+<div class="version-tag" id="versionTag">v40</div>
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
 var _pendingKey = 'firebase:pendingRedirect:AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug:[DEFAULT]';
