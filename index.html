@@ -1183,7 +1183,29 @@ html:not(.show-qp) #qpWrap{display:none;}
 .empty-garage strong{color:var(--text2);font-size:0.85rem;}
 
 /* Grid */
-.garage-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+.garage-grid{display:grid;grid-template-columns:repeat(var(--garage-cols,3),minmax(0,1fr));gap:14px;transition:gap .25s var(--ease);}
+.garage-grid .garage-card{min-width:0;}
+.garage-grid .gc-img-wrap{height:clamp(120px, 13vw, 190px);}
+.garage-grid[data-zoom="1"]{--garage-cols:1;gap:18px;}
+.garage-grid[data-zoom="2"]{--garage-cols:2;}
+.garage-grid[data-zoom="3"]{--garage-cols:3;}
+.garage-grid[data-zoom="4"]{--garage-cols:4;gap:10px;}
+.garage-grid[data-zoom="5"]{--garage-cols:5;gap:8px;}
+@media(max-width:700px){.garage-grid[data-zoom="4"]{--garage-cols:3}.garage-grid[data-zoom="5"]{--garage-cols:4}}
+@media(max-width:470px){.garage-grid[data-zoom="3"]{--garage-cols:2}.garage-grid[data-zoom="4"]{--garage-cols:3}.garage-grid[data-zoom="5"]{--garage-cols:3}.garage-grid[data-zoom="1"] .gc-img-wrap{height:250px}.garage-grid[data-zoom="2"] .gc-img-wrap{height:170px}}
+.garage-refresh-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px;padding:8px 10px;border:1px solid var(--glass-border);border-radius:var(--r-md);background:rgba(255,255,255,.025);color:var(--text2);font-size:.55rem;letter-spacing:1.2px;text-transform:uppercase;}
+.garage-refresh-btn,.garage-zoom-btn{border:1px solid var(--glass-border);background:var(--surf2);color:var(--text2);border-radius:var(--r-sm);cursor:pointer;font-family:Inter,sans-serif;font-weight:700;transition:all .2s var(--spring);}
+.garage-refresh-btn{padding:7px 10px;letter-spacing:1px;font-size:.55rem;}
+.garage-refresh-btn:hover,.garage-zoom-btn:hover{color:var(--accent);border-color:rgba(232,184,75,.3);}
+.garage-refresh-btn.refreshing{color:var(--accent);pointer-events:none;}
+.garage-zoom{display:flex;align-items:center;gap:4px;}
+.garage-zoom-label{font-size:.48rem;letter-spacing:1px;color:var(--muted);margin-right:3px;}
+.garage-zoom-btn{width:27px;height:27px;font-size:.85rem;line-height:1;}
+.garage-zoom-val{min-width:38px;text-align:center;font-size:.5rem;color:var(--text2);letter-spacing:.8px;}
+.garage-pull-indicator{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translate(-50%,-70px);z-index:9999;padding:8px 13px;border:1px solid var(--glass-border);border-radius:999px;background:rgba(17,17,20,.92);backdrop-filter:blur(16px);color:var(--text2);font-size:.55rem;font-weight:800;letter-spacing:1.5px;box-shadow:var(--shadow);pointer-events:none;transition:transform .2s var(--spring),color .2s,border-color .2s;}
+.garage-pull-indicator.show{transform:translate(-50%,0);}
+.garage-pull-indicator.ready{color:var(--accent);border-color:rgba(232,184,75,.4);}
+
 .garage-card{
   background:var(--glass-card);
   border:1px solid var(--glass-border);
@@ -2958,8 +2980,88 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 .trip-run-row{animation:fadeUp 0.3s var(--ease) both;}
 @media (prefers-reduced-motion:reduce){.trip-cer *{animation:none !important;transition:none !important;}.trip-cer-ticket{transform:none;opacity:1;}}
 
+
+
+/* ── LENS PASS: FEEDBACK / JUICINESS / VISIBLE PROGRESS ──
+   Small, additive layer. It deliberately sits on top of the existing reward system
+   instead of replacing it. */
+.cs-lens-feedback{
+  position:fixed;left:50%;top:max(76px,calc(env(safe-area-inset-top,0px) + 14px));
+  transform:translateX(-50%) translateY(-10px) scale(.94);
+  z-index:100001;pointer-events:none;opacity:0;
+  display:flex;align-items:center;gap:9px;max-width:min(92vw,360px);
+  padding:9px 13px;border:1px solid rgba(232,184,75,.28);
+  border-radius:999px;background:rgba(17,17,20,.88);
+  backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);
+  box-shadow:0 10px 34px rgba(0,0,0,.42),0 0 22px rgba(232,184,75,.08);
+  transition:opacity .22s ease,transform .38s var(--spring-soft);
+  font-family:'Inter',sans-serif;
+}
+.cs-lens-feedback.show{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}
+.cs-lens-feedback.out{opacity:0;transform:translateX(-50%) translateY(-7px) scale(.96);transition-duration:.28s;}
+.cs-lens-feedback .clf-icon{font-size:1rem;line-height:1;flex-shrink:0;}
+.cs-lens-feedback .clf-main{font-size:.68rem;font-weight:700;letter-spacing:.35px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cs-lens-feedback .clf-sub{font-size:.52rem;color:var(--text2);margin-left:3px;white-space:nowrap;}
+.cs-lens-feedback.major{border-color:var(--accent);box-shadow:0 10px 38px rgba(0,0,0,.5),0 0 28px rgba(232,184,75,.16);}
+
+.cs-run-progress{
+  margin:4px 0 14px;padding:11px 12px 10px;
+  background:var(--glass-card);border:1px solid var(--glass-border);
+  border-radius:var(--r-md);box-shadow:var(--shadow-sm);
+  animation:fadeUp .28s var(--ease) both;
+}
+.cs-run-progress-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:7px;}
+.cs-run-progress-title{font-size:.46rem;font-weight:800;letter-spacing:2px;color:var(--text2);text-transform:uppercase;}
+.cs-run-progress-value{font-family:'Inter',sans-serif;font-size:.68rem;color:var(--accent);white-space:nowrap;}
+.cs-run-progress-track{height:6px;background:var(--surf3);border-radius:99px;overflow:hidden;position:relative;}
+.cs-run-progress-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent-d),var(--accent));transition:width .7s var(--spring-soft);position:relative;}
+.cs-run-progress-fill::after{content:'';position:absolute;top:0;bottom:0;width:35%;left:-40%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);animation:csProgressShine 2.4s ease-in-out infinite;}
+@keyframes csProgressShine{0%,55%{left:-40%;opacity:0}65%{opacity:1}100%{left:120%;opacity:0}}
+.cs-run-progress-note{font-size:.5rem;color:var(--muted);margin-top:6px;letter-spacing:.25px;}
+.cs-run-progress.record{border-color:rgba(52,199,89,.38);}
+.cs-run-progress.record .cs-run-progress-fill{background:linear-gradient(90deg,#34c759,#72e58e);}
+.cs-run-progress.record .cs-run-progress-value{color:var(--green);}
+
+.cs-juicy-pop{animation:csJuicyPop .46s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes csJuicyPop{0%{transform:scale(1)}35%{transform:scale(1.12)}65%{transform:scale(.97)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){
+  .cs-lens-feedback,.cs-run-progress,.cs-run-progress-fill::after,.cs-juicy-pop{animation:none!important;transition:none!important;}
+}
+
 </style>
 
+
+<style>
+/* Saved-run editor */
+.cs-run-edit-overlay{position:fixed;inset:0;z-index:10050;background:rgba(0,0,0,.72);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:18px;animation:fadeUp .18s ease both;}
+.cs-run-edit-card{width:min(720px,100%);max-height:min(88vh,820px);overflow:auto;background:var(--glass-card,var(--surf));border:1px solid var(--glass-border,var(--border));border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.55);padding:18px;}
+.cs-re-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.cs-re-kicker{font-size:.58rem;letter-spacing:2px;color:var(--accent);font-weight:800}.cs-re-title{font-size:1.15rem;font-weight:800;margin-top:3px}.cs-re-close{border:0;background:var(--surf2);color:var(--text);width:34px;height:34px;border-radius:50%;font-size:1.3rem;cursor:pointer}.cs-re-summary{font-size:.72rem;color:var(--text2);padding:9px 11px;border:1px solid var(--border);border-radius:9px;margin-bottom:10px}.cs-re-car{border:1px solid var(--border);background:var(--surf2);border-radius:12px;padding:10px;margin-bottom:8px}.cs-re-car-top{display:flex;justify-content:space-between;align-items:center;font-size:.55rem;letter-spacing:1.5px;color:var(--muted);font-weight:800;margin-bottom:8px}.cs-re-remove{border:0;background:none;color:var(--red,#e66);font-size:.55rem;letter-spacing:1px;cursor:pointer}.cs-re-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:7px}.cs-re-grid input,.cs-re-grid select{min-width:0;background:var(--surf);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:9px;font:inherit;font-size:.72rem;outline:none}.cs-re-grid input:focus,.cs-re-grid select:focus{border-color:var(--accent)}.cs-re-add{width:100%;padding:11px;border:1px dashed var(--border);background:transparent;color:var(--text2);border-radius:9px;cursor:pointer;font-size:.68rem;letter-spacing:1px}.cs-re-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.cs-re-actions button{border:0;border-radius:8px;padding:10px 15px;cursor:pointer;font-size:.68rem;letter-spacing:1.2px;font-weight:800}.cs-re-cancel{background:var(--surf2);color:var(--text2)}.cs-re-save{background:var(--accent);color:#111}.cs-run-edit-btn{border:1px solid var(--border);background:var(--surf2);color:var(--text2);border-radius:6px;padding:5px 8px;font-size:.53rem;letter-spacing:1px;cursor:pointer;margin-right:4px}.cs-run-edit-btn:hover{border-color:var(--accent);color:var(--accent)}.cs-garage-subtitle{font-size:.62rem;color:var(--muted);margin-top:2px;letter-spacing:.2px}.garage-main-nav{transform:scale(1.015);}.garage-main-nav .nav-label{font-weight:800}.garage-main-nav .nav-icon{filter:drop-shadow(0 0 7px rgba(232,184,75,.18))}
+@media(max-width:600px){.cs-re-grid{grid-template-columns:1fr 1fr}.cs-re-grid input:first-child{grid-column:1/-1}.cs-run-edit-card{padding:14px}.cs-run-edit-overlay{padding:10px}}
+</style>
+
+
+<style id="cs-garage-upgrade-css">
+.cs-garage-dashboard{margin:10px 0 16px;padding:16px;border:1px solid var(--glass-border);border-radius:var(--r-lg);background:linear-gradient(135deg,rgba(232,184,75,.08),rgba(255,255,255,.025));box-shadow:var(--shadow-sm);}
+.cs-gd-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:12px;}
+.cs-gd-kicker{font-size:.52rem;letter-spacing:2px;color:var(--accent);font-weight:800;text-transform:uppercase;}
+.cs-gd-title{font-size:1.05rem;font-weight:850;letter-spacing:-.3px;margin-top:3px;}
+.cs-gd-sub{font-size:.67rem;color:var(--muted);margin-top:3px;}
+.cs-gd-count{text-align:right;white-space:nowrap;}
+.cs-gd-count b{font-size:1.25rem;color:var(--text);}
+.cs-gd-count span{display:block;font-size:.5rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.cs-gd-track{height:7px;border-radius:99px;background:var(--surf3);overflow:hidden;border:1px solid var(--glass-border);}
+.cs-gd-fill{height:100%;border-radius:99px;background:var(--accent);transition:width .55s var(--spring-soft);}
+.cs-gd-bottom{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:8px;}
+.cs-gd-next{font-size:.63rem;color:var(--text2);}
+.cs-gd-next strong{color:var(--accent);}
+.cs-gd-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.cs-gd-action{border:1px solid var(--glass-border);background:rgba(255,255,255,.035);color:var(--text2);border-radius:999px;padding:7px 10px;font-size:.52rem;font-weight:800;letter-spacing:.8px;cursor:pointer;}
+.cs-gd-action:hover{border-color:rgba(232,184,75,.35);color:var(--accent);}
+.cs-gd-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;}
+.cs-gd-chip{font-size:.51rem;color:var(--muted);padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.025);border:1px solid var(--glass-border);}
+.cs-gd-chip b{color:var(--text2);}
+@media(max-width:600px){.cs-gd-top{gap:8px}.cs-gd-title{font-size:.95rem}.cs-gd-bottom{align-items:flex-start;flex-direction:column}.cs-gd-actions{justify-content:flex-start}}
+</style>
 </head>
 <body>
 
@@ -3141,11 +3243,11 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
     <!-- GARAGE PAGE -->
     <div class="page" id="page-garage">
       <div class="sec-row" style="margin-bottom:10px">
-        <div class="sec-title">ALL SPOTTED</div>
+        <div><div class="sec-title">YOUR GARAGE</div><div class="cs-garage-subtitle">Every car you spot lives here.</div></div>
         <div style="display:flex;gap:6px;align-items:center;">
           <div class="garage-view-toggle">
-            <button class="gv-btn active" id="gvList" onclick="setGarageView('list')" title="List view">&#9776;</button>
-            <button class="gv-btn" id="gvGrid" onclick="setGarageView('grid')" title="Card view">Cards</button>
+            <button class="gv-btn active" id="gvGrid" onclick="setGarageView('grid')" title="Card view">Cards</button>
+            <button class="gv-btn" id="gvList" onclick="setGarageView('list')" title="List view">&#9776;</button>
             <button class="gv-btn" id="gvMap" onclick="setGarageView('map')" title="Map view">Map</button>
           </div>
           <button class="txt-btn" id="sortBtn" onclick="cycleSort()" title="Cycle sort order">Value &#8595;</button>
@@ -3164,6 +3266,14 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
         <div class="stat-box"><div class="stat-v" id="gTotal">$0</div><div class="stat-l">Total</div></div>
         <div class="stat-box"><div class="stat-v" id="gAvg">&#8212;</div><div class="stat-l">Avg</div></div>
       </div>
+      <div class="garage-refresh-row">
+        <span>COLLECTION VIEW</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="garage-zoom"><span class="garage-zoom-label">ZOOM</span><button class="garage-zoom-btn" onclick="setGarageZoom(garageZoom-1)" title="Fewer, larger cards">−</button><span class="garage-zoom-val" id="garageZoomVal">3 ×</span><button class="garage-zoom-btn" onclick="setGarageZoom(garageZoom+1)" title="More, smaller cards">+</button></div>
+          <button class="garage-refresh-btn" id="garageRefreshBtn" onclick="refreshGarage()" title="Refresh your collection">↻ REFRESH</button>
+        </div>
+      </div>
+      <div id="garageDashboard"></div>
       <div id="featuredSpot" style="display:none"></div>
       <div id="journeySection" style="display:none"></div>
       <div id="discSection" style="display:none">
@@ -3820,7 +3930,8 @@ if (navigator.storage && navigator.storage.persist) { navigator.storage.persist(
 
 // GARAGE VIEW — declared here so renderGarage() works before auth fires
 let garageFilter = 'all';
-let garageView   = 'list';
+let garageView   = 'grid';
+let garageZoom = 3;
 
 // Navigation & page transition state
 let pageOrder = ['spot','garage','voice','history','achievements','settings','news','leaderboard','book','expeditions','trips','more'];
@@ -6107,10 +6218,56 @@ function deleteCarEverywhere(name) {
 
 //  GARAGE FILTER & VIEW STATE 
 
+function setGarageZoom(z) {
+  garageZoom = Math.max(1, Math.min(5, Number(z) || 3));
+  try { localStorage.setItem('cs_garage_zoom', String(garageZoom)); } catch(e) {}
+  var val = document.getElementById('garageZoomVal');
+  if (val) val.textContent = garageZoom + ' ×';
+  renderGarage();
+}
+function refreshGarage() {
+  var btn = document.getElementById('garageRefreshBtn');
+  if (btn) { btn.classList.add('refreshing'); btn.textContent = '↻ REFRESHING'; }
+  var work = Promise.resolve();
+  if (typeof restorePhotosFromIDB === 'function') work = work.then(function(){ return restorePhotosFromIDB(); });
+  if (typeof loadFromCloud === 'function' && currentUser) work = work.then(function(){ return loadFromCloud(); });
+  return work.catch(function(e){ console.warn('Garage refresh failed', e); }).then(function(){
+    _patchPhotosFromCache(); renderGarage();
+    if (btn) { btn.classList.remove('refreshing'); btn.textContent = '✓ REFRESHED'; setTimeout(function(){ btn.textContent = '↻ REFRESH'; }, 900); }
+    if (typeof lensFeedback === 'function') lensFeedback('↻','GARAGE REFRESHED','Collection is up to date');
+  });
+}
+(function(){
+  try { garageZoom = Math.max(1, Math.min(5, Number(localStorage.getItem('cs_garage_zoom')) || 3)); } catch(e) { garageZoom = 3; }
+  var sx=0, sy=0, pulling=false, indicator=null;
+  function getIndicator(){
+    if (!indicator) { indicator=document.createElement('div'); indicator.className='garage-pull-indicator'; indicator.textContent='↓ PULL TO REFRESH'; document.body.appendChild(indicator); }
+    return indicator;
+  }
+  document.addEventListener('touchstart',function(e){
+    var pg=document.getElementById('page-garage'); if(!pg || !pg.classList.contains('active')) return;
+    if ((document.scrollingElement && document.scrollingElement.scrollTop > 2) || window.scrollY > 2) return;
+    var t=e.touches && e.touches[0]; if(!t) return; sx=t.clientX; sy=t.clientY; pulling=false;
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    if (!sy) return; var pg=document.getElementById('page-garage'); if(!pg || !pg.classList.contains('active')) return;
+    var t=e.touches && e.touches[0]; if(!t) return; var dy=t.clientY-sy;
+    if (dy>18 && Math.abs(dy)>Math.abs(t.clientX-sx)*1.2 && ((document.scrollingElement && document.scrollingElement.scrollTop<=2) || window.scrollY<=2)) {
+      pulling=true; var ind=getIndicator(); ind.classList.add('show'); if(dy>72){ind.classList.add('ready');ind.textContent='↑ RELEASE TO REFRESH';} else {ind.classList.remove('ready');ind.textContent='↓ PULL TO REFRESH';}
+    }
+  },{passive:true});
+  document.addEventListener('touchend',function(){
+    if(!pulling) { sy=0; return; }
+    var ind=getIndicator(); var ready=ind.classList.contains('ready'); ind.classList.remove('show','ready'); sy=0; pulling=false;
+    if(ready) refreshGarage();
+  },{passive:true});
+})();
+
 function setGarageView(v) {
   garageView = v;
   var map = { list:'gvList', grid:'gvGrid', map:'gvMap' };
   ['gvList','gvGrid','gvMap'].forEach(function(id){ var el = document.getElementById(id); if (el) el.classList.toggle('active', id === map[v]); });
+  var zv = document.getElementById('garageZoomVal'); if (zv) zv.textContent = garageZoom + ' ×';
   renderGarage();
 }
 function clearGarageSearch() {
@@ -6304,6 +6461,31 @@ function buildClusterPopup(cluster) {
   return html;
 }
 
+function renderGarageDashboard(cars){
+  var el=document.getElementById('garageDashboard');
+  if(!el) return;
+  if(!cars.length){
+    el.innerHTML='<div class="cs-garage-dashboard"><div class="cs-gd-top"><div><div class="cs-gd-kicker">BUILD YOUR COLLECTION</div><div class="cs-gd-title">Your garage starts with one.</div><div class="cs-gd-sub">Every spot becomes part of your collection.</div></div><div class="cs-gd-count"><b>0</b><span>cars collected</span></div></div><div class="cs-gd-track"><div class="cs-gd-fill" style="width:0%"></div></div><div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>1 car</strong></div><div class="cs-gd-actions"><button class="cs-gd-action" onclick="goTo("spot")">＋ SPOT A CAR</button></div></div></div>';
+    return;
+  }
+  var milestones=[5,10,25,50,100,250,500];
+  var next=milestones.find(function(n){return cars.length<n;}) || (Math.ceil(cars.length/100)*100);
+  var prev=milestones.filter(function(n){return n<=cars.length;}).pop() || 0;
+  var span=Math.max(1,next-prev);
+  var pct=Math.min(100,Math.max(0,((cars.length-prev)/span)*100));
+  var makes=new Set(cars.map(function(c){return String(c.name||'').trim().split(/\s+/)[0].toLowerCase();}).filter(Boolean)).size;
+  var photos=cars.filter(function(c){return !!c.photo;}).length;
+  var favorites=cars.filter(function(c){return isFavorite(c.name);}).length;
+  var best=cars.slice().sort(function(a,b){return b.value-a.value;})[0];
+  var nextLabel=next-cars.length===1?'1 more car':(next-cars.length)+' more cars';
+  el.innerHTML='<div class="cs-garage-dashboard">'+
+    '<div class="cs-gd-top"><div><div class="cs-gd-kicker">YOUR COLLECTION</div><div class="cs-gd-title">Build a garage worth showing off.</div><div class="cs-gd-sub">Keep spotting cars. Watch your collection grow.</div></div><div class="cs-gd-count"><b>'+cars.length+'</b><span>cars collected</span></div></div>'+
+    '<div class="cs-gd-track"><div class="cs-gd-fill" style="width:'+pct+'%"></div></div>'+
+    '<div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>'+next+' cars</strong> · '+nextLabel+'</div><div class="cs-gd-actions"><button class="cs-gd-action" onclick="setGarageSortHeader("favorites",document.querySelector(".gs-pill[data-sort=\"favorites\"]"))">★ FAVORITES</button><button class="cs-gd-action" onclick="setGarageFilter("legend",document.querySelector(".gf-pill[data-filter=\"legend\"]"))">👑 LEGENDS</button></div></div>'+
+    '<div class="cs-gd-chips"><div class="cs-gd-chip"><b>'+makes+'</b> makes</div><div class="cs-gd-chip"><b>'+photos+'</b> photographed</div><div class="cs-gd-chip"><b>'+favorites+'</b> favorites</div><div class="cs-gd-chip"><b>'+escapeHtml(best.name)+'</b> crown jewel</div></div>'+
+    '</div>';
+}
+
 function renderGarage() {
   _patchPhotosFromCache();
   // Only do the heavy museum render when the garage is actually on screen.
@@ -6320,6 +6502,7 @@ function renderGarage() {
   var pgEl = document.getElementById('page-garage');
   if (pgEl) { pgEl.classList.remove('garage-enter'); void pgEl.offsetWidth; pgEl.classList.add('garage-enter'); }
   var allCars = getAllCars();
+  renderGarageDashboard(allCars);
   var filtered = applyHeaderSort(applyGarageFilters(sorted(allCars)));
   var total = allCars.reduce(function(x,c){ return x + c.value; }, 0);
   document.getElementById('gTotal').textContent = fmt(total);
@@ -6402,6 +6585,7 @@ function renderGarage() {
   }
   if (garageView === 'grid') {
     el.className = 'garage-grid';
+    el.setAttribute('data-zoom', String(garageZoom));
     var gridPage = filtered.slice(0, (garagePage + 1) * GARAGE_PAGE_SIZE);
     var gridRemaining = filtered.length - gridPage.length;
     el.innerHTML = gridPage.map(function(car, idx){
@@ -11658,6 +11842,328 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
   }
 })();
 </script>
+
+
+<script>
+/* CarSpotter — Lens pass. Additive only: preserves existing storage, scoring,
+   collector-card, achievement and cloud-sync logic. */
+(function(){
+  'use strict';
+  var feedbackTimer = null;
+
+  function lensFeedback(icon, main, sub, major){
+    try{
+      var old=document.querySelector('.cs-lens-feedback');
+      if(old) old.remove();
+      var el=document.createElement('div');
+      el.className='cs-lens-feedback'+(major?' major':'');
+      el.innerHTML='<span class="clf-icon">'+icon+'</span><span class="clf-main">'+escapeHtml(String(main||''))+'</span>'+
+        (sub?'<span class="clf-sub">'+escapeHtml(String(sub))+'</span>':'');
+      document.body.appendChild(el);
+      requestAnimationFrame(function(){el.classList.add('show');});
+      clearTimeout(feedbackTimer);
+      feedbackTimer=setTimeout(function(){
+        el.classList.add('out');
+        setTimeout(function(){if(el.parentNode)el.remove();},300);
+      }, major?2400:1550);
+    }catch(e){}
+  }
+  window.csLensFeedback=lensFeedback;
+
+  function renderLensRunProgress(){
+    try{
+      var list=document.getElementById('runList');
+      if(!list) return;
+      var existing=document.getElementById('csRunProgress');
+      if(existing) existing.remove();
+      if(typeof currentRun==='undefined' || !currentRun.length) return;
+      var best=typeof getBest==='function'?getBest():0;
+      if(!best || best<=0) return;
+      var total=currentRun.reduce(function(sum,c){return sum+(Number(c.value)||0);},0);
+      var pct=Math.min(100,Math.round((total/best)*100));
+      var ahead=total>best;
+      var wrap=document.createElement('div');
+      wrap.id='csRunProgress';
+      wrap.className='cs-run-progress'+(ahead?' record':'');
+      var note=ahead?'New run record — you are ahead.':
+        (total===best?'Tied with your best run.':(best-total>0?' '+fmtFull(best-total)+' to beat your best.':''));
+      wrap.innerHTML='<div class="cs-run-progress-top"><span class="cs-run-progress-title">Run Momentum</span>'+ 
+        '<span class="cs-run-progress-value">'+(ahead?'RECORD':pct+'% OF BEST')+'</span></div>'+ 
+        '<div class="cs-run-progress-track"><div class="cs-run-progress-fill" style="width:'+pct+'%"></div></div>'+ 
+        '<div class="cs-run-progress-note">'+escapeHtml(note)+'</div>';
+      list.parentNode.insertBefore(wrap,list);
+    }catch(e){}
+  }
+
+  /* Visible-progress layer: piggybacks on the existing renderer rather than
+     changing how runs are stored or scored. */
+  var originalRenderSpot=window.renderSpot;
+  if(typeof originalRenderSpot==='function'){
+    window.renderSpot=function(){
+      var r=originalRenderSpot.apply(this,arguments);
+      setTimeout(renderLensRunProgress,0);
+      return r;
+    };
+  }
+
+  /* Feedback layer: the real logging functions still do all their existing work. */
+  var originalLogRun=window.logRun;
+  if(typeof originalLogRun==='function'){
+    window.logRun=function(){
+      var before=(typeof currentRun!=='undefined')?currentRun.length:0;
+      var result=originalLogRun.apply(this,arguments);
+      setTimeout(function(){
+        var after=(typeof currentRun!=='undefined')?currentRun.length:before;
+        if(after>before){
+          var car=currentRun[currentRun.length-1];
+          var gain=car&&typeof rarityXP==='function'?rarityXP(car.value||0):0;
+          lensFeedback('✓','SPOT LOGGED',gain?'+'+gain+' XP · RUN UPDATED':'Run updated',false);
+          var total=currentRun.reduce(function(s,c){return s+(Number(c.value)||0);},0);
+          var best=typeof getBest==='function'?getBest():0;
+          if(best && total>best) lensFeedback('🏆','NEW RUN RECORD','You just beat your best',true);
+          renderLensRunProgress();
+        }
+      },60);
+      return result;
+    };
+  }
+
+  var originalLogSpotted=window.logSpotted;
+  if(typeof originalLogSpotted==='function'){
+    window.logSpotted=function(){
+      var before=(typeof allRuns!=='undefined')?allRuns.length:0;
+      var result=originalLogSpotted.apply(this,arguments);
+      setTimeout(function(){
+        var after=(typeof allRuns!=='undefined')?allRuns.length:before;
+        if(after>before){
+          var entry=allRuns[0];
+          var car=entry&&entry.cars&&entry.cars[0];
+          var gain=car&&typeof rarityXP==='function'?rarityXP(car.value||0):0;
+          lensFeedback('✓','DISCOVERY SAVED',gain?'+'+gain+' XP · Added to Garage':'Added to Garage',false);
+          if(entry && car && car.value>=1000000) lensFeedback('👑','LEGENDARY DISCOVERY','That one was worth '+fmtFull(car.value),true);
+        }
+      },60);
+      return result;
+    };
+  }
+
+  /* Chance lens: make the existing random personality system feel intentional.
+     This is cosmetic only — it never changes XP, values, unlocks or storage. */
+  var originalMaybe=window.maybeCarPersonality;
+  if(typeof originalMaybe==='function'){
+    window.maybeCarPersonality=function(car){
+      var r=originalMaybe.apply(this,arguments);
+      try{
+        if(car && Math.random()<0.035){
+          var surprises=[
+            ['🎲','LUCKY TIMING','The right car at exactly the right moment.'],
+            ['👀','NICE CATCH','That one would have been easy to miss.'],
+            ['⚡','QUICK REACTION','Logged before the moment disappeared.'],
+            ['🃏','WILD CARD','You really did not know what was coming next.']
+          ];
+          var pick=surprises[Math.floor(Math.random()*surprises.length)];
+          setTimeout(function(){lensFeedback(pick[0],pick[1],pick[2],false);},450);
+        }
+      }catch(e){}
+      return r;
+    };
+  }
+
+  /* Juiciness on major existing controls — no behavior changes. */
+  document.addEventListener('click',function(e){
+    try{
+      var b=e.target.closest('button');
+      if(!b || b.disabled) return;
+      b.classList.remove('cs-juicy-pop');
+      void b.offsetWidth;
+      b.classList.add('cs-juicy-pop');
+    }catch(ex){}
+  },{passive:true});
+
+  /* Initial render after the app's own startup IIFE has finished. */
+  setTimeout(renderLensRunProgress,80);
+})();
+</script>
+
+<script>
+/* CarSpotter follow-up: editable saved runs, durable photo restore, Garage-first UX. */
+(function(){
+  'use strict';
+
+  /* ── SAVED RUN EDITOR ─────────────────────────────────────────── */
+  function openRunEditor(runId){
+    var run = allRuns.find(function(r){ return r.id === runId; });
+    if(!run || run.spotted){
+      if(run && run.spotted) showToast('Solo discoveries can already be edited from the Garage.');
+      return;
+    }
+    var overlay=document.createElement('div');
+    overlay.className='cs-run-edit-overlay';
+    overlay.id='csRunEditOverlay';
+    overlay.onclick=function(e){ if(e.target===overlay) overlay.remove(); };
+
+    function carRow(car,i){
+      return '<div class="cs-re-car" data-i="'+i+'" data-original="'+encodeURIComponent(car.name||'')+'">'+
+        '<div class="cs-re-car-top"><span>CAR '+(i+1)+'</span><button type="button" class="cs-re-remove" data-remove="'+i+'">REMOVE</button></div>'+
+        '<div class="cs-re-grid">'+
+          '<input data-f="name" value="'+escapeAttr(car.name||'')+'" placeholder="Car name">'+
+          '<input data-f="value" type="number" min="0" step="1000" value="'+(Number(car.value)||0)+'" placeholder="Value">'+
+          '<input data-f="color" value="'+escapeAttr(car.color||'')+'" placeholder="Color">'+
+          '<select data-f="type">'+
+            ['sports','muscle','track','supercar','exotic','ev','luxury','suv','classic','hotrod'].map(function(t){return '<option value="'+t+'" '+(car.type===t?'selected':'')+'>'+t.charAt(0).toUpperCase()+t.slice(1)+'</option>';}).join('')+
+          '</select>'+ 
+        '</div></div>';
+    }
+
+    overlay.innerHTML='<div class="cs-run-edit-card">'+
+      '<div class="cs-re-head"><div><div class="cs-re-kicker">EDIT SAVED RUN</div><div class="cs-re-title">'+escapeHtml(run.date||'Run')+'</div></div><button type="button" class="cs-re-close">×</button></div>'+
+      '<div class="cs-re-summary" id="csReSummary"></div>'+
+      '<div id="csReCars">'+(run.cars||[]).map(carRow).join('')+'</div>'+
+      '<button type="button" class="cs-re-add" id="csReAdd">＋ ADD CAR TO RUN</button>'+
+      '<div class="cs-re-actions"><button type="button" class="cs-re-cancel">CANCEL</button><button type="button" class="cs-re-save">SAVE RUN</button></div>'+
+    '</div>';
+    document.body.appendChild(overlay);
+
+    var carsEl=overlay.querySelector('#csReCars');
+    function updateSummary(){
+      var total=0, count=0;
+      carsEl.querySelectorAll('.cs-re-car').forEach(function(row){
+        var n=row.querySelector('[data-f="name"]');
+        var v=row.querySelector('[data-f="value"]');
+        if(n && n.value.trim()){ count++; total += Number(v&&v.value)||0; }
+      });
+      overlay.querySelector('#csReSummary').textContent=count+' car'+(count===1?'':'s')+' · '+fmtFull(total);
+    }
+    function bindRows(){
+      carsEl.querySelectorAll('.cs-re-car input,.cs-re-car select').forEach(function(x){ x.oninput=updateSummary; });
+      carsEl.querySelectorAll('[data-remove]').forEach(function(btn){
+        btn.onclick=function(){ var row=btn.closest('.cs-re-car'); if(row) row.remove(); updateSummary(); };
+      });
+    }
+    bindRows(); updateSummary();
+    overlay.querySelector('.cs-re-close').onclick=function(){overlay.remove();};
+    overlay.querySelector('.cs-re-cancel').onclick=function(){overlay.remove();};
+    overlay.querySelector('#csReAdd').onclick=function(){
+      var i=carsEl.querySelectorAll('.cs-re-car').length;
+      var wrap=document.createElement('div'); wrap.innerHTML=carRow({name:'',value:0,color:'',type:'sports'},i);
+      carsEl.appendChild(wrap.firstChild); bindRows(); updateSummary();
+      var first=carsEl.lastElementChild.querySelector('[data-f="name"]'); if(first) first.focus();
+    };
+    overlay.querySelector('.cs-re-save').onclick=function(){
+      var updated=[];
+      var bad=false;
+      carsEl.querySelectorAll('.cs-re-car').forEach(function(row){
+        var name=sanitizeText((row.querySelector('[data-f="name"]')||{}).value||'');
+        var value=Number((row.querySelector('[data-f="value"]')||{}).value||0);
+        var color=sanitizeText((row.querySelector('[data-f="color"]')||{}).value||'');
+        var type=(row.querySelector('[data-f="type"]')||{}).value||'sports';
+        if(!name){bad=true; return;}
+        if(!isFinite(value)||value<0){bad=true; return;}
+        updated.push({name:name,value:value,color:color,type:type});
+      });
+      if(bad){showToast('Every car needs a name and valid value.');return;}
+      if(!updated.length){showToast('A run needs at least one car.');return;}
+
+      var oldCars=run.cars||[];
+      var oldByName={}; oldCars.forEach(function(c){oldByName[String(c.name||'').toLowerCase()]=c;});
+      updated=updated.map(function(c){
+        /* Match by the edited name first; when a car was renamed, preserve its
+           existing photo and mirror it under the new IndexedDB key too. */
+        var old=oldByName[c.name.toLowerCase()];
+        if(old) return Object.assign({},old,c);
+        return c;
+      });
+      /* Preserve photos by row position when a car is renamed. */
+      var editedRows=[].slice.call(carsEl.querySelectorAll('.cs-re-car'));
+      updated=updated.map(function(c,i){
+        var row=editedRows[i];
+        var originalName='';
+        try{ originalName=decodeURIComponent((row&&row.getAttribute('data-original'))||''); }catch(e){}
+        var old=oldCars.find(function(x){return String(x.name||'').toLowerCase()===originalName.toLowerCase();});
+        if(old && old.photo){
+          var photo=old.photo;
+          if(typeof photo==='string' && photo.indexOf('photo:')===0) photo=_photoCacheGet(photo.slice(6)) || _photoCacheGet(String(old.name||'').toLowerCase()) || photo;
+          c.photo=photo;
+          if(photo && String(c.name||'').toLowerCase()!==String(old.name||'').toLowerCase() && String(photo).indexOf('data:')===0) _idbPut(c.name,photo).catch(function(){});
+        }
+        if(old && old.location) c.location=old.location;
+        if(old && old.ts) c.ts=old.ts;
+        return c;
+      });
+      var oldHead=run.headliner;
+      var headName=oldHead && String(oldHead.name||'').toLowerCase();
+      var newHead=updated.find(function(c){return c.name.toLowerCase()===headName;}) || updated.reduce(function(a,b){return !a||b.value>a.value?b:a;},null);
+      run.cars=updated;
+      run.total=updated.reduce(function(sum,c){return sum+(Number(c.value)||0);},0);
+      run.headliner=newHead ? {name:newHead.name,type:newHead.type,value:newHead.value} : null;
+      run._v=(run._v||0)+1;
+      _bumpVer('runs');
+      _saveRunsLocal();
+      saveToCloud();
+      flushSyncNow();
+      overlay.remove();
+      histPage=0;
+      renderHistory(); renderGarage(); renderSpot(); renderQPTrigger();
+      lensFeedback('✎','RUN UPDATED',run.cars.length+' cars · '+fmtFull(run.total),true);
+    };
+  }
+  window.openRunEditor=openRunEditor;
+
+  /* Put EDIT beside the existing delete control for completed runs. */
+  var oldRenderHistory=window.renderHistory;
+  if(typeof oldRenderHistory==='function'){
+    window.renderHistory=function(){
+      var out=oldRenderHistory.apply(this,arguments);
+      setTimeout(function(){
+        var items=[].slice.call(document.querySelectorAll('#histList .hist-item:not(.is-spot)'));
+        var completed=allRuns.filter(function(r){return !r.spotted;});
+        items.forEach(function(item){
+          if(item.querySelector('.cs-run-edit-btn')) return;
+          var visibleIndex=items.indexOf(item);
+          var run=completed[visibleIndex];
+          if(!run) return;
+          var hdr=item.querySelector('.hist-hdr');
+          if(!hdr) return;
+          var del=hdr.querySelector('.del-btn');
+          if(!del) return;
+          var b=document.createElement('button');
+          b.type='button'; b.className='cs-run-edit-btn'; b.textContent='EDIT'; b.title='Edit this saved run';
+          b.onclick=function(e){e.stopPropagation();openRunEditor(run.id);};
+          hdr.insertBefore(b,del);
+        });
+      },0);
+      return out;
+    };
+  }
+
+  /* ── DURABLE PHOTO RESTORE ────────────────────────────────────── */
+  function restorePhotosFromIDB(){
+    if(typeof _idbGetAll!=='function') return;
+    _idbGetAll().then(function(entries){
+      if(!entries || !entries.length) return;
+      var map={}; entries.forEach(function(e){if(e&&e.name&&e.data) map[String(e.name).toLowerCase()]=e.data;});
+      function apply(list){(list||[]).forEach(function(c){var p=map[String(c.name||'').toLowerCase()];if(p && (!c.photo || String(c.photo).indexOf('photo:')===0 || String(c.photo).indexOf('data:')!==0)) c.photo=p;});}
+      allRuns.forEach(function(r){apply(r.cars);}); apply(currentRun); apply(quickPicks);
+      _saveRunsLocal(); _saveCurrentLocal(); _saveQPLocal();
+      renderGarage(); renderHistory(); renderSpot();
+    }).catch(function(){});
+  }
+  window.csRestorePhotos=restorePhotosFromIDB;
+
+  /* Restore again after cloud hydration, which is the important reload/login path. */
+  var oldLoadCloud=window.loadFromCloud;
+  if(typeof oldLoadCloud==='function'){
+    window.loadFromCloud=function(){
+      var args=arguments;
+      return oldLoadCloud.apply(this,args).then(function(v){ setTimeout(restorePhotosFromIDB,50); return v; });
+    };
+  }
+  setTimeout(restorePhotosFromIDB,300);
+
+  /* Garage remains the original secondary destination; improvements focus on making it more rewarding to visit. */
+})();
+</script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
 </body>
 </html>
