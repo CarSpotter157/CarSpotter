@@ -51,7 +51,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'; this.onload=null" rel="stylesheet"/>
 <style>
 /* ═══════════════════════════════════════════════
-   CARSPOTTER v38
+   CARSPOTTER v39
    Vibe: Apple-clean meets car dashboard
    — Generous whitespace, clear hierarchy
    — Inter everywhere, clean and modern
@@ -114,34 +114,34 @@
 body.theme-light {
   /* A real light theme: warm paper background, cool-white surfaces,
      readable charcoal text, and subtle depth instead of inverted blacks. */
-  --bg:#f4f5f7;
+  --bg:#f5f5f7;
   --surf:#ffffff;
-  --surf2:#f7f8fa;
-  --surf3:#eceef1;
-  --border:#e2e5e9;
-  --border2:#d3d7dd;
-  --accent:#b88618;
-  --accent-d:#966f12;
-  --adim:rgba(184,134,24,0.10);
-  --text:#17191d;
-  --text2:#606773;
-  --muted:#9299a5;
-  --green:#208a4a;
-  --red:#c7352c;
-  --shadow:0 8px 24px rgba(20,28,38,0.08);
-  --shadow-sm:0 2px 8px rgba(20,28,38,0.06);
-  --shadow-lg:0 18px 44px rgba(20,28,38,0.12);
-  --glass-card:rgba(255,255,255,0.94);
-  --glass:rgba(255,255,255,0.90);
-  --glass-border:rgba(25,32,42,0.08);
+  --surf2:#f2f2f7;
+  --surf3:#e5e5ea;
+  --border:#d1d1d6;
+  --border2:#c7c7cc;
+  --accent:#007aff;
+  --accent-d:#0066d6;
+  --adim:rgba(0,122,255,0.12);
+  --text:#1d1d1f;
+  --text2:#6e6e73;
+  --muted:#8e8e93;
+  --green:#34c759;
+  --red:#ff3b30;
+  --shadow:0 8px 24px rgba(0,0,0,0.07);
+  --shadow-sm:0 2px 8px rgba(0,0,0,0.05);
+  --shadow-lg:0 18px 44px rgba(0,0,0,0.10);
+  --glass-card:rgba(255,255,255,0.96);
+  --glass:rgba(255,255,255,0.92);
+  --glass-border:rgba(60,60,67,0.12);
 }
 
 /* Light-mode component surfaces. These intentionally use soft neutrals rather
    than simply swapping black for white, so the UI retains depth and hierarchy. */
 body.theme-light .app-shell::before{
   background:
-    radial-gradient(60% 45% at 20% 12%, rgba(184,134,24,0.035), transparent 60%),
-    radial-gradient(55% 40% at 85% 88%, rgba(96,125,160,0.035), transparent 62%);
+    radial-gradient(60% 45% at 20% 12%, rgba(0,122,255,0.025), transparent 60%),
+    radial-gradient(55% 40% at 85% 88%, rgba(142,142,147,0.025), transparent 62%);
 }
 body.theme-light .page-header,
 body.theme-light .bottom-nav,
@@ -173,14 +173,14 @@ body.theme-light .collector-card,
 body.theme-light .featured-hero,
 body.theme-light .recap-p-card,
 body.theme-light .evo-card{
-  background:linear-gradient(160deg,#ffffff,#f0f2f5);
+  background:#ffffff;
 }
 body.theme-light .cc-front-name,
 body.theme-light .featured-hero .fh-name,
 body.theme-light .evo-card-name,
 body.theme-light .unicorn-total{color:var(--text);}
 body.theme-light .cc-front-type,
-body.theme-light .evo-card-type{color:#747b86;}
+body.theme-light .evo-card-type{color:#6e6e73;}
 body.theme-light .gc-photo-badge,
 body.theme-light .gc-search,
 body.theme-light .detail-hero-badge{
@@ -192,18 +192,18 @@ body.theme-light .toggle-pill{box-shadow:inset 0 1px 2px rgba(20,28,38,0.10);}
 body.theme-light .toggle-knob{background:#fff;box-shadow:0 1px 4px rgba(20,28,38,0.18);}
 body.theme-light .toggle-pill.on .toggle-knob{background:#fff;}
 body.theme-light .sort-pref-btn{background:#fff;border-color:var(--border);}
-body.theme-light .map-picker-overlay{background:#f4f5f7;}
+body.theme-light .map-picker-overlay{background:#f5f5f7;}
 body.theme-light .recap-p-media,
 body.theme-light .disc-img,
 body.theme-light .cc-quick-thumb{background:linear-gradient(160deg,#eef0f3,#e1e4e8);}
 body.theme-light .book-sil{background:linear-gradient(180deg,#eef0f3,#e3e6ea);}
 body.theme-light .expo-cer-paper,
 body.theme-light .trip-cer-ticket{background:linear-gradient(170deg,#fff,#f2f3f5);}
-body.theme-light .make-cer-panel{background:linear-gradient(170deg,#fff,#f7f4e9);}
+body.theme-light .make-cer-panel{background:#ffffff;}
 body.theme-light .title-crest,
 body.theme-light .title-seal::before,
 body.theme-light .make-cer-crest{
-  background:radial-gradient(circle at 35% 30%,#fff4c9,#e8d49a);
+  background:linear-gradient(180deg,#f2f2f7,#e5e5ea);
 }
 body.theme-light .ob-spin{border-color:rgba(51,51,51,0.12);border-top-color:#777;}
 body.theme-light .csr-google-link{color:#3d78c8;}
@@ -2609,7 +2609,7 @@ html:not(.show-favs) #favSection{display:none;}
 body.theme-light .toast{color:var(--text);}
 body.theme-light .btn-run{color:#fff;}
 body.theme-light .auth-overlay{background:var(--bg);}
-body.theme-light .qp-dropdown{background:#f9f9f5;}
+body.theme-light .qp-dropdown{background:#ffffff;}
 
 /* ── DESKTOP SIDEBAR LOGO ── */
 .dsk-logo{display:none;}
@@ -3105,6 +3105,114 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 @media (prefers-reduced-motion:reduce){
   .cs-lens-feedback,.cs-run-progress,.cs-run-progress-fill::after,.cs-juicy-pop{animation:none!important;transition:none!important;}
 }
+
+
+/* ── LIGHT MODE — native-app / Apple-style visual language ── */
+body.theme-light{
+  color-scheme:light;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+body.theme-light .app-shell{background:#f5f5f7;}
+body.theme-light .page-header,
+body.theme-light .bottom-nav,
+body.theme-light .card,
+body.theme-light .setting-card,
+body.theme-light .history-card,
+body.theme-light .trip-card,
+body.theme-light .achievement-card,
+body.theme-light .more-tile,
+body.theme-light .garage-summary,
+body.theme-light .garage-controls,
+body.theme-light .run-card,
+body.theme-light .note-card,
+body.theme-light .modal-card{
+  background:#fff;
+  border-color:#d1d1d6;
+  box-shadow:0 1px 3px rgba(0,0,0,.045),0 6px 20px rgba(0,0,0,.035);
+}
+body.theme-light .card-title,
+body.theme-light .sec-title,
+body.theme-light .ff label,
+body.theme-light .s-lbl{color:#6e6e73;}
+body.theme-light .txt-btn,
+body.theme-light .subtle,
+body.theme-light .setting-desc,
+body.theme-light .s-sub{color:#6e6e73;}
+body.theme-light .ff input,
+body.theme-light .ff select,
+body.theme-light input,
+body.theme-light select,
+body.theme-light textarea,
+body.theme-light .search-input,
+body.theme-light .qp-dropdown,
+body.theme-light .edit-field input,
+body.theme-light .edit-field select{
+  background:#f2f2f7;
+  color:#1d1d1f;
+  border:1px solid #d1d1d6;
+  box-shadow:none;
+}
+body.theme-light .ff input:focus,
+body.theme-light .ff select:focus,
+body.theme-light input:focus,
+body.theme-light select:focus,
+body.theme-light textarea:focus{
+  background:#fff;
+  border-color:#007aff;
+  box-shadow:0 0 0 3px rgba(0,122,255,.14);
+  transform:none;
+}
+body.theme-light .ff input::placeholder{color:#8e8e93;}
+body.theme-light .btn-run{
+  background:#007aff;
+  color:#fff;
+  border:0;
+  box-shadow:0 4px 12px rgba(0,122,255,.22);
+}
+body.theme-light .btn-run:hover{background:#0071e3;box-shadow:0 6px 16px rgba(0,122,255,.25);}
+body.theme-light .btn-run:active{background:#006edb;}
+body.theme-light .btn-spot,
+body.theme-light .btn-secondary,
+body.theme-light .sort-pref-btn{
+  background:#f2f2f7;
+  color:#007aff;
+  border:1px solid #d1d1d6;
+  box-shadow:none;
+}
+body.theme-light .btn-spot:hover,
+body.theme-light .btn-secondary:hover,
+body.theme-light .sort-pref-btn:hover{background:#e5e5ea;border-color:#c7c7cc;}
+body.theme-light .score-banner{background:#fff;border-color:#d1d1d6;box-shadow:0 1px 3px rgba(0,0,0,.04),0 10px 30px rgba(0,0,0,.05);}
+body.theme-light .score-banner::after{background:linear-gradient(90deg,transparent,#007aff,transparent);}
+body.theme-light .score-divider{background:linear-gradient(180deg,transparent,#007aff,transparent);}
+body.theme-light .s-num{color:#007aff;}
+body.theme-light .card-title::after{background:#007aff;}
+body.theme-light .toggle-pill{background:#e5e5ea;border:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06);}
+body.theme-light .toggle-pill.on{background:#34c759;}
+body.theme-light .toggle-knob{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.20);}
+body.theme-light .toggle-pill.on .toggle-knob{background:#fff;}
+body.theme-light .theme-swatch.active{border-color:#007aff;box-shadow:0 0 0 2px rgba(0,122,255,.18);}
+body.theme-light .gc-photo-badge,
+body.theme-light .detail-hero-badge{background:rgba(28,28,30,.72);color:#fff;}
+body.theme-light .featured-hero,
+body.theme-light .cc-card,
+body.theme-light .collector-card,
+body.theme-light .recap-p-card,
+body.theme-light .evo-card{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.05),0 8px 24px rgba(0,0,0,.04);}
+body.theme-light .more-tile:hover,
+body.theme-light .achievement-card:hover,
+body.theme-light .garage-controls:hover{border-color:#c7c7cc;box-shadow:0 4px 16px rgba(0,0,0,.06);}
+body.theme-light .more-tile .tile-icon,
+body.theme-light .nav-icon.active,
+body.theme-light .nav-item.active{color:#007aff;}
+body.theme-light .nav-item.active{font-weight:700;}
+body.theme-light .bottom-nav{background:rgba(255,255,255,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
+body.theme-light .track-deco::before{background:repeating-linear-gradient(90deg,#007aff 0,#007aff 30px,transparent 30px,transparent 50px);opacity:.025;}
+body.theme-light .btn-google{background:#fff;color:#1d1d1f;border-color:#d1d1d6;box-shadow:0 1px 2px rgba(0,0,0,.04);}
+body.theme-light .toast{background:rgba(28,28,30,.92);color:#fff;border-color:rgba(255,255,255,.08);}
+body.theme-light .qp-dropdown .qp-item:hover{background:#f2f2f7;}
+body.theme-light .qp-dropdown .qp-item{border-color:#e5e5ea;}
 
 </style>
 <style>
@@ -3827,7 +3935,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <div class="act-list" id="actList"></div>
 </div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE &mdash; Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v38</div>
+<div class="version-tag" id="versionTag">v39</div>
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
 var _pendingKey = 'firebase:pendingRedirect:AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug:[DEFAULT]';
@@ -5065,7 +5173,7 @@ function applyAppearance(mode) {
   // Keep the old key in sync for backwards compatibility with older backups.
   localStorage.setItem('cs_theme', appearanceMode === 'light' ? '6' : '0');
   const metaTheme = document.querySelector('meta[name="theme-color"]');
-  if (metaTheme) metaTheme.content = appearanceMode === 'light' ? '#f5f4ef' : '#060608';
+  if (metaTheme) metaTheme.content = appearanceMode === 'light' ? '#f5f5f7' : '#060608';
   renderAppearanceToggle();
 }
 function toggleAppearance() {
