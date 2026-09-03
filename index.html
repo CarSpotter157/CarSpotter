@@ -51,7 +51,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'; this.onload=null" rel="stylesheet"/>
 <style>
 /* ═══════════════════════════════════════════════
-   CARSPOTTER v37
+   CARSPOTTER v38
    Vibe: Apple-clean meets car dashboard
    — Generous whitespace, clear hierarchy
    — Inter everywhere, clean and modern
@@ -112,12 +112,102 @@
 }
 /* Light mode — same CarSpotter identity, brighter surfaces. */
 body.theme-light {
-  --bg:#f5f4ef; --surf:#ffffff; --surf2:#eae9e3; --surf3:#dddcd5;
-  --border:#e0dfd8; --border2:#ccc; --text:#18181a; --text2:#6b6b72; --muted:#a4a4aa;
-  --green:#24a148; --red:#d92d20; --shadow:0 2px 10px rgba(0,0,0,0.08);
-  --glass-card:rgba(255,255,255,0.78); --glass:rgba(255,255,255,0.82);
-  --glass-border:rgba(0,0,0,0.07);
+  /* A real light theme: warm paper background, cool-white surfaces,
+     readable charcoal text, and subtle depth instead of inverted blacks. */
+  --bg:#f4f5f7;
+  --surf:#ffffff;
+  --surf2:#f7f8fa;
+  --surf3:#eceef1;
+  --border:#e2e5e9;
+  --border2:#d3d7dd;
+  --accent:#b88618;
+  --accent-d:#966f12;
+  --adim:rgba(184,134,24,0.10);
+  --text:#17191d;
+  --text2:#606773;
+  --muted:#9299a5;
+  --green:#208a4a;
+  --red:#c7352c;
+  --shadow:0 8px 24px rgba(20,28,38,0.08);
+  --shadow-sm:0 2px 8px rgba(20,28,38,0.06);
+  --shadow-lg:0 18px 44px rgba(20,28,38,0.12);
+  --glass-card:rgba(255,255,255,0.94);
+  --glass:rgba(255,255,255,0.90);
+  --glass-border:rgba(25,32,42,0.08);
 }
+
+/* Light-mode component surfaces. These intentionally use soft neutrals rather
+   than simply swapping black for white, so the UI retains depth and hierarchy. */
+body.theme-light .app-shell::before{
+  background:
+    radial-gradient(60% 45% at 20% 12%, rgba(184,134,24,0.035), transparent 60%),
+    radial-gradient(55% 40% at 85% 88%, rgba(96,125,160,0.035), transparent 62%);
+}
+body.theme-light .page-header,
+body.theme-light .bottom-nav,
+body.theme-light .modal-card,
+body.theme-light .setting-card,
+body.theme-light .history-card,
+body.theme-light .trip-card,
+body.theme-light .achievement-card,
+body.theme-light .more-tile,
+body.theme-light .garage-summary,
+body.theme-light .garage-controls,
+body.theme-light .run-card,
+body.theme-light .note-card{
+  background:var(--surf);
+  border-color:var(--border);
+  box-shadow:var(--shadow-sm);
+}
+body.theme-light input,
+body.theme-light select,
+body.theme-light textarea,
+body.theme-light .search-input,
+body.theme-light .qp-dropdown{
+  background:#fff;
+  color:var(--text);
+  border-color:var(--border2);
+}
+body.theme-light .cc-card,
+body.theme-light .collector-card,
+body.theme-light .featured-hero,
+body.theme-light .recap-p-card,
+body.theme-light .evo-card{
+  background:linear-gradient(160deg,#ffffff,#f0f2f5);
+}
+body.theme-light .cc-front-name,
+body.theme-light .featured-hero .fh-name,
+body.theme-light .evo-card-name,
+body.theme-light .unicorn-total{color:var(--text);}
+body.theme-light .cc-front-type,
+body.theme-light .evo-card-type{color:#747b86;}
+body.theme-light .gc-photo-badge,
+body.theme-light .gc-search,
+body.theme-light .detail-hero-badge{
+  background:rgba(25,30,38,0.72);
+  color:#fff;
+}
+body.theme-light .btn-google{background:#fff;color:#20242a;border-color:#d9dde2;}
+body.theme-light .toggle-pill{box-shadow:inset 0 1px 2px rgba(20,28,38,0.10);}
+body.theme-light .toggle-knob{background:#fff;box-shadow:0 1px 4px rgba(20,28,38,0.18);}
+body.theme-light .toggle-pill.on .toggle-knob{background:#fff;}
+body.theme-light .sort-pref-btn{background:#fff;border-color:var(--border);}
+body.theme-light .map-picker-overlay{background:#f4f5f7;}
+body.theme-light .recap-p-media,
+body.theme-light .disc-img,
+body.theme-light .cc-quick-thumb{background:linear-gradient(160deg,#eef0f3,#e1e4e8);}
+body.theme-light .book-sil{background:linear-gradient(180deg,#eef0f3,#e3e6ea);}
+body.theme-light .expo-cer-paper,
+body.theme-light .trip-cer-ticket{background:linear-gradient(170deg,#fff,#f2f3f5);}
+body.theme-light .make-cer-panel{background:linear-gradient(170deg,#fff,#f7f4e9);}
+body.theme-light .title-crest,
+body.theme-light .title-seal::before,
+body.theme-light .make-cer-crest{
+  background:radial-gradient(circle at 35% 30%,#fff4c9,#e8d49a);
+}
+body.theme-light .ob-spin{border-color:rgba(51,51,51,0.12);border-top-color:#777;}
+body.theme-light .csr-google-link{color:#3d78c8;}
+
 
 /* ── RESET ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
@@ -3737,7 +3827,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <div class="act-list" id="actList"></div>
 </div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE &mdash; Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v37</div>
+<div class="version-tag" id="versionTag">v38</div>
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
 var _pendingKey = 'firebase:pendingRedirect:AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug:[DEFAULT]';
