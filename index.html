@@ -3127,16 +3127,19 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 .garage-card{border-radius:16px;box-shadow:0 7px 22px rgba(0,0,0,.22);}
 .garage-card:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(0,0,0,.32);}
 
-/* More: make secondary navigation feel like a real app menu */
+/* More: restore the full, spacious destination grid while keeping the polished styling */
 #page-more{padding-bottom:calc(var(--nav-h) + 34px);}
-#page-more .sec-title{font-size:.7rem;color:var(--text);letter-spacing:2.2px;}
-#page-more::before{content:'Tools & destinations';display:block;font-size:.62rem;color:var(--muted);margin:-8px 0 16px;}
-#page-more > div[style*="display:grid"]{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;}
-.more-page-tile{min-height:64px;padding:14px 16px;display:grid;grid-template-columns:38px 1fr auto;grid-template-rows:auto auto;align-items:center;justify-content:initial;gap:1px 12px;border-radius:14px;box-shadow:none;text-align:left;}
-.more-tile-icon{grid-row:1 / span 2;width:38px;height:38px;border-radius:11px;background:rgba(232,184,75,.08);}
-.more-tile-label{font-size:.68rem;letter-spacing:1.1px;align-self:end;}
-.more-page-tile::after{content:'›';grid-column:3;grid-row:1 / span 2;font-size:1.2rem;color:var(--muted);transition:transform .4s var(--ease-release),color .35s;}
-.more-page-tile:hover::after{transform:translateX(3px);color:var(--accent);}
+#page-more .sec-title{font-size:.7rem;color:var(--text);letter-spacing:2.2px;margin-bottom:6px!important;}
+#page-more::before{content:'Tools & destinations';display:block;font-size:.62rem;color:var(--muted);margin:-2px 0 16px;}
+#page-more > div[style*="display:grid"]{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important;}
+.more-page-tile{min-height:132px;padding:24px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;border-radius:18px;box-shadow:0 7px 22px rgba(0,0,0,.18);text-align:center;transition:transform .42s var(--ease-release),border-color .38s var(--ease-release),box-shadow .42s var(--ease-release),background .38s var(--ease-release);}
+.more-page-tile:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,.25);}
+.more-page-tile:active{transform:scale(.975);}
+.more-tile-icon{width:48px;height:48px;border-radius:14px;background:rgba(232,184,75,.075);color:var(--accent);display:flex;align-items:center;justify-content:center;}
+.more-tile-icon svg{width:24px;height:24px;}
+.more-tile-label{font-size:.68rem;font-weight:700;letter-spacing:1.15px;text-transform:uppercase;color:var(--text2);}
+.more-page-tile::after{display:none;}
+@media (min-width:700px){#page-more > div[style*="display:grid"]{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important;}.more-page-tile{min-height:145px;}}
 
 /* Settings: clearer section separation */
 #page-settings .setting-card{border-radius:16px;margin-bottom:12px;}
@@ -3627,6 +3630,14 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 </div>
 
 
+    <div class="page" id="page-news">
+      <div class="sec-title" style="margin-bottom:10px">Car News</div>
+      <div id="newsHeadliner" class="news-headliner" style="display:none" onclick="window.open(window._hlLink || '#', '_blank')"></div>
+      <div id="newsSources" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;overflow-x:auto;padding-bottom:2px;"></div>
+      <div id="newsList"></div>
+    </div>
+
+
 <!-- MORE PAGE (full page instead of dropdown) -->
 <div class="page" id="page-more">
 <div class="sec-title" style="margin-bottom:4px">More</div>
@@ -3644,6 +3655,14 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 
 
 
+<button class="more-page-tile" onclick="goTo('news')" title="Latest car news from multiple sources">
+<span class="more-tile-icon"><svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="22"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg></span>
+<span class="more-tile-label">Car News</span>
+</button>
+<button class="more-page-tile" onclick="goTo('achievements')" title="View your achievements and milestones">
+<span class="more-tile-icon"><svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="22"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
+<span class="more-tile-label">Achievements</span>
+</button>
 <button class="more-page-tile" onclick="goTo('settings')" title="App settings and preferences">
 <span class="more-tile-icon"><svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="22"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span>
 <span class="more-tile-label">Settings</span>
@@ -3724,7 +3743,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <div class="act-list" id="actList"></div>
 </div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE &mdash; Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v34</div>
+<div class="version-tag" id="versionTag">v36</div>
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
 var _pendingKey = 'firebase:pendingRedirect:AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug:[DEFAULT]';
@@ -3948,7 +3967,7 @@ let garageView   = 'grid';
 let garageZoom = 3;
 
 // Navigation & page transition state
-let pageOrder = ['spot','garage','voice','history','achievements','settings','trips','more'];
+let pageOrder = ['spot','garage','voice','history','achievements','settings','news','trips','more'];
 let currentPage = 'spot';
 let runTotalAnimated = 0;
 
@@ -5603,6 +5622,7 @@ function goTo(page) {
     if (page==='history')      renderHistory();
     if (page==='achievements') renderAchievements();
     if (page==='settings')     { renderThemeBar(); initSoundToggle(); initVibeToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); initSortPrefBtns(); applyCompactMode(); }
+    if (page==='news')         { if (!newsLoaded) { newsLoaded=true; renderNewsSources(); } loadNews(); }
     if (page==='trips')        renderTrips();
     if (page==='spot')         { renderHomeFav(); setTimeout(startFavRotation, 250); }
   });
@@ -9766,6 +9786,7 @@ var _cmdNav = [
   { k:'trip',          p:'trips' },
   { k:'more',          p:'more' },
   { k:'settings',      p:'settings' },
+  { k:'news',          p:'news' },
   { k:'notes',         p:'voice' },
   { k:'voice',         p:'voice' },
   { k:'home',          p:'spot' },
@@ -9873,6 +9894,87 @@ document.addEventListener('click', e => {
     btn.classList.remove('active');
   }
 });
+
+const NEWS_SOURCES = [
+  { name: 'Car & Driver',  rss: 'https://www.caranddriver.com/rss/all.xml/' },
+  { name: 'Motor Trend',   rss: 'https://www.motor1.com/rss/news/all/' },
+  { name: 'The Drive',     rss: 'https://www.thedrive.com/feed' },
+];
+let activeSource = 0;
+let newsLoaded = false;
+
+function renderNewsSources() {
+  const el = document.getElementById('newsSources');
+  el.innerHTML = NEWS_SOURCES.map((s, i) =>
+    `<button class="news-source-btn ${i === activeSource ? 'active' : ''}" onclick="switchSource(${i})">${s.name}</button>`
+  ).join('');
+}
+
+function switchSource(i) {
+  activeSource = i;
+  renderNewsSources();
+  loadNews();
+}
+
+// Deterministic gradient + emoji placeholder for feeds without thumbnails (e.g. Car & Driver).
+function newsFallbackImg(seed) {
+  try {
+    var hue = Math.abs(String(seed || '').split('').reduce(function(a, ch) { return (a + ch.charCodeAt(0)) % 360; }, 0));
+    var hue2 = (hue + 55) % 360;
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(' + hue + ',32%,17%)"/><stop offset="1" stop-color="hsl(' + hue2 + ',42%,28%)"/></linearGradient></defs><rect width="800" height="400" fill="url(#g)"/><text x="400" y="235" font-size="150" text-anchor="middle">🚘</text></svg>';
+    return 'data:image/svg+xml,' + encodeURIComponent(svg);
+  } catch(e) { return 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400"><rect width="800" height="400" fill="#1a1a1f"/><text x="400" y="235" font-size="150" text-anchor="middle">🚘</text></svg>'); }
+}
+
+function extractNewsImg(item) {
+  if (item.thumbnail && item.thumbnail.length > 4) return item.thumbnail;
+  if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.startsWith('image')) return item.enclosure.link;
+  if (item['media:content'] && item['media:content'].url) return item['media:content'].url;
+  const html = [item.description, item.content].filter(Boolean).join(' ');
+  const m = html.match(/<img[^>]+src\s*=\s*["']([^"']+)["']/i);
+  if (m) return m[1];
+  return '';
+}
+async function loadNews() {
+  const el = document.getElementById('newsList');
+  el.innerHTML = '<div class="news-loading">Loading latest news...</div>';
+  const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(NEWS_SOURCES[activeSource].rss)}&api_key=kkv1zj5yfbnz1ldwxehfesg358e3ttagbc8wzxiq&count=20`;
+  try {
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (!data.items || !data.items.length) throw new Error('No items');
+    var hl = document.getElementById('newsHeadliner');
+    if (hl) {
+      var first = data.items[0];
+      var hlImg = extractNewsImg(first) || newsFallbackImg((first.title || '') + NEWS_SOURCES[activeSource].name);
+      hl.style.display = 'block';
+      hl.innerHTML = '<img src="' + hlImg + '" alt="" onerror="this.outerHTML=\'<div style=width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surf2)></div>\'"><div class="hl-overlay"><div class="hl-source">' + NEWS_SOURCES[activeSource].name + '</div><div class="hl-title">' + escapeHtml(first.title || '') + '</div><div class="hl-date">' + (first.pubDate ? new Date(first.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '') + '</div></div>';
+      window._hlLink = first.link || '#';
+    }
+    el.innerHTML = data.items.map(function(item, idx) {
+      var date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
+      var title = item.title || 'No title';
+      var link  = item.link  || '#';
+      var imgSrc = extractNewsImg(item);
+      var imgHTML = imgSrc
+        ? '<img class="news-card-img" src="' + imgSrc + '" alt="" onerror="this.outerHTML=\'<div class=news-card-img-ph>🚘</div>\'">'
+        : '<div class="news-card-img-ph">🚘</div>';
+      return '<a class="news-card" href="' + link + '" target="_blank" rel="noopener" style="animation-delay:' + (idx*0.03) + 's">' +
+        imgHTML +
+        '<div class="news-card-body">' +
+          '<div class="news-source">' + NEWS_SOURCES[activeSource].name + '</div>' +
+          '<div class="news-title">' + escapeHtml(title) + '</div>' +
+          '<div class="news-date">' + escapeHtml(date) + '</div>' +
+        '</div>' +
+      '</a>';
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="news-error">Could not load news — check your connection.</div>';
+    var hl = document.getElementById('newsHeadliner');
+    if (hl) hl.style.display = 'none';
+  }
+}
+
 
 // ══════════════════════════════════════════════════════════════════
 //  PROGRESSION & REWARD SYSTEM EXPANSION — Foundation layer
