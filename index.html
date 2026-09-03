@@ -1,12 +1,13 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CarSpotter">
-<meta name="theme-color" content="#0a0a0a">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="CarSpotter" name="apple-mobile-web-app-title"/>
+<meta content="#0a0a0a" name="theme-color"/>
 <title>CarSpotter</title>
 <script>
 // Decide install-banner visibility BEFORE first paint so showing it causes no layout shift.
@@ -40,14 +41,14 @@
   } catch(e) {}
 })();
 </script>
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='55%25' font-size='110' text-anchor='middle' dominant-baseline='middle'%3E%F0%9F%9B%B5%3C/text%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://cdnjs.cloudflare.com">
-<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=optional" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'; this.onload=null">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'; this.onload=null">
+<link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%230a0a0a'/%3E%3Ctext x='50%25' y='55%25' font-size='110' text-anchor='middle' dominant-baseline='middle'%3E%F0%9F%9B%B5%3C/text%3E%3C/svg%3E" rel="apple-touch-icon"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://cdnjs.cloudflare.com" rel="preconnect"/>
+<link href="https://cdnjs.cloudflare.com" rel="dns-prefetch"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=optional" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'; this.onload=null" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'; this.onload=null" rel="stylesheet"/>
 <style>
 /* ═══════════════════════════════════════════════
    CARSPOTTER v24
@@ -237,7 +238,7 @@ html.cs-hidden .levelup-star,.html.cs-hidden .recap-record-tag.pop{animation-pla
   .dsk-cols{display:grid;grid-template-columns:1fr 1fr;flex:1;overflow:hidden;}
   .dsk-col{overflow-y:auto;padding:28px 32px;height:100%;}
   .dsk-col:first-child{border-right:1px solid var(--border);overflow:hidden;}
-  #page-garage,#page-history,#page-stats,#page-achievements,#page-leaderboard{overflow-y:auto;padding:32px 40px;}
+  #page-garage,#page-history,#page-achievements{overflow-y:auto;padding:32px 40px;}
   #page-voice{overflow-y:hidden;padding:28px 40px;display:flex;flex-direction:column;}
   .road-deco{display:none;}
 }
@@ -3029,8 +3030,6 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 }
 
 </style>
-
-
 <style>
 /* Saved-run editor */
 .cs-run-edit-overlay{position:fixed;inset:0;z-index:10050;background:rgba(0,0,0,.72);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:18px;animation:fadeUp .18s ease both;}
@@ -3038,8 +3037,6 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 .cs-re-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.cs-re-kicker{font-size:.58rem;letter-spacing:2px;color:var(--accent);font-weight:800}.cs-re-title{font-size:1.15rem;font-weight:800;margin-top:3px}.cs-re-close{border:0;background:var(--surf2);color:var(--text);width:34px;height:34px;border-radius:50%;font-size:1.3rem;cursor:pointer}.cs-re-summary{font-size:.72rem;color:var(--text2);padding:9px 11px;border:1px solid var(--border);border-radius:9px;margin-bottom:10px}.cs-re-car{border:1px solid var(--border);background:var(--surf2);border-radius:12px;padding:10px;margin-bottom:8px}.cs-re-car-top{display:flex;justify-content:space-between;align-items:center;font-size:.55rem;letter-spacing:1.5px;color:var(--muted);font-weight:800;margin-bottom:8px}.cs-re-remove{border:0;background:none;color:var(--red,#e66);font-size:.55rem;letter-spacing:1px;cursor:pointer}.cs-re-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:7px}.cs-re-grid input,.cs-re-grid select{min-width:0;background:var(--surf);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:9px;font:inherit;font-size:.72rem;outline:none}.cs-re-grid input:focus,.cs-re-grid select:focus{border-color:var(--accent)}.cs-re-add{width:100%;padding:11px;border:1px dashed var(--border);background:transparent;color:var(--text2);border-radius:9px;cursor:pointer;font-size:.68rem;letter-spacing:1px}.cs-re-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.cs-re-actions button{border:0;border-radius:8px;padding:10px 15px;cursor:pointer;font-size:.68rem;letter-spacing:1.2px;font-weight:800}.cs-re-cancel{background:var(--surf2);color:var(--text2)}.cs-re-save{background:var(--accent);color:#111}.cs-run-edit-btn{border:1px solid var(--border);background:var(--surf2);color:var(--text2);border-radius:6px;padding:5px 8px;font-size:.53rem;letter-spacing:1px;cursor:pointer;margin-right:4px}.cs-run-edit-btn:hover{border-color:var(--accent);color:var(--accent)}.cs-garage-subtitle{font-size:.62rem;color:var(--muted);margin-top:2px;letter-spacing:.2px}.garage-main-nav{transform:scale(1.015);}.garage-main-nav .nav-label{font-weight:800}.garage-main-nav .nav-icon{filter:drop-shadow(0 0 7px rgba(232,184,75,.18))}
 @media(max-width:600px){.cs-re-grid{grid-template-columns:1fr 1fr}.cs-re-grid input:first-child{grid-column:1/-1}.cs-run-edit-card{padding:14px}.cs-run-edit-overlay{padding:10px}}
 </style>
-
-
 <style id="cs-garage-upgrade-css">
 .cs-garage-dashboard{margin:10px 0 16px;padding:16px;border:1px solid var(--glass-border);border-radius:var(--r-lg);background:linear-gradient(135deg,rgba(232,184,75,.08),rgba(255,255,255,.025));box-shadow:var(--shadow-sm);}
 .cs-gd-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:12px;}
@@ -3064,651 +3061,535 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 </style>
 </head>
 <body>
-
 <!-- AUTH OVERLAY -->
 <div class="auth-overlay" id="authOverlay" style="display:none">
-  <div class="auth-loading" id="authLoading"><div class="auth-spinner"></div><div class="auth-loading-text">Initializing CarSpotter...</div></div>
-  <div class="auth-content" id="authContent" style="display:none">
-  <div class="auth-logo">Car<span>Spotter</span></div>
-  <div class="auth-sub">Sign in to sync across devices</div>
-  <div class="auth-card">
-    <div class="auth-title">Welcome back</div>
-    <button class="btn-google" onclick="signInGoogle()">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20" height="20" alt="">
+<div class="auth-loading" id="authLoading"><div class="auth-spinner"></div><div class="auth-loading-text">Initializing CarSpotter...</div></div>
+<div class="auth-content" id="authContent" style="display:none">
+<div class="auth-logo">Car<span>Spotter</span></div>
+<div class="auth-sub">Sign in to sync across devices</div>
+<div class="auth-card">
+<div class="auth-title">Welcome back</div>
+<button class="btn-google" onclick="signInGoogle()">
+<img alt="" height="20" src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="20"/>
       Continue with Google
     </button>
-    <div class="auth-note">Your spots, runs &amp; garage sync automatically.<br>Works on any device you sign into.</div>
-  </div>
-  </div>
+<div class="auth-note">Your spots, runs &amp; garage sync automatically.<br/>Works on any device you sign into.</div>
+</div>
+</div>
+</div>
+<div class="app-shell" id="appShell">
+<!-- mobile header -->
+<header class="app-header">
+<div class="logo">Car<span>Spotter</span></div>
+<div style="display:flex;align-items:center;gap:10px;">
+<div class="hdr-r">
+<div class="hdr-lbl">Best Run</div>
+<div class="hdr-val" id="headerBest">&mdash;</div>
+</div>
+<button aria-label="Activity" class="act-bell" id="actBell" onclick="toggleActivity(1)">
+<svg class="act-bell-ic" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+<span class="act-badge" id="actBadge" style="display:none">0</span>
+</button>
+<div id="userPillWrap"></div>
+</div>
+</header>
+<!-- Persistent road-trip running indicator — shown on every page while a trip is active -->
+<div class="trip-livebar" id="tripLiveBar" style="display:none"></div>
+<div class="pages">
+<!-- SPOT PAGE -->
+<div class="page active" id="page-spot">
+<div class="install-banner" id="installBanner">
+<div class="install-text"><strong>Install as app:</strong> Share &rarr; Add to Home Screen (iPhone) &middot; Install icon in Chrome (PC)</div>
+<button class="install-close" onclick="dismissInstall()">✕</button>
+</div>
+<!-- desktop two cols wrapper -->
+<div class="dsk-cols" style="height:100%">
+<div class="dsk-col">
+<div class="score-banner">
+<div class="score-half">
+<div class="s-lbl">This Run</div>
+<div class="s-num" id="runTotal">$0</div>
+<div class="s-sub" id="runCount">0 cars</div>
+</div>
+<div class="score-divider"></div>
+<div class="score-half score-half--right">
+<div class="s-lbl">Best Run</div>
+<div class="b-num" id="bestTotal">&mdash;</div>
+<div class="beat tied" id="beatMsg">No record yet</div>
+</div>
+</div>
+<div class="level-bar-wrap">
+<div class="level-bar-info">
+<span class="level-lbl"><span id="levelTitleSlot"></span><span class="level-num">LV <span id="levelNum">1</span></span></span>
+<span class="level-xp" id="levelXp">0 / 100 XP</span>
+</div>
+<div class="level-bar-track"><div class="level-bar-fill" id="levelFill" style="width:0%"></div></div>
+</div>
+<div class="card">
+<div class="card-title">Log a Car</div>
+<div class="form-grid">
+<div class="ff">
+<label for="carName">Make / Model</label>
+<div class="car-ac-wrap" id="carAcWrap">
+<input autocomplete="off" id="carName" onblur="setTimeout(closeCarAc,180)" onfocus="onCarNameInput(this.value)" oninput="onCarNameInput(this.value)" placeholder="Ferrari 488" title="Start typing to see suggestions from the database" type="text"/>
+<div class="car-ac-dropdown" id="carAcDropdown"></div>
+</div>
+</div>
+<div class="ff">
+<label for="carValue">Value ($)</label>
+<input id="carValue" inputmode="numeric" max="50000000" min="1000" placeholder="280000" title="Enter value between $1,000 and $50,000,000" type="number"/>
+<div class="ff-hint" id="carValueHint" style="display:none;font-size:0.65rem;color:var(--red);margin-top:4px;"></div>
+</div>
+<div class="ff">
+<label for="carColor">Color</label>
+<input autocomplete="off" id="carColor" placeholder="Rosso Corsa" title="Optional &mdash; e.g. Rosso Corsa, Midnight Blue" type="text"/>
+</div>
+<div class="ff">
+<label for="carType">Type</label>
+<select id="carType" title="Select the car category">
+<option disabled="" selected="" value="">&mdash; Select Type &mdash;</option>
+<option value="supercar">Supercar</option>
+<option value="sports">Sports Car</option>
+<option value="muscle">Muscle Car</option>
+<option value="track">Track Car</option>
+<option value="exotic">Exotic</option>
+<option value="ev">EV</option>
+<option value="luxury">Luxury / Sedan</option>
+<option value="suv">Truck / SUV</option>
+<option value="classic">Classic / Vintage</option>
+<option value="hotrod">Hot Rod</option>
+</select>
+</div>
+</div>
+<!-- Photo + Location row -->
+<div id="photoPreviewWrap" style="display:none"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+<label class="photo-btn" style="margin-bottom:0">
+<svg fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="flex-shrink:0" viewbox="0 0 24 24" width="12"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+<span>Photo</span>
+<input accept="image/*" id="photoInput" onchange="handlePhotoInput(this)" style="display:none" type="file"/>
+</label>
+<button class="geo-btn" id="geoBtn" onclick="captureLocation()" style="margin:0">
+<svg fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="display:inline;vertical-align:middle;flex-shrink:0" viewbox="0 0 24 24" width="12"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>Save Location
+              </button>
+</div>
+<div class="location-chip-row" id="locationChipRow" style="display:none"></div>
+<!-- Quick Picks -->
+<div class="qp-wrap" id="qpWrap">
+<button class="qp-trigger" onclick="toggleQP()">
+<span>Quick Picks</span>
+<span class="qp-arrow" id="qpArrow">&dtrif;</span>
+</button>
+<div class="qp-dropdown">
+<div class="qp-header">
+<button class="qp-edit-btn" id="qpEditBtn" onclick="toggleQPEdit()" title="Edit quick picks">EDIT</button>
+<button class="qp-clear-btn" id="qpClearBtn" onclick="clearAllQP()" style="display:none" title="Remove all quick picks">CLEAR ALL</button>
+</div>
+<div class="qp-search">
+<input autocomplete="off" id="qpSearch" oninput="renderQPList(this.value)" placeholder="Search..." type="text"/>
+</div>
+<div class="qp-list" id="qpList"></div>
+</div>
+</div>
+<!-- Two action buttons: run vs spotted -->
+<div class="btn-row">
+<button class="btn-run" onclick="logRun()" title="Add this car to your active spotting session (stacks multiple cars)">+ ADD TO RUN</button>
+<button class="btn-spot" onclick="logSpotted()" title="Save this single car directly to your garage without a session">SAVE SOLO</button>
+</div>
+<div class="btn-hint-row">
+<span>Stacks into the active run (below)</span>
+<span>Saves this car alone</span>
+</div>
+<div class="section" id="favSection" style="margin:12px 0 0">
+<div class="sec-row"><div class="sec-title">FAVORITES</div><button class="txt-btn" id="favToggle" onclick="goTo('garage')">Show All</button></div>
+<div class="fav-scroll" id="favList"></div>
+</div>
+</div>
+</div><!-- /dsk-col left -->
+<div class="dsk-col">
+<div class="sec-row">
+<div class="sec-title">CURRENT RUN</div>
+<button class="txt-btn" onclick="clearRun()" title="Remove all cars from this run">Clear</button>
+</div>
+<div id="runList">
+<div class="empty-run"><span class="ei" style="font-size:1.4rem;display:block;margin-bottom:6px;opacity:0.3">&rarr;</span>Add cars to start a run</div>
+</div>
+<div id="endWrap" style="display:none">
+<button class="btn-end" onclick="endRun()">End Run &amp; Save</button>
+</div>
+</div><!-- /dsk-col right -->
+</div><!-- /dsk-cols -->
+</div><!-- /page-spot -->
+<!-- GARAGE PAGE -->
+<div class="page" id="page-garage">
+<div class="sec-row" style="margin-bottom:10px">
+<div><div class="sec-title">YOUR GARAGE</div><div class="cs-garage-subtitle">Every car you spot lives here.</div></div>
+<div style="display:flex;gap:6px;align-items:center;">
+<div class="garage-view-toggle">
+<button class="gv-btn active" id="gvGrid" onclick="setGarageView('grid')" title="Card view">Cards</button>
+<button class="gv-btn" id="gvList" onclick="setGarageView('list')" title="List view">☰</button>
+<button class="gv-btn" id="gvMap" onclick="setGarageView('map')" title="Map view">Map</button>
+</div>
+<button class="txt-btn" id="sortBtn" onclick="cycleSort()" title="Cycle sort order">Value &darr;</button>
+<button class="txt-btn" onclick="openCarSearch()" title="Search car specs database">🔍 Search</button>
+</div>
+</div>
+<div class="garage-sort-row">
+<button class="gs-pill active" data-sort="allCars" onclick="setGarageSortHeader('allCars',this)" title="Show all cars, favorites first">All Cars</button>
+<button class="gs-pill" data-sort="recent" onclick="setGarageSortHeader('recent',this)" title="Sort by most recently spotted">Recent</button>
+<button class="gs-pill" data-sort="rarest" onclick="setGarageSortHeader('rarest',this)" title="Sort by rarity tier (Legend &rarr; Daily)">Rarest</button>
+<button class="gs-pill" data-sort="highestXp" onclick="setGarageSortHeader('highestXp',this)" title="Sort by highest XP value">Highest XP</button>
+<button class="gs-pill" data-sort="favorites" onclick="setGarageSortHeader('favorites',this)" title="Show only favorited cars">&starf; Favorites</button>
+</div>
+<div class="stats-row">
+<div class="stat-box"><div class="stat-v" id="gCars">0</div><div class="stat-l">Cars</div></div>
+<div class="stat-box"><div class="stat-v" id="gTotal">$0</div><div class="stat-l">Total</div></div>
+<div class="stat-box"><div class="stat-v" id="gAvg">&mdash;</div><div class="stat-l">Avg</div></div>
+</div>
+<div class="garage-refresh-row">
+<span>COLLECTION VIEW</span>
+<div style="display:flex;align-items:center;gap:8px;">
+<div class="garage-zoom"><span class="garage-zoom-label">ZOOM</span><button class="garage-zoom-btn" onclick="setGarageZoom(garageZoom-1)" title="Fewer, larger cards">&minus;</button><span class="garage-zoom-val" id="garageZoomVal">3 &times;</span><button class="garage-zoom-btn" onclick="setGarageZoom(garageZoom+1)" title="More, smaller cards">+</button></div>
+<button class="garage-refresh-btn" id="garageRefreshBtn" onclick="refreshGarage()" title="Refresh your collection">&orarr; REFRESH</button>
+</div>
+</div>
+<div id="garageDashboard"></div>
+<div id="featuredSpot" style="display:none"></div>
+<div id="journeySection" style="display:none"></div>
+<div id="discSection" style="display:none">
+<div class="sec-row" style="margin:4px 0 8px;">
+<div class="sec-title">RECENT DISCOVERIES</div>
+<button class="txt-btn" id="discClearBtn" onclick="clearDiscoveries()" style="display:none">Clear</button>
+</div>
+<div class="disc-scroll" id="discoveriesList"></div>
+</div>
+<div class="garage-search-wrap">
+<input autocomplete="off" id="garageSearch" oninput="onGarageSearch()" placeholder="Search cars..." title="Search by car name, color, or location" type="text"/>
+<button class="garage-search-clear" id="garageSearchClear" onclick="clearGarageSearch()" style="display:none" title="Clear search">✕</button>
+</div>
+<div class="garage-filter-row" id="garageFilterRow">
+<button class="gf-pill active" data-filter="all" onclick="setGarageFilter('all',this)" title="Show all cars">All</button>
+<button class="gf-pill" data-filter="supercar" onclick="setGarageFilter('supercar',this)" title="Filter supercars">🏎 Super</button>
+<button class="gf-pill" data-filter="sports" onclick="setGarageFilter('sports',this)" title="Filter sports cars">🚗 Sports</button>
+<button class="gf-pill" data-filter="muscle" onclick="setGarageFilter('muscle',this)" title="Filter muscle cars">🐎 Muscle</button>
+<button class="gf-pill" data-filter="track" onclick="setGarageFilter('track',this)" title="Filter track cars">🏁 Track</button>
+<button class="gf-pill" data-filter="exotic" onclick="setGarageFilter('exotic',this)" title="Filter exotic cars">🔥 Exotic</button>
+<button class="gf-pill" data-filter="ev" onclick="setGarageFilter('ev',this)" title="Filter EVs">⚡ EV</button>
+<button class="gf-pill" data-filter="legend" onclick="setGarageFilter('legend',this)" title="Filter $1M+ legends">👑 Legend+</button>
+<button class="gf-pill" data-filter="hypercar" onclick="setGarageFilter('hypercar',this)" title="Filter $500K+ hypercars">🚀 Hyper+</button>
+</div>
+<div id="garageList">
+<div class="empty-garage"><div style="font-size:2.5rem;margin-bottom:12px;opacity:0.5">🚗</div><strong style="color:var(--text2);font-size:0.85rem;display:block;margin-bottom:4px">Your garage is empty</strong><span style="color:var(--muted)">Log your first car from the Spot tab &mdash; use "+ ADD TO RUN" for a session or "SAVE SOLO" for a single car</span></div>
+</div>
+</div>
+<!-- HISTORY PAGE -->
+<div class="page" id="page-history">
+<div class="record-card" id="recordWrap" style="display:none">
+<div class="rec-lbl">All-time Best Run</div>
+<div class="rec-val" id="recordVal">&mdash;</div>
+<div class="rec-sub" id="recordSub"></div>
+</div>
+<div style="background:var(--surf);border:1px solid var(--border);border-radius:var(--r-md);padding:11px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+<div style="font-size:0.7rem;color:var(--text2);line-height:1.5;flex-shrink:0;"><strong style="color:var(--text)">Export</strong><br/>No photos</div>
+<button onclick="exportLocalData()" style="background:var(--accent);color:#0a0a0a;border:none;border-radius:7px;font-family:'Inter',sans-serif;font-size:0.8rem;letter-spacing:1.5px;padding:8px 13px;cursor:pointer;flex-shrink:0;" title="Download JSON backup without photos (smaller file)">EXPORT</button>
+<div style="font-size:0.7rem;color:var(--text2);line-height:1.5;flex-shrink:0;"><strong style="color:var(--text)">With photos</strong><br/>Large file</div>
+<button onclick="exportAllData()" style="background:var(--accent);color:#0a0a0a;border:none;border-radius:7px;font-family:'Inter',sans-serif;font-size:0.8rem;letter-spacing:1.5px;padding:8px 13px;cursor:pointer;flex-shrink:0;" title="Download JSON backup WITH all photos (large file)">EXPORT</button>
+</div>
+<div style="background:var(--surf);border:1px solid var(--border);border-radius:var(--r-md);padding:11px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+<div style="font-size:0.7rem;color:var(--text2);line-height:1.5;"><strong style="color:var(--text)"> Import backup</strong><br/>Restore from a carspotter-backup.json file</div>
+<label style="background:var(--accent);color:#0a0a0a;border:none;border-radius:7px;font-family:'Inter',sans-serif;font-size:0.85rem;letter-spacing:1.5px;padding:8px 13px;cursor:pointer;flex-shrink:0;" title="Select a backup file to restore">
+          IMPORT
+          <input accept=".json" onchange="importFromFile(this)" style="display:none" type="file"/>
+</label>
+</div>
+<div class="sec-title" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
+<span>HISTORY</span>
+<button class="txt-btn" id="bulkToggleBtn" onclick="toggleBulkMode()" title="Select multiple runs to delete">Select</button>
+</div>
+<div class="bulk-bar" id="bulkBar">
+<span class="bulk-count" id="bulkCount">0 selected</span>
+<button class="bulk-cancel-btn" onclick="toggleBulkMode()">Cancel</button>
+<button class="bulk-del-btn" onclick="bulkDelete()"> Delete</button>
+</div>
+<div id="histList">
+<div class="no-history"><div style="font-size:2rem;margin-bottom:10px;opacity:0.5">📋</div><strong style="color:var(--text2);font-size:0.85rem;display:block;margin-bottom:4px">No runs yet</strong>Complete a run or spot a solo car to see it here</div>
+</div>
+</div>
+<!-- NOTES PAGE -->
+<div class="page" id="page-voice">
+<div class="notes-header">
+<div>
+<div class="sec-title">Notes</div>
+<div class="notes-sub">Type or speak &mdash; saves automatically</div>
+</div>
+<div style="display:flex;gap:8px;align-items:center;">
+<button class="mic-btn" id="micBtn" onclick="toggleMic()">
+<svg fill="none" height="14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="14"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="23"></line><line x1="8" x2="16" y1="23" y2="23"></line></svg>
+<span class="mic-lbl" id="micLbl">Tap to speak</span>
+</button>
+</div>
+</div>
+<textarea class="notes-area" id="notesArea" placeholder="Ferrari 488 red
+Yellow Lambo
+Blue Porsche GT3 992
+
+Jot notes here &mdash; switch to Spot tab to log them."></textarea>
+</div>
+<!-- ACHIEVEMENTS PAGE -->
+<div class="page" id="page-achievements">
+<div class="sec-title" style="margin-bottom:6px">Achievements</div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">
+<div class="ach-count-row" id="achCountRow" style="margin-bottom:0"><span id="achUnlocked">0</span> / <span id="achTotal">0</span> unlocked</div>
+
+</div>
+<div class="ach-grid" id="achGrid"></div>
+</div>
+<!-- SETTINGS PAGE -->
+<div class="page" id="page-settings">
+<div class="sec-title" style="margin-bottom:14px">Settings</div> <!-- Themes -->
+<div class="card setting-card">
+<div class="setting-head">
+<div class="setting-icon">Theme</div>
+<div class="setting-copy">
+<div class="card-title">THEME</div>
+<div class="setting-desc">Tune CarSpotter''s look with bold palettes, then add carbon fiber texture for extra depth.</div>
+</div>
+</div>
+<div class="theme-bar" id="themeBar"></div>
+<div id="themeName" style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;margin-top:8px;">Default</div>
+<div style="font-size:0.6rem;color:var(--muted);margin-top:4px;line-height:1.5;">Dark: Default  Carbon  Stealth  Inferno  Cobalt  Acid<br/>Light: Light &nbsp;|&nbsp; Special: Cyberpunk  Retro 80s</div>
+<div class="setting-row" style="border-top:none;padding-top:10px;">
+<div class="carbon-preview"></div>
+<span style="font-size:0.78rem;color:var(--text2);flex:1;">Carbon fiber texture on surfaces</span>
+<button class="toggle-pill" id="carbonToggle" onclick="toggleCarbon()" title="Toggle carbon fiber visual effect"><div class="toggle-knob"></div></button>
+</div>
+</div>
+<!-- Offline Status -->
+<div class="card setting-card">
+<div class="setting-head">
+<div class="setting-icon">Sync</div>
+<div class="setting-copy">
+<div class="card-title">SYNC &amp; OFFLINE</div>
+<div class="setting-desc">Every run saves on-device first, then syncs to the cloud when you are back online.</div>
+</div>
+</div>
+<div class="setting-row" style="border-top:none;padding-top:0;margin-top:0;">
+<div id="offlineStatusDot" style="width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0;"></div>
+<span id="offlineStatusText" style="font-size:0.78rem;color:var(--text2);flex:1;">Online - syncing to cloud</span>
+</div>
+<div id="offlineQueueInfo" style="display:none;font-size:0.65rem;color:var(--accent2);margin-top:6px;letter-spacing:1px;"></div>
+</div>
+<!-- Sound FX -->
+<div class="card setting-card">
+<div class="setting-head">
+<div class="setting-icon">Audio</div>
+<div class="setting-copy">
+<div class="card-title">SOUND EFFECTS</div>
+<div class="setting-desc">Keep the app quiet or add feedback when you log cars and finish runs.</div>
+</div>
+</div>
+<div class="setting-row sound-toggle" style="border-top:none;padding-top:0;margin-top:0;">
+<span style="font-size:0.78rem;color:var(--text2);flex:1;">Play sounds when logging cars</span>
+<button class="toggle-pill" id="soundToggle" onclick="toggleSound()" title="Toggle sound effects"><div class="toggle-knob"></div></button>
+</div>
+<div class="setting-row sound-toggle" style="border-top:none;padding-top:0;margin-top:0;">
+<span style="font-size:0.78rem;color:var(--text2);flex:1;">Vibrate when logging cars</span>
+<button class="toggle-pill" id="vibeToggle" onclick="toggleVibe()" title="Toggle haptic feedback"><div class="toggle-knob"></div></button>
+</div>
+<div class="setting-row sound-toggle" style="border-top:none;padding-top:0;margin-top:0;">
+<span style="font-size:0.78rem;color:var(--text2);flex:1;">Collector card animations</span>
+<button class="toggle-pill" id="ccAnimToggle" onclick="toggleCCAnim()" title="Enable/disable collector card reveal animations"><div class="toggle-knob"></div></button>
+</div>
+</div>
+<!-- Aliases -->
+<div class="card setting-card">
+<div class="setting-head">
+<div class="setting-icon">Names</div>
+<div class="setting-copy">
+<div class="card-title">CAR NICKNAMES</div>
+<div class="setting-desc">Map abbreviations to full names so your stats and garage stay tidy. Example: GT3 RS -&gt; Porsche 911 GT3 RS.</div>
+</div>
+</div>
+<button class="setting-link" onclick="openAliasModal()" title="Manage car nickname shortcuts">
+<span>Manage nicknames</span>
+<span id="aliasCount" style="font-family:'Inter',sans-serif;font-size:0.9rem;color:var(--accent);letter-spacing:1px;">0 saved</span>
+</button>
+</div>
+<div class="card setting-card">
+<div class="setting-head">
+<div class="setting-icon">Guide</div>
+<div class="setting-copy">
+<div class="card-title">HELP &amp; ONBOARDING</div>
+<div class="setting-desc">Replay the interactive walkthrough &mdash; practice logging a run, explore a demo Garage, and see why signing in matters. Uses demo data only; nothing touches your real collection.</div>
+</div>
+</div>
+<button class="setting-link" onclick="openOnboarding(true)" title="Replay the interactive walkthrough">
+<span>Show interactive walkthrough</span>
+<span>Open</span>
+</button>
+</div>
+<!-- Default Sort -->
+<div class="card setting-card">
+<div class="setting-head">
+<div class="setting-icon">Sort</div>
+<div class="setting-copy">
+<div class="card-title">DEFAULT GARAGE SORT</div>
+<div class="setting-desc">Choose how your garage is ordered when you open it.</div>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px;">
+<button class="sort-pref-btn" id="spb-desc" onclick="setSortPref('desc')">$ High&ndash;Low</button>
+<button class="sort-pref-btn" id="spb-asc" onclick="setSortPref('asc')">$ Low&ndash;High</button>
+<button class="sort-pref-btn" id="spb-alpha" onclick="setSortPref('alpha')">A&ndash;Z</button>
+</div>
+</div>
+<!-- Compact mode -->
+<div class="card setting-card">
+<div class="setting-head">
+<div class="setting-icon">View</div>
+<div class="setting-copy">
+<div class="card-title">COMPACT GARAGE</div>
+<div class="setting-desc">Shrink garage rows to fit more cars on screen at once.</div>
+</div>
+</div>
+<div class="setting-row" style="border-top:none;padding-top:0;margin-top:10px;">
+<span style="font-size:0.78rem;color:var(--text2);flex:1;">Compact list rows</span>
+<button class="toggle-pill" id="compactToggle" onclick="toggleCompactMode()" title="Shrink garage rows to fit more cars on screen"><div class="toggle-knob"></div></button>
+</div>
+</div>
+<!-- Data -->
+<div class="card setting-card">
+<div class="setting-head">
+<div class="setting-icon">Data</div>
+<div class="setting-copy">
+<div class="card-title">EXPORT &amp; BACKUP</div>
+<div class="setting-desc">Download all your runs, garage, aliases, settings as JSON. Import later to restore.</div>
+</div>
+</div>
+<button class="setting-link" onclick="exportLocalData()">
+<span>Export (no photos)</span>
+<span style="color:var(--accent)">&darr; JSON</span>
+</button>
+<button class="setting-link" onclick="exportAllData()">
+<span>Export WITH photos</span>
+<span style="color:var(--accent)">&darr; JSON (large)</span>
+</button>
+</div>
+<!-- Danger zone -->
+<div class="card setting-card" style="border-color:#ff444433;">
+<div class="setting-head">
+<div class="setting-icon" style="color:#ff4444">⚠️</div>
+<div class="setting-copy">
+<div class="card-title" style="color:#ff4444">DANGER ZONE</div>
+<div class="setting-desc">Permanently delete all local data. This cannot be undone.</div>
+</div>
+</div>
+<button class="setting-link" onclick="clearAllData()" style="color:#ff4444" title="Permanently delete ALL local data - cannot be undone">
+<span>Clear all local data</span>
+<span>Delete</span>
+</button>
+</div>
 </div>
 
-<div class="app-shell" id="appShell">
 
-  <!-- mobile header -->
-  <header class="app-header">
-    <div class="logo">Car<span>Spotter</span></div>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div class="hdr-r">
-        <div class="hdr-lbl">Best Run</div>
-        <div class="hdr-val" id="headerBest">—</div>
-      </div>
-      <button class="act-bell" id="actBell" onclick="toggleActivity(1)" aria-label="Activity">
-        <svg class="act-bell-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="act-badge" id="actBadge" style="display:none">0</span>
-      </button>
-      <div id="userPillWrap"></div>
-    </div>
-  </header>
-
-  <!-- Persistent road-trip running indicator — shown on every page while a trip is active -->
-  <div class="trip-livebar" id="tripLiveBar" style="display:none"></div>
-
-  <div class="pages">
-
-    <!-- SPOT PAGE -->
-    <div class="page active" id="page-spot">
-      <div id="installBanner" class="install-banner">
-        <div class="install-text"><strong>Install as app:</strong> Share → Add to Home Screen (iPhone) · Install icon in Chrome (PC)</div>
-        <button class="install-close" onclick="dismissInstall()">✕</button>
-      </div>
-
-      <!-- desktop two cols wrapper -->
-      <div class="dsk-cols" style="height:100%">
-        <div class="dsk-col">
-
-          <div class="score-banner">
-            <div class="score-half">
-              <div class="s-lbl">This Run</div>
-              <div class="s-num" id="runTotal">$0</div>
-              <div class="s-sub" id="runCount">0 cars</div>
-            </div>
-            <div class="score-divider"></div>
-            <div class="score-half score-half--right">
-              <div class="s-lbl">Best Run</div>
-              <div class="b-num" id="bestTotal">—</div>
-              <div class="beat tied" id="beatMsg">No record yet</div>
-            </div>
-          </div>
-
-          <div class="level-bar-wrap">
-            <div class="level-bar-info">
-              <span class="level-lbl"><span id="levelTitleSlot"></span><span class="level-num">LV <span id="levelNum">1</span></span></span>
-              <span class="level-xp" id="levelXp">0 / 100 XP</span>
-            </div>
-            <div class="level-bar-track"><div class="level-bar-fill" id="levelFill" style="width:0%"></div></div>
-          </div>
-
-          <div class="card">
-            <div class="card-title">Log a Car</div>
-            <div class="form-grid">
-              <div class="ff">
-                <label for="carName">Make / Model</label>
-                <div class="car-ac-wrap" id="carAcWrap">
-                  <input id="carName" type="text" placeholder="Ferrari 488" autocomplete="off" oninput="onCarNameInput(this.value)" onblur="setTimeout(closeCarAc,180)" onfocus="onCarNameInput(this.value)" title="Start typing to see suggestions from the database">
-                  <div class="car-ac-dropdown" id="carAcDropdown"></div>
-                </div>
-              </div>
-              <div class="ff">
-                <label for="carValue">Value ($)</label>
-                <input id="carValue" type="number" placeholder="280000" min="1000" max="50000000" inputmode="numeric" title="Enter value between $1,000 and $50,000,000">
-                <div class="ff-hint" id="carValueHint" style="display:none;font-size:0.65rem;color:var(--red);margin-top:4px;"></div>
-              </div>
-              <div class="ff">
-                <label for="carColor">Color</label>
-                <input id="carColor" type="text" placeholder="Rosso Corsa" autocomplete="off" title="Optional — e.g. Rosso Corsa, Midnight Blue">
-              </div>
-              <div class="ff">
-                <label for="carType">Type</label>
-                <select id="carType" title="Select the car category">
-                  <option value="" disabled selected>— Select Type —</option>
-                  <option value="supercar">Supercar</option>
-                  <option value="sports">Sports Car</option>
-                  <option value="muscle">Muscle Car</option>
-                  <option value="track">Track Car</option>
-                  <option value="exotic">Exotic</option>
-                  <option value="ev">EV</option>
-                  <option value="luxury">Luxury / Sedan</option>
-                  <option value="suv">Truck / SUV</option>
-                  <option value="classic">Classic / Vintage</option>
-                  <option value="hotrod">Hot Rod</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Photo + Location row -->
-            <div id="photoPreviewWrap" style="display:none"></div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
-              <label class="photo-btn" style="margin-bottom:0">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                <span>Photo</span>
-                <input type="file" accept="image/*" style="display:none" id="photoInput" onchange="handlePhotoInput(this)">
-              </label>
-              <button class="geo-btn" id="geoBtn" onclick="captureLocation()" style="margin:0">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;flex-shrink:0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Save Location
-              </button>
-            </div>
-            <div class="location-chip-row" id="locationChipRow" style="display:none"></div>
-
-            <!-- Quick Picks -->
-            <div class="qp-wrap" id="qpWrap">
-              <button class="qp-trigger" onclick="toggleQP()">
-                <span>Quick Picks</span>
-                <span class="qp-arrow" id="qpArrow">▾</span>
-              </button>
-              <div class="qp-dropdown">
-                <div class="qp-header">
-                  <button class="qp-edit-btn" id="qpEditBtn" onclick="toggleQPEdit()" title="Edit quick picks">EDIT</button>
-                  <button class="qp-clear-btn" id="qpClearBtn" onclick="clearAllQP()" style="display:none" title="Remove all quick picks">CLEAR ALL</button>
-                </div>
-                <div class="qp-search">
-                  <input type="text" id="qpSearch" placeholder="Search..." oninput="renderQPList(this.value)" autocomplete="off">
-                </div>
-                <div class="qp-list" id="qpList"></div>
-              </div>
-            </div>
-
-<!-- Two action buttons: run vs spotted -->
-            <div class="btn-row">
-              <button class="btn-run" onclick="logRun()" title="Add this car to your active spotting session (stacks multiple cars)">+ ADD TO RUN</button>
-              <button class="btn-spot" onclick="logSpotted()" title="Save this single car directly to your garage without a session">SAVE SOLO</button>
-            </div>
-            <div class="btn-hint-row">
-              <span>Stacks into the active run (below)</span>
-              <span>Saves this car alone</span>
-            </div>
-            <div class="section" id="favSection" style="margin:12px 0 0">
-              <div class="sec-row"><div class="sec-title">FAVORITES</div><button class="txt-btn" id="favToggle" onclick="goTo('garage')">Show All</button></div>
-              <div class="fav-scroll" id="favList"></div>
-            </div>
-          </div>
-
-        </div><!-- /dsk-col left -->
-
-        <div class="dsk-col">
-          <div class="sec-row">
-            <div class="sec-title">CURRENT RUN</div>
-            <button class="txt-btn" onclick="clearRun()" title="Remove all cars from this run">Clear</button>
-          </div>
-          <div id="runList">
-            <div class="empty-run"><span class="ei" style="font-size:1.4rem;display:block;margin-bottom:6px;opacity:0.3">&#8594;</span>Add cars to start a run</div>
-          </div>
-          <div id="endWrap" style="display:none">
-            <button class="btn-end" onclick="endRun()">End Run &amp; Save</button>
-          </div>
-        </div><!-- /dsk-col right -->
-
-      </div><!-- /dsk-cols -->
-    </div><!-- /page-spot -->
-
-    <!-- GARAGE PAGE -->
-    <div class="page" id="page-garage">
-      <div class="sec-row" style="margin-bottom:10px">
-        <div><div class="sec-title">YOUR GARAGE</div><div class="cs-garage-subtitle">Every car you spot lives here.</div></div>
-        <div style="display:flex;gap:6px;align-items:center;">
-          <div class="garage-view-toggle">
-            <button class="gv-btn active" id="gvGrid" onclick="setGarageView('grid')" title="Card view">Cards</button>
-            <button class="gv-btn" id="gvList" onclick="setGarageView('list')" title="List view">&#9776;</button>
-            <button class="gv-btn" id="gvMap" onclick="setGarageView('map')" title="Map view">Map</button>
-          </div>
-          <button class="txt-btn" id="sortBtn" onclick="cycleSort()" title="Cycle sort order">Value &#8595;</button>
-          <button class="txt-btn" onclick="openCarSearch()" title="Search car specs database">🔍 Search</button>
-        </div>
-      </div>
-      <div class="garage-sort-row">
-        <button class="gs-pill active" data-sort="allCars" onclick="setGarageSortHeader('allCars',this)" title="Show all cars, favorites first">All Cars</button>
-        <button class="gs-pill" data-sort="recent" onclick="setGarageSortHeader('recent',this)" title="Sort by most recently spotted">Recent</button>
-        <button class="gs-pill" data-sort="rarest" onclick="setGarageSortHeader('rarest',this)" title="Sort by rarity tier (Legend → Daily)">Rarest</button>
-        <button class="gs-pill" data-sort="highestXp" onclick="setGarageSortHeader('highestXp',this)" title="Sort by highest XP value">Highest XP</button>
-        <button class="gs-pill" data-sort="favorites" onclick="setGarageSortHeader('favorites',this)" title="Show only favorited cars">★ Favorites</button>
-      </div>
-      <div class="stats-row">
-        <div class="stat-box"><div class="stat-v" id="gCars">0</div><div class="stat-l">Cars</div></div>
-        <div class="stat-box"><div class="stat-v" id="gTotal">$0</div><div class="stat-l">Total</div></div>
-        <div class="stat-box"><div class="stat-v" id="gAvg">&#8212;</div><div class="stat-l">Avg</div></div>
-      </div>
-      <div class="garage-refresh-row">
-        <span>COLLECTION VIEW</span>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div class="garage-zoom"><span class="garage-zoom-label">ZOOM</span><button class="garage-zoom-btn" onclick="setGarageZoom(garageZoom-1)" title="Fewer, larger cards">−</button><span class="garage-zoom-val" id="garageZoomVal">3 ×</span><button class="garage-zoom-btn" onclick="setGarageZoom(garageZoom+1)" title="More, smaller cards">+</button></div>
-          <button class="garage-refresh-btn" id="garageRefreshBtn" onclick="refreshGarage()" title="Refresh your collection">↻ REFRESH</button>
-        </div>
-      </div>
-      <div id="garageDashboard"></div>
-      <div id="featuredSpot" style="display:none"></div>
-      <div id="journeySection" style="display:none"></div>
-      <div id="discSection" style="display:none">
-        <div class="sec-row" style="margin:4px 0 8px;">
-          <div class="sec-title">RECENT DISCOVERIES</div>
-          <button class="txt-btn" id="discClearBtn" onclick="clearDiscoveries()" style="display:none">Clear</button>
-        </div>
-        <div class="disc-scroll" id="discoveriesList"></div>
-      </div>
-      <div class="garage-search-wrap">
-        <input type="text" id="garageSearch" placeholder="Search cars..." oninput="onGarageSearch()" autocomplete="off" title="Search by car name, color, or location">
-        <button class="garage-search-clear" onclick="clearGarageSearch()" id="garageSearchClear" style="display:none" title="Clear search">✕</button>
-      </div>
-      <div class="garage-filter-row" id="garageFilterRow">
-        <button class="gf-pill active" data-filter="all" onclick="setGarageFilter('all',this)" title="Show all cars">All</button>
-        <button class="gf-pill" data-filter="supercar" onclick="setGarageFilter('supercar',this)" title="Filter supercars">🏎 Super</button>
-        <button class="gf-pill" data-filter="sports" onclick="setGarageFilter('sports',this)" title="Filter sports cars">🚗 Sports</button>
-        <button class="gf-pill" data-filter="muscle" onclick="setGarageFilter('muscle',this)" title="Filter muscle cars">🐎 Muscle</button>
-        <button class="gf-pill" data-filter="track" onclick="setGarageFilter('track',this)" title="Filter track cars">🏁 Track</button>
-        <button class="gf-pill" data-filter="exotic" onclick="setGarageFilter('exotic',this)" title="Filter exotic cars">🔥 Exotic</button>
-        <button class="gf-pill" data-filter="ev" onclick="setGarageFilter('ev',this)" title="Filter EVs">⚡ EV</button>
-        <button class="gf-pill" data-filter="legend" onclick="setGarageFilter('legend',this)" title="Filter $1M+ legends">👑 Legend+</button>
-        <button class="gf-pill" data-filter="hypercar" onclick="setGarageFilter('hypercar',this)" title="Filter $500K+ hypercars">🚀 Hyper+</button>
-      </div>
-      <div id="garageList">
-        <div class="empty-garage"><div style="font-size:2.5rem;margin-bottom:12px;opacity:0.5">🚗</div><strong style="color:var(--text2);font-size:0.85rem;display:block;margin-bottom:4px">Your garage is empty</strong><span style="color:var(--muted)">Log your first car from the Spot tab — use "+ ADD TO RUN" for a session or "SAVE SOLO" for a single car</span></div>
-      </div>
-    </div>
-
-    <!-- HISTORY PAGE -->
-    <div class="page" id="page-history">
-      <div id="recordWrap" style="display:none" class="record-card">
-        <div class="rec-lbl">All-time Best Run</div>
-        <div class="rec-val" id="recordVal">—</div>
-        <div class="rec-sub" id="recordSub"></div>
-      </div>
-      <div style="background:var(--surf);border:1px solid var(--border);border-radius:var(--r-md);padding:11px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
-        <div style="font-size:0.7rem;color:var(--text2);line-height:1.5;flex-shrink:0;"><strong style="color:var(--text)">Export</strong><br>No photos</div>
-        <button onclick="exportLocalData()" style="background:var(--accent);color:#0a0a0a;border:none;border-radius:7px;font-family:'Inter',sans-serif;font-size:0.8rem;letter-spacing:1.5px;padding:8px 13px;cursor:pointer;flex-shrink:0;" title="Download JSON backup without photos (smaller file)">EXPORT</button>
-        <div style="font-size:0.7rem;color:var(--text2);line-height:1.5;flex-shrink:0;"><strong style="color:var(--text)">With photos</strong><br>Large file</div>
-        <button onclick="exportAllData()" style="background:var(--accent);color:#0a0a0a;border:none;border-radius:7px;font-family:'Inter',sans-serif;font-size:0.8rem;letter-spacing:1.5px;padding:8px 13px;cursor:pointer;flex-shrink:0;" title="Download JSON backup WITH all photos (large file)">EXPORT</button>
-      </div>
-      <div style="background:var(--surf);border:1px solid var(--border);border-radius:var(--r-md);padding:11px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
-        <div style="font-size:0.7rem;color:var(--text2);line-height:1.5;"><strong style="color:var(--text)"> Import backup</strong><br>Restore from a carspotter-backup.json file</div>
-        <label style="background:var(--accent);color:#0a0a0a;border:none;border-radius:7px;font-family:'Inter',sans-serif;font-size:0.85rem;letter-spacing:1.5px;padding:8px 13px;cursor:pointer;flex-shrink:0;" title="Select a backup file to restore">
-          IMPORT
-          <input type="file" accept=".json" style="display:none" onchange="importFromFile(this)">
-        </label>
-      </div>
-      <div class="sec-title" style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">
-        <span>HISTORY</span>
-        <button class="txt-btn" onclick="toggleBulkMode()" id="bulkToggleBtn" title="Select multiple runs to delete">Select</button>
-      </div>
-      <div class="bulk-bar" id="bulkBar">
-        <span class="bulk-count" id="bulkCount">0 selected</span>
-        <button class="bulk-cancel-btn" onclick="toggleBulkMode()">Cancel</button>
-        <button class="bulk-del-btn" onclick="bulkDelete()"> Delete</button>
-      </div>
-      <div id="histList">
-        <div class="no-history"><div style="font-size:2rem;margin-bottom:10px;opacity:0.5">📋</div><strong style="color:var(--text2);font-size:0.85rem;display:block;margin-bottom:4px">No runs yet</strong>Complete a run or spot a solo car to see it here</div>
-      </div>
-    </div>
+<!-- MORE PAGE (full page instead of dropdown) -->
+<div class="page" id="page-more">
+<div class="sec-title" style="margin-bottom:16px">More</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
 
 
-    <!-- NOTES PAGE -->
-    <div class="page" id="page-voice">
-      <div class="notes-header">
-        <div>
-          <div class="sec-title">Notes</div>
-          <div class="notes-sub">Type or speak — saves automatically</div>
-        </div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <button class="mic-btn" id="micBtn" onclick="toggleMic()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-            <span class="mic-lbl" id="micLbl">Tap to speak</span>
-          </button>
-        </div>
-      </div>
-      <textarea id="notesArea" class="notes-area" placeholder="Ferrari 488 red&#10;Yellow Lambo&#10;Blue Porsche GT3 992&#10;&#10;Jot notes here — switch to Spot tab to log them."></textarea>
-    </div>
+<button class="more-page-tile" onclick="goTo('trips')" title="Create and track road trip journeys">
+<span class="more-tile-icon"><svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="22"><path d="M12 2v6"></path><path d="M4.93 10.93a1.43 1.43 0 0 0-2.85 0 1.43 1.43 0 0 0 0 2.85 1.43 1.43 0 0 0 0 2.85 1.43 1.43 0 0 0 0 2.85 1.43 1.43 0 0 0 2.85 0"></path><path d="M19.07 10.93a1.43 1.43 0 0 1 2.85 0 1.43 1.43 0 0 1 0 2.85 1.43 1.43 0 0 1 0 2.85 1.43 1.43 0 0 1 0 2.85 1.43 1.43 0 0 1-2.85 0"></path><path d="M14 22l-5-3 5-3v6z"></path><path d="M14 2v3"></path><path d="M12 2h4"></path><path d="M12 5H9.5a2.5 2.5 0 0 0 0 5H12"></path></svg></span>
+<span class="more-tile-label">Road Trips</span>
+</button>
+<button class="more-page-tile" onclick="goTo('history')" title="View completed runs and solo spots">
+<span class="more-tile-icon"><svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="22"><path d="M3 12h18M3 6h18M3 18h18"></path></svg></span>
+<span class="more-tile-label">History</span>
+</button>
 
 
-    <!-- ACHIEVEMENTS PAGE -->
-    <div class="page" id="page-achievements">
-      <div class="sec-title" style="margin-bottom:6px">Achievements</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">
-        <div class="ach-count-row" id="achCountRow" style="margin-bottom:0"><span id="achUnlocked">0</span> / <span id="achTotal">0</span> unlocked</div>
-        <button class="txt-btn" onclick="goTo('expeditions')" style="white-space:nowrap">See all →</button>
-      </div>
-      <div class="ach-grid" id="achGrid"></div>
-    </div>
 
-    <!-- SETTINGS PAGE -->
-    <div class="page" id="page-settings">
-      <div class="sec-title" style="margin-bottom:14px">Settings</div>      <!-- Themes -->
-      <div class="card setting-card">
-        <div class="setting-head">
-          <div class="setting-icon">Theme</div>
-          <div class="setting-copy">
-            <div class="card-title">THEME</div>
-            <div class="setting-desc">Tune CarSpotter''s look with bold palettes, then add carbon fiber texture for extra depth.</div>
-          </div>
-        </div>
-        <div class="theme-bar" id="themeBar"></div>
-        <div style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;margin-top:8px;" id="themeName">Default</div>
-        <div style="font-size:0.6rem;color:var(--muted);margin-top:4px;line-height:1.5;">Dark: Default  Carbon  Stealth  Inferno  Cobalt  Acid<br>Light: Light &nbsp;|&nbsp; Special: Cyberpunk  Retro 80s</div>
-        <div class="setting-row" style="border-top:none;padding-top:10px;">
-          <div class="carbon-preview"></div>
-          <span style="font-size:0.78rem;color:var(--text2);flex:1;">Carbon fiber texture on surfaces</span>
-          <button class="toggle-pill" id="carbonToggle" onclick="toggleCarbon()" title="Toggle carbon fiber visual effect"><div class="toggle-knob"></div></button>
-        </div>
-      </div>
+<button class="more-page-tile" onclick="goTo('settings')" title="App settings and preferences">
+<span class="more-tile-icon"><svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="22"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span>
+<span class="more-tile-label">Settings</span>
+</button>
+<button class="more-page-tile" onclick="openCarSearch()" title="Search car specs and auto-fill form">
+<span class="more-tile-icon"><svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="22"><circle cx="11" cy="11" r="8"></circle><line x1="21" x2="16.65" y1="21" y2="16.65"></line></svg></span>
+<span class="more-tile-label">Car Search</span>
+</button>
 
-      <!-- Offline Status -->
-      <div class="card setting-card">
-        <div class="setting-head">
-          <div class="setting-icon">Sync</div>
-          <div class="setting-copy">
-            <div class="card-title">SYNC & OFFLINE</div>
-            <div class="setting-desc">Every run saves on-device first, then syncs to the cloud when you are back online.</div>
-          </div>
-        </div>
-        <div class="setting-row" style="border-top:none;padding-top:0;margin-top:0;">
-          <div id="offlineStatusDot" style="width:10px;height:10px;border-radius:50%;background:var(--green);flex-shrink:0;"></div>
-          <span id="offlineStatusText" style="font-size:0.78rem;color:var(--text2);flex:1;">Online - syncing to cloud</span>
-        </div>
-        <div id="offlineQueueInfo" style="display:none;font-size:0.65rem;color:var(--accent2);margin-top:6px;letter-spacing:1px;"></div>
-      </div>
+</div>
+</div>
+<!-- STATS PAGE -->
 
-      <!-- Sound FX -->
-      <div class="card setting-card">
-        <div class="setting-head">
-          <div class="setting-icon">Audio</div>
-          <div class="setting-copy">
-            <div class="card-title">SOUND EFFECTS</div>
-            <div class="setting-desc">Keep the app quiet or add feedback when you log cars and finish runs.</div>
-          </div>
-        </div>
-        <div class="setting-row sound-toggle" style="border-top:none;padding-top:0;margin-top:0;">
-          <span style="font-size:0.78rem;color:var(--text2);flex:1;">Play sounds when logging cars</span>
-          <button class="toggle-pill" id="soundToggle" onclick="toggleSound()" title="Toggle sound effects"><div class="toggle-knob"></div></button>
-        </div>
-        <div class="setting-row sound-toggle" style="border-top:none;padding-top:0;margin-top:0;">
-          <span style="font-size:0.78rem;color:var(--text2);flex:1;">Vibrate when logging cars</span>
-          <button class="toggle-pill" id="vibeToggle" onclick="toggleVibe()" title="Toggle haptic feedback"><div class="toggle-knob"></div></button>
-        </div>
-        <div class="setting-row sound-toggle" style="border-top:none;padding-top:0;margin-top:0;">
-          <span style="font-size:0.78rem;color:var(--text2);flex:1;">Collector card animations</span>
-          <button class="toggle-pill" id="ccAnimToggle" onclick="toggleCCAnim()" title="Enable/disable collector card reveal animations"><div class="toggle-knob"></div></button>
-        </div>
-      </div>
+<!-- COLLECTOR BOOK PAGE -->
 
-      <!-- Aliases -->
-      <div class="card setting-card">
-        <div class="setting-head">
-          <div class="setting-icon">Names</div>
-          <div class="setting-copy">
-            <div class="card-title">CAR NICKNAMES</div>
-            <div class="setting-desc">Map abbreviations to full names so your stats and garage stay tidy. Example: GT3 RS -> Porsche 911 GT3 RS.</div>
-          </div>
-        </div>
-        <button class="setting-link" onclick="openAliasModal()" title="Manage car nickname shortcuts">
-          <span>Manage nicknames</span>
-          <span id="aliasCount" style="font-family:'Inter',sans-serif;font-size:0.9rem;color:var(--accent);letter-spacing:1px;">0 saved</span>
-        </button>
-      </div>
+<!-- EXPEDITIONS PAGE (unified challenge collection: expeditions + achievements) -->
 
-      <div class="card setting-card">
-        <div class="setting-head">
-          <div class="setting-icon">Guide</div>
-          <div class="setting-copy">
-            <div class="card-title">HELP & ONBOARDING</div>
-            <div class="setting-desc">Replay the interactive walkthrough — practice logging a run, explore a demo Garage, and see why signing in matters. Uses demo data only; nothing touches your real collection.</div>
-          </div>
-        </div>
-        <button class="setting-link" onclick="openOnboarding(true)" title="Replay the interactive walkthrough">
-          <span>Show interactive walkthrough</span>
-          <span>Open</span>
-        </button>
-      </div>
-
-      <!-- Default Sort -->
-      <div class="card setting-card">
-        <div class="setting-head">
-          <div class="setting-icon">Sort</div>
-          <div class="setting-copy">
-            <div class="card-title">DEFAULT GARAGE SORT</div>
-            <div class="setting-desc">Choose how your garage is ordered when you open it.</div>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px;">
-          <button class="sort-pref-btn" id="spb-desc" onclick="setSortPref('desc')">$ High–Low</button>
-          <button class="sort-pref-btn" id="spb-asc"  onclick="setSortPref('asc')">$ Low–High</button>
-          <button class="sort-pref-btn" id="spb-alpha" onclick="setSortPref('alpha')">A–Z</button>
-        </div>
-      </div>
-
-      <!-- Compact mode -->
-      <div class="card setting-card">
-        <div class="setting-head">
-          <div class="setting-icon">View</div>
-          <div class="setting-copy">
-            <div class="card-title">COMPACT GARAGE</div>
-            <div class="setting-desc">Shrink garage rows to fit more cars on screen at once.</div>
-          </div>
-        </div>
-        <div class="setting-row" style="border-top:none;padding-top:0;margin-top:10px;">
-          <span style="font-size:0.78rem;color:var(--text2);flex:1;">Compact list rows</span>
-          <button class="toggle-pill" id="compactToggle" onclick="toggleCompactMode()" title="Shrink garage rows to fit more cars on screen"><div class="toggle-knob"></div></button>
-        </div>
-      </div>
-
-      <!-- Data -->
-      <div class="card setting-card">
-        <div class="setting-head">
-          <div class="setting-icon">Data</div>
-          <div class="setting-copy">
-            <div class="card-title">EXPORT & BACKUP</div>
-            <div class="setting-desc">Download all your runs, garage, aliases, settings as JSON. Import later to restore.</div>
-          </div>
-        </div>
-        <button class="setting-link" onclick="exportLocalData()">
-          <span>Export (no photos)</span>
-          <span style="color:var(--accent)">↓ JSON</span>
-        </button>
-        <button class="setting-link" onclick="exportAllData()">
-          <span>Export WITH photos</span>
-          <span style="color:var(--accent)">↓ JSON (large)</span>
-        </button>
-      </div>
-
-      <!-- Danger zone -->
-      <div class="card setting-card" style="border-color:#ff444433;">
-        <div class="setting-head">
-          <div class="setting-icon" style="color:#ff4444">⚠️</div>
-          <div class="setting-copy">
-            <div class="card-title" style="color:#ff4444">DANGER ZONE</div>
-            <div class="setting-desc">Permanently delete all local data. This cannot be undone.</div>
-          </div>
-        </div>
-        <button class="setting-link" style="color:#ff4444" onclick="clearAllData()" title="Permanently delete ALL local data - cannot be undone">
-          <span>Clear all local data</span>
-          <span>Delete</span>
-        </button>
-      </div>
-    </div><!-- NEWS PAGE -->
-    <div class="page" id="page-leaderboard">
-      <div class="leaderboard-topbar">
-        <div class="sec-title">Leaderboard</div>
-        <button class="txt-btn" onclick="loadLeaderboard(true)">Refresh</button>
-      </div>
-      <div class="leaderboard-sub">All completed runs across CarSpotter, ranked by total dollar amount.</div>
-      <div id="leaderboardList"><div class="lb-loading">Loading leaderboard...</div></div>
-    </div>
-
-    <div class="page" id="page-news">
-      <div class="sec-title" style="margin-bottom:10px">Car News</div>
-      <div id="newsHeadliner" class="news-headliner" style="display:none" onclick="window.open(window._hlLink || '#', '_blank')"></div>
-      <div id="newsSources" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;overflow-x:auto;padding-bottom:2px;"></div>
-      <div id="newsList"></div>
-    </div>
-
-    <!-- MORE PAGE (full page instead of dropdown) -->
-    <div class="page" id="page-more">
-      <div class="sec-title" style="margin-bottom:16px">More</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <button class="more-page-tile" onclick="goTo('book')" title="View your collector book by manufacturer">
-          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
-          <span class="more-tile-label">Collector Book</span>
-        </button>
-        <button class="more-page-tile" onclick="goTo('expeditions')" title="Challenges and achievements to complete">
-          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
-          <span class="more-tile-label">Expeditions</span>
-        </button>
-        <button class="more-page-tile" onclick="goTo('trips')" title="Create and track road trip journeys">
-          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6"/><path d="M4.93 10.93a1.43 1.43 0 0 0-2.85 0 1.43 1.43 0 0 0 0 2.85 1.43 1.43 0 0 0 0 2.85 1.43 1.43 0 0 0 0 2.85 1.43 1.43 0 0 0 2.85 0"/><path d="M19.07 10.93a1.43 1.43 0 0 1 2.85 0 1.43 1.43 0 0 1 0 2.85 1.43 1.43 0 0 1 0 2.85 1.43 1.43 0 0 1 0 2.85 1.43 1.43 0 0 1-2.85 0"/><path d="M14 22l-5-3 5-3v6z"/><path d="M14 2v3"/><path d="M12 2h4"/><path d="M12 5H9.5a2.5 2.5 0 0 0 0 5H12"/></svg></span>
-          <span class="more-tile-label">Road Trips</span>
-        </button>
-        <button class="more-page-tile" onclick="goTo('history')" title="View completed runs and solo spots">
-          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg></span>
-          <span class="more-tile-label">History</span>
-        </button>
-        <button class="more-page-tile" onclick="goTo('leaderboard')" title="Global leaderboard of top runs">
-          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
-          <span class="more-tile-label">Leaderboard</span>
-        </button>
-        <button class="more-page-tile" onclick="goTo('expeditions')" title="Challenges and achievements to complete">
-          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></span>
-          <span class="more-tile-label">Achievements</span>
-        </button>
-        <button class="more-page-tile" onclick="goTo('news')" title="Latest car news from multiple sources">
-          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8z"/></svg></span>
-          <span class="more-tile-label">Car News</span>
-        </button>
-        <button class="more-page-tile" onclick="goTo('settings')" title="App settings and preferences">
-          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
-          <span class="more-tile-label">Settings</span>
-        </button>
-        <button class="more-page-tile" onclick="openCarSearch()" title="Search car specs and auto-fill form">
-          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-          <span class="more-tile-label">Car Search</span>
-        </button>
-        <button class="more-page-tile" onclick="goTo('stats')" title="Detailed statistics and charts">
-          <span class="more-tile-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg></span>
-          <span class="more-tile-label">My Stats</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- STATS PAGE -->
-    <div class="page" id="page-stats">
-      <div class="sec-row" style="margin-bottom:14px">
-        <div class="sec-title">My Stats</div>
-      </div>
-      <div id="st-summary" class="stats-row"></div>
-      <div class="card">
-        <div class="card-title">Top Spots by Value</div>
-        <div id="st-topcars"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Rarity Breakdown</div>
-        <div id="st-rarity"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Most Spotted Makes</div>
-        <div id="st-makes"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">By Type</div>
-        <div id="st-types"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Run History (Last 10)</div>
-        <div id="st-chart"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Best Day of Week</div>
-        <div id="st-days"></div>
-      </div>
-    </div>
-
-    <!-- COLLECTOR BOOK PAGE -->
-    <div class="page" id="page-book">
-      <div class="book-hero" id="bookHero"></div>
-      <div class="sec-row" style="margin-bottom:10px">
-        <div class="sec-title">MANUFACTURER SHELVES</div>
-      </div>
-      <div class="book-make-grid" id="bookMakeGrid"></div>
-      <div class="mystery-hint-chip">👁 Silhouettes are undiscovered models. Tap to peek at what you're hunting.</div>
-    </div>
-
-    <!-- EXPEDITIONS PAGE (unified challenge collection: expeditions + achievements) -->
-    <div class="page" id="page-expeditions">
-      <div class="expo-hero">
-        <div class="eh-icon">🗺️</div>
-        <div>
-          <div class="eh-title">ACHIEVEMENTS & EXPEDITIONS</div>
-          <div class="eh-sub">One collection · auto-earn or claim XP rewards</div>
-        </div>
-      </div>
-      <div id="expoList"></div>
-    </div>
-
-    <!-- ROAD TRIPS PAGE -->
-    <div class="page" id="page-trips">
-      <div class="trip-hero" id="tripHero"></div>
-      <div class="trip-create" id="tripCreateCard">
-        <div class="tc-title">START A ROAD TRIP</div>
-        <div class="trip-form-row">
-          <input type="text" id="tripNameInput" placeholder="Trip name (e.g. Tail of the Dragon)" autocomplete="off">
-          <select id="tripEmojiSelect">
-            <option value="🛣️">🛣️ Highway</option>
-            <option value="⛰️">⛰️ Mountains</option>
-            <option value="🌊">🌊 Coast</option>
-            <option value="🌆">🌆 City</option>
-            <option value="🏜️">🏜️ Desert</option>
-            <option value="🌲">🌲 Forest</option>
-            <option value="🔥">🔥 Canyon</option>
-            <option value="🎢">🎢 Twisty Road</option>
-          </select>
-        </div>
-        <button class="trip-create-btn" onclick="createTrip()">LAUNCH TRIP</button>
-      </div>
-      <div class="sec-row" style="margin-bottom:10px">
-        <div class="sec-title">YOUR TRIPS</div>
-      </div>
-      <div class="trip-list" id="tripList"></div>
-    </div>
-
-  </div><!-- /pages -->
-
-  <!-- UNDO BAR -->
-  <div class="undo-bar" id="undoBar">
-    <span class="undo-msg" id="undoMsg">Car removed</span>
-    <button class="undo-btn" onclick="doUndo()">↩ UNDO</button>
-  </div>
-
-  <nav class="bottom-nav" id="bottomNav">
-    <!-- desktop logo injected by JS -->
-    <button class="nav-btn active" onclick="goTo('spot')" id="nav-spot">
-      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/></svg></span>
-      <span class="nav-label">Spot</span>
-    </button>
-    <button class="nav-btn" onclick="goTo('garage')" id="nav-garage">
-      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg></span>
-      <span class="nav-label">Garage</span>
-      <span class="nav-badge" id="navGarageBadge" style="display:none">0</span>
-    </button>
-    <button class="nav-btn" onclick="goTo('voice')" id="nav-voice">
-      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span>
-      <span class="nav-label">Notes</span>
-    </button>
-    <button class="nav-btn" onclick="goTo('more')" id="nav-more">
-      <span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.3" fill="currentColor" stroke="none"/></svg></span>
-      <span class="nav-label">More</span>
-    </button>
-  </nav>
-
-  <!-- More dropdown removed — now a full page (page-more) -->
-
+<!-- ROAD TRIPS PAGE -->
+<div class="page" id="page-trips">
+<div class="trip-hero" id="tripHero"></div>
+<div class="trip-create" id="tripCreateCard">
+<div class="tc-title">START A ROAD TRIP</div>
+<div class="trip-form-row">
+<input autocomplete="off" id="tripNameInput" placeholder="Trip name (e.g. Tail of the Dragon)" type="text"/>
+<select id="tripEmojiSelect">
+<option value="🛣️">🛣️ Highway</option>
+<option value="⛰️">⛰️ Mountains</option>
+<option value="🌊">🌊 Coast</option>
+<option value="🌆">🌆 City</option>
+<option value="🏜️">🏜️ Desert</option>
+<option value="🌲">🌲 Forest</option>
+<option value="🔥">🔥 Canyon</option>
+<option value="🎢">🎢 Twisty Road</option>
+</select>
+</div>
+<button class="trip-create-btn" onclick="createTrip()">LAUNCH TRIP</button>
+</div>
+<div class="sec-row" style="margin-bottom:10px">
+<div class="sec-title">YOUR TRIPS</div>
+</div>
+<div class="trip-list" id="tripList"></div>
+</div>
+</div><!-- /pages -->
+<!-- UNDO BAR -->
+<div class="undo-bar" id="undoBar">
+<span class="undo-msg" id="undoMsg">Car removed</span>
+<button class="undo-btn" onclick="doUndo()">&larrhk; UNDO</button>
+</div>
+<nav class="bottom-nav" id="bottomNav">
+<!-- desktop logo injected by JS -->
+<button class="nav-btn active" id="nav-spot" onclick="goTo('spot')">
+<span class="nav-icon"><svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="20"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle><line x1="12" x2="12" y1="2" y2="5"></line><line x1="12" x2="12" y1="19" y2="22"></line><line x1="2" x2="5" y1="12" y2="12"></line><line x1="19" x2="22" y1="12" y2="12"></line></svg></span>
+<span class="nav-label">Spot</span>
+</button>
+<button class="nav-btn" id="nav-garage" onclick="goTo('garage')">
+<span class="nav-icon"><svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="20"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9,22 9,12 15,12 15,22"></polyline></svg></span>
+<span class="nav-label">Garage</span>
+<span class="nav-badge" id="navGarageBadge" style="display:none">0</span>
+</button>
+<button class="nav-btn" id="nav-voice" onclick="goTo('voice')">
+<span class="nav-icon"><svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="20"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="23"></line><line x1="8" x2="16" y1="23" y2="23"></line></svg></span>
+<span class="nav-label">Notes</span>
+</button>
+<button class="nav-btn" id="nav-more" onclick="goTo('more')">
+<span class="nav-icon"><svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20"><circle cx="5" cy="12" fill="currentColor" r="1.3" stroke="none"></circle><circle cx="12" cy="12" fill="currentColor" r="1.3" stroke="none"></circle><circle cx="19" cy="12" fill="currentColor" r="1.3" stroke="none"></circle></svg></span>
+<span class="nav-label">More</span>
+</button>
+</nav>
+<!-- More dropdown removed — now a full page (page-more) -->
 </div><!-- /app-shell -->
-
 <div class="road-deco"><div class="rdl"></div><div class="rdl"></div><div class="rdl"></div></div>
-
 <div class="toast" id="toast"></div>
 <div class="act-panel" id="actPanel">
-  <div class="act-head">
-    <div class="act-title">Activity</div>
-    <button class="act-clear" onclick="clearActivity()">Clear</button>
-  </div>
-  <div class="act-list" id="actList"></div>
+<div class="act-head">
+<div class="act-title">Activity</div>
+<button class="act-clear" onclick="clearActivity()">Clear</button>
 </div>
-<div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v32</div>
-
+<div class="act-list" id="actList"></div>
+</div>
+<div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE &mdash; Saves locally, syncs when back</span></div>
+<div class="version-tag" id="versionTag">v33</div>
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
 var _pendingKey = 'firebase:pendingRedirect:AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug:[DEFAULT]';
@@ -3780,8 +3661,6 @@ let bulkMode     = false;
 let bulkSelected = new Set();
 let soundEnabled = localStorage.getItem('cs_sound') !== 'off';
 let aliases      = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
-let leaderboardRuns = [];
-let leaderboardLoaded = false;
 let bestFromLB = parseInt(localStorage.getItem('cs_best_lb') || '0');
 let favoriteNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
 let currentSpotLocation = JSON.parse(localStorage.getItem('cs_pending_loc') || 'null');
@@ -3934,7 +3813,7 @@ let garageView   = 'grid';
 let garageZoom = 3;
 
 // Navigation & page transition state
-let pageOrder = ['spot','garage','voice','history','achievements','settings','news','leaderboard','book','expeditions','trips','more'];
+let pageOrder = ['spot','garage','voice','history','achievements','settings','trips','more'];
 let currentPage = 'spot';
 let runTotalAnimated = 0;
 
@@ -4890,7 +4769,6 @@ function _txWriteCore(opts) {
       if (_syncRetryTimer) { clearTimeout(_syncRetryTimer); _syncRetryTimer = null; }
       try { localStorage.removeItem('cs_sync_last_err'); } catch(e){}
       setSyncDot('ok');
-      leaderboardLoaded = false;
       _lastPushTs = Date.now();
       try { localStorage.setItem('cs_cloud_current_ts', String(_lastPushTs)); } catch(e){}
       return true;
@@ -4936,35 +4814,6 @@ window.addEventListener('online', function() {
 });
 
 //  THEMES 
-
-async function publishRunToLeaderboard(run) {
-  if (!currentUser || !run || run.spotted) return;
-  // Rate-limit: only publish once per 10 minutes to prevent quota abuse
-  const lastPub = parseInt(localStorage.getItem('cs_lb_last') || '0');
-  const now = Date.now();
-  if (now - lastPub < 10 * 60 * 1000) {
-    console.log('Leaderboard publish throttled — wait', Math.ceil((10*60*1000-(now-lastPub))/1000), 's');
-    return;
-  }
-  try {
-    await db.collection('leaderboardRuns').doc(String(run.id)).set({
-      runId: String(run.id),
-      userId: currentUser.uid,
-      name: currentUser.displayName || 'Spotter',
-      photo: currentUser.photoURL || '',
-      total: Number(run.total) || 0,
-      date: run.date || '',
-      cars: Array.isArray(run.cars) ? run.cars.length : 0,
-      headliner: run.headliner?.name || (run.cars?.[0]?.name || ''),
-      createdAt: run.id || Date.now(),
-      updatedAt: Date.now()
-    }, { merge: true });
-    localStorage.setItem('cs_lb_last', String(now));
-    leaderboardLoaded = false;
-  } catch (e) {
-    console.error('Leaderboard publish failed', e);
-  }
-}
 
 const THEMES = [
   { name:'Default',      accent:'#f5c842', accent2:'#ff5733', bg:'#0a0a0a', surf:'#141414', surf2:'#1e1e22', bodyClass:'', unlock:1 },
@@ -5619,11 +5468,6 @@ function goTo(page) {
     if (page==='history')      renderHistory();
     if (page==='achievements') renderAchievements();
     if (page==='settings')     { renderThemeBar(); initSoundToggle(); initVibeToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); initSortPrefBtns(); applyCompactMode(); }
-    if (page==='news')         { if (!newsLoaded) { newsLoaded=true; renderNewsSources(); } loadNews(); }
-    if (page==='leaderboard')  loadLeaderboard(true);
-    if (page==='stats')        renderStats();
-    if (page==='book')         renderBook();
-    if (page==='expeditions')  renderExpeditions();
     if (page==='trips')        renderTrips();
     if (page==='spot')         { renderHomeFav(); setTimeout(startFavRotation, 250); }
   });
@@ -6071,7 +5915,6 @@ function endRun() {
     localStorage.setItem('cs_best_lb', String(bestFromLB));
   }
   saveToCloud();
-  publishRunToLeaderboard(run);
   currentRun = [];
   headlinerIdx = -1;
   saveCurrentRun();
@@ -9785,14 +9628,9 @@ var _cmdNav = [
   { k:'garage',        p:'garage' },
   { k:'history',       p:'history' },
   { k:'achievement',   p:'achievements' },
-  { k:'expedition',    p:'expeditions' },
-  { k:'leaderboard',   p:'leaderboard' },
-  { k:'book',          p:'book' },
   { k:'trip',          p:'trips' },
   { k:'more',          p:'more' },
   { k:'settings',      p:'settings' },
-  { k:'news',          p:'news' },
-  { k:'stats',         p:'stats' },
   { k:'notes',         p:'voice' },
   { k:'voice',         p:'voice' },
   { k:'home',          p:'spot' },
@@ -9833,7 +9671,7 @@ function _parseSmartCmd(cmd) {
   var guessed = _locParseCar(c);
   if (guessed && guessed.name) return { action:'log', name:guessed.name, value:guessed.value, color:guessed.color, type:guessed.type };
 
-  return { action:'toast', msg:'Try "log a Ferrari 488", "garage", "stats", or "how many cars"' };
+  return { action:'toast', msg:'Try "log a Ferrari 488", "garage", "history", or "how many cars"' };
 }
 
 function runSmartCmd() {
@@ -9901,315 +9739,9 @@ document.addEventListener('click', e => {
   }
 });
 
-//  STATS 
-function renderStats() {
-  // Gather all cars from all runs + spots
-  const allCars = allRuns.flatMap(r => r.cars || []);
-  const runs = allRuns.filter(r => !r.spotted);
-  const spots = allRuns.filter(r => r.spotted);
-
-  //  Summary boxes 
-  const totalValue = allCars.reduce((s,c) => s + (c.value||0), 0);
-  const bestRun = runs.length ? runs.reduce((a,b) => a.total>b.total?a:b) : null;
-  document.getElementById('st-summary').innerHTML = `
-    <div class="stat-box"><div class="stat-v">${allCars.length}</div><div class="stat-l">Total Cars</div></div>
-    <div class="stat-box"><div class="stat-v">${fmt(totalValue)}</div><div class="stat-l">Total Value</div></div>
-    <div class="stat-box"><div class="stat-v">${runs.length}</div><div class="stat-l">Runs</div></div>`;
-
-  //  Achievements 
-  renderAchievements();
-
-  //  Top cars by value 
-  const topCars = [...allCars].sort((a,b) => b.value-a.value).slice(0,5);
-  const maxVal = topCars[0]?.value || 1;
-  document.getElementById('st-topcars').innerHTML = topCars.length
-    ? topCars.map(c => `<div class="st-bar-wrap">
-        <div class="st-bar-label"><span class="st-bar-name">${carTypeLabel(c.type)} ${c.name}</span><span class="st-bar-val">${fmt(c.value)}</span></div>
-        <div class="st-bar-track"><div class="st-bar-fill" style="width:${Math.round(c.value/maxVal*100)}%"></div></div>
-      </div>`).join('')
-    : '<div class="st-empty">Log some cars to see your top spots here</div>';
-
-  //  Most spotted makes 
-  const makeCounts = {};
-  allCars.forEach(c => {
-    const make = c.name.trim().split(' ')[0];
-    makeCounts[make] = (makeCounts[make]||0) + 1;
-  });
-  const topMakes = Object.entries(makeCounts).sort((a,b)=>b[1]-a[1]).slice(0,6);
-  const maxMake = topMakes[0]?.[1] || 1;
-  document.getElementById('st-makes').innerHTML = topMakes.length
-    ? topMakes.map(([make,count]) => `<div class="st-bar-wrap">
-        <div class="st-bar-label"><span class="st-bar-name">${make}</span><span class="st-bar-val">${count}x</span></div>
-        <div class="st-bar-track"><div class="st-bar-fill" style="width:${Math.round(count/maxMake*100)}%"></div></div>
-      </div>`).join('')
-    : '<div class="st-empty">No data yet — start spotting</div>';
-
-  //  By type — group by category, hide unknown/empty types
-  const typeMap = {'supercar':'🏎️ Supercar','sports':'🚗 Sports','muscle':'🐎 Muscle','track':'🏁 Track','exotic':'🔥 Exotic','ev':'⚡ EV','luxury':'👑 Luxury','suv':'🛻 SUV','classic':'🕹️ Classic','hotrod':'🔧 Hot Rod'};
-  const typeCounts = {};
-  allCars.forEach(c => {
-    var key = c.type || '';
-    var label = typeMap[key] || '';
-    if (label) typeCounts[label] = (typeCounts[label]||0) + 1;
-  });
-  const topTypes = Object.entries(typeCounts).sort((a,b)=>b[1]-a[1]);
-  const maxType = topTypes[0]?.[1] || 1;
-  document.getElementById('st-types').innerHTML = topTypes.length
-    ? topTypes.map(([type,count]) => `<div class="st-bar-wrap">
-        <div class="st-bar-label"><span class="st-bar-name">${type}</span><span class="st-bar-val">${count}x</span></div>
-        <div class="st-bar-track"><div class="st-bar-fill" style="width:${Math.round(count/maxType*100)}%"></div></div>
-      </div>`).join('')
-    : '<div class="st-empty">No data yet</div>';
-
-  //  Run chart (last 10 runs) 
-  const chartRuns = runs.slice(0,10).reverse();
-  const maxChart = Math.max(...chartRuns.map(r=>r.total), 1);
-  document.getElementById('st-chart').innerHTML = chartRuns.length >= 2
-    ? `<div class="st-chart-bar-wrap">${chartRuns.map(r =>
-        `<div class="st-chart-bar" style="height:${Math.max(8,Math.round(r.total/maxChart*100))}%" title="${fmt(r.total)}"></div>`
-      ).join('')}</div>
-      <div class="st-chart-labels">${chartRuns.map(r =>
-        `<div class="st-chart-lbl">${r.date.split(',')[0]}</div>`
-      ).join('')}</div>`
-    : '<div class="st-empty">Complete 2+ runs to see your trend</div>';
-
-  //  Best day of week 
-  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const dayCounts = {Sun:0,Mon:0,Tue:0,Wed:0,Thu:0,Fri:0,Sat:0};
-  allRuns.forEach(r => {
-    if (r.id) { const d = new Date(r.id); dayCounts[days[d.getDay()]] += r.total||0; }
-  });
-  const maxDay = Math.max(...Object.values(dayCounts), 1);
-  document.getElementById('st-days').innerHTML = `
-    <div class="st-chart-bar-wrap">${days.map(d =>
-      `<div class="st-chart-bar" style="height:${Math.max(4,Math.round(dayCounts[d]/maxDay*100))}%;${dayCounts[d]===maxDay?'background:var(--accent2)':''}" title="${d}: ${fmt(dayCounts[d])}"></div>`
-    ).join('')}</div>
-    <div class="st-chart-labels">${days.map(d =>
-      `<div class="st-chart-lbl" style="${dayCounts[d]===maxDay?'color:var(--accent2)':''}">${d}</div>`
-    ).join('')}</div>`;
-
-  //  Rarity Pie Chart 
-  const rarityBuckets = [
-    { label:'Legend',   color:'#d4a843', min:1000000 },
-    { label:'Hypercar', color:'#e05240', min:500000  },
-    { label:'Supercar', color:'#c084fc', min:150000  },
-    { label:'Sports',   color:'#60a5fa', min:50000   },
-    { label:'Daily',    color:'#4b5563', min:0        },
-  ];
-  const rarityCounts = {};
-  rarityBuckets.forEach(b => rarityCounts[b.label] = 0);
-  allCars.forEach(c => {
-    const v = c.value || 0;
-    const bucket = rarityBuckets.find(b => v >= b.min) || rarityBuckets[rarityBuckets.length-1];
-    rarityCounts[bucket.label]++;
-  });
-  const totalForPie = allCars.length || 1;
-  let startAng = -Math.PI/2;
-  const pieR = 50, pcx = 60, pcy = 60;
-  const pieSlices = rarityBuckets.filter(b => rarityCounts[b.label] > 0).map(b => {
-    const pct = rarityCounts[b.label] / totalForPie;
-    const sweep = pct * 2 * Math.PI;
-    const x1 = pcx + pieR * Math.cos(startAng), y1 = pcy + pieR * Math.sin(startAng);
-    startAng += sweep;
-    const x2 = pcx + pieR * Math.cos(startAng), y2 = pcy + pieR * Math.sin(startAng);
-    const large = sweep > Math.PI ? 1 : 0;
-    return { path: `M${pcx},${pcy} L${x1.toFixed(2)},${y1.toFixed(2)} A${pieR},${pieR},0,${large},1,${x2.toFixed(2)},${y2.toFixed(2)} Z`, color: b.color, label: b.label, count: rarityCounts[b.label], pct: Math.round(pct*100) };
-  });
-  const pieSvg = pieSlices.length > 1
-    ? `<svg class="pie-svg" width="120" height="120" viewBox="0 0 120 120">${pieSlices.map(s=>`<path d="${s.path}" fill="${s.color}" opacity="0.85"/>`).join('')}<circle cx="60" cy="60" r="28" fill="var(--surf)"/></svg>`
-    : (pieSlices.length === 1 ? `<svg class="pie-svg" width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" fill="${pieSlices[0].color}" opacity="0.85"/><circle cx="60" cy="60" r="28" fill="var(--surf)"/></svg>` : '');
-  const rEl = document.getElementById('st-rarity');
-  if (rEl) {
-    if (!allCars.length) { rEl.innerHTML = '<div class="st-empty">No data yet</div>'; }
-    else { rEl.innerHTML = `<div class="pie-wrap">${pieSvg}<div class="pie-legend">${pieSlices.map(s=>`<div class="pie-leg-item"><div class="pie-leg-dot" style="background:${s.color}"></div><span>${s.label}</span><span class="pie-leg-val">${s.count} (${s.pct}%)</span></div>`).join('')}</div></div>`; }
-  }
-}
-
-//  NEWS 
-
-function fmtLeaderboardDate(v) {
-  return v || 'Unknown date';
-}
-
-async function loadLeaderboard(force) {
-  if (leaderboardLoaded && !force) { renderLeaderboard(); return; }
-  const el = document.getElementById('leaderboardList');
-  if (el) el.innerHTML = '<div class="lb-loading">Loading leaderboard...</div>';
-  try {
-    const snap = await db.collection('leaderboardRuns').orderBy('total', 'desc').limit(100).get();
-    leaderboardRuns = snap.docs.map(doc => {
-      const data = doc.data() || {};
-      return {
-        userId: data.userId || '',
-        name: data.name || 'Spotter',
-        total: Number(data.total) || 0,
-        date: data.date || '',
-        cars: Number(data.cars) || 0,
-        headliner: data.headliner || '',
-        isMe: !!currentUser && currentUser.uid === data.userId
-      };
-    });
-    // If no global entries, seed with current user's best runs
-    if (!leaderboardRuns.length) {
-      const myRuns = allRuns.filter(r => !r.spotted && r.total > 0)
-        .sort((a,b) => b.total - a.total).slice(0, 5);
-      leaderboardRuns = myRuns.map(r => ({
-        userId: currentUser?.uid || '',
-        name: currentUser?.displayName || 'You',
-        total: r.total,
-        date: r.date,
-        cars: (r.cars||[]).length,
-        headliner: r.headliner?.name || '',
-        isMe: true
-      }));
-    }
-    leaderboardLoaded = true;
-    // Sync user's best score from leaderboard into local cache
-    const myBest = leaderboardRuns.filter(r => r.isMe).reduce((max, r) => Math.max(max, r.total), 0);
-    if (myBest > bestFromLB) {
-      bestFromLB = myBest;
-      localStorage.setItem('cs_best_lb', String(bestFromLB));
-    }
-    renderLeaderboard();
-  } catch (e) {
-    console.error(e);
-    // Permission error — show own runs instead
-    const myRuns = allRuns.filter(r => !r.spotted && r.total > 0)
-      .sort((a,b) => b.total - a.total).slice(0, 10);
-    if (myRuns.length) {
-      leaderboardRuns = myRuns.map(r => ({
-        userId: currentUser?.uid || '',
-        name: (currentUser?.displayName || 'You') + ' (local)',
-        total: r.total,
-        date: r.date,
-        cars: (r.cars||[]).length,
-        headliner: r.headliner?.name || '',
-        isMe: true
-      }));
-      leaderboardLoaded = true;
-      renderLeaderboard();
-      if (el) {
-        const note = document.createElement('div');
-        note.style.cssText = 'font-size:0.62rem;color:var(--muted);text-align:center;padding:8px;letter-spacing:0.5px;';
-        note.textContent = '📡 Showing your local runs — global leaderboard requires Firestore rules to be updated.';
-        el.prepend(note);
-      }
-    } else {
-      if (el) el.innerHTML = '<div class="lb-empty">No runs yet — complete a run to appear here!</div>';
-    }
-  }
-}
-
-function renderLeaderboard() {
-  const el = document.getElementById('leaderboardList');
-  if (!el) return;
-  if (!leaderboardRuns.length) {
-    el.innerHTML = '<div class="lb-empty">No completed runs have been synced yet.</div>';
-    return;
-  }
-  el.className = 'leaderboard-list';
-  el.innerHTML = leaderboardRuns.map((run, idx) => {
-    const top = idx < 3 ? 'top' : '';
-    const who = run.isMe ? run.name + ' (You)' : run.name;
-    const medal = idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':'#'+(idx+1);
-    return `
-      <div class="lb-row" style="animation-delay:${idx * 0.03}s">
-        <div class="lb-rank ${top}">${medal}</div>
-        <div class="lb-main">
-          <div class="lb-name">${who}</div>
-          <div class="lb-meta">${fmtLeaderboardDate(run.date)}${run.headliner ? '  ⭐ ' + run.headliner : ''}  🚘 ${run.cars} cars</div>
-        </div>
-        <div class="lb-score">
-          <div class="lb-total">${fmtFull(run.total)}</div>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-const NEWS_SOURCES = [
-  { name: 'Car & Driver',  rss: 'https://www.caranddriver.com/rss/all.xml/' },
-  { name: 'Motor Trend',   rss: 'https://www.motor1.com/rss/news/all/' },
-  { name: 'The Drive',     rss: 'https://www.thedrive.com/feed' },
-];
-let activeSource = 0;
-let newsLoaded = false;
-
-function renderNewsSources() {
-  const el = document.getElementById('newsSources');
-  el.innerHTML = NEWS_SOURCES.map((s, i) =>
-    `<button class="news-source-btn ${i === activeSource ? 'active' : ''}" onclick="switchSource(${i})">${s.name}</button>`
-  ).join('');
-}
-
-function switchSource(i) {
-  activeSource = i;
-  renderNewsSources();
-  loadNews();
-}
-
-// Deterministic gradient + emoji placeholder for feeds without thumbnails (e.g. Car & Driver).
-function newsFallbackImg(seed) {
-  try {
-    var hue = Math.abs(String(seed || '').split('').reduce(function(a, ch) { return (a + ch.charCodeAt(0)) % 360; }, 0));
-    var hue2 = (hue + 55) % 360;
-    var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(' + hue + ',32%,17%)"/><stop offset="1" stop-color="hsl(' + hue2 + ',42%,28%)"/></linearGradient></defs><rect width="800" height="400" fill="url(#g)"/><text x="400" y="235" font-size="150" text-anchor="middle">🚘</text></svg>';
-    return 'data:image/svg+xml,' + encodeURIComponent(svg);
-  } catch(e) { return 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="400"><rect width="800" height="400" fill="#1a1a1f"/><text x="400" y="235" font-size="150" text-anchor="middle">🚘</text></svg>'); }
-}
-
-function extractNewsImg(item) {
-  if (item.thumbnail && item.thumbnail.length > 4) return item.thumbnail;
-  if (item.enclosure && item.enclosure.link && item.enclosure.type && item.enclosure.type.startsWith('image')) return item.enclosure.link;
-  if (item['media:content'] && item['media:content'].url) return item['media:content'].url;
-  const html = [item.description, item.content].filter(Boolean).join(' ');
-  const m = html.match(/<img[^>]+src\s*=\s*["']([^"']+)["']/i);
-  if (m) return m[1];
-  return '';
-}
-async function loadNews() {
-  const el = document.getElementById('newsList');
-  el.innerHTML = '<div class="news-loading">Loading latest news...</div>';
-  const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(NEWS_SOURCES[activeSource].rss)}&api_key=kkv1zj5yfbnz1ldwxehfesg358e3ttagbc8wzxiq&count=20`;
-  try {
-    const res  = await fetch(url);
-    const data = await res.json();
-    if (!data.items || !data.items.length) throw new Error('No items');
-    var hl = document.getElementById('newsHeadliner');
-    if (hl) {
-      var first = data.items[0];
-      var hlImg = extractNewsImg(first) || newsFallbackImg((first.title || '') + NEWS_SOURCES[activeSource].name);
-      hl.style.display = 'block';
-      hl.innerHTML = '<img src="' + hlImg + '" alt="" onerror="this.outerHTML=\'<div style=width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--surf2)></div>\'"><div class="hl-overlay"><div class="hl-source">' + NEWS_SOURCES[activeSource].name + '</div><div class="hl-title">' + escapeHtml(first.title || '') + '</div><div class="hl-date">' + (first.pubDate ? new Date(first.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '') + '</div></div>';
-      window._hlLink = first.link || '#';
-    }
-    el.innerHTML = data.items.map(function(item, idx) {
-      var date = item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) : '';
-      var title = item.title || 'No title';
-      var link  = item.link  || '#';
-      var imgSrc = extractNewsImg(item);
-      var imgHTML = imgSrc
-        ? '<img class="news-card-img" src="' + imgSrc + '" alt="" onerror="this.outerHTML=\'<div class=news-card-img-ph>🚘</div>\'">'
-        : '<div class="news-card-img-ph">🚘</div>';
-      return '<a class="news-card" href="' + link + '" target="_blank" rel="noopener" style="animation-delay:' + (idx*0.03) + 's">' +
-        imgHTML +
-        '<div class="news-card-body">' +
-          '<div class="news-source">' + NEWS_SOURCES[activeSource].name + '</div>' +
-          '<div class="news-title">' + escapeHtml(title) + '</div>' +
-          '<div class="news-date">' + escapeHtml(date) + '</div>' +
-        '</div>' +
-      '</a>';
-    }).join('');
-  } catch(e) {
-    el.innerHTML = '<div class="news-error">Could not load news — check your connection.</div>';
-    var hl = document.getElementById('newsHeadliner');
-    if (hl) hl.style.display = 'none';
-  }
-}
-
 // ══════════════════════════════════════════════════════════════════
 //  PROGRESSION & REWARD SYSTEM EXPANSION — Foundation layer
-//  Spotter Titles · Collector Book · Mystery Cars · Expeditions
-//  Road Trips · Car Stories · Collector Card Evolution
+//  Spotter Titles · Mystery Cars · Road Trips · Car Stories · Collector Card Evolution
 //  Rare Discovery Moments
 // ══════════════════════════════════════════════════════════════════
 
@@ -11416,11 +10948,9 @@ function updateProgressionAfterLog(car) {
   checkEvolutionUnlock(car);
   renderTitleChip();
   renderLevelBar();
-  // Refresh book/expedition/trip pages if they are the active page
+  // Refresh the active trip page if it is visible
   var pg = document.querySelector('.page.active');
   if (pg) {
-    if (pg.id === 'page-book') renderBook();
-    if (pg.id === 'page-expeditions') renderExpeditions();
   }
 }
 window.renderSpecsStory = renderSpecsStory;
@@ -12000,8 +11530,6 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
   }
 })();
 </script>
-
-
 <script>
 /* CarSpotter — Lens pass. Additive only: preserves existing storage, scoring,
    collector-card, achievement and cloud-sync logic. */
@@ -12142,7 +11670,6 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
   setTimeout(renderLensRunProgress,80);
 })();
 </script>
-
 <script>
 /* CarSpotter follow-up: editable saved runs, durable photo restore, Garage-first UX. */
 (function(){
@@ -12321,10 +11848,6 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
   /* Garage remains the original secondary destination; improvements focus on making it more rewarding to visit. */
 })();
 </script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js" defer></script>
+<script defer="" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </body>
 </html>
-
-
-
