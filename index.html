@@ -3059,6 +3059,141 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 .cs-gd-chip b{color:var(--text2);}
 @media(max-width:600px){.cs-gd-top{gap:8px}.cs-gd-title{font-size:.95rem}.cs-gd-bottom{align-items:flex-start;flex-direction:column}.cs-gd-actions{justify-content:flex-start}}
 </style>
+
+<style id="cs-v34-professional-polish">
+/* ═══════════════════════════════════════════════
+   CARSPOTTER v34 — PROFESSIONAL UI POLISH
+   Cleaner hierarchy, calmer surfaces, longer motion.
+═══════════════════════════════════════════════ */
+:root{
+  --pro-space-1:6px;
+  --pro-space-2:10px;
+  --pro-space-3:14px;
+  --pro-space-4:18px;
+  --pro-space-5:24px;
+  --pro-radius:18px;
+  --pro-radius-lg:24px;
+  --pro-border:rgba(255,255,255,.075);
+  --pro-shadow:0 10px 30px rgba(0,0,0,.28);
+}
+
+/* Calmer, more consistent surfaces */
+.card,.score-banner,.record-card,.garage-card,.more-page-tile,.setting-card{
+  border-color:var(--pro-border);
+  box-shadow:var(--pro-shadow);
+}
+.card{border-radius:var(--pro-radius-lg);padding:24px;margin-bottom:16px;}
+.card-title{margin-bottom:18px;letter-spacing:2.6px;}
+.card-title::after{width:22px;height:1px;bottom:-7px;}
+
+/* Screen rhythm */
+.page{padding-top:22px;}
+.sec-row{margin-bottom:12px;}
+.sec-title{letter-spacing:2.4px;color:var(--text2);}
+
+/* Spot: make the primary action unmistakable */
+.score-banner{border-radius:var(--pro-radius-lg);padding:24px 22px;min-height:126px;margin-bottom:18px;}
+.btn-row{gap:10px;margin-bottom:10px;}
+.btn-run,.btn-spot,.btn-end{border-radius:14px;min-height:52px;}
+.btn-run{box-shadow:0 8px 24px rgba(232,184,75,.14);}
+.btn-spot{background:rgba(255,255,255,.025);border-color:var(--pro-border);}
+.btn-hint-row{font-size:.48rem;opacity:.72;gap:8px;}
+.btn-hint-row span::before{display:none;}
+
+/* Inputs: one coherent field language */
+.ff input,.ff select,.qp-search input,.garage-search-wrap input{
+  border-color:var(--pro-border);
+  border-radius:12px;
+  min-height:44px;
+}
+.ff input:focus,.ff select:focus,.qp-search input:focus,.garage-search-wrap input:focus{
+  border-color:rgba(232,184,75,.5);
+  box-shadow:0 0 0 3px rgba(232,184,75,.07);
+}
+
+/* Garage: cleaner dashboard and controls */
+#page-garage .sec-row:first-child{align-items:flex-end;margin-bottom:14px;}
+.cs-garage-subtitle{font-size:.62rem;color:var(--muted);margin-top:3px;}
+.cs-garage-dashboard{border-radius:var(--pro-radius-lg);padding:18px;margin:0 0 14px;background:linear-gradient(135deg,rgba(232,184,75,.075),rgba(255,255,255,.018));}
+.garage-sort-row,.garage-filter-row{gap:7px;}
+.gs-pill,.gf-pill,.gv-btn,.garage-refresh-btn,.garage-zoom-btn{
+  border-radius:10px;
+  transition:all .32s var(--ease-release);
+}
+.stats-row{gap:8px;margin-bottom:14px;}
+.stat-box{border-radius:14px;padding:14px 10px;background:rgba(255,255,255,.018);box-shadow:none;}
+.stat-box:hover{border-color:rgba(232,184,75,.3);}
+.garage-refresh-row{border-radius:12px;background:rgba(255,255,255,.018);}
+.garage-card{border-radius:16px;box-shadow:0 7px 22px rgba(0,0,0,.22);}
+.garage-card:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(0,0,0,.32);}
+
+/* More: make secondary navigation feel like a real app menu */
+#page-more{padding-bottom:calc(var(--nav-h) + 34px);}
+#page-more .sec-title{font-size:.7rem;color:var(--text);letter-spacing:2.2px;}
+#page-more::before{content:'Tools & destinations';display:block;font-size:.62rem;color:var(--muted);margin:-8px 0 16px;}
+#page-more > div[style*="display:grid"]{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;}
+.more-page-tile{min-height:64px;padding:14px 16px;display:grid;grid-template-columns:38px 1fr auto;grid-template-rows:auto auto;align-items:center;justify-content:initial;gap:1px 12px;border-radius:14px;box-shadow:none;text-align:left;}
+.more-tile-icon{grid-row:1 / span 2;width:38px;height:38px;border-radius:11px;background:rgba(232,184,75,.08);}
+.more-tile-label{font-size:.68rem;letter-spacing:1.1px;align-self:end;}
+.more-page-tile::after{content:'›';grid-column:3;grid-row:1 / span 2;font-size:1.2rem;color:var(--muted);transition:transform .4s var(--ease-release),color .35s;}
+.more-page-tile:hover::after{transform:translateX(3px);color:var(--accent);}
+
+/* Settings: clearer section separation */
+#page-settings .setting-card{border-radius:16px;margin-bottom:12px;}
+#page-settings .setting-head{padding:16px 18px 11px;}
+#page-settings .setting-icon{min-width:48px;color:var(--muted);}
+#page-settings .setting-desc{font-size:.66rem;}
+#page-settings .card-title{margin-bottom:7px;}
+.setting-link{min-height:48px;transition:background .35s var(--ease),color .35s var(--ease);}
+
+/* Empty states: intentional, not unfinished */
+.empty-garage,.no-history{border:1px dashed var(--pro-border);border-radius:16px;padding:44px 24px!important;background:rgba(255,255,255,.012);}
+
+/* Longer, more deliberate interaction motion */
+.page-enter-forward{animation-duration:.52s!important;}
+.page-enter-back{animation-duration:.48s!important;}
+.page-enter-garage{animation-duration:.72s!important;}
+.page-enter-achievements,.page-enter-trips{animation-duration:.78s!important;}
+.card{animation-duration:.62s!important;}
+.more-page-tile{animation-duration:.52s!important;}
+.hist-item{animation-duration:.42s!important;}
+.garage-card.anim-stagger{animation-duration:.72s!important;}
+.nav-btn{transition-duration:.42s!important;}
+.nav-btn .nav-icon{transition-duration:.48s!important;}
+.btn-run,.btn-spot,.btn-end{transition-duration:.38s!important;}
+.qp-trigger,.qp-item,.garage-refresh-btn,.garage-zoom-btn,.setting-link,.txt-btn{transition-duration:.35s!important;}
+.toggle-pill{transition-duration:.48s!important;}
+.toggle-knob{transition-duration:.52s!important;}
+
+/* Keep the premium reward moments, but let the user actually see them. */
+.cc-card.collecting{animation-duration:1.05s!important;}
+.cc-collected{animation-duration:.72s!important;}
+.cc-quick{animation-duration:.72s!important;}
+.cc-quick-thumb,.cc-quick-emoji{animation-duration:.62s!important;}
+.cc-quick-ring{animation-duration:1.2s!important;}
+.cc-quick-chip::before{animation-duration:1.45s!important;}
+.nav-badge.pop{animation-duration:.78s!important;}
+
+/* Subtle press instead of the old abrupt shrink */
+.card:active,.more-page-tile:active,.garage-card:active{transform:scale(.985);transition-duration:.16s!important;}
+.btn-run:active,.btn-spot:active,.btn-end:active,.nav-btn:active{transform:scale(.97);transition-duration:.16s!important;}
+
+@media(min-width:800px){
+  #page-garage,#page-history,#page-achievements{padding:34px 44px;}
+  #page-settings,#page-more,#page-trips{padding:34px 44px;}
+  .dsk-col{padding:30px 36px;}
+  .dsk-col:first-child{padding-right:38px;}
+  .dsk-col:last-child{padding-left:38px;}
+}
+@media(max-width:600px){
+  .page{padding-left:16px;padding-right:16px;}
+  .card{padding:20px;}
+  .score-banner{padding:20px 18px;}
+}
+@media(prefers-reduced-motion:reduce){
+  .page-enter-forward,.page-enter-back,.page-enter-garage,.page-enter-achievements,.page-enter-trips,.card,.more-page-tile,.hist-item,.garage-card.anim-stagger,.cc-card.collecting,.cc-collected,.cc-quick,.cc-quick-thumb,.cc-quick-emoji,.cc-quick-ring,.nav-badge.pop{animation-duration:.01ms!important;}
+}
+</style>
 </head>
 <body>
 <!-- AUTH OVERLAY -->
@@ -3494,7 +3629,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 
 <!-- MORE PAGE (full page instead of dropdown) -->
 <div class="page" id="page-more">
-<div class="sec-title" style="margin-bottom:16px">More</div>
+<div class="sec-title" style="margin-bottom:4px">More</div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
 
 
@@ -3589,7 +3724,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <div class="act-list" id="actList"></div>
 </div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE &mdash; Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v33</div>
+<div class="version-tag" id="versionTag">v34</div>
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
 var _pendingKey = 'firebase:pendingRedirect:AIzaSyCi5-kTFAM-0qFXJIXP4_Qc-tYNLg0N2Ug:[DEFAULT]';
