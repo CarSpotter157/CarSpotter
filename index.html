@@ -3707,7 +3707,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
   <div class="act-list" id="actList"></div>
 </div>
 <div class="offline-banner" id="offlineBanner"><span>OFFLINE</span><span>OFFLINE — Saves locally, syncs when back</span></div>
-<div class="version-tag" id="versionTag">v31</div>
+<div class="version-tag" id="versionTag">v32</div>
 
 <script>
 // Clear any stale redirect from a previous failed sign-in attempt
@@ -4191,10 +4191,66 @@ window.signInGoogle = function() {
     showToast('Sign in failed: ' + e.message);
   });
 };
-function signOutUser() {
-  if (!confirm('Sign out?\n\nYour data stays on this device.')) return;
+async function signOutUser() {
+  if (!confirm('Sign out?\n\nYour data is synced to your account.')) return;
+  // Never let a pending write from Account A become the local payload for Account B.
+  // Flush first when possible, then the auth-state handler isolates the next account.
+  try {
+    if (currentUser && _dirty && navigator.onLine && typeof _txWrite === 'function') {
+      await _txWrite({ cause: 'signout' });
+    }
+  } catch(e) {
+    console.warn('Sign-out sync flush failed', e);
+    if (_dirty) {
+      if (!confirm('Some changes have not finished syncing. Sign out anyway?\n\nUnsynced changes may not appear on your account.')) return;
+    }
+  }
   if (syncUnsub) { syncUnsub(); syncUnsub = null; }
   auth.signOut();
+}
+
+// ── ACCOUNT-ISOLATED LOCAL CACHE ───────────────────────────────────
+// localStorage belongs to the browser, not the Firebase account. Without an
+// account boundary, signing out of A and into B can leave A's local runs in
+// memory while B's cloud data is loading. That is the exact "same stuff on
+// another account" failure mode this guard prevents.
+var _activeLocalUid = localStorage.getItem('cs_active_uid') || '';
+var _ACCOUNT_LOCAL_KEYS = [
+  'cs_runs','cs_current','cs_qp','cs_fav','cs_aliases','cs_notes','cs_xp',
+  'cs_achievements','cs_progression','cs_discoveries','cs_del_runs','cs_del_qp',
+  'cs_del_fav','cs_fv','cs_sync_dirty','cs_cloud_current_ts','cs_lamport_last'
+];
+function _clearAccountLocalCache() {
+  _ACCOUNT_LOCAL_KEYS.forEach(function(k){ try { localStorage.removeItem(k); } catch(e){} });
+  try { _idbPhotoCache = {}; _photoLoading = {}; _photoMissing = {}; } catch(e) {}
+  // IDB photos are keyed only by car name in this version, so they cannot be
+  // safely attributed to a Firebase UID. Keep the database intact rather than
+  // deleting another account's photos; cloud data will restore the correct refs.
+}
+function _prepareLocalCacheForUser(user) {
+  var uid = user && user.uid ? String(user.uid) : '';
+  if (!uid) return;
+  var previous = _activeLocalUid;
+  if (previous && previous !== uid) {
+    _clearAccountLocalCache();
+    // Reset in-memory state too; otherwise renderers can briefly show Account A
+    // while Account B's Firestore document is being fetched.
+    currentRun = [];
+    allRuns = [];
+    quickPicks = [];
+    favoriteNames = new Set();
+    aliases = {};
+    _deletedRuns = [];
+    _deletedQP = [];
+    _removedFavs = [];
+    _fieldVer = {};
+    _dirty = false;
+    _lastAppliedLamport = 0;
+    _lastLocalSeq = '';
+    if (typeof _xpTotal !== 'undefined') _xpTotal = 0;
+  }
+  _activeLocalUid = uid;
+  try { localStorage.setItem('cs_active_uid', uid); } catch(e) {}
 }
 
 function importLocalData() {
@@ -4239,24 +4295,44 @@ function importLocalData() {
 }
 
 auth.onAuthStateChanged(async user => {
+  // Establish the account boundary BEFORE loading or flushing anything.
+  // This keeps one browser's local cache from being merged into another UID.
+  if (user) _prepareLocalCacheForUser(user);
   currentUser = user;
   var authOverlay = document.getElementById('authOverlay');
+  var authLoading = document.getElementById('authLoading');
+  var authContent = document.getElementById('authContent');
+
   if (user) {
+    // Returning/signed-in users go straight into the app.
     authOverlay.style.display = 'none';
+    if (authLoading) authLoading.style.display = 'none';
+    if (authContent) authContent.style.display = 'none';
     renderUserPill();
     _lastSave = Date.now();
     _loadLastAppliedLamport();
     _lastLocalSeq = '';
-    loadFromCloud().catch(function(){});
+    try {
+      await loadFromCloud();
+    } catch(e) {
+      console.warn('Initial cloud load failed', e);
+      setSyncDot('');
+      showToast('⚠️ Could not refresh your cloud data. Check your connection.');
+    }
     subscribeCloud();
     if (_dirty) flushSyncNow();
     checkNewAchievements();
     const localRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
     if (localRuns.length > 0 && !user.isAnonymous) showImportBanner(localRuns.length);
   } else {
-    authOverlay.style.display = 'none';
-    document.getElementById('userPillWrap').innerHTML = '<div class="user-pill" onclick="showSignInSheet()">Sign In</div>';
+    // No account: restore the original Google sign-in gate instead of silently
+    // entering the app as a local/anonymous session.
     if (syncUnsub) { syncUnsub(); syncUnsub = null; }
+    authOverlay.style.display = 'flex';
+    if (authLoading) authLoading.style.display = 'none';
+    if (authContent) authContent.style.display = 'block';
+    var pill = document.getElementById('userPillWrap');
+    if (pill) pill.innerHTML = '<div class="user-pill" onclick="showSignInSheet()">Sign In</div>';
   }
 });
 
@@ -4379,6 +4455,43 @@ function _stampCloud(san) {
   return san;
 }
 
+function _replaceLocalFromCloud(c) {
+  if (!c || typeof c !== 'object') return;
+  // On a clean login, Firestore is the source of truth. This is important on a
+  // second device: an old browser cache (for example, a May 4 run) must not be
+  // allowed to look newer simply because the cloud read happened after startup.
+  if (c.currentRun && Array.isArray(c.currentRun.cars)) currentRun = c.currentRun.cars.slice();
+  else if (Array.isArray(c.currentRun)) currentRun = c.currentRun.slice();
+  else currentRun = [];
+  if (c.allRuns && Array.isArray(c.allRuns.items)) allRuns = c.allRuns.items.slice();
+  else if (Array.isArray(c.allRuns)) allRuns = c.allRuns.slice();
+  else allRuns = [];
+  if (c.quickPicks && Array.isArray(c.quickPicks.items)) quickPicks = c.quickPicks.items.slice();
+  else if (Array.isArray(c.quickPicks)) quickPicks = c.quickPicks.slice();
+  else quickPicks = [];
+  _deletedRuns = (c.deletedRuns && Array.isArray(c.deletedRuns.ids)) ? c.deletedRuns.ids.slice() : [];
+  _deletedQP = (c.deletedQP && Array.isArray(c.deletedQP.ids)) ? c.deletedQP.ids.slice() : [];
+  _removedFavs = (c.favorites && Array.isArray(c.favorites.removed)) ? c.favorites.removed.slice() : [];
+  favoriteNames = new Set((c.favorites && Array.isArray(c.favorites.names)) ? c.favorites.names : []);
+  aliases = (c.aliases && c.aliases.map && typeof c.aliases.map === 'object') ? Object.assign({}, c.aliases.map) : {};
+  if (c.notes && c.notes.text != null) { try { localStorage.setItem('cs_notes', String(c.notes.text)); } catch(e){} }
+  if (c.xp && typeof c.xp.value === 'number') _xpTotal = c.xp.value;
+  if (c.progression && typeof window.mergeCloudProgression === 'function') window.mergeCloudProgression(c.progression);
+  if (c.discoveries && Array.isArray(c.discoveries.items)) { try { localStorage.setItem('cs_discoveries', JSON.stringify(c.discoveries.items)); } catch(e){} }
+  if (c.settings && c.settings.map) _applySettings(c.settings.map);
+  _prevAchievements = (c.achievements && Array.isArray(c.achievements.ids)) ? c.achievements.ids.slice() : [];
+  _fieldVer = {
+    currentRun: c.currentRun?.ver || 0, runs: c.allRuns?.ver || 0, qp: c.quickPicks?.ver || 0,
+    deletedRuns: c.deletedRuns?.ver || 0, deletedQP: c.deletedQP?.ver || 0,
+    favorites: c.favorites?.ver || 0, aliases: c.aliases?.ver || 0, notes: c.notes?.ver || 0,
+    discoveries: c.discoveries?.ver || 0, settings: c.settings?.ver || 0, achievements: c.achievements?.ver || 0,
+    xp: c.xp?.ver || 0
+  };
+  _purgeTombstoned();
+  _markDirty(false);
+  _saveAllLocal();
+}
+
 async function loadFromCloud() {
   if (!currentUser) return;
   setSyncDot('syncing');
@@ -4387,11 +4500,12 @@ async function loadFromCloud() {
     if (snap.exists) {
       const d = snap.data();
       _diagRead('loadFromCloud(get)', d);
-      // Apply the doc unconditionally — the per-field merges are additive + tombstoned
-      // and monotonic, so this is safe and never drops newer data (post-rebase races).
-      logSync('loadFromCloud', 'apply lamport', d.lamport || 'legacy');
-      _applyCloud(d);
-      _saveAllLocal();
+      // A clean local cache is a mirror, not a second account. On initial account
+      // hydration, replace it from Firestore. If there are unsynced local changes,
+      // keep the existing merge/rebase behavior so offline work is not lost.
+      logSync('loadFromCloud', 'apply lamport', d.lamport || 'legacy', 'dirty=' + _dirty);
+      if (!_dirty) _replaceLocalFromCloud(d);
+      else { _applyCloud(d); _saveAllLocal(); }
       // Always converge back — the transactional rebase applies any newer cloud state first.
       _lastSave = Date.now();
       _txWrite({ cause: 'loadFromCloud' });
@@ -5631,17 +5745,56 @@ function clearAllQP() {
   showToast('All quick picks cleared');
   saveToCloud();
 }
+function _garageCarsForQuickPick(query) {
+  var q = String(query || '').toLowerCase().trim();
+  if (!q) return [];
+  var out = [];
+  var seen = {};
+  function add(car) {
+    if (!car || !car.name) return;
+    var key = String(car.name).toLowerCase();
+    if (seen[key] || key.indexOf(q) === -1) return;
+    seen[key] = true;
+    out.push(car);
+  }
+  (allRuns || []).forEach(function(run) { (run.cars || []).forEach(add); });
+  (currentRun || []).forEach(add);
+  return out;
+}
 function renderQPList(query) {
   const el = document.getElementById('qpList');
-  const q  = query.toLowerCase().trim();
-  const list = q ? quickPicks.filter(c => c.name.toLowerCase().includes(q)) : quickPicks;
-  if (!list.length) { el.innerHTML = '<div class="qp-empty">'+(q?'No matches':'No picks yet — log some cars!')+'</div>'; return; }
+  const wrap = document.getElementById('qpWrap');
+  const q  = String(query || '').toLowerCase().trim();
+
+  // Quick Picks stay lightweight: the saved Quick Picks list is shown when the
+  // search is empty. Garage cars are only surfaced when their name matches what
+  // the user is typing, so we don't dump the whole garage into Quick Picks.
+  var saved = q ? quickPicks.filter(c => String(c.name || '').toLowerCase().includes(q)) : quickPicks.slice();
+  var merged = [];
+  var seen = {};
+  saved.forEach(function(c) {
+    var key = String(c.name || '').toLowerCase();
+    if (!seen[key]) { seen[key] = true; merged.push(c); }
+  });
+  if (q) {
+    _garageCarsForQuickPick(q).forEach(function(c) {
+      var key = String(c.name || '').toLowerCase();
+      if (!seen[key]) { seen[key] = true; merged.push(c); }
+    });
+  }
+
+  if (!merged.length) {
+    el.innerHTML = '<div class="qp-empty">'+(q?'No matches':'No picks yet — log some cars!')+'</div>';
+    if (wrap) wrap.style.display = q ? 'block' : (quickPicks.length ? 'block' : 'none');
+    return;
+  }
   el.innerHTML = '';
-  list.forEach(c => {
+  merged.forEach(function(c) {
     const d = document.createElement('div');
+    var fromGarage = q && !quickPicks.some(function(qp){ return String(qp.name || '').toLowerCase() === String(c.name || '').toLowerCase(); });
     d.className = 'qp-item' + (qpEditMode ? ' editing' : '');
-    d.innerHTML = (c.photo ? `<img style="width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid var(--border)" src="${c.photo}" alt="">` : `<span class="qp-item-type" style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:36px;text-align:right">${carTypeLabel(c.type)}</span>`) + `<span class="qp-item-name">${c.name}</span><span class="qp-item-val">${fmtFull(c.value)}</span>` + (qpEditMode ? `<button class="qp-item-del" title="Remove">✕</button>` : '');
-    if (qpEditMode) {
+    d.innerHTML = (c.photo ? `<img style="width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid var(--border)" src="${c.photo}" alt="">` : `<span class="qp-item-type" style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:36px;text-align:right">${carTypeLabel(c.type)}</span>`) + `<span class="qp-item-name">${c.name}</span><span class="qp-item-val">${fmtFull(c.value)}</span>` + (fromGarage ? `<span style="font-size:.48rem;color:var(--accent);letter-spacing:.7px;margin-left:auto;font-weight:800">GARAGE MATCH</span>` : `<span style="font-size:.48rem;color:var(--muted);letter-spacing:.7px;margin-left:auto">QUICK PICK</span>`) + (qpEditMode && !fromGarage ? `<button class="qp-item-del" title="Remove">✕</button>` : '');
+    if (qpEditMode && !fromGarage) {
       d.querySelector('.qp-item-del').onclick = (e) => { e.stopPropagation(); removeQP(c.name); };
     } else {
       d.onclick = () => {
@@ -5655,9 +5808,14 @@ function renderQPList(query) {
     }
     el.appendChild(d);
   });
+  if (wrap) wrap.style.display = 'block';
 }
 function renderQPTrigger() {
-  document.getElementById('qpWrap').style.display = quickPicks.length ? 'block' : 'none';
+  var wrap = document.getElementById('qpWrap');
+  var search = document.getElementById('qpSearch');
+  if (!wrap) return;
+  var q = search ? search.value.trim() : '';
+  wrap.style.display = (quickPicks.length || q) ? 'block' : 'none';
 }
 document.addEventListener('click', e => {
   if (qpOpen && !document.getElementById('qpWrap').contains(e.target)) closeQP();
