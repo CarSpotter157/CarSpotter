@@ -3199,8 +3199,6 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 </style>
 </head>
 <body>
-<div id="csRecoveryBanner" style="position:fixed;top:0;left:0;right:0;z-index:99999;background:#111;color:#fff;padding:9px 14px;text-align:center;font:600 12px Inter,Arial,sans-serif;letter-spacing:.4px;border-bottom:1px solid #555;">LOCAL RECOVERY MODE — your existing browser data is being displayed. Firestore writes are disabled.</div>
-<style>#app{padding-top:34px}</style>
 <!-- AUTH OVERLAY -->
 <div class="auth-overlay" id="authOverlay" style="display:none">
 <div class="auth-loading" id="authLoading"><div class="auth-spinner"></div><div class="auth-loading-text">Initializing CarSpotter...</div></div>
@@ -3815,26 +3813,14 @@ let undoStack    = null;
 let undoTimer    = null;
 let bulkMode     = false;
 let bulkSelected = new Set();
-// CARSPOTTER LOCAL RECOVERY MODE — READS THE EXISTING UID-SCOPED CACHE
-// This version intentionally does NOT read/write Firestore during initial recovery.
-window.__CS_RECOVERY_MODE = true;
-function _csRecoveryKey(key) {
-  var uid = localStorage.getItem('cs_active_uid') || localStorage.getItem('cs_uid') || '';
-  var scoped = uid ? (uid + '_' + key) : '';
-  if (scoped && localStorage.getItem(scoped) !== null) return scoped;
-  return key;
-}
-function _csRecoveryGet(key, fallback) {
-  try { var v = localStorage.getItem(_csRecoveryKey(key)); return v === null ? fallback : v; } catch(e) { return fallback; }
-}
 let soundEnabled = localStorage.getItem('cs_sound') !== 'off';
-let aliases      = JSON.parse(_csRecoveryGet('cs_aliases', '{}'));
-let bestFromLB = parseInt(_csRecoveryGet('cs_best_lb', '0') || '0');
-let favoriteNames = new Set(JSON.parse(_csRecoveryGet('cs_fav', '[]')));
-let currentSpotLocation = JSON.parse(_csRecoveryGet('cs_pending_loc', 'null'));
-let allRuns      = JSON.parse(_csRecoveryGet('cs_runs', '[]'));
-let currentRun   = JSON.parse(_csRecoveryGet('cs_current', '[]'));
-let quickPicks   = JSON.parse(_csRecoveryGet('cs_qp', '[]'));
+let aliases      = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
+let bestFromLB = parseInt(localStorage.getItem('cs_best_lb') || '0');
+let favoriteNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
+let currentSpotLocation = JSON.parse(localStorage.getItem('cs_pending_loc') || 'null');
+let allRuns      = JSON.parse(localStorage.getItem('cs_runs')      || '[]');
+let currentRun   = JSON.parse(localStorage.getItem('cs_current')   || '[]');
+let quickPicks   = JSON.parse(localStorage.getItem('cs_qp')        || '[]');
 let sortMode     = 'desc';
 let currentUser  = null;
 let _lastSave    = 0;
@@ -4100,7 +4086,7 @@ const ACHIEVEMENTS = [
   { id:'palindrome',       icon:'PP',name:'Mirror Mirror',  desc:'Spot a car worth a palindrome ($1,212,121)', xp:300, check:(c,r)=>detectPalindromicValue(c) },
   { id:'twin_spot',        icon:'TT',name:'Double Take',    desc:'Spot the exact same car twice in one run', xp:420, check:(c,r)=>detectTwinSpot(r) },
 ];
-let _prevAchievements = JSON.parse(_csRecoveryGet('cs_ach', '[]'));
+let _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
 
 //  MERGE HELPERS — prevent data loss when cloud & local diverge 
 function _mergeRunArrays(local, cloud) {
@@ -4360,14 +4346,14 @@ auth.onAuthStateChanged(async user => {
     _loadLastAppliedLamport();
     _lastLocalSeq = '';
     try {
-      if (!window.__CS_RECOVERY_MODE) await loadFromCloud();
-      else { renderQPTrigger(); renderSpot(); renderGarage(); renderHistory(); }
+      await loadFromCloud();
     } catch(e) {
       console.warn('Initial cloud load failed', e);
       setSyncDot('');
       showToast('⚠️ Could not refresh your cloud data. Check your connection.');
     }
-    if (!window.__CS_RECOVERY_MODE) { subscribeCloud(); if (_dirty) flushSyncNow(); }
+    subscribeCloud();
+    if (_dirty) flushSyncNow();
     checkNewAchievements();
     const localRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
     if (localRuns.length > 0 && !user.isAnonymous) showImportBanner(localRuns.length);
@@ -4540,7 +4526,6 @@ function _replaceLocalFromCloud(c) {
 }
 
 async function loadFromCloud() {
-  if (window.__CS_RECOVERY_MODE) { console.warn('CarSpotter recovery mode: Firestore load skipped.'); renderQPTrigger(); renderSpot(); renderGarage(); renderHistory(); return; }
   if (!currentUser) return;
   setSyncDot('syncing');
   try {
@@ -4567,7 +4552,6 @@ async function loadFromCloud() {
 }
 
 function subscribeCloud() {
-  if (window.__CS_RECOVERY_MODE) return function(){};
   if (!currentUser) return;
   syncUnsub = db.collection('users').doc(currentUser.uid).onSnapshot(snap => {
     if (!snap.exists) return;
@@ -4755,7 +4739,6 @@ function _flushLocalNow() {
 }
 
 function saveToCloud() {
-  if (window.__CS_RECOVERY_MODE) { _persistLocalSoon(); return; }
   logSync('saveToCloud', 'queued');
   // Persist locally first (debounced) — works offline
   _persistLocalSoon();
@@ -4906,7 +4889,6 @@ function _applyCloud(c) {
 //  Firestore retries on contention, so a stale device's write can never silently
 //  clobber a newer field (this is what fixes End-Run reverts and delete resurrection).
 function _txWrite(opts) {
-  if (window.__CS_RECOVERY_MODE) return Promise.resolve(false);
   if (!currentUser) return Promise.resolve(false);
   if (!navigator.onLine) { _markDirty(true); return Promise.resolve(false); }
   // Serialize all writes on this device so rapid-fire calls (endRun's immediate
@@ -4999,7 +4981,7 @@ const THEMES = [
   { name:'Retro 80s',    accent:'#ff6ec7', accent2:'#ffe600', bg:'#0d0d1a', surf:'#131325', surf2:'#1c1c35', bodyClass:'theme-retro80s', unlock:22 },
   { name:'Midnight',     accent:'#8ea2ff', accent2:'#e8b84b', bg:'#060608', surf:'#0e0e12', surf2:'#171720', bodyClass:'', id:'midnight', secret:true, unlock:30 },
 ];
-let activeTheme = parseInt(_csRecoveryGet('cs_theme', '0') || '0');
+let activeTheme = parseInt(localStorage.getItem('cs_theme') || '0');
 let carbonOn    = localStorage.getItem('cs_carbon') === 'on';
 function _themeUnlocked(i) {
   var t = (i==null) ? null : THEMES[i];
@@ -7415,7 +7397,7 @@ async function fetchCarImage(carName) {
 }
 
 //  XP & LEVELS — reward every log so there's always a reason to find the next car
-let _xpTotal = parseInt(_csRecoveryGet('cs_xp', '0') || '0');
+let _xpTotal = parseInt(localStorage.getItem('cs_xp') || '0');
 function xpInfo(xp) {
   var level = 1, into = 0, need = 100;
   var remaining = xp;
@@ -8118,8 +8100,8 @@ function _toastPump() {
 //  records, achievements, rare finds, sync recoveries). Stored per-device in
 //  localStorage only — deliberately never sent to Firestore (it is ephemeral UI)
 //  and never exported (photos stay out; the feed is trivial to rebuild on import).
-var _actList = (function(){ try { var a = JSON.parse(_csRecoveryGet('cs_activity', 'null') || 'null'); return Array.isArray(a) ? a : []; } catch(e){ return []; } })();
-var _actSeen = parseInt(_csRecoveryGet('cs_activity_seen', '0') || '0') || 0;
+var _actList = (function(){ try { var a = JSON.parse(localStorage.getItem('cs_activity') || 'null'); return Array.isArray(a) ? a : []; } catch(e){ return []; } })();
+var _actSeen = parseInt(localStorage.getItem('cs_activity_seen') || '0') || 0;
 var _actOpen = false;
 function _saveAct() { try { localStorage.setItem('cs_activity', JSON.stringify(_actList)); } catch(e){} }
 function _ceremonyVisible() {
@@ -8774,9 +8756,9 @@ function _stripCopy(obj) {
   }
   return obj;
 }
-function _saveRunsLocal()    { return _safeSet(_csRecoveryKey('cs_runs'),    JSON.stringify(_stripCopy(allRuns))); }
-function _saveCurrentLocal() { return _safeSet(_csRecoveryKey('cs_current'), JSON.stringify(_stripCopy(currentRun))); }
-function _saveQPLocal()      { return _safeSet(_csRecoveryKey('cs_qp'),      JSON.stringify(_stripCopy(quickPicks))); }
+function _saveRunsLocal()    { return _safeSet('cs_runs',    JSON.stringify(_stripCopy(allRuns))); }
+function _saveCurrentLocal() { return _safeSet('cs_current', JSON.stringify(_stripCopy(currentRun))); }
+function _saveQPLocal()      { return _safeSet('cs_qp',      JSON.stringify(_stripCopy(quickPicks))); }
 
 // Deep copy with 'photo:' refs resolved back to their base64 from the IDB cache —
 // used by exports so backups contain the actual image data.
@@ -9327,7 +9309,7 @@ window.saveEditCar = function(originalName) {
 // ─────────────────────────────────────────────
 //  CAR SEARCH (built-in, no redirect)
 // ── COMPACT MODE ──
-let compactMode = _csRecoveryGet('cs_compact', '') === 'on';
+let compactMode = localStorage.getItem('cs_compact') === 'on';
 function applyCompactMode() {
   document.body.classList.toggle('compact-mode', compactMode);
   const btn = document.getElementById('compactToggle');
