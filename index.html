@@ -4545,6 +4545,8 @@ async function loadFromCloud() {
     }
     if (!_lastSave) setSyncDot('ok');
   } catch(e) { setSyncDot(''); console.error(e); }
+  try { await pullRunSubcollection(); } catch(e) { console.warn('Run subcollection pull failed', e); }
+  try { await pullCloudPhotos(); } catch(e) { console.warn('Photo subcollection pull failed', e); }
   renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
   fetchRefImagesForAllCars();
   if (currentRun.length > 0)
@@ -4553,6 +4555,7 @@ async function loadFromCloud() {
 
 function subscribeCloud() {
   if (!currentUser) return;
+  startSubcollectionListeners();
   syncUnsub = db.collection('users').doc(currentUser.uid).onSnapshot(snap => {
     if (!snap.exists) return;
     const d = snap.data();
@@ -4693,7 +4696,7 @@ var _sanitizedSet = typeof WeakSet !== 'undefined' ? new WeakSet() : null;
 function _buildCloudPayload() {
   var payload = {
     currentRun:   { ver: _fieldVer.currentRun || 0, cars: currentRun },
-    allRuns:      { ver: _fieldVer.runs || 0, items: allRuns },
+    allRuns:      { ver: _fieldVer.runs || 0, items: [] },
     deletedRuns:  { ver: _fieldVer.deletedRuns || 0, ids: _deletedRuns },
     quickPicks:   { ver: _fieldVer.qp || 0, items: quickPicks || [] },
     deletedQP:    { ver: _fieldVer.deletedQP || 0, ids: _deletedQP },
@@ -4759,7 +4762,10 @@ function saveToCloud() {
   _lastSave = Date.now();
   syncTimer = setTimeout(() => {
     syncTimer = null;
-    _txWrite({ cause: 'saveToCloud' });
+    _txWrite({ cause: 'saveToCloud' }).then(function(){
+      if (typeof scheduleRunSubcollectionSync === 'function') scheduleRunSubcollectionSync();
+      if (typeof scheduleCloudPhotoSync === 'function') scheduleCloudPhotoSync();
+    }).catch(function(){});
   }, 1500);
 }
 
@@ -5603,7 +5609,6 @@ function stopFavRotation(){if(favTimer){clearInterval(favTimer);favTimer=null}}
 
 //  NAV 
 function goTo(page) {
-  if (page === 'achievements') page = 'expeditions';
   var prev = document.querySelector('.page.active');
   if (prev && prev.id==='page-spot' && page!=='spot') stopFavRotation();
   if (prev) {
@@ -7608,7 +7613,7 @@ function celebrateFullCollectorCard(car, opts) {
     luxury:'👑', suv:'🛻', classic:'🕹️', hotrod:'🔧'
   }[car.type] || '🚘';
 
-  var photo = car.photo || (_idbPhotoCache[car.name.toLowerCase()] || '');
+  var photo = (_idbPhotoCache[car.name.toLowerCase()] || '') || car.photo || '';
   if (!photo) { photo = ''; }
   else if (photo.indexOf('data:') !== 0) {
     // Prefer the user's own photo; fall back to a stock/reference image only if none exists.
@@ -7757,8 +7762,8 @@ function celebrateFullCollectorCard(car, opts) {
     overlay.onclick = function() { if (phase === 0) flipNow(); else if (phase === 1) revealNow(); else collect(); };
 
     // Auto-timeline: anticipation → flip → reveal stars → collect
-    setTimeout(function() { if (phase === 0) flipNow(); }, 1600);
-    setTimeout(collect, 4300);
+    setTimeout(function() { if (phase === 0) flipNow(); }, 900);
+    setTimeout(collect, 2600);
 
     // Particle burst by rarity
     var pCount = tier === 'legend' ? 24 : tier === 'hyper' ? 16 : tier === 'super' ? 10 : 0;
@@ -7790,7 +7795,7 @@ function celebrateQuick(car, opts) {
     var el = document.createElement('div');
     el.className = 'cc-quick';
     el._ccResolve = resolve;
-    var photo = car.photo || (_idbPhotoCache[car.name.toLowerCase()] || '');
+    var photo = (_idbPhotoCache[car.name.toLowerCase()] || '') || car.photo || '';
     var thumb = photo
       ? '<img class="cc-quick-thumb" src="' + photo + '" alt="">'
       : '<span class="cc-quick-emoji">' + tierEmoji(tier) + '</span>';
@@ -7846,7 +7851,7 @@ function rewardLog(car, popTotal, opts) {
     levelUpPulse();
     cardDone.then(function() { enqueueCeremony(function(done){ celebrateLevelUp(after, done); }); });
   }
-  if (window.updateProgressionAfterLog) setTimeout(function(){ updateProgressionAfterLog(car); }, 900);
+  if (window.updateProgressionAfterLog) setTimeout(function(){ updateProgressionAfterLog(car); }, 120);
   maybeCarPersonality(car);
   return cardDone;
 }
@@ -11071,7 +11076,7 @@ function checkEvolutionUnlock(car) {
 
 function celebrateEvolution(car, oldTier, newTier, count, done) {
   if (document.querySelector('.evo-overlay')) { if (typeof done === 'function') done(); return; }
-  var photo = car.photo || (_idbPhotoCache[car.name.toLowerCase()] || '');
+  var photo = (_idbPhotoCache[car.name.toLowerCase()] || '') || car.photo || '';
   var imgHTML = photo
     ? '<img src="' + photo + '" alt="" onerror="this.parentElement.innerHTML=\'' + tierEmoji(tierOf(car.value || 0)) + '\'">'
     : tierEmoji(tierOf(car.value || 0));
@@ -12085,6 +12090,300 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
   /* Garage remains the original secondary destination; improvements focus on making it more rewarding to visit. */
 })();
 </script>
+
+<script>
+/* CARSPOTTER FIX PACK — durable history/photos + clickable Recent Spots.
+   Runs and user photos are stored in subcollections so the account document stays
+   comfortably below Firestore's 1 MiB document limit. */
+(function(){
+  'use strict';
+
+  var runSyncTimer = null, photoSyncTimer = null;
+  var runListenerUnsub = null, photoListenerUnsub = null;
+  var subSyncBusy = false;
+  var lastRunRenderSig = '';
+  var lastPhotoRenderSig = '';
+
+  function uidRef(){
+    return currentUser ? db.collection('users').doc(currentUser.uid) : null;
+  }
+  function cleanDoc(obj){
+    try { return JSON.parse(JSON.stringify(_stripDeepPhotos(JSON.parse(JSON.stringify(obj))))); }
+    catch(e){ return {}; }
+  }
+  function runKey(run){
+    return String(run && run.id != null ? run.id : '');
+  }
+
+  async function syncRunsSubcollection(){
+    if(!currentUser || !navigator.onLine) return;
+    var ref=uidRef().collection('runs');
+    var local=Array.isArray(allRuns) ? allRuns : [];
+    var wanted={};
+    local.forEach(function(run){
+      if(!runKey(run)) return;
+      wanted[runKey(run)]=true;
+    });
+    // Batch writes in chunks to avoid large batches.
+    for(var i=0;i<local.length;i+=400){
+      var batch=db.batch();
+      var chunk=local.slice(i,i+400);
+      chunk.forEach(function(run){
+        if(!runKey(run)) return;
+        batch.set(ref.doc(runKey(run)), cleanDoc(run), {merge:true});
+      });
+      if(chunk.length) await batch.commit();
+    }
+    var snap=await ref.get();
+    var deletes=[];
+    snap.forEach(function(doc){ if(!wanted[doc.id]) deletes.push(doc.id); });
+    for(var j=0;j<deletes.length;j+=400){
+      var b=db.batch();
+      deletes.slice(j,j+400).forEach(function(id){ b.delete(ref.doc(id)); });
+      if(deletes.length) await b.commit();
+    }
+  }
+
+  function scheduleRunSubcollectionSync(){
+    clearTimeout(runSyncTimer);
+    runSyncTimer=setTimeout(function(){
+      runSyncTimer=null;
+      syncRunsSubcollection().catch(function(e){ console.warn('Run sync failed',e); });
+    },250);
+  }
+
+  async function pullRunSubcollection(){
+    if(!currentUser || !navigator.onLine) return;
+    var snap=await uidRef().collection('runs').get();
+    var cloud=[];
+    snap.forEach(function(doc){
+      var r=doc.data()||{};
+      if(r.id==null) r.id=Number(doc.id) || doc.id;
+      cloud.push(r);
+    });
+    if(!cloud.length) {
+      // One-time migration: if the legacy main document had runs, push them out.
+      if(Array.isArray(allRuns) && allRuns.length) await syncRunsSubcollection();
+      return;
+    }
+    var byId={};
+    cloud.forEach(function(r){ byId[runKey(r)]=r; });
+    // Subcollection is authoritative for history; preserve local only when it has
+    // a run not yet present remotely (for an offline/newly-created run).
+    var merged=[];
+    (Array.isArray(allRuns)?allRuns:[]).forEach(function(r){
+      var k=runKey(r);
+      if(k && byId[k]) { merged.push(Object.assign({},r,byId[k])); delete byId[k]; }
+      else if(k) merged.push(r);
+    });
+    Object.keys(byId).forEach(function(k){ merged.push(byId[k]); });
+    merged.sort(function(a,b){ return Number(b.id||0)-Number(a.id||0); });
+    allRuns=merged;
+    _saveRunsLocal();
+  }
+
+  async function syncCloudPhotos(){
+    if(!currentUser || !navigator.onLine) return;
+    var ref=uidRef().collection('photos');
+    var map={};
+    function addCar(c){
+      if(!c || !c.name || !c.photo) return;
+      var p=String(c.photo);
+      if(p.indexOf('data:image/')!==0) {
+        if(p.indexOf('photo:')===0) p=_photoCacheGet(p.slice(6)) || '';
+      }
+      if(p && p.indexOf('data:image/')===0 && p.length < 900000) {
+        map[_photoCacheKey(c.name)]={name:c.name,data:p,updatedAt:Date.now()};
+      }
+    }
+    (Array.isArray(allRuns)?allRuns:[]).forEach(function(r){(r.cars||[]).forEach(addCar);});
+    (Array.isArray(currentRun)?currentRun:[]).forEach(addCar);
+    (Array.isArray(quickPicks)?quickPicks:[]).forEach(addCar);
+    var keys=Object.keys(map);
+    for(var i=0;i<keys.length;i+=400){
+      var batch=db.batch();
+      keys.slice(i,i+400).forEach(function(k){
+        batch.set(ref.doc(k),map[k],{merge:true});
+      });
+      if(keys.length) await batch.commit();
+    }
+  }
+
+  function scheduleCloudPhotoSync(){
+    clearTimeout(photoSyncTimer);
+    photoSyncTimer=setTimeout(function(){
+      photoSyncTimer=null;
+      syncCloudPhotos().catch(function(e){console.warn('Photo sync failed',e);});
+    },300);
+  }
+
+  async function pullCloudPhotos(){
+    if(!currentUser || !navigator.onLine) return;
+    var snap=await uidRef().collection('photos').get();
+    var changed=false;
+    snap.forEach(function(doc){
+      var d=doc.data()||{};
+      if(!d.data || String(d.data).indexOf('data:image/')!==0) return;
+      var key=_photoCacheKey(d.name || doc.id);
+      _photoCacheSet(key,d.data);
+      try { _idbPut(d.name || doc.id,d.data); } catch(e){}
+      changed=true;
+    });
+    if(changed){
+      function apply(list){
+        (list||[]).forEach(function(c){
+          var p=_photoCacheGet(_photoCacheKey(c.name));
+          if(p) c.photo=p;
+        });
+      }
+      apply(allRuns.reduce(function(a,r){return a.concat(r.cars||[]);},[]));
+      apply(currentRun); apply(quickPicks);
+      _saveRunsLocal(); _saveCurrentLocal(); _saveQPLocal();
+    }
+    return changed;
+  }
+
+  function startSubcollectionListeners(){
+    if(!currentUser) return;
+    if(runListenerUnsub) runListenerUnsub();
+    if(photoListenerUnsub) photoListenerUnsub();
+    var u=uidRef();
+    runListenerUnsub=u.collection('runs').onSnapshot(function(snap){
+      var remote={};
+      snap.forEach(function(doc){
+        var r=doc.data()||{};
+        if(r.id==null) r.id=Number(doc.id)||doc.id;
+        remote[runKey(r)]=r;
+      });
+      var local=Array.isArray(allRuns)?allRuns:[];
+      var next=[];
+      local.forEach(function(r){
+        var k=runKey(r);
+        if(remote[k]) { next.push(Object.assign({},r,remote[k])); delete remote[k]; }
+        else if(k && !navigator.onLine) next.push(r);
+      });
+      Object.keys(remote).forEach(function(k){next.push(remote[k]);});
+      next.sort(function(a,b){return Number(b.id||0)-Number(a.id||0);});
+      var before=JSON.stringify(local.map(function(r){return [r.id,r._v,r.total,r.cars&&r.cars.length];}));
+      var after=JSON.stringify(next.map(function(r){return [r.id,r._v,r.total,r.cars&&r.cars.length];}));
+      if(before!==after){
+        allRuns=next;
+        _saveRunsLocal();
+        renderHistory();
+        renderGarage();
+      }
+      // Pull photos for data correctness, but DON'T blindly re-render on every
+      // Firestore snapshot. Re-rendering here was causing Garage/History entrance
+      // animations to restart over and over whenever the sync listener fired.
+      pullCloudPhotos().then(function(changed){
+        if(changed){ renderHistory(); renderGarage(); }
+      }).catch(function(){});
+    },function(e){console.warn('Run listener failed',e);});
+    photoListenerUnsub=u.collection('photos').onSnapshot(function(snap){
+      var changed=false;
+      var sig=[];
+      snap.forEach(function(doc){
+        var d=doc.data()||{};
+        if(d.data && String(d.data).indexOf('data:image/')===0){
+          var k=_photoCacheKey(d.name||doc.id);
+          var data=String(d.data);
+          sig.push(doc.id+':'+data.length+':'+(d.updatedAt||''));
+          if(_photoCacheGet(k)!==data){
+            _photoCacheSet(k,data);
+            try{_idbPut(d.name||doc.id,data);}catch(e){}
+            changed=true;
+          }
+        }
+      });
+      sig.sort();
+      var photoSig=sig.join('|');
+      if(changed && photoSig!==lastPhotoRenderSig){
+        lastPhotoRenderSig=photoSig;
+        restorePhotosFromIDB();
+        renderDiscoveries();
+        renderGarage();
+        renderHistory();
+      }
+    },function(e){console.warn('Photo listener failed',e);});
+  }
+
+  /* Recent Spots: the old inline onclick embeds JSON directly into an HTML
+     attribute, which breaks as soon as the car object contains quotes. Replace
+     it with DOM listeners and always resolve the user's cached photo first. */
+  function patchRecentSpots(){
+    var list=document.getElementById('discoveriesList');
+    if(!list) return;
+    var cards=[].slice.call(list.querySelectorAll('.disc-card'));
+    cards.forEach(function(card,i){
+      var old=card.getAttribute('onclick');
+      if(old) card.removeAttribute('onclick');
+      if(card.dataset.csBound) return;
+      card.dataset.csBound='1';
+      card.addEventListener('click',function(e){
+        e.preventDefault(); e.stopPropagation();
+        var data=[];
+        try{data=JSON.parse(localStorage.getItem('cs_discoveries')||'[]');}catch(ex){}
+        var rec=data[i];
+        if(!rec) return;
+        var photo=resolveDiscoveryPhoto(rec.p,rec.n) || _photoCacheGet(_photoCacheKey(rec.n)) || '';
+        var car={name:rec.n,value:rec.v||0,type:rec.t||'',color:'',photo:photo,location:null,runDate:new Date(rec.d).toLocaleDateString('en-US',{month:'short',day:'numeric'}),spotCount:1};
+        if(typeof showCarInstances==='function') showCarInstances(car);
+      });
+    });
+  }
+  var oldRenderDiscoveries=window.renderDiscoveries;
+  if(typeof oldRenderDiscoveries==='function'){
+    window.renderDiscoveries=function(){
+      var r=oldRenderDiscoveries.apply(this,arguments);
+      setTimeout(patchRecentSpots,0);
+      return r;
+    };
+  }
+
+  /* Never let a reference-image fetch replace a real user photo. */
+  var oldFetchRef=window.fetchAndStoreRefImage;
+  if(typeof oldFetchRef==='function'){
+    window.fetchAndStoreRefImage=function(car){
+      var own=_photoCacheGet(_photoCacheKey(car&&car.name));
+      if(own && own.indexOf('data:image/')===0){
+        car.photo=own;
+        return Promise.resolve(own);
+      }
+      return oldFetchRef.apply(this,arguments);
+    };
+  }
+
+  /* Keep photo uploads mirrored to Firestore immediately. */
+  var oldSavePhoto=window._savePhoto;
+  if(typeof oldSavePhoto==='function'){
+    window._savePhoto=function(compressed,t){
+      var r=oldSavePhoto.apply(this,arguments);
+      if(compressed && t && t.name){
+        _photoCacheSet(_photoCacheKey(t.name),compressed);
+        scheduleCloudPhotoSync();
+      } else if(compressed){
+        scheduleCloudPhotoSync();
+      }
+      return r;
+    };
+  }
+
+  /* Existing editor is already present in this build. Make sure it is callable
+     from history even if the page was rendered before the editor script ran. */
+  setTimeout(function(){
+    try{ renderDiscoveries(); renderHistory(); }catch(e){}
+    try{ pullCloudPhotos(); }catch(e){}
+  },120);
+
+  window.scheduleRunSubcollectionSync=scheduleRunSubcollectionSync;
+  window.scheduleCloudPhotoSync=scheduleCloudPhotoSync;
+  window.pullRunSubcollection=pullRunSubcollection;
+  window.pullCloudPhotos=pullCloudPhotos;
+  window.startSubcollectionListeners=startSubcollectionListeners;
+  window.restorePhotosFromIDB=window.restorePhotosFromIDB || function(){};
+})();
+</script>
+
 <script defer="" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </body>
 </html>
