@@ -15,7 +15,7 @@
   try {
     var dismissed = localStorage.getItem('cs_install_dismissed');
     var hasData;
-    try { hasData = JSON.parse(localStorage.getItem('cs_runs') || '[]').length > 0 || JSON.parse(localStorage.getItem('cs_current') || '[]').length > 0; } catch(e) { hasData = false; }
+    try { hasData = _csReadJSON('cs_runs', []).length > 0 || JSON.parse(localStorage.getItem('cs_current') || '[]').length > 0; } catch(e) { hasData = false; }
     if (dismissed) return;
     if (!hasData) return;
     var standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || (window.navigator && window.navigator.standalone);
@@ -32,7 +32,7 @@
     var favNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
     if (favNames.size) {
       var known = new Set();
-      (JSON.parse(localStorage.getItem('cs_runs') || '[]')).forEach(function(r){ (r.cars||[]).forEach(function(c){ known.add(String(c.name).toLowerCase()); }); });
+      (_csReadJSON('cs_runs', [])).forEach(function(r){ (r.cars||[]).forEach(function(c){ known.add(String(c.name).toLowerCase()); }); });
       (JSON.parse(localStorage.getItem('cs_current') || '[]')).forEach(function(c){ known.add(String(c.name).toLowerCase()); });
       var any = false;
       favNames.forEach(function(n){ if (known.has(String(n).toLowerCase())) any = true; });
@@ -3197,6 +3197,7 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
   .page-enter-forward,.page-enter-back,.page-enter-garage,.page-enter-achievements,.page-enter-trips,.card,.more-page-tile,.hist-item,.garage-card.anim-stagger,.cc-card.collecting,.cc-collected,.cc-quick,.cc-quick-thumb,.cc-quick-emoji,.cc-quick-ring,.nav-badge.pop{animation-duration:.01ms!important;}
 }
 </style>
+<script>window.CS_SYNC_REPAIR_BUILD='2026-09-07-final';</script>
 </head>
 <body>
 <!-- AUTH OVERLAY -->
@@ -4247,6 +4248,34 @@ async function signOutUser() {
 // account boundary, signing out of A and into B can leave A's local runs in
 // memory while B's cloud data is loading. That is the exact "same stuff on
 // another account" failure mode this guard prevents.
+
+function _csAccountUid() {
+  try { return String(localStorage.getItem('cs_active_uid') || localStorage.getItem('cs_uid') || ''); }
+  catch(e) { return ''; }
+}
+function _csScopedKey(key) {
+  var uid = _csAccountUid();
+  return uid ? uid + '_' + key : key;
+}
+function _csReadJSON(key, fallback) {
+  try {
+    var scoped = _csScopedKey(key);
+    var rawScoped = localStorage.getItem(scoped);
+    if (rawScoped !== null) return JSON.parse(rawScoped);
+    var raw = localStorage.getItem(key);
+    return raw !== null ? JSON.parse(raw) : fallback;
+  } catch(e) { return fallback; }
+}
+function _csReadString(key, fallback) {
+  try {
+    var scoped = _csScopedKey(key);
+    var rawScoped = localStorage.getItem(scoped);
+    if (rawScoped !== null) return rawScoped;
+    var raw = localStorage.getItem(key);
+    return raw !== null ? raw : fallback;
+  } catch(e) { return fallback; }
+}
+
 var _activeLocalUid = localStorage.getItem('cs_active_uid') || '';
 var _ACCOUNT_LOCAL_KEYS = [
   'cs_runs','cs_current','cs_qp','cs_fav','cs_aliases','cs_notes','cs_xp',
@@ -4287,7 +4316,7 @@ function _prepareLocalCacheForUser(user) {
 }
 
 function importLocalData() {
-  const localRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
+  const localRuns = _csReadJSON('cs_runs', []);
   const localCurrent = JSON.parse(localStorage.getItem('cs_current') || '[]');
   const localQP = JSON.parse(localStorage.getItem('cs_qp') || '[]');
   const localNotes = localStorage.getItem('cs_notes') || '';
@@ -4355,7 +4384,7 @@ auth.onAuthStateChanged(async user => {
     subscribeCloud();
     if (_dirty) flushSyncNow();
     checkNewAchievements();
-    const localRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
+    const localRuns = _csReadJSON('cs_runs', []);
     if (localRuns.length > 0 && !user.isAnonymous) showImportBanner(localRuns.length);
   } else {
     // No account: restore the original Google sign-in gate instead of silently
@@ -8757,7 +8786,7 @@ function _stripCopy(obj) {
   return obj;
 }
 function _saveRunsLocal()    { return _safeSet('cs_runs',    JSON.stringify(_stripCopy(allRuns))); }
-function _saveCurrentLocal() { return _safeSet('cs_current', JSON.stringify(_stripCopy(currentRun))); }
+function _saveCurrentLocal() { return _safeSet(_csScopedKey('cs_current'), JSON.stringify(_stripCopy(currentRun))); }
 function _saveQPLocal()      { return _safeSet('cs_qp',      JSON.stringify(_stripCopy(quickPicks))); }
 
 // Deep copy with 'photo:' refs resolved back to their base64 from the IDB cache —
