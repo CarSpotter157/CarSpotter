@@ -3713,7 +3713,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 </div>
 <nav class="bottom-nav" id="bottomNav">
 <!-- desktop logo injected by JS -->
-<button class="nav-btn active" id="nav-spot" onclick="goTo(&#39;spot&#39;)">
+<button class="nav-btn active" id="nav-spot" onclick="goTo('spot')">
 <span class="nav-icon"><svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="20"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle><line x1="12" x2="12" y1="2" y2="5"></line><line x1="12" x2="12" y1="19" y2="22"></line><line x1="2" x2="5" y1="12" y2="12"></line><line x1="19" x2="22" y1="12" y2="12"></line></svg></span>
 <span class="nav-label">Spot</span>
 </button>
@@ -4239,8 +4239,6 @@ async function signOutUser() {
     }
   }
   if (syncUnsub) { syncUnsub(); syncUnsub = null; }
-  if (typeof runListenerUnsub === 'function') { try { runListenerUnsub(); } catch(e){} }
-  if (typeof photoListenerUnsub === 'function') { try { photoListenerUnsub(); } catch(e){} }
   auth.signOut();
 }
 
@@ -4510,7 +4508,7 @@ function _replaceLocalFromCloud(c) {
   favoriteNames = new Set((c.favorites && Array.isArray(c.favorites.names)) ? c.favorites.names : []);
   aliases = (c.aliases && c.aliases.map && typeof c.aliases.map === 'object') ? Object.assign({}, c.aliases.map) : {};
   if (c.notes && c.notes.text != null) { try { localStorage.setItem('cs_notes', String(c.notes.text)); } catch(e){} }
-  if (c.xp && typeof c.xp.value === 'number') _xpTotal = Math.max(Number(_xpTotal) || 0, Number(c.xp.value) || 0);
+  if (c.xp && typeof c.xp.value === 'number') _xpTotal = c.xp.value;
   if (c.progression && typeof window.mergeCloudProgression === 'function') window.mergeCloudProgression(c.progression);
   if (c.discoveries && Array.isArray(c.discoveries.items)) { try { localStorage.setItem('cs_discoveries', JSON.stringify(c.discoveries.items)); } catch(e){} }
   if (c.settings && c.settings.map) _applySettings(c.settings.map);
@@ -4525,43 +4523,6 @@ function _replaceLocalFromCloud(c) {
   _purgeTombstoned();
   _markDirty(false);
   _saveAllLocal();
-}
-
-function _repairXPFromOwnedData() {
-  // XP is deterministic in this build: every logged car grants rarityXP(),
-  // and every claimed achievement/expedition grants its listed reward. If an
-  // old/empty cloud document reset cs_xp during account hydration, rebuild the
-  // earned floor from the user's actual synced data instead of losing progress.
-  try {
-    var total = 0;
-    var cars = [];
-    (Array.isArray(allRuns) ? allRuns : []).forEach(function(r){
-      (Array.isArray(r.cars) ? r.cars : []).forEach(function(c){ cars.push(c); });
-    });
-    (Array.isArray(currentRun) ? currentRun : []).forEach(function(c){ cars.push(c); });
-    cars.forEach(function(c){ total += (typeof rarityXP === 'function' ? rarityXP(Number(c.value)||0) : 0); });
-
-    // Achievement/expedition claims are stored in _progress.expoClaimed.
-    // This is the same one-time claim ledger used by claimExpo/checkNewAchievements.
-    var claimed = (_progress && _progress.expoClaimed) || {};
-    (Array.isArray(ACHIEVEMENTS) ? ACHIEVEMENTS : []).forEach(function(a){
-      if (claimed[a.id]) total += Number(a.xp)||0;
-    });
-    (Array.isArray(EXPEDITIONS) ? EXPEDITIONS : []).forEach(function(e){
-      if (claimed[e.id]) total += Number(e.xp)||0;
-    });
-
-    if (total > (Number(_xpTotal)||0)) {
-      _xpTotal = total;
-      try { localStorage.setItem('cs_xp', String(_xpTotal)); } catch(e){}
-      _bumpVer('xp');
-      if (typeof renderLevelBar === 'function') renderLevelBar();
-      if (typeof renderTitleChip === 'function') renderTitleChip();
-      if (currentUser && !_applyingCloud) saveToCloud();
-      return true;
-    }
-  } catch(e) { console.warn('XP repair failed', e); }
-  return false;
 }
 
 async function loadFromCloud() {
@@ -4584,9 +4545,6 @@ async function loadFromCloud() {
     }
     if (!_lastSave) setSyncDot('ok');
   } catch(e) { setSyncDot(''); console.error(e); }
-  try { await pullRunSubcollection(); } catch(e) { console.warn('Run subcollection pull failed', e); }
-  try { await pullCloudPhotos(); } catch(e) { console.warn('Photo subcollection pull failed', e); }
-  _repairXPFromOwnedData();
   renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
   fetchRefImagesForAllCars();
   if (currentRun.length > 0)
@@ -4595,8 +4553,6 @@ async function loadFromCloud() {
 
 function subscribeCloud() {
   if (!currentUser) return;
-  if (syncUnsub) { try { syncUnsub(); } catch(e){} syncUnsub = null; }
-  startSubcollectionListeners();
   syncUnsub = db.collection('users').doc(currentUser.uid).onSnapshot(snap => {
     if (!snap.exists) return;
     const d = snap.data();
@@ -4737,7 +4693,7 @@ var _sanitizedSet = typeof WeakSet !== 'undefined' ? new WeakSet() : null;
 function _buildCloudPayload() {
   var payload = {
     currentRun:   { ver: _fieldVer.currentRun || 0, cars: currentRun },
-    allRuns:      { ver: _fieldVer.runs || 0, items: [] },
+    allRuns:      { ver: _fieldVer.runs || 0, items: allRuns },
     deletedRuns:  { ver: _fieldVer.deletedRuns || 0, ids: _deletedRuns },
     quickPicks:   { ver: _fieldVer.qp || 0, items: quickPicks || [] },
     deletedQP:    { ver: _fieldVer.deletedQP || 0, ids: _deletedQP },
@@ -4803,10 +4759,7 @@ function saveToCloud() {
   _lastSave = Date.now();
   syncTimer = setTimeout(() => {
     syncTimer = null;
-    _txWrite({ cause: 'saveToCloud' }).then(function(){
-      if (typeof scheduleRunSubcollectionSync === 'function') scheduleRunSubcollectionSync();
-      if (typeof scheduleCloudPhotoSync === 'function') scheduleCloudPhotoSync();
-    }).catch(function(){});
+    _txWrite({ cause: 'saveToCloud' });
   }, 1500);
 }
 
@@ -5650,6 +5603,7 @@ function stopFavRotation(){if(favTimer){clearInterval(favTimer);favTimer=null}}
 
 //  NAV 
 function goTo(page) {
+  if (page === 'achievements') page = 'expeditions';
   var prev = document.querySelector('.page.active');
   if (prev && prev.id==='page-spot' && page!=='spot') stopFavRotation();
   if (prev) {
@@ -6667,7 +6621,7 @@ function renderGarageDashboard(cars){
   var el=document.getElementById('garageDashboard');
   if(!el) return;
   if(!cars.length){
-    el.innerHTML='<div class="cs-garage-dashboard"><div class="cs-gd-top"><div><div class="cs-gd-kicker">BUILD YOUR COLLECTION</div><div class="cs-gd-title">Your garage starts with one.</div><div class="cs-gd-sub">Every spot becomes part of your collection.</div></div><div class="cs-gd-count"><b>0</b><span>cars collected</span></div></div><div class="cs-gd-track"><div class="cs-gd-fill" style="width:0%"></div></div><div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>1 car</strong></div><div class="cs-gd-actions"><button class="cs-gd-action" data-noop="goTo(&#39;spot&#39;)">＋ SPOT A CAR</button></div></div></div>';
+    el.innerHTML='<div class="cs-garage-dashboard"><div class="cs-gd-top"><div><div class="cs-gd-kicker">BUILD YOUR COLLECTION</div><div class="cs-gd-title">Your garage starts with one.</div><div class="cs-gd-sub">Every spot becomes part of your collection.</div></div><div class="cs-gd-count"><b>0</b><span>cars collected</span></div></div><div class="cs-gd-track"><div class="cs-gd-fill" style="width:0%"></div></div><div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>1 car</strong></div><div class="cs-gd-actions"><button class="cs-gd-action" onclick="goTo("spot")">＋ SPOT A CAR</button></div></div></div>';
     return;
   }
   var milestones=[5,10,25,50,100,250,500];
@@ -6683,7 +6637,7 @@ function renderGarageDashboard(cars){
   el.innerHTML='<div class="cs-garage-dashboard">'+
     '<div class="cs-gd-top"><div><div class="cs-gd-kicker">YOUR COLLECTION</div><div class="cs-gd-title">Build a garage worth showing off.</div><div class="cs-gd-sub">Keep spotting cars. Watch your collection grow.</div></div><div class="cs-gd-count"><b>'+cars.length+'</b><span>cars collected</span></div></div>'+
     '<div class="cs-gd-track"><div class="cs-gd-fill" style="width:'+pct+'%"></div></div>'+
-    '<div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>'+next+' cars</strong> · '+nextLabel+'</div><div class="cs-gd-actions"><button class="cs-gd-action" onclick="setGarageSortHeader(&#39;favorites&#39;,document.querySelector(&#39;.gs-pill[data-sort=favorites]&#39;))">★ FAVORITES</button><button class="cs-gd-action" onclick="setGarageFilter(&#39;legend&#39;,document.querySelector(&#39;.gf-pill[data-filter=legend]&#39;))">👑 LEGENDS</button></div></div>'+
+    '<div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>'+next+' cars</strong> · '+nextLabel+'</div><div class="cs-gd-actions"><button class="cs-gd-action" onclick="setGarageSortHeader("favorites",document.querySelector(".gs-pill[data-sort=\"favorites\"]"))">★ FAVORITES</button><button class="cs-gd-action" onclick="setGarageFilter("legend",document.querySelector(".gf-pill[data-filter=\"legend\"]"))">👑 LEGENDS</button></div></div>'+
     '<div class="cs-gd-chips"><div class="cs-gd-chip"><b>'+makes+'</b> makes</div><div class="cs-gd-chip"><b>'+photos+'</b> photographed</div><div class="cs-gd-chip"><b>'+favorites+'</b> favorites</div><div class="cs-gd-chip"><b>'+escapeHtml(best.name)+'</b> crown jewel</div></div>'+
     '</div>';
 }
@@ -6782,7 +6736,7 @@ function renderGarage() {
     el.className = '';
     el.innerHTML = allCars.length
       ? '<div class="garage-empty"><div class="ge-scene">\uD83D\uDD0D</div><div class="ge-title">NO MATCHES</div><div class="ge-sub">Try a different filter or search term.</div></div>'
-      : '<div class="garage-empty"><div class="ge-scene">\uD83D\uDE97</div><div class="ge-title">YOUR GARAGE IS EMPTY</div><div class="ge-sub">Spot your first car and it becomes the crown jewel of your collection.</div><button class="ge-btn" onclick="goTo(&#39;spot&#39;)">LOG YOUR FIRST CAR</button></div>';
+      : '<div class="garage-empty"><div class="ge-scene">\uD83D\uDE97</div><div class="ge-title">YOUR GARAGE IS EMPTY</div><div class="ge-sub">Spot your first car and it becomes the crown jewel of your collection.</div><button class="ge-btn" onclick="goTo(\'spot\')">LOG YOUR FIRST CAR</button></div>';
     return;
   }
   if (garageView === 'grid') {
@@ -7654,7 +7608,7 @@ function celebrateFullCollectorCard(car, opts) {
     luxury:'👑', suv:'🛻', classic:'🕹️', hotrod:'🔧'
   }[car.type] || '🚘';
 
-  var photo = (_idbPhotoCache[car.name.toLowerCase()] || '') || car.photo || '';
+  var photo = car.photo || (_idbPhotoCache[car.name.toLowerCase()] || '');
   if (!photo) { photo = ''; }
   else if (photo.indexOf('data:') !== 0) {
     // Prefer the user's own photo; fall back to a stock/reference image only if none exists.
@@ -7803,8 +7757,8 @@ function celebrateFullCollectorCard(car, opts) {
     overlay.onclick = function() { if (phase === 0) flipNow(); else if (phase === 1) revealNow(); else collect(); };
 
     // Auto-timeline: anticipation → flip → reveal stars → collect
-    setTimeout(function() { if (phase === 0) flipNow(); }, 900);
-    setTimeout(collect, 2600);
+    setTimeout(function() { if (phase === 0) flipNow(); }, 1600);
+    setTimeout(collect, 4300);
 
     // Particle burst by rarity
     var pCount = tier === 'legend' ? 24 : tier === 'hyper' ? 16 : tier === 'super' ? 10 : 0;
@@ -7836,7 +7790,7 @@ function celebrateQuick(car, opts) {
     var el = document.createElement('div');
     el.className = 'cc-quick';
     el._ccResolve = resolve;
-    var photo = (_idbPhotoCache[car.name.toLowerCase()] || '') || car.photo || '';
+    var photo = car.photo || (_idbPhotoCache[car.name.toLowerCase()] || '');
     var thumb = photo
       ? '<img class="cc-quick-thumb" src="' + photo + '" alt="">'
       : '<span class="cc-quick-emoji">' + tierEmoji(tier) + '</span>';
@@ -7892,7 +7846,7 @@ function rewardLog(car, popTotal, opts) {
     levelUpPulse();
     cardDone.then(function() { enqueueCeremony(function(done){ celebrateLevelUp(after, done); }); });
   }
-  if (window.updateProgressionAfterLog) setTimeout(function(){ updateProgressionAfterLog(car); }, 120);
+  if (window.updateProgressionAfterLog) setTimeout(function(){ updateProgressionAfterLog(car); }, 900);
   maybeCarPersonality(car);
   return cardDone;
 }
@@ -9941,16 +9895,6 @@ document.addEventListener('click', e => {
   }
 });
 
-// Robust navigation fallback for the More > Achievements tile.
-document.addEventListener('click', function(e){
-  try {
-    var tile=e.target.closest && e.target.closest('#moreMenu .more-page-tile');
-    if(!tile) return;
-    var label=(tile.textContent||'').trim().toLowerCase();
-    if(label.indexOf('achievements')!==-1){ e.preventDefault(); e.stopPropagation(); goTo('achievements'); }
-  } catch(ex) {}
-}, true);
-
 const NEWS_SOURCES = [
   { name: 'Car & Driver',  rss: 'https://www.caranddriver.com/rss/all.xml/' },
   { name: 'Motor Trend',   rss: 'https://www.motor1.com/rss/news/all/' },
@@ -11127,7 +11071,7 @@ function checkEvolutionUnlock(car) {
 
 function celebrateEvolution(car, oldTier, newTier, count, done) {
   if (document.querySelector('.evo-overlay')) { if (typeof done === 'function') done(); return; }
-  var photo = (_idbPhotoCache[car.name.toLowerCase()] || '') || car.photo || '';
+  var photo = car.photo || (_idbPhotoCache[car.name.toLowerCase()] || '');
   var imgHTML = photo
     ? '<img src="' + photo + '" alt="" onerror="this.parentElement.innerHTML=\'' + tierEmoji(tierOf(car.value || 0)) + '\'">'
     : tierEmoji(tierOf(car.value || 0));
@@ -12141,306 +12085,6 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
   /* Garage remains the original secondary destination; improvements focus on making it more rewarding to visit. */
 })();
 </script>
-
-<script>
-/* CARSPOTTER FIX PACK — durable history/photos + clickable Recent Spots.
-   Runs and user photos are stored in subcollections so the account document stays
-   comfortably below Firestore's 1 MiB document limit. */
-(function(){
-  'use strict';
-
-  var runSyncTimer = null, photoSyncTimer = null;
-  var runListenerUnsub = null, photoListenerUnsub = null;
-  var subSyncBusy = false;
-  var lastRunRenderSig = '';
-  var lastPhotoRenderSig = '';
-
-  function uidRef(){
-    return currentUser ? db.collection('users').doc(currentUser.uid) : null;
-  }
-  function cleanDoc(obj){
-    try { return JSON.parse(JSON.stringify(_stripDeepPhotos(JSON.parse(JSON.stringify(obj))))); }
-    catch(e){ return {}; }
-  }
-  function runKey(run){
-    return String(run && run.id != null ? run.id : '');
-  }
-
-  async function syncRunsSubcollection(){
-    if(!currentUser || !navigator.onLine) return;
-    var ref=uidRef().collection('runs');
-    var local=Array.isArray(allRuns) ? allRuns : [];
-    var wanted={};
-    local.forEach(function(run){
-      if(!runKey(run)) return;
-      wanted[runKey(run)]=true;
-    });
-    // Batch writes in chunks to avoid large batches.
-    for(var i=0;i<local.length;i+=400){
-      var batch=db.batch();
-      var chunk=local.slice(i,i+400);
-      chunk.forEach(function(run){
-        if(!runKey(run)) return;
-        batch.set(ref.doc(runKey(run)), cleanDoc(run), {merge:true});
-      });
-      if(chunk.length) await batch.commit();
-    }
-    var snap=await ref.get();
-    var deletes=[];
-    snap.forEach(function(doc){ if(!wanted[doc.id]) deletes.push(doc.id); });
-    for(var j=0;j<deletes.length;j+=400){
-      var b=db.batch();
-      deletes.slice(j,j+400).forEach(function(id){ b.delete(ref.doc(id)); });
-      if(deletes.length) await b.commit();
-    }
-  }
-
-  function scheduleRunSubcollectionSync(){
-    clearTimeout(runSyncTimer);
-    runSyncTimer=setTimeout(function(){
-      runSyncTimer=null;
-      syncRunsSubcollection().catch(function(e){ console.warn('Run sync failed',e); });
-    },250);
-  }
-
-  async function pullRunSubcollection(){
-    if(!currentUser || !navigator.onLine) return;
-    var snap=await uidRef().collection('runs').get();
-    var cloud=[];
-    snap.forEach(function(doc){
-      var r=doc.data()||{};
-      if(r.id==null) r.id=Number(doc.id) || doc.id;
-      cloud.push(r);
-    });
-    if(!cloud.length) {
-      // One-time migration: if the legacy main document had runs, push them out.
-      if(Array.isArray(allRuns) && allRuns.length) await syncRunsSubcollection();
-      return;
-    }
-    var byId={};
-    cloud.forEach(function(r){ byId[runKey(r)]=r; });
-    // Subcollection is authoritative for history; preserve local only when it has
-    // a run not yet present remotely (for an offline/newly-created run).
-    var merged=[];
-    (Array.isArray(allRuns)?allRuns:[]).forEach(function(r){
-      var k=runKey(r);
-      if(k && byId[k]) { merged.push(Object.assign({},r,byId[k])); delete byId[k]; }
-      else if(k) merged.push(r);
-    });
-    Object.keys(byId).forEach(function(k){ merged.push(byId[k]); });
-    merged.sort(function(a,b){ return Number(b.id||0)-Number(a.id||0); });
-    allRuns=merged;
-    _saveRunsLocal();
-  }
-
-  async function syncCloudPhotos(){
-    if(!currentUser || !navigator.onLine) return;
-    var ref=uidRef().collection('photos');
-    var map={};
-    function addCar(c){
-      if(!c || !c.name || !c.photo) return;
-      var p=String(c.photo);
-      if(p.indexOf('data:image/')!==0) {
-        if(p.indexOf('photo:')===0) p=_photoCacheGet(p.slice(6)) || '';
-      }
-      if(p && p.indexOf('data:image/')===0 && p.length < 900000) {
-        map[_photoCacheKey(c.name)]={name:c.name,data:p,updatedAt:Date.now()};
-      }
-    }
-    (Array.isArray(allRuns)?allRuns:[]).forEach(function(r){(r.cars||[]).forEach(addCar);});
-    (Array.isArray(currentRun)?currentRun:[]).forEach(addCar);
-    (Array.isArray(quickPicks)?quickPicks:[]).forEach(addCar);
-    var keys=Object.keys(map);
-    for(var i=0;i<keys.length;i+=400){
-      var batch=db.batch();
-      keys.slice(i,i+400).forEach(function(k){
-        batch.set(ref.doc(k),map[k],{merge:true});
-      });
-      if(keys.length) await batch.commit();
-    }
-  }
-
-  function scheduleCloudPhotoSync(){
-    clearTimeout(photoSyncTimer);
-    photoSyncTimer=setTimeout(function(){
-      photoSyncTimer=null;
-      syncCloudPhotos().catch(function(e){console.warn('Photo sync failed',e);});
-    },300);
-  }
-
-  async function pullCloudPhotos(){
-    if(!currentUser || !navigator.onLine) return;
-    var snap=await uidRef().collection('photos').get();
-    var changed=false;
-    snap.forEach(function(doc){
-      var d=doc.data()||{};
-      if(!d.data || String(d.data).indexOf('data:image/')!==0) return;
-      var key=_photoCacheKey(d.name || doc.id);
-      var data=String(d.data);
-      if (_photoCacheGet(key) !== data) {
-        _photoCacheSet(key,data);
-        try { _idbPut(d.name || doc.id,data); } catch(e){}
-        changed=true;
-      }
-    });
-    if(changed){
-      function apply(list){
-        (list||[]).forEach(function(c){
-          var p=_photoCacheGet(_photoCacheKey(c.name));
-          if(p) c.photo=p;
-        });
-      }
-      apply(allRuns.reduce(function(a,r){return a.concat(r.cars||[]);},[]));
-      apply(currentRun); apply(quickPicks);
-      _saveRunsLocal(); _saveCurrentLocal(); _saveQPLocal();
-    }
-    return changed;
-  }
-
-  function startSubcollectionListeners(){
-    if(!currentUser) return;
-    if(runListenerUnsub) runListenerUnsub();
-    if(photoListenerUnsub) photoListenerUnsub();
-    var u=uidRef();
-    runListenerUnsub=u.collection('runs').onSnapshot(function(snap){
-      var remote={};
-      snap.forEach(function(doc){
-        var r=doc.data()||{};
-        if(r.id==null) r.id=Number(doc.id)||doc.id;
-        remote[runKey(r)]=r;
-      });
-      var local=Array.isArray(allRuns)?allRuns:[];
-      var next=[];
-      local.forEach(function(r){
-        var k=runKey(r);
-        if(remote[k]) { next.push(Object.assign({},r,remote[k])); delete remote[k]; }
-        else if(k && !navigator.onLine) next.push(r);
-      });
-      Object.keys(remote).forEach(function(k){next.push(remote[k]);});
-      next.sort(function(a,b){return Number(b.id||0)-Number(a.id||0);});
-      var before=JSON.stringify(local.map(function(r){return [r.id,r._v,r.total,r.cars&&r.cars.length];}));
-      var after=JSON.stringify(next.map(function(r){return [r.id,r._v,r.total,r.cars&&r.cars.length];}));
-      if(before!==after){
-        allRuns=next;
-        _saveRunsLocal();
-        _repairXPFromOwnedData();
-        var active=document.querySelector('.page.active');
-        if(active && active.id==='page-history') renderHistory();
-        if(active && active.id==='page-garage') renderGarage();
-      }
-      // Pull photos for data correctness, but DON'T blindly re-render on every
-      // Firestore snapshot. Re-rendering here was causing Garage/History entrance
-      // animations to restart over and over whenever the sync listener fired.
-      pullCloudPhotos().then(function(changed){
-        if(changed){ renderHistory(); renderGarage(); }
-      }).catch(function(){});
-    },function(e){console.warn('Run listener failed',e);});
-    photoListenerUnsub=u.collection('photos').onSnapshot(function(snap){
-      var changed=false;
-      var sig=[];
-      snap.forEach(function(doc){
-        var d=doc.data()||{};
-        if(d.data && String(d.data).indexOf('data:image/')===0){
-          var k=_photoCacheKey(d.name||doc.id);
-          var data=String(d.data);
-          sig.push(doc.id+':'+data.length+':'+(d.updatedAt||''));
-          if(_photoCacheGet(k)!==data){
-            _photoCacheSet(k,data);
-            try{_idbPut(d.name||doc.id,data);}catch(e){}
-            changed=true;
-          }
-        }
-      });
-      sig.sort();
-      var photoSig=sig.join('|');
-      if(changed && photoSig!==lastPhotoRenderSig){
-        lastPhotoRenderSig=photoSig;
-        restorePhotosFromIDB();
-        var active=document.querySelector('.page.active');
-        if(active && active.id==='page-garage') renderGarage();
-        if(active && active.id==='page-history') renderHistory();
-        if(active && active.id==='page-spot') renderDiscoveries();
-      }
-    },function(e){console.warn('Photo listener failed',e);});
-  }
-
-  /* Recent Spots: the old inline onclick embeds JSON directly into an HTML
-     attribute, which breaks as soon as the car object contains quotes. Replace
-     it with DOM listeners and always resolve the user's cached photo first. */
-  function patchRecentSpots(){
-    var list=document.getElementById('discoveriesList');
-    if(!list) return;
-    var cards=[].slice.call(list.querySelectorAll('.disc-card'));
-    cards.forEach(function(card,i){
-      var old=card.getAttribute('onclick');
-      if(old) card.removeAttribute('onclick');
-      if(card.dataset.csBound) return;
-      card.dataset.csBound='1';
-      card.addEventListener('click',function(e){
-        e.preventDefault(); e.stopPropagation();
-        var data=[];
-        try{data=JSON.parse(localStorage.getItem('cs_discoveries')||'[]');}catch(ex){}
-        var rec=data[i];
-        if(!rec) return;
-        var photo=resolveDiscoveryPhoto(rec.p,rec.n) || _photoCacheGet(_photoCacheKey(rec.n)) || '';
-        var car={name:rec.n,value:rec.v||0,type:rec.t||'',color:'',photo:photo,location:null,runDate:new Date(rec.d).toLocaleDateString('en-US',{month:'short',day:'numeric'}),spotCount:1};
-        if(typeof showCarInstances==='function') showCarInstances(car);
-      });
-    });
-  }
-  var oldRenderDiscoveries=window.renderDiscoveries;
-  if(typeof oldRenderDiscoveries==='function'){
-    window.renderDiscoveries=function(){
-      var r=oldRenderDiscoveries.apply(this,arguments);
-      setTimeout(patchRecentSpots,0);
-      return r;
-    };
-  }
-
-  /* Never let a reference-image fetch replace a real user photo. */
-  var oldFetchRef=window.fetchAndStoreRefImage;
-  if(typeof oldFetchRef==='function'){
-    window.fetchAndStoreRefImage=function(car){
-      var own=_photoCacheGet(_photoCacheKey(car&&car.name));
-      if(own && own.indexOf('data:image/')===0){
-        car.photo=own;
-        return Promise.resolve(own);
-      }
-      return oldFetchRef.apply(this,arguments);
-    };
-  }
-
-  /* Keep photo uploads mirrored to Firestore immediately. */
-  var oldSavePhoto=window._savePhoto;
-  if(typeof oldSavePhoto==='function'){
-    window._savePhoto=function(compressed,t){
-      var r=oldSavePhoto.apply(this,arguments);
-      if(compressed && t && t.name){
-        _photoCacheSet(_photoCacheKey(t.name),compressed);
-        scheduleCloudPhotoSync();
-      } else if(compressed){
-        scheduleCloudPhotoSync();
-      }
-      return r;
-    };
-  }
-
-  /* Existing editor is already present in this build. Make sure it is callable
-     from history even if the page was rendered before the editor script ran. */
-  setTimeout(function(){
-    try{ renderDiscoveries(); renderHistory(); }catch(e){}
-    try{ pullCloudPhotos(); }catch(e){}
-  },120);
-
-  window.scheduleRunSubcollectionSync=scheduleRunSubcollectionSync;
-  window.scheduleCloudPhotoSync=scheduleCloudPhotoSync;
-  window.pullRunSubcollection=pullRunSubcollection;
-  window.pullCloudPhotos=pullCloudPhotos;
-  window.startSubcollectionListeners=startSubcollectionListeners;
-  window.restorePhotosFromIDB=window.restorePhotosFromIDB || function(){};
-})();
-</script>
-
 <script defer="" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </body>
 </html>
