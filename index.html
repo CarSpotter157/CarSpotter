@@ -3873,15 +3873,6 @@ function _photoLazyLoad(key) {
       }).catch(function(){}).then(function() {
         _photoLoading[k] = false;
         pending--;
-        if (pending <= 0 && !_photoRerenderTimer) {
-          _photoRerenderTimer = setTimeout(function() {
-            _photoRerenderTimer = null;
-            renderSpot();
-            renderGarage();
-            renderHistory();
-            renderDiscoveries();
-          }, 180);
-        }
       });
     });
   }, 60);
