@@ -8,8 +8,10 @@
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="CarSpotter" name="apple-mobile-web-app-title"/>
 <meta content="#0a0a0a" name="theme-color"/>
-<title>CarSpotter</title>
+<title>CarSpotter — Sync Repair</title>
 <script>
+// CarSpotter sync repair build: additive account-scoped local/cloud merge.
+window.CS_SYNC_REPAIR_BUILD = '2026-09-07';
 // Decide install-banner visibility BEFORE first paint so showing it causes no layout shift.
 (function(){
   try {
@@ -3804,6 +3806,39 @@ try {
 } catch(e) {}
 </script>
 <script>
+// ── ACCOUNT-SCOPED LOCAL STORAGE REPAIR ─────────────────────────────
+// Older CarSpotter builds stored account data under <uid>_cs_* while this build
+// reads plain cs_* keys. Keep the original data untouched, but prefer the
+// account-scoped snapshot whenever one exists. This is intentionally additive:
+// it never deletes or replaces the stored scoped snapshot.
+function _csAccountUid() {
+  try {
+    return String(localStorage.getItem('cs_active_uid') || localStorage.getItem('cs_uid') || '');
+  } catch(e) { return ''; }
+}
+function _csScopedKey(key) {
+  var uid = _csAccountUid();
+  return uid ? uid + '_' + key : key;
+}
+function _csReadJSON(key, fallback) {
+  try {
+    var scoped = _csScopedKey(key);
+    var rawScoped = localStorage.getItem(scoped);
+    if (rawScoped !== null) return JSON.parse(rawScoped);
+    var raw = localStorage.getItem(key);
+    return raw !== null ? JSON.parse(raw) : fallback;
+  } catch(e) { return fallback; }
+}
+function _csReadString(key, fallback) {
+  try {
+    var scoped = _csScopedKey(key);
+    var rawScoped = localStorage.getItem(scoped);
+    if (rawScoped !== null) return rawScoped;
+    var raw = localStorage.getItem(key);
+    return raw !== null ? raw : fallback;
+  } catch(e) { return fallback; }
+}
+
 let qpEditMode   = false;
 let headlinerIdx = -1;
 let favTimer = null;
@@ -3814,17 +3849,17 @@ let undoTimer    = null;
 let bulkMode     = false;
 let bulkSelected = new Set();
 let soundEnabled = localStorage.getItem('cs_sound') !== 'off';
-let aliases      = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
-let bestFromLB = parseInt(localStorage.getItem('cs_best_lb') || '0');
-let favoriteNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
-let currentSpotLocation = JSON.parse(localStorage.getItem('cs_pending_loc') || 'null');
-let allRuns      = JSON.parse(localStorage.getItem('cs_runs')      || '[]');
-let currentRun   = JSON.parse(localStorage.getItem('cs_current')   || '[]');
-let quickPicks   = JSON.parse(localStorage.getItem('cs_qp')        || '[]');
+let aliases      = _csReadJSON('cs_aliases', {});
+let bestFromLB = parseInt(_csReadString('cs_best_lb', '0') || '0');
+let favoriteNames = new Set(_csReadJSON('cs_fav', []));
+let currentSpotLocation = _csReadJSON('cs_pending_loc', null);
+let allRuns      = _csReadJSON('cs_runs', []);
+let currentRun   = _csReadJSON('cs_current', []);
+let quickPicks   = _csReadJSON('cs_qp', []);
 let sortMode     = 'desc';
 let currentUser  = null;
 let _lastSave    = 0;
-let _lastCloudTs = parseInt(localStorage.getItem('cs_cloud_ts') || '0'); // server-timestamp (ms) of the newest cloud doc we've applied or acknowledged
+let _lastCloudTs = parseInt(_csReadString('cs_cloud_ts', '0') || '0'); // server-timestamp (ms) of the newest cloud doc we've applied or acknowledged
 let _lastPushTs  = 0; // client-clock (ms) of the last successful currentRun push to cloud
 let syncUnsub    = null;
 let syncTimer    = null;
@@ -4284,10 +4319,52 @@ function _prepareLocalCacheForUser(user) {
   }
   _activeLocalUid = uid;
   try { localStorage.setItem('cs_active_uid', uid); } catch(e) {}
+
+  // Hydrate this account's browser-local snapshot BEFORE Firestore hydration.
+  // Prefer <uid>_cs_* (the snapshot containing the user's 166 recovered runs);
+  // fall back to the legacy unscoped keys so a second device can contribute
+  // its local runs on first login.
+  try {
+    var scopedRunsKey = uid + '_cs_runs';
+    var scopedRunsRaw = localStorage.getItem(scopedRunsKey);
+    var legacyRunsRaw = localStorage.getItem('cs_runs');
+    if (scopedRunsRaw !== null) {
+      var rr = JSON.parse(scopedRunsRaw);
+      if (Array.isArray(rr)) allRuns = rr;
+    } else if (legacyRunsRaw !== null) {
+      var lr = JSON.parse(legacyRunsRaw);
+      if (Array.isArray(lr) && lr.length) allRuns = lr;
+    }
+
+    var scopedCurRaw = localStorage.getItem(uid + '_cs_current');
+    if (scopedCurRaw !== null) {
+      var cr = JSON.parse(scopedCurRaw);
+      if (Array.isArray(cr)) currentRun = cr;
+    }
+
+    var scopedQPRaw = localStorage.getItem(uid + '_cs_qp');
+    if (scopedQPRaw !== null) {
+      var qr = JSON.parse(scopedQPRaw);
+      if (Array.isArray(qr)) quickPicks = qr;
+    }
+
+    var scopedFavRaw = localStorage.getItem(uid + '_cs_fav');
+    if (scopedFavRaw !== null) {
+      var fr = JSON.parse(scopedFavRaw);
+      if (Array.isArray(fr)) favoriteNames = new Set(fr);
+    }
+    var scopedAliasRaw = localStorage.getItem(uid + '_cs_aliases');
+    if (scopedAliasRaw !== null) {
+      var ar = JSON.parse(scopedAliasRaw);
+      if (ar && typeof ar === 'object') aliases = ar;
+    }
+  } catch(e) {
+    console.warn('Account-local hydration failed', e);
+  }
 }
 
 function importLocalData() {
-  const localRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
+  const localRuns = _csReadJSON('cs_runs', []);
   const localCurrent = JSON.parse(localStorage.getItem('cs_current') || '[]');
   const localQP = JSON.parse(localStorage.getItem('cs_qp') || '[]');
   const localNotes = localStorage.getItem('cs_notes') || '';
@@ -4355,7 +4432,7 @@ auth.onAuthStateChanged(async user => {
     subscribeCloud();
     if (_dirty) flushSyncNow();
     checkNewAchievements();
-    const localRuns = JSON.parse(localStorage.getItem('cs_runs') || '[]');
+    const localRuns = _csReadJSON('cs_runs', []);
     if (localRuns.length > 0 && !user.isAnonymous) showImportBanner(localRuns.length);
   } else {
     // No account: restore the original Google sign-in gate instead of silently
@@ -4533,15 +4610,23 @@ async function loadFromCloud() {
     if (snap.exists) {
       const d = snap.data();
       _diagRead('loadFromCloud(get)', d);
-      // A clean local cache is a mirror, not a second account. On initial account
-      // hydration, replace it from Firestore. If there are unsynced local changes,
-      // keep the existing merge/rebase behavior so offline work is not lost.
-      logSync('loadFromCloud', 'apply lamport', d.lamport || 'legacy', 'dirty=' + _dirty);
-      if (!_dirty) _replaceLocalFromCloud(d);
-      else { _applyCloud(d); _saveAllLocal(); }
-      // Always converge back — the transactional rebase applies any newer cloud state first.
+      // IMPORTANT: local browser data may be newer than the cloud document.
+      // Older builds wrote account data under <uid>_cs_* and Firestore can
+      // legitimately contain an empty allRuns field. Never replace a populated
+      // local snapshot with cloud [] here. Instead, merge the cloud document
+      // additively into the already-hydrated local state, then converge the union
+      // back to Firestore.
+      var localRunCountBeforeCloud = Array.isArray(allRuns) ? allRuns.length : 0;
+      logSync('loadFromCloud', 'merge cloud into local', d.lamport || 'legacy', 'localRuns=' + localRunCountBeforeCloud);
+      var changedByCloud = _applyCloud(d);
+      _saveAllLocal();
       _lastSave = Date.now();
-      _txWrite({ cause: 'loadFromCloud' });
+      if (localRunCountBeforeCloud > 0 || changedByCloud) {
+        _markDirty(true);
+        await _txWrite({ cause: 'loadFromCloud-merge', retries: 5 });
+      } else {
+        _markDirty(false);
+      }
     }
     if (!_lastSave) setSyncDot('ok');
   } catch(e) { setSyncDot(''); console.error(e); }
@@ -8756,9 +8841,9 @@ function _stripCopy(obj) {
   }
   return obj;
 }
-function _saveRunsLocal()    { return _safeSet('cs_runs',    JSON.stringify(_stripCopy(allRuns))); }
-function _saveCurrentLocal() { return _safeSet('cs_current', JSON.stringify(_stripCopy(currentRun))); }
-function _saveQPLocal()      { return _safeSet('cs_qp',      JSON.stringify(_stripCopy(quickPicks))); }
+function _saveRunsLocal()    { return _safeSet(_csScopedKey('cs_runs'),    JSON.stringify(_stripCopy(allRuns))); }
+function _saveCurrentLocal() { return _safeSet(_csScopedKey('cs_current'), JSON.stringify(_stripCopy(currentRun))); }
+function _saveQPLocal()      { return _safeSet(_csScopedKey('cs_qp'),      JSON.stringify(_stripCopy(quickPicks))); }
 
 // Deep copy with 'photo:' refs resolved back to their base64 from the IDB cache —
 // used by exports so backups contain the actual image data.
