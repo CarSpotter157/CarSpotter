@@ -3713,7 +3713,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 </div>
 <nav class="bottom-nav" id="bottomNav">
 <!-- desktop logo injected by JS -->
-<button class="nav-btn active" id="nav-spot" onclick="goTo('spot')">
+<button class="nav-btn active" id="nav-spot" onclick="goTo(&#39;spot&#39;)">
 <span class="nav-icon"><svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="20"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle><line x1="12" x2="12" y1="2" y2="5"></line><line x1="12" x2="12" y1="19" y2="22"></line><line x1="2" x2="5" y1="12" y2="12"></line><line x1="19" x2="22" y1="12" y2="12"></line></svg></span>
 <span class="nav-label">Spot</span>
 </button>
@@ -4239,6 +4239,8 @@ async function signOutUser() {
     }
   }
   if (syncUnsub) { syncUnsub(); syncUnsub = null; }
+  if (typeof runListenerUnsub === 'function') { try { runListenerUnsub(); } catch(e){} }
+  if (typeof photoListenerUnsub === 'function') { try { photoListenerUnsub(); } catch(e){} }
   auth.signOut();
 }
 
@@ -4508,7 +4510,7 @@ function _replaceLocalFromCloud(c) {
   favoriteNames = new Set((c.favorites && Array.isArray(c.favorites.names)) ? c.favorites.names : []);
   aliases = (c.aliases && c.aliases.map && typeof c.aliases.map === 'object') ? Object.assign({}, c.aliases.map) : {};
   if (c.notes && c.notes.text != null) { try { localStorage.setItem('cs_notes', String(c.notes.text)); } catch(e){} }
-  if (c.xp && typeof c.xp.value === 'number') _xpTotal = c.xp.value;
+  if (c.xp && typeof c.xp.value === 'number') _xpTotal = Math.max(Number(_xpTotal) || 0, Number(c.xp.value) || 0);
   if (c.progression && typeof window.mergeCloudProgression === 'function') window.mergeCloudProgression(c.progression);
   if (c.discoveries && Array.isArray(c.discoveries.items)) { try { localStorage.setItem('cs_discoveries', JSON.stringify(c.discoveries.items)); } catch(e){} }
   if (c.settings && c.settings.map) _applySettings(c.settings.map);
@@ -4523,6 +4525,43 @@ function _replaceLocalFromCloud(c) {
   _purgeTombstoned();
   _markDirty(false);
   _saveAllLocal();
+}
+
+function _repairXPFromOwnedData() {
+  // XP is deterministic in this build: every logged car grants rarityXP(),
+  // and every claimed achievement/expedition grants its listed reward. If an
+  // old/empty cloud document reset cs_xp during account hydration, rebuild the
+  // earned floor from the user's actual synced data instead of losing progress.
+  try {
+    var total = 0;
+    var cars = [];
+    (Array.isArray(allRuns) ? allRuns : []).forEach(function(r){
+      (Array.isArray(r.cars) ? r.cars : []).forEach(function(c){ cars.push(c); });
+    });
+    (Array.isArray(currentRun) ? currentRun : []).forEach(function(c){ cars.push(c); });
+    cars.forEach(function(c){ total += (typeof rarityXP === 'function' ? rarityXP(Number(c.value)||0) : 0); });
+
+    // Achievement/expedition claims are stored in _progress.expoClaimed.
+    // This is the same one-time claim ledger used by claimExpo/checkNewAchievements.
+    var claimed = (_progress && _progress.expoClaimed) || {};
+    (Array.isArray(ACHIEVEMENTS) ? ACHIEVEMENTS : []).forEach(function(a){
+      if (claimed[a.id]) total += Number(a.xp)||0;
+    });
+    (Array.isArray(EXPEDITIONS) ? EXPEDITIONS : []).forEach(function(e){
+      if (claimed[e.id]) total += Number(e.xp)||0;
+    });
+
+    if (total > (Number(_xpTotal)||0)) {
+      _xpTotal = total;
+      try { localStorage.setItem('cs_xp', String(_xpTotal)); } catch(e){}
+      _bumpVer('xp');
+      if (typeof renderLevelBar === 'function') renderLevelBar();
+      if (typeof renderTitleChip === 'function') renderTitleChip();
+      if (currentUser && !_applyingCloud) saveToCloud();
+      return true;
+    }
+  } catch(e) { console.warn('XP repair failed', e); }
+  return false;
 }
 
 async function loadFromCloud() {
@@ -4547,6 +4586,7 @@ async function loadFromCloud() {
   } catch(e) { setSyncDot(''); console.error(e); }
   try { await pullRunSubcollection(); } catch(e) { console.warn('Run subcollection pull failed', e); }
   try { await pullCloudPhotos(); } catch(e) { console.warn('Photo subcollection pull failed', e); }
+  _repairXPFromOwnedData();
   renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
   fetchRefImagesForAllCars();
   if (currentRun.length > 0)
@@ -4555,6 +4595,7 @@ async function loadFromCloud() {
 
 function subscribeCloud() {
   if (!currentUser) return;
+  if (syncUnsub) { try { syncUnsub(); } catch(e){} syncUnsub = null; }
   startSubcollectionListeners();
   syncUnsub = db.collection('users').doc(currentUser.uid).onSnapshot(snap => {
     if (!snap.exists) return;
@@ -6626,7 +6667,7 @@ function renderGarageDashboard(cars){
   var el=document.getElementById('garageDashboard');
   if(!el) return;
   if(!cars.length){
-    el.innerHTML='<div class="cs-garage-dashboard"><div class="cs-gd-top"><div><div class="cs-gd-kicker">BUILD YOUR COLLECTION</div><div class="cs-gd-title">Your garage starts with one.</div><div class="cs-gd-sub">Every spot becomes part of your collection.</div></div><div class="cs-gd-count"><b>0</b><span>cars collected</span></div></div><div class="cs-gd-track"><div class="cs-gd-fill" style="width:0%"></div></div><div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>1 car</strong></div><div class="cs-gd-actions"><button class="cs-gd-action" onclick="goTo("spot")">＋ SPOT A CAR</button></div></div></div>';
+    el.innerHTML='<div class="cs-garage-dashboard"><div class="cs-gd-top"><div><div class="cs-gd-kicker">BUILD YOUR COLLECTION</div><div class="cs-gd-title">Your garage starts with one.</div><div class="cs-gd-sub">Every spot becomes part of your collection.</div></div><div class="cs-gd-count"><b>0</b><span>cars collected</span></div></div><div class="cs-gd-track"><div class="cs-gd-fill" style="width:0%"></div></div><div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>1 car</strong></div><div class="cs-gd-actions"><button class="cs-gd-action" data-noop="goTo(&#39;spot&#39;)">＋ SPOT A CAR</button></div></div></div>';
     return;
   }
   var milestones=[5,10,25,50,100,250,500];
@@ -6642,7 +6683,7 @@ function renderGarageDashboard(cars){
   el.innerHTML='<div class="cs-garage-dashboard">'+
     '<div class="cs-gd-top"><div><div class="cs-gd-kicker">YOUR COLLECTION</div><div class="cs-gd-title">Build a garage worth showing off.</div><div class="cs-gd-sub">Keep spotting cars. Watch your collection grow.</div></div><div class="cs-gd-count"><b>'+cars.length+'</b><span>cars collected</span></div></div>'+
     '<div class="cs-gd-track"><div class="cs-gd-fill" style="width:'+pct+'%"></div></div>'+
-    '<div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>'+next+' cars</strong> · '+nextLabel+'</div><div class="cs-gd-actions"><button class="cs-gd-action" onclick="setGarageSortHeader("favorites",document.querySelector(".gs-pill[data-sort=\"favorites\"]"))">★ FAVORITES</button><button class="cs-gd-action" onclick="setGarageFilter("legend",document.querySelector(".gf-pill[data-filter=\"legend\"]"))">👑 LEGENDS</button></div></div>'+
+    '<div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>'+next+' cars</strong> · '+nextLabel+'</div><div class="cs-gd-actions"><button class="cs-gd-action" onclick="setGarageSortHeader(&#39;favorites&#39;,document.querySelector(&#39;.gs-pill[data-sort=favorites]&#39;))">★ FAVORITES</button><button class="cs-gd-action" onclick="setGarageFilter(&#39;legend&#39;,document.querySelector(&#39;.gf-pill[data-filter=legend]&#39;))">👑 LEGENDS</button></div></div>'+
     '<div class="cs-gd-chips"><div class="cs-gd-chip"><b>'+makes+'</b> makes</div><div class="cs-gd-chip"><b>'+photos+'</b> photographed</div><div class="cs-gd-chip"><b>'+favorites+'</b> favorites</div><div class="cs-gd-chip"><b>'+escapeHtml(best.name)+'</b> crown jewel</div></div>'+
     '</div>';
 }
@@ -6741,7 +6782,7 @@ function renderGarage() {
     el.className = '';
     el.innerHTML = allCars.length
       ? '<div class="garage-empty"><div class="ge-scene">\uD83D\uDD0D</div><div class="ge-title">NO MATCHES</div><div class="ge-sub">Try a different filter or search term.</div></div>'
-      : '<div class="garage-empty"><div class="ge-scene">\uD83D\uDE97</div><div class="ge-title">YOUR GARAGE IS EMPTY</div><div class="ge-sub">Spot your first car and it becomes the crown jewel of your collection.</div><button class="ge-btn" onclick="goTo(\'spot\')">LOG YOUR FIRST CAR</button></div>';
+      : '<div class="garage-empty"><div class="ge-scene">\uD83D\uDE97</div><div class="ge-title">YOUR GARAGE IS EMPTY</div><div class="ge-sub">Spot your first car and it becomes the crown jewel of your collection.</div><button class="ge-btn" onclick="goTo(&#39;spot&#39;)">LOG YOUR FIRST CAR</button></div>';
     return;
   }
   if (garageView === 'grid') {
@@ -9900,6 +9941,16 @@ document.addEventListener('click', e => {
   }
 });
 
+// Robust navigation fallback for the More > Achievements tile.
+document.addEventListener('click', function(e){
+  try {
+    var tile=e.target.closest && e.target.closest('#moreMenu .more-page-tile');
+    if(!tile) return;
+    var label=(tile.textContent||'').trim().toLowerCase();
+    if(label.indexOf('achievements')!==-1){ e.preventDefault(); e.stopPropagation(); goTo('achievements'); }
+  } catch(ex) {}
+}, true);
+
 const NEWS_SOURCES = [
   { name: 'Car & Driver',  rss: 'https://www.caranddriver.com/rss/all.xml/' },
   { name: 'Motor Trend',   rss: 'https://www.motor1.com/rss/news/all/' },
@@ -12225,9 +12276,12 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
       var d=doc.data()||{};
       if(!d.data || String(d.data).indexOf('data:image/')!==0) return;
       var key=_photoCacheKey(d.name || doc.id);
-      _photoCacheSet(key,d.data);
-      try { _idbPut(d.name || doc.id,d.data); } catch(e){}
-      changed=true;
+      var data=String(d.data);
+      if (_photoCacheGet(key) !== data) {
+        _photoCacheSet(key,data);
+        try { _idbPut(d.name || doc.id,data); } catch(e){}
+        changed=true;
+      }
     });
     if(changed){
       function apply(list){
@@ -12269,8 +12323,10 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
       if(before!==after){
         allRuns=next;
         _saveRunsLocal();
-        renderHistory();
-        renderGarage();
+        _repairXPFromOwnedData();
+        var active=document.querySelector('.page.active');
+        if(active && active.id==='page-history') renderHistory();
+        if(active && active.id==='page-garage') renderGarage();
       }
       // Pull photos for data correctness, but DON'T blindly re-render on every
       // Firestore snapshot. Re-rendering here was causing Garage/History entrance
@@ -12300,9 +12356,10 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
       if(changed && photoSig!==lastPhotoRenderSig){
         lastPhotoRenderSig=photoSig;
         restorePhotosFromIDB();
-        renderDiscoveries();
-        renderGarage();
-        renderHistory();
+        var active=document.querySelector('.page.active');
+        if(active && active.id==='page-garage') renderGarage();
+        if(active && active.id==='page-history') renderHistory();
+        if(active && active.id==='page-spot') renderDiscoveries();
       }
     },function(e){console.warn('Photo listener failed',e);});
   }
