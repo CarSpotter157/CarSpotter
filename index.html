@@ -15,7 +15,7 @@
   try {
     var dismissed = localStorage.getItem('cs_install_dismissed');
     var hasData;
-    try { hasData = _csReadJSON('cs_runs', []).length > 0 || _csReadJSON('cs_current', []).length > 0; } catch(e) { hasData = false; }
+    try { hasData = _csReadJSON('cs_runs', []).length > 0 || JSON.parse(localStorage.getItem('cs_current') || '[]').length > 0; } catch(e) { hasData = false; }
     if (dismissed) return;
     if (!hasData) return;
     var standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || (window.navigator && window.navigator.standalone);
@@ -27,13 +27,13 @@
 // revealing them at runtime causes no layout shift.
 (function(){
   try {
-    var qp = JSON.parse(localStorage.getItem(_csScopedKey('cs_qp')) || '[]');
+    var qp = JSON.parse(localStorage.getItem('cs_qp') || '[]');
     if (qp.length) document.documentElement.classList.add('show-qp');
-    var favNames = new Set(JSON.parse(localStorage.getItem(_csScopedKey('cs_fav')) || '[]'));
+    var favNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
     if (favNames.size) {
       var known = new Set();
       (_csReadJSON('cs_runs', [])).forEach(function(r){ (r.cars||[]).forEach(function(c){ known.add(String(c.name).toLowerCase()); }); });
-      (_csReadJSON('cs_current', [])).forEach(function(c){ known.add(String(c.name).toLowerCase()); });
+      (JSON.parse(localStorage.getItem('cs_current') || '[]')).forEach(function(c){ known.add(String(c.name).toLowerCase()); });
       var any = false;
       favNames.forEach(function(n){ if (known.has(String(n).toLowerCase())) any = true; });
       if (any) document.documentElement.classList.add('show-favs');
@@ -3755,7 +3755,6 @@ if (sessionStorage.getItem(_pendingKey) && !window.location.hash) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-storage-compat.min.js"></script>
 <script>
 // BUGFIX: previously this block assumed the Firebase CDN scripts always load.
 // If they don't (offline first launch, ad-blocker, flaky connection, CDN outage —
@@ -3793,7 +3792,6 @@ const auth = window._fbReady ? firebase.auth() : {
   currentUser: null
 };
 const db = window._fbReady ? firebase.firestore() : null;
-const storage = window._fbReady && firebase.storage ? firebase.storage() : null;
 
 // Find the OAuth client ID from Firebase auth internals
 var oauthClientId = '';
@@ -3816,18 +3814,18 @@ let undoStack    = null;
 let undoTimer    = null;
 let bulkMode     = false;
 let bulkSelected = new Set();
-let soundEnabled = localStorage.getItem(_csScopedKey('cs_sound')) !== 'off';
-let aliases      = _csReadJSON('cs_aliases', {});
-let bestFromLB = parseInt(_csReadString('cs_best_lb', '0') || '0');
-let favoriteNames = new Set(_csReadJSON('cs_fav', []));
+let soundEnabled = localStorage.getItem('cs_sound') !== 'off';
+let aliases      = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
+let bestFromLB = parseInt(localStorage.getItem('cs_best_lb') || '0');
+let favoriteNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
 let currentSpotLocation = JSON.parse(localStorage.getItem('cs_pending_loc') || 'null');
-let allRuns      = _csReadJSON('cs_runs', []);
-let currentRun   = _csReadJSON('cs_current', []);
-let quickPicks   = _csReadJSON('cs_qp', []);
-let sortMode     = _csReadString('cs_sort', 'desc') || 'desc';
+let allRuns      = JSON.parse(localStorage.getItem('cs_runs')      || '[]');
+let currentRun   = JSON.parse(localStorage.getItem('cs_current')   || '[]');
+let quickPicks   = JSON.parse(localStorage.getItem('cs_qp')        || '[]');
+let sortMode     = 'desc';
 let currentUser  = null;
 let _lastSave    = 0;
-let _lastCloudTs = parseInt(localStorage.getItem(_csScopedKey('cs_cloud_ts')) || '0'); // server-timestamp (ms) of the newest cloud doc we've applied or acknowledged
+let _lastCloudTs = parseInt(localStorage.getItem('cs_cloud_ts') || '0'); // server-timestamp (ms) of the newest cloud doc we've applied or acknowledged
 let _lastPushTs  = 0; // client-clock (ms) of the last successful currentRun push to cloud
 let syncUnsub    = null;
 let syncTimer    = null;
@@ -3881,16 +3879,16 @@ function _photoLazyLoad(key) {
 }
 
 // ── DETERMINISTIC SYNC STATE ────────────────────────────────────────
-var _lamport = parseInt(localStorage.getItem(_csScopedKey('cs_lamport')) || '0');                  // global logical clock (persisted, monotonic)
+var _lamport = parseInt(localStorage.getItem('cs_lamport') || '0');                  // global logical clock (persisted, monotonic)
 var _lastAppliedLamport = 0;   // lamport of the newest cloud doc we've applied for the CURRENT account (per-uid)
 function _loadLastAppliedLamport() {
   _lastAppliedLamport = parseInt(localStorage.getItem('cs_lamport_last' + (currentUser ? '_' + currentUser.uid : '') ) || '0');
 }
-var _fieldVer = (function(){ try { var f = JSON.parse(localStorage.getItem(_csScopedKey('cs_fv')) || 'null'); return (f && typeof f === 'object') ? f : {}; } catch(e){ return {}; } })(); // per-field Lamport versions
-var _deletedRuns = (function(){ try { var d = JSON.parse(localStorage.getItem(_csScopedKey('cs_del_runs')) || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })(); // tombstoned run ids
-var _deletedQP  = (function(){ try { var d = JSON.parse(localStorage.getItem(_csScopedKey('cs_del_qp')) || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();  // tombstoned quick-pick names (lowercase)
-var _removedFavs = (function(){ try { var d = JSON.parse(localStorage.getItem(_csScopedKey('cs_del_fav')) || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })(); // tombstoned favorite names
-var _dirty = localStorage.getItem(_csScopedKey('cs_sync_dirty')) === '1';                           // durable "unsynced change" flag
+var _fieldVer = (function(){ try { var f = JSON.parse(localStorage.getItem('cs_fv') || 'null'); return (f && typeof f === 'object') ? f : {}; } catch(e){ return {}; } })(); // per-field Lamport versions
+var _deletedRuns = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_runs') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })(); // tombstoned run ids
+var _deletedQP  = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_qp') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();  // tombstoned quick-pick names (lowercase)
+var _removedFavs = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_fav') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })(); // tombstoned favorite names
+var _dirty = localStorage.getItem('cs_sync_dirty') === '1';                           // durable "unsynced change" flag
 var _applyingCloud = false;                                                           // guard: never echo-write while applying a cloud doc
 var _lastSyncErr = null;                                                              // {at,cause,code,message} of the most recent failed write
 var _lastSyncErrNotified = '';                                                        // dedupe key so each distinct failure notifies only once
@@ -3916,12 +3914,12 @@ function logSync() {
   try { console.log.apply(console, ['[sync]'].concat(Array.prototype.slice.call(arguments))); } catch(e) {}
 }
 function _bumpVer(key) { _lamport += 1; _fieldVer[key] = _lamport; _persistLamport(); _persistFieldVer(); return _lamport; }
-function _persistLamport() { _csSet('cs_lamport', String(_lamport)); }
-function _persistFieldVer() { _csSet('cs_fv', JSON.stringify(_fieldVer)); }
-function _persistDeleted() { _csSet('cs_del_runs', JSON.stringify(_deletedRuns)); _csSet('cs_del_qp', JSON.stringify(_deletedQP)); _csSet('cs_del_fav', JSON.stringify(_removedFavs)); }
+function _persistLamport() { try { localStorage.setItem('cs_lamport', String(_lamport)); } catch(e){} }
+function _persistFieldVer() { try { localStorage.setItem('cs_fv', JSON.stringify(_fieldVer)); } catch(e){} }
+function _persistDeleted() { try { localStorage.setItem('cs_del_runs', JSON.stringify(_deletedRuns)); localStorage.setItem('cs_del_qp', JSON.stringify(_deletedQP)); localStorage.setItem('cs_del_fav', JSON.stringify(_removedFavs)); } catch(e){} }
 function _markDirty(v) {
   _dirty = !!v;
-  _csSet('cs_sync_dirty', _dirty ? '1' : '0');
+  try { localStorage.setItem('cs_sync_dirty', _dirty ? '1' : '0'); } catch(e){}
   logSync('dirty=' + _dirty);
 }
 
@@ -4080,7 +4078,7 @@ const ACHIEVEMENTS = [
   { id:'palindrome',       icon:'PP',name:'Mirror Mirror',  desc:'Spot a car worth a palindrome ($1,212,121)', xp:300, check:(c,r)=>detectPalindromicValue(c) },
   { id:'twin_spot',        icon:'TT',name:'Double Take',    desc:'Spot the exact same car twice in one run', xp:420, check:(c,r)=>detectTwinSpot(r) },
 ];
-let _prevAchievements = JSON.parse(localStorage.getItem(_csScopedKey('cs_ach')) || '[]');
+let _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
 
 //  MERGE HELPERS — prevent data loss when cloud & local diverge 
 function _mergeRunArrays(local, cloud) {
@@ -4167,13 +4165,13 @@ function _mergeAchievements(cloudIds) {
   var changed = false;
   var s = new Set(_prevAchievements || []);
   cloudIds.forEach(function(id) { if (id && !s.has(id)) { s.add(id); changed = true; } });
-  if (changed) { _prevAchievements = Array.from(s); try { localStorage.setItem(_csScopedKey('cs_ach'), JSON.stringify(_prevAchievements)); } catch(e){} }
+  if (changed) { _prevAchievements = Array.from(s); try { localStorage.setItem('cs_ach', JSON.stringify(_prevAchievements)); } catch(e){} }
   return changed;
 }
 function _settingsMap() {
   var m = { theme: activeTheme, carbon: carbonOn ? 'on' : 'off', sound: soundEnabled ? 'on' : 'off' };
   if (typeof compactMode !== 'undefined') m.compact = compactMode ? 'on' : 'off';
-  try { m.vibe = localStorage.getItem(_csScopedKey('cs_vibe')) || 'on'; } catch(e){}
+  try { m.vibe = localStorage.getItem('cs_vibe') || 'on'; } catch(e){}
   if (sortMode) m.sort = sortMode;
   return m;
 }
@@ -4194,7 +4192,7 @@ function _applySettings(m) {
     compactMode = m.compact === 'on';
     if (typeof applyCompactMode === 'function') applyCompactMode();
   }
-  if (m.vibe != null) { try { localStorage.setItem(_csScopedKey('cs_vibe'), m.vibe); } catch(e){} }
+  if (m.vibe != null) { try { localStorage.setItem('cs_vibe', m.vibe); } catch(e){} }
   if (m.sort != null && m.sort !== sortMode) {
     sortMode = m.sort;
     if (typeof initSortPrefBtns === 'function') initSortPrefBtns();
@@ -4252,62 +4250,37 @@ function _csScopedKey(key) {
 }
 function _csReadJSON(key, fallback) {
   try {
-    var uid = _csAccountUid();
-    var raw = localStorage.getItem(uid ? (uid + '_' + key) : key);
+    var scoped = _csScopedKey(key);
+    var rawScoped = localStorage.getItem(scoped);
+    if (rawScoped !== null) return JSON.parse(rawScoped);
+    var raw = localStorage.getItem(key);
     return raw !== null ? JSON.parse(raw) : fallback;
   } catch(e) { return fallback; }
 }
 function _csReadString(key, fallback) {
   try {
-    var uid = _csAccountUid();
-    var raw = localStorage.getItem(uid ? (uid + '_' + key) : key);
+    var scoped = _csScopedKey(key);
+    var rawScoped = localStorage.getItem(scoped);
+    if (rawScoped !== null) return rawScoped;
+    var raw = localStorage.getItem(key);
     return raw !== null ? raw : fallback;
   } catch(e) { return fallback; }
 }
-function _csSet(key, value) { try { localStorage.setItem(_csScopedKey(key), value); return true; } catch(e) { return false; } }
-function _csRemove(key) { try { localStorage.removeItem(_csScopedKey(key)); } catch(e) {} }
 
 var _activeLocalUid = localStorage.getItem('cs_active_uid') || '';
 var _ACCOUNT_LOCAL_KEYS = [
   'cs_runs','cs_current','cs_qp','cs_fav','cs_aliases','cs_notes','cs_xp',
-  'cs_ach','cs_progress','cs_discoveries','cs_del_runs','cs_del_qp',
-  'cs_del_fav','cs_fv','cs_sync_dirty','cs_cloud_current_ts','cs_cloud_ts',
-  'cs_lamport_last','cs_sync_last_err','cs_best_lb','cs_theme','cs_carbon',
-  'cs_sound','cs_compact','cs_sort','cs_vibe','cs_garage_zoom','cs_featured'
+  'cs_achievements','cs_progression','cs_discoveries','cs_del_runs','cs_del_qp',
+  'cs_del_fav','cs_fv','cs_sync_dirty','cs_cloud_current_ts','cs_lamport_last'
 ];
-function _csLegacyExists() {
-  try { return ['cs_runs','cs_current','cs_qp'].some(function(k){ return localStorage.getItem(k) !== null; }); } catch(e) { return false; }
-}
-function _csMigrateLegacyToUid(uid) {
-  if (!uid) return;
-  var marker = 'cs_migrated_' + uid;
-  try { if (localStorage.getItem(marker) === '1') return; } catch(e) { return; }
-  // Only migrate the old unscoped cache when this UID has no scoped runs/current/QP.
-  // This preserves an existing user's pre-fix data without allowing it to follow
-  // later account switches.
-  var scopedRuns = localStorage.getItem(uid + '_cs_runs');
-  var scopedCurrent = localStorage.getItem(uid + '_cs_current');
-  var scopedQP = localStorage.getItem(uid + '_cs_qp');
-  if (scopedRuns === null && scopedCurrent === null && scopedQP === null && _csLegacyExists()) {
-    _ACCOUNT_LOCAL_KEYS.forEach(function(k){
-      try { var v = localStorage.getItem(k); if (v !== null) localStorage.setItem(uid + '_' + k, v); } catch(e){}
-    });
-    // Legacy keys are removed only after copying; future account switches therefore
-    // cannot see the old cache.
-    _ACCOUNT_LOCAL_KEYS.forEach(function(k){ try { localStorage.removeItem(k); } catch(e){} });
-  }
-  try { localStorage.setItem(marker, '1'); } catch(e){}
-}
 function _clearAccountLocalCache() {
-  var uid = _activeLocalUid;
-  _ACCOUNT_LOCAL_KEYS.forEach(function(k){ try { if (uid) localStorage.removeItem(uid + '_' + k); localStorage.removeItem(k); } catch(e){} });
-  try { _idbPhotoCache = {}; _photoLoading = {}; _photoMissing = {}; _photoCacheOrder = []; } catch(e) {}
+  _ACCOUNT_LOCAL_KEYS.forEach(function(k){ try { localStorage.removeItem(k); } catch(e){} });
+  try { _idbPhotoCache = {}; _photoLoading = {}; _photoMissing = {}; } catch(e) {}
+  // IDB photos are keyed only by car name in this version, so they cannot be
+  // safely attributed to a Firebase UID. Keep the database intact rather than
+  // deleting another account's photos; cloud data will restore the correct refs.
 }
 function _prepareLocalCacheForUser(user) {
-  var uid = user && user.uid ? String(user.uid) : '';
-  if (!uid) return;
-  var previous = _activeLocalUid;
-  if (!previous || previous === uid) _csMigrateLegacyToUid(uid);
   var uid = user && user.uid ? String(user.uid) : '';
   if (!uid) return;
   var previous = _activeLocalUid;
@@ -4335,9 +4308,9 @@ function _prepareLocalCacheForUser(user) {
 
 function importLocalData() {
   const localRuns = _csReadJSON('cs_runs', []);
-  const localCurrent = _csReadJSON('cs_current', []);
-  const localQP = _csReadJSON('cs_qp', []);
-  const localNotes = _csReadString('cs_notes', '');
+  const localCurrent = JSON.parse(localStorage.getItem('cs_current') || '[]');
+  const localQP = JSON.parse(localStorage.getItem('cs_qp') || '[]');
+  const localNotes = localStorage.getItem('cs_notes') || '';
 
   if (!localRuns.length && !localCurrent.length && !localQP.length) {
     alert('No local data found on this device to import.');
@@ -4360,8 +4333,8 @@ function importLocalData() {
   if (!currentRun.length && localCurrent.length) currentRun = localCurrent;
 
   // Merge notes
-  if (!localStorage.getItem(_csScopedKey('cs_notes')) && localNotes) {
-    localStorage.setItem(_csScopedKey('cs_notes'), localNotes);
+  if (!localStorage.getItem('cs_notes') && localNotes) {
+    localStorage.setItem('cs_notes', localNotes);
     const a = document.getElementById('notesArea');
     if (a) a.value = localNotes;
   }
@@ -4554,10 +4527,10 @@ function _replaceLocalFromCloud(c) {
   _removedFavs = (c.favorites && Array.isArray(c.favorites.removed)) ? c.favorites.removed.slice() : [];
   favoriteNames = new Set((c.favorites && Array.isArray(c.favorites.names)) ? c.favorites.names : []);
   aliases = (c.aliases && c.aliases.map && typeof c.aliases.map === 'object') ? Object.assign({}, c.aliases.map) : {};
-  if (c.notes && c.notes.text != null) { try { localStorage.setItem(_csScopedKey('cs_notes'), String(c.notes.text)); } catch(e){} }
+  if (c.notes && c.notes.text != null) { try { localStorage.setItem('cs_notes', String(c.notes.text)); } catch(e){} }
   if (c.xp && typeof c.xp.value === 'number') _xpTotal = c.xp.value;
   if (c.progression && typeof window.mergeCloudProgression === 'function') window.mergeCloudProgression(c.progression);
-  if (c.discoveries && Array.isArray(c.discoveries.items)) { try { localStorage.setItem(_csScopedKey('cs_discoveries'), JSON.stringify(c.discoveries.items)); } catch(e){} }
+  if (c.discoveries && Array.isArray(c.discoveries.items)) { try { localStorage.setItem('cs_discoveries', JSON.stringify(c.discoveries.items)); } catch(e){} }
   if (c.settings && c.settings.map) _applySettings(c.settings.map);
   _prevAchievements = (c.achievements && Array.isArray(c.achievements.ids)) ? c.achievements.ids.slice() : [];
   _fieldVer = {
@@ -4626,52 +4599,18 @@ function subscribeCloud() {
 //  FIRESTORE PHOTO STRIPPER — keeps base64 out of the 1 MB document limit 
 // Ensures every base64 photo is cached locally, then replaces with a key reference
 function _ensurePhotoIndexed(car) {
-  if (!car || !car.photo || car.photo.indexOf('data:') !== 0) return '';
-  var pid = _photoIdFor(car);
-  var key = _photoStoreKey(pid, _photoUid());
+  if (!car || !car.photo || car.photo.indexOf('data:') !== 0) return;
+  var key = car.name.toLowerCase();
   _photoCacheSet(key, car.photo);
-  _idbPut(pid, car.photo, _photoUid()).catch(function(){});
-  _uploadPhotoForCar(car, car.photo, pid);
-  return key;
-}
-function _findCarsByPhotoId(pid) {
-  var out=[];
-  function scan(list){ (list||[]).forEach(function(c){ if(c && String(c._photoId||'')===String(pid)) out.push(c); }); }
-  scan(currentRun); scan(quickPicks); (allRuns||[]).forEach(function(r){ scan(r.cars); });
-  return out;
-}
-function _uploadPhotoForCar(car, dataUrl, pid) {
-  if (!storage || !currentUser || !dataUrl || String(dataUrl).indexOf('data:') !== 0) return;
-  var uid = String(currentUser.uid), path = 'users/' + uid + '/photos/' + String(pid) + '.jpg';
-  var ref = storage.ref().child(path);
-  ref.putString(dataUrl, 'data_url', { contentType: 'image/jpeg' }).then(function(snapshot){ return snapshot.ref.getDownloadURL(); }).then(function(url){
-    var cars = _findCarsByPhotoId(pid);
-    cars.forEach(function(c){ c.photo = url; });
-    if (cars.length) {
-      _bumpVer('runs');
-      _saveAllLocal();
-      saveToCloud();
-      renderSpot(); renderGarage(); renderHistory();
-    }
-  }).catch(function(err){ console.warn('Photo cloud upload failed; local photo remains safe.', err); });
+  _idbPut(car.name, car.photo).catch(function(){});
 }
 function _stripDeepPhotos(obj) {
   if (Array.isArray(obj)) {
     obj.forEach(function(item) { _stripDeepPhotos(item); });
   } else if (obj && typeof obj === 'object') {
     if (obj.photo && typeof obj.photo === 'string' && obj.photo.indexOf('data:') === 0) {
-      var pk = _ensurePhotoIndexed(obj);
-      obj.photo = 'photo:' + pk;
-    } else if (obj.photo && typeof obj.photo === 'string' && obj.photo.indexOf('photo:') === 0) {
-      // Legacy/local photo refs are uploaded opportunistically when their cached
-      // bytes are available. This is what converts old device-only photos into
-      // durable cross-device Storage URLs without putting base64 in Firestore.
-      var oldRef = obj.photo.slice(6), cached = _photoCacheGet(oldRef);
-      if (cached && cached.indexOf('data:') === 0) {
-        var pid = _photoIdFor(obj);
-        _uploadPhotoForCar(obj, cached, pid);
-        obj.photo = 'photo:' + _photoStoreKey(pid, _photoUid());
-      }
+      _ensurePhotoIndexed(obj);
+      obj.photo = 'photo:' + obj.name.toLowerCase();
     }
     for (var k in obj) {
       if (typeof obj[k] === 'object') _stripDeepPhotos(obj[k]);
@@ -4771,43 +4710,18 @@ function _diagAndSanitize(tag, obj, mode) {
   return san;
 }
 var _sanitizedSet = typeof WeakSet !== 'undefined' ? new WeakSet() : null;
-function _preparePhotosForCloud() {
-  function scan(list) {
-    (list || []).forEach(function(car) {
-      if (!car || typeof car !== 'object' || !car.photo) return;
-      if (String(car.photo).indexOf('data:') === 0) {
-        _ensurePhotoIndexed(car);
-      } else if (String(car.photo).indexOf('photo:') === 0 && !car._photoId) {
-        var legacyKey = String(car.photo).slice(6);
-        var cached = _photoCacheGet(legacyKey) || _photoCacheGet(_photoCacheKey(car.name));
-        if (cached && String(cached).indexOf('data:') === 0) {
-          _ensurePhotoIndexed(Object.assign({}, car, { photo: cached }));
-          // Assign the same durable id to the real object so the sanitized copy
-          // and later upload callback can find this exact sighting.
-          car._photoId = _photoIdFor(car);
-          _photoCacheSet(_photoStoreKey(car._photoId, _photoUid()), cached);
-          _idbPut(car._photoId, cached, _photoUid()).catch(function(){});
-          _uploadPhotoForCar(car, cached, car._photoId);
-        }
-      }
-    });
-  }
-  scan(currentRun); scan(quickPicks);
-  (allRuns || []).forEach(function(r){ scan(r.cars); });
-}
 function _buildCloudPayload() {
-  _preparePhotosForCloud();
   var payload = {
     currentRun:   { ver: _fieldVer.currentRun || 0, cars: currentRun },
     allRuns:      { ver: _fieldVer.runs || 0, items: allRuns },
     deletedRuns:  { ver: _fieldVer.deletedRuns || 0, ids: _deletedRuns },
     quickPicks:   { ver: _fieldVer.qp || 0, items: quickPicks || [] },
     deletedQP:    { ver: _fieldVer.deletedQP || 0, ids: _deletedQP },
-    notes:        { ver: _fieldVer.notes || 0, text: localStorage.getItem(_csScopedKey('cs_notes')) || '' },
+    notes:        { ver: _fieldVer.notes || 0, text: localStorage.getItem('cs_notes') || '' },
     // Recent Discoveries (the trophy-case strip on Garage) used to be pure
     // localStorage and never synced at all — a device switch always showed an
     // empty/local-only list. Wired into the same version-wins sync as notes.
-    discoveries:  { ver: _fieldVer.discoveries || 0, items: (function(){ try { return JSON.parse(localStorage.getItem(_csScopedKey('cs_discoveries')) || '[]'); } catch(e) { return []; } })() },
+    discoveries:  { ver: _fieldVer.discoveries || 0, items: (function(){ try { return JSON.parse(localStorage.getItem('cs_discoveries') || '[]'); } catch(e) { return []; } })() },
     xp:           { ver: _fieldVer.xp || 0, value: _xpTotal || 0 },
     favorites:    { ver: _fieldVer.favorites || 0, names: Array.from(favoriteNames), removed: _removedFavs || [] },
     aliases:      { ver: _fieldVer.aliases || 0, map: aliases || {} },
@@ -4853,7 +4767,7 @@ function saveToCloud() {
     logSync('saveToCloud', !currentUser ? 'no user' : 'offline');
     if (!navigator.onLine) {
       offlineQueue.push(Date.now());
-      localStorage.setItem(_csScopedKey('cs_offline_queue'), JSON.stringify(offlineQueue));
+      localStorage.setItem('cs_offline_queue', JSON.stringify(offlineQueue));
       _markDirty(true);
     }
     return;
@@ -4897,13 +4811,13 @@ function _applyCloud(c) {
         currentRun = c.currentRun.slice();
         _fieldVer.currentRun = Math.max(_fieldVer.currentRun || 0, 1);
         _persistFieldVer();
-        try { localStorage.setItem(_csScopedKey('cs_cloud_current_ts'), String(Date.now())); } catch(e){}
+        try { localStorage.setItem('cs_cloud_current_ts', String(Date.now())); } catch(e){}
         changed = true;
       }
       if (Array.isArray(c.allRuns)) { if (_mergeRuns(c.allRuns)) changed = true; }
       if (Array.isArray(c.quickPicks)) { if (_mergeQP(c.quickPicks)) changed = true; }
       if (typeof c.notes === 'string') {
-        try { localStorage.setItem(_csScopedKey('cs_notes'), c.notes); } catch(e){}
+        try { localStorage.setItem('cs_notes', c.notes); } catch(e){}
         var nal = document.getElementById('notesArea');
         if (nal && document.activeElement !== nal) nal.value = c.notes;
         changed = true;
@@ -4915,7 +4829,7 @@ function _applyCloud(c) {
     if (crCars && c.currentRun.ver != null && c.currentRun.ver > crv) {
       currentRun = crCars.slice();
       _fieldVer.currentRun = c.currentRun.ver;
-      try { localStorage.setItem(_csScopedKey('cs_cloud_current_ts'), String(Date.now())); } catch(e){}
+      try { localStorage.setItem('cs_cloud_current_ts', String(Date.now())); } catch(e){}
       changed = true;
     } else if (crCars && c.currentRun.ver != null && c.currentRun.ver === crv &&
                c.currentRun.ver >= 1 && crCars.length === 0 && currentRun.length > 0) {
@@ -4939,7 +4853,7 @@ function _applyCloud(c) {
     // notes — whole-field version wins
     if (c.notes && c.notes.ver != null && c.notes.ver > (_fieldVer.notes || 0)) {
       var nt = String(c.notes.text || '');
-      try { localStorage.setItem(_csScopedKey('cs_notes'), nt); } catch(e){}
+      try { localStorage.setItem('cs_notes', nt); } catch(e){}
       _fieldVer.notes = c.notes.ver;
       var na = document.getElementById('notesArea');
       if (na && document.activeElement !== na) na.value = nt;
@@ -4949,7 +4863,7 @@ function _applyCloud(c) {
     // it's a derived "last 10" convenience list, not authoritative data, so a
     // simple version-wins swap is enough to make it follow you across devices)
     if (c.discoveries && c.discoveries.ver != null && c.discoveries.ver > (_fieldVer.discoveries || 0) && Array.isArray(c.discoveries.items)) {
-      try { localStorage.setItem(_csScopedKey('cs_discoveries'), JSON.stringify(c.discoveries.items)); } catch(e){}
+      try { localStorage.setItem('cs_discoveries', JSON.stringify(c.discoveries.items)); } catch(e){}
       _fieldVer.discoveries = c.discoveries.ver;
       if (typeof renderDiscoveries === 'function') renderDiscoveries();
       changed = true;
@@ -4957,7 +4871,7 @@ function _applyCloud(c) {
     // xp — monotonic max (never loses XP already earned)
     if (c.xp && typeof c.xp.value === 'number' && c.xp.value > _xpTotal) {
       _xpTotal = c.xp.value;
-      try { localStorage.setItem(_csScopedKey('cs_xp'), String(_xpTotal)); } catch(e){}
+      try { localStorage.setItem('cs_xp', String(_xpTotal)); } catch(e){}
       if (typeof renderLevelBar === 'function') renderLevelBar();
       if (typeof renderTitleChip === 'function') renderTitleChip();
       _fieldVer.xp = Math.max(_fieldVer.xp || 0, c.xp.ver || 0);
@@ -4965,14 +4879,14 @@ function _applyCloud(c) {
     }
     // favorites — union minus removed tombstone
     if (_mergeFavorites(c.favorites && c.favorites.names, c.favorites && c.favorites.removed)) {
-      try { localStorage.setItem(_csScopedKey('cs_fav'), JSON.stringify(Array.from(favoriteNames))); } catch(e){}
+      try { localStorage.setItem('cs_fav', JSON.stringify(Array.from(favoriteNames))); } catch(e){}
       if (typeof renderHomeFav === 'function') renderHomeFav();
       if (typeof renderGarage === 'function') renderGarage();
       changed = true;
     }
     // aliases — per-key union, local wins on same-key conflict
     if (_mergeAliases(c.aliases && c.aliases.map)) {
-      try { localStorage.setItem(_csScopedKey('cs_aliases'), JSON.stringify(aliases)); } catch(e){}
+      try { localStorage.setItem('cs_aliases', JSON.stringify(aliases)); } catch(e){}
       changed = true;
     }
     // settings — whole-field version wins
@@ -5027,17 +4941,17 @@ function _txWriteCore(opts) {
       _lastSyncErrNotified = '';
       _syncRetryN = 0;
       if (_syncRetryTimer) { clearTimeout(_syncRetryTimer); _syncRetryTimer = null; }
-      try { localStorage.removeItem(_csScopedKey('cs_sync_last_err')); } catch(e){}
+      try { localStorage.removeItem('cs_sync_last_err'); } catch(e){}
       setSyncDot('ok');
       _lastPushTs = Date.now();
-      try { localStorage.setItem(_csScopedKey('cs_cloud_current_ts'), String(_lastPushTs)); } catch(e){}
+      try { localStorage.setItem('cs_cloud_current_ts', String(_lastPushTs)); } catch(e){}
       return true;
     }).catch(function(err) {
       logSync('txWrite', cause, 'FAILED (attempt ' + attempt + '):', err && err.code, err && err.message);
       // Persist the real error so a future sync failure is diagnosable even when
       // debug logging is off.
       _lastSyncErr = { at: Date.now(), cause: cause, code: (err && err.code) || '', message: (err && err.message) || '' };
-      try { localStorage.setItem(_csScopedKey('cs_sync_last_err'), JSON.stringify(_lastSyncErr)); } catch(e){}
+      try { localStorage.setItem('cs_sync_last_err', JSON.stringify(_lastSyncErr)); } catch(e){}
       if (attempt < maxTries) {
         return new Promise(function(res) { setTimeout(res, 400 * attempt); }).then(tryOnce);
       }
@@ -5087,8 +5001,8 @@ const THEMES = [
   { name:'Retro 80s',    accent:'#ff6ec7', accent2:'#ffe600', bg:'#0d0d1a', surf:'#131325', surf2:'#1c1c35', bodyClass:'theme-retro80s', unlock:22 },
   { name:'Midnight',     accent:'#8ea2ff', accent2:'#e8b84b', bg:'#060608', surf:'#0e0e12', surf2:'#171720', bodyClass:'', id:'midnight', secret:true, unlock:30 },
 ];
-let activeTheme = parseInt(localStorage.getItem(_csScopedKey('cs_theme')) || '0');
-let carbonOn    = localStorage.getItem(_csScopedKey('cs_carbon')) === 'on';
+let activeTheme = parseInt(localStorage.getItem('cs_theme') || '0');
+let carbonOn    = localStorage.getItem('cs_carbon') === 'on';
 function _themeUnlocked(i) {
   var t = (i==null) ? null : THEMES[i];
   var lvl = t ? t.unlock : 0;
@@ -5118,7 +5032,7 @@ function applyTheme(idx) {
   document.body.classList.remove('theme-light','theme-cyberpunk','theme-retro80s');
   if (t.bodyClass) document.body.classList.add(t.bodyClass);
   activeTheme = idx;
-  localStorage.setItem(_csScopedKey('cs_theme'), idx);
+  localStorage.setItem('cs_theme', idx);
   // Update theme-color meta
   const metaTheme = document.querySelector('meta[name="theme-color"]');
   if (metaTheme) metaTheme.content = t.bg;
@@ -5190,7 +5104,7 @@ function initSecretThemeTap() {
 }
 function toggleCarbon() {
   carbonOn = !carbonOn;
-  localStorage.setItem(_csScopedKey('cs_carbon'), carbonOn ? 'on' : 'off');
+  localStorage.setItem('cs_carbon', carbonOn ? 'on' : 'off');
   applyCarbon();
   const btn = document.getElementById('carbonToggle');
   if (btn) btn.classList.toggle('on', carbonOn);
@@ -5480,7 +5394,7 @@ function playSound(type) {
 }
 function toggleSound() {
   soundEnabled = !soundEnabled;
-  localStorage.setItem(_csScopedKey('cs_sound'), soundEnabled ? 'on' : 'off');
+  localStorage.setItem('cs_sound', soundEnabled ? 'on' : 'off');
   const btn = document.getElementById('soundToggle');
   if (btn) btn.classList.toggle('on', soundEnabled);
   showToast(soundEnabled ? ' Sounds on' : ' Sounds off');
@@ -5598,7 +5512,7 @@ function resolveAlias(name) {
   return name;
 }
 function saveAliases() {
-  localStorage.setItem(_csScopedKey('cs_aliases'), JSON.stringify(aliases));
+  localStorage.setItem('cs_aliases', JSON.stringify(aliases));
   _bumpVer('aliases');
   updateAliasCount();
   saveToCloud();
@@ -5691,7 +5605,7 @@ function toggleFavorite(name){
   const key = String(name);
   if (favoriteNames.has(name)) { favoriteNames.delete(name); if (_removedFavs.indexOf(key) === -1) _removedFavs.push(key); }
   else { favoriteNames.add(name); _removedFavs = _removedFavs.filter(n => n !== key); }
-  try { localStorage.setItem(_csScopedKey('cs_fav'), JSON.stringify(Array.from(favoriteNames))); localStorage.setItem(_csScopedKey('cs_del_fav'), JSON.stringify(_removedFavs)); } catch(e){}
+  try { localStorage.setItem('cs_fav', JSON.stringify(Array.from(favoriteNames))); localStorage.setItem('cs_del_fav', JSON.stringify(_removedFavs)); } catch(e){}
   _bumpVer('favorites');
   renderHomeFav(); renderGarage();
   saveToCloud();
@@ -6173,7 +6087,7 @@ function endRun() {
   // Update leaderboard cache if this is the new best
   if (total > bestFromLB) {
     bestFromLB = total;
-    localStorage.setItem(_csScopedKey('cs_best_lb'), String(bestFromLB));
+    localStorage.setItem('cs_best_lb', String(bestFromLB));
   }
   saveToCloud();
   currentRun = [];
@@ -6464,12 +6378,8 @@ function deleteCarEverywhere(name) {
     else if (carIdx >= 0 && carIdx < headlinerIdx) headlinerIdx--;
     // else: car not in current run or after headliner — keep headlinerIdx
   }
-  var deletedPhotoIds = [];
-  prevRuns.forEach(function(run){ (run.cars||[]).forEach(function(c){ if(c && c.name && c.name.toLowerCase()===key && c._photoId) deletedPhotoIds.push(String(c._photoId)); }); });
-  prevRun.forEach(function(c){ if(c && c.name && c.name.toLowerCase()===key && c._photoId) deletedPhotoIds.push(String(c._photoId)); });
   currentRun = currentRun.filter(c=>c.name.toLowerCase()!==key);
   saveCurrentRun();
-  Array.from(new Set(deletedPhotoIds)).forEach(function(pid){ _idbDelete(pid).catch(function(){}); if (currentUser) _deleteCloudPhoto(pid, currentUser.uid).catch(function(){}); });
   // Sync through the transactional writer — its rebase prevents a stale cloud doc
   // from clobbering this edit even if the user reloads immediately.
   saveToCloud();
@@ -6486,7 +6396,7 @@ function deleteCarEverywhere(name) {
 
 function setGarageZoom(z) {
   garageZoom = Math.max(1, Math.min(5, Number(z) || 3));
-  try { localStorage.setItem(_csScopedKey('cs_garage_zoom'), String(garageZoom)); } catch(e) {}
+  try { localStorage.setItem('cs_garage_zoom', String(garageZoom)); } catch(e) {}
   var val = document.getElementById('garageZoomVal');
   if (val) val.textContent = garageZoom + ' ×';
   renderGarage();
@@ -6504,7 +6414,7 @@ function refreshGarage() {
   });
 }
 (function(){
-  try { garageZoom = Math.max(1, Math.min(5, Number(localStorage.getItem(_csScopedKey('cs_garage_zoom'))) || 3)); } catch(e) { garageZoom = 3; }
+  try { garageZoom = Math.max(1, Math.min(5, Number(localStorage.getItem('cs_garage_zoom')) || 3)); } catch(e) { garageZoom = 3; }
   var sx=0, sy=0, pulling=false, indicator=null;
   function getIndicator(){
     if (!indicator) { indicator=document.createElement('div'); indicator.className='garage-pull-indicator'; indicator.textContent='↓ PULL TO REFRESH'; document.body.appendChild(indicator); }
@@ -6616,12 +6526,12 @@ function applyHeaderSort(cars) {
   return favs.concat(rest);
 }
 function featuredName() {
-  try { return localStorage.getItem(_csScopedKey('cs_featured')) || ''; } catch(e) { return ''; }
+  try { return localStorage.getItem('cs_featured') || ''; } catch(e) { return ''; }
 }
 function setFeaturedCar(name) {
   try {
-    var cur = localStorage.getItem(_csScopedKey('cs_featured')) || '';
-    localStorage.setItem(_csScopedKey('cs_featured'), cur === name ? '' : name);
+    var cur = localStorage.getItem('cs_featured') || '';
+    localStorage.setItem('cs_featured', cur === name ? '' : name);
   } catch(e) {}
   renderGarage();
 }
@@ -6731,7 +6641,7 @@ function renderGarageDashboard(cars){
   var el=document.getElementById('garageDashboard');
   if(!el) return;
   if(!cars.length){
-    el.innerHTML='<div class="cs-garage-dashboard"><div class="cs-gd-top"><div><div class="cs-gd-kicker">BUILD YOUR COLLECTION</div><div class="cs-gd-title">Your garage starts with one.</div><div class="cs-gd-sub">Every spot becomes part of your collection.</div></div><div class="cs-gd-count"><b>0</b><span>cars collected</span></div></div><div class="cs-gd-track"><div class="cs-gd-fill" style="width:0%"></div></div><div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>1 car</strong></div><div class="cs-gd-actions"><button class="cs-gd-action" onclick="goTo(\'spot\')">＋ SPOT A CAR</button></div></div></div>';
+    el.innerHTML='<div class="cs-garage-dashboard"><div class="cs-gd-top"><div><div class="cs-gd-kicker">BUILD YOUR COLLECTION</div><div class="cs-gd-title">Your garage starts with one.</div><div class="cs-gd-sub">Every spot becomes part of your collection.</div></div><div class="cs-gd-count"><b>0</b><span>cars collected</span></div></div><div class="cs-gd-track"><div class="cs-gd-fill" style="width:0%"></div></div><div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>1 car</strong></div><div class="cs-gd-actions"><button class="cs-gd-action" onclick="goTo("spot")">＋ SPOT A CAR</button></div></div></div>';
     return;
   }
   var milestones=[5,10,25,50,100,250,500];
@@ -7507,7 +7417,7 @@ async function fetchCarImage(carName) {
 }
 
 //  XP & LEVELS — reward every log so there's always a reason to find the next car
-let _xpTotal = parseInt(localStorage.getItem(_csScopedKey('cs_xp')) || '0');
+let _xpTotal = parseInt(localStorage.getItem('cs_xp') || '0');
 function xpInfo(xp) {
   var level = 1, into = 0, need = 100;
   var remaining = xp;
@@ -7516,7 +7426,7 @@ function xpInfo(xp) {
 }
 function addXP(amount) {
   _xpTotal += amount;
-  localStorage.setItem(_csScopedKey('cs_xp'), String(_xpTotal));
+  localStorage.setItem('cs_xp', String(_xpTotal));
   _bumpVer('xp');
   renderLevelBar();
   saveToCloud();
@@ -7555,13 +7465,13 @@ function levelUpPulse() {
 
 //  HAPTICS — tasteful buzz on supported devices
 function haptic(pattern) {
-  if (localStorage.getItem(_csScopedKey('cs_vibe')) === 'off') return;
+  if (localStorage.getItem('cs_vibe') === 'off') return;
   if (!_userInteracted) return;
   try { if (navigator.vibrate) navigator.vibrate(pattern); } catch(e) {}
 }
 function toggleVibe() {
-  var on = localStorage.getItem(_csScopedKey('cs_vibe')) !== 'off';
-  localStorage.setItem(_csScopedKey('cs_vibe'), on ? 'off' : 'on');
+  var on = localStorage.getItem('cs_vibe') !== 'off';
+  localStorage.setItem('cs_vibe', on ? 'off' : 'on');
   var btn = document.getElementById('vibeToggle');
   if (btn) btn.classList.toggle('on', !on);
   showToast(on ? ' Vibrations off' : ' Vibrations on');
@@ -7570,7 +7480,7 @@ function toggleVibe() {
 }
 function initVibeToggle() {
   var btn = document.getElementById('vibeToggle');
-  if (btn) btn.classList.toggle('on', localStorage.getItem(_csScopedKey('cs_vibe')) !== 'off');
+  if (btn) btn.classList.toggle('on', localStorage.getItem('cs_vibe') !== 'off');
 }
 
 //  COLLECTOR CARD SETTINGS — keep the reward moment configurable
@@ -7606,7 +7516,7 @@ function tierMeta(t) {
 function recordDiscovery(car, xp) {
   try {
     var list = [];
-    try { list = JSON.parse(localStorage.getItem(_csScopedKey('cs_discoveries')) || '[]'); } catch(e) { list = []; }
+    try { list = JSON.parse(localStorage.getItem('cs_discoveries') || '[]'); } catch(e) { list = []; }
     var photoRef = '';
     if (car.photo && car.photo.indexOf('data:image/') === 0) {
       var pKey = (car.name || '').toLowerCase();
@@ -7628,7 +7538,7 @@ function recordDiscovery(car, xp) {
     }
     list.unshift({ n: car.name, v: car.value || 0, t: car.type || '', r: tierOf(car.value || 0), xp: xp || 0, d: Date.now(), p: photoRef });
     if (list.length > 10) list.length = 10;
-    localStorage.setItem(_csScopedKey('cs_discoveries'), JSON.stringify(list));
+    localStorage.setItem('cs_discoveries', JSON.stringify(list));
     _bumpVer('discoveries');
     saveToCloud();
     renderDiscoveries();
@@ -7648,7 +7558,7 @@ function resolveDiscoveryPhoto(p, name) {
 }
 function clearDiscoveries() {
   if (!confirm('Clear your recent discoveries?')) return;
-  try { localStorage.removeItem(_csScopedKey('cs_discoveries')); } catch(e) {}
+  try { localStorage.removeItem('cs_discoveries'); } catch(e) {}
   _bumpVer('discoveries');
   saveToCloud();
   renderDiscoveries();
@@ -7658,7 +7568,7 @@ function renderDiscoveries() {
   var listEl  = document.getElementById('discoveriesList');
   if (!section || !listEl) return;
   var list = [];
-  try { list = JSON.parse(localStorage.getItem(_csScopedKey('cs_discoveries')) || '[]'); } catch(e) { list = []; }
+  try { list = JSON.parse(localStorage.getItem('cs_discoveries') || '[]'); } catch(e) { list = []; }
   if (!list.length) { section.style.display = 'none'; return; }
   section.style.display = '';
   var clearBtn = document.getElementById('discClearBtn');
@@ -8100,7 +8010,6 @@ var _refImgSaveTimer = null;
 function fetchAndStoreRefImage(car) {
   var cur = car.photo;
   if (cur && (String(cur).indexOf('data:') === 0 || String(cur).indexOf('http') === 0)) return;
-  if (cur && String(cur).indexOf('photo:') === 0) { _photoLazyLoad(_photoRefKey(cur)); return; }
   // A bare `photo:` ref whose cache entry is gone, or no photo at all, is still
   // unresolved — fetch a reference image so "recent spots" don't stay empty.
   fetchCarImage(car.name).then(function(url) {
@@ -8111,14 +8020,14 @@ function fetchAndStoreRefImage(car) {
       // Backfill the most recent discovery card for this car so "Recent spots"
       // don't stay image-less after the reference photo resolves.
       try {
-        var disc = JSON.parse(localStorage.getItem(_csScopedKey('cs_discoveries')) || '[]');
+        var disc = JSON.parse(localStorage.getItem('cs_discoveries') || '[]');
         var discChanged = false;
         disc = disc.map(function(rec) {
           if (String(rec.n).toLowerCase() === String(car.name).toLowerCase() &&
               (!rec.p || String(rec.p).indexOf('photo:') === 0)) { rec.p = url; discChanged = true; }
           return rec;
         });
-        if (discChanged) { localStorage.setItem(_csScopedKey('cs_discoveries'), JSON.stringify(disc)); renderDiscoveries(); }
+        if (discChanged) { localStorage.setItem('cs_discoveries', JSON.stringify(disc)); renderDiscoveries(); }
       } catch(e) {}
       clearTimeout(_refImgSaveTimer);
       _refImgSaveTimer = setTimeout(saveToCloud, 500);
@@ -8414,7 +8323,7 @@ function importFromFile(input) {
       // Free the storage quota BEFORE writing anything: the photo-bearing keys are
       // rebuilt from the backup with images moved into IndexedDB as tiny refs.
       ['cs_runs','cs_current','cs_qp'].forEach(function(k) {
-        try { localStorage.removeItem(_csScopedKey(k)); localStorage.removeItem(k); } catch(e) {}
+        try { localStorage.removeItem(k); } catch(e) {}
       });
 
       let restored = 0;
@@ -8441,39 +8350,39 @@ function importFromFile(input) {
       } catch(e) {}
 
       // Reload all runtime state from localStorage
-      allRuns    = _csReadJSON('cs_runs', []);
-      currentRun = _csReadJSON('cs_current', []);
-      quickPicks = _csReadJSON('cs_qp', []);
-      aliases    = JSON.parse(localStorage.getItem(_csScopedKey('cs_aliases')) || '{}');
-      bestFromLB = parseInt(localStorage.getItem(_csScopedKey('cs_best_lb'))   || '0');
-      _prevAchievements = JSON.parse(localStorage.getItem(_csScopedKey('cs_ach')) || '[]');
+      allRuns    = JSON.parse(localStorage.getItem('cs_runs')    || '[]');
+      currentRun = JSON.parse(localStorage.getItem('cs_current') || '[]');
+      quickPicks = JSON.parse(localStorage.getItem('cs_qp')      || '[]');
+      aliases    = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
+      bestFromLB = parseInt(localStorage.getItem('cs_best_lb')   || '0');
+      _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
       // Reload deterministic sync state too — otherwise stale in-memory tombstones
       // / field versions let auto-sync resurrect or clobber the freshly imported data.
-      _deletedRuns = (function(){ try { var d = JSON.parse(localStorage.getItem(_csScopedKey('cs_del_runs')) || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();
-      _deletedQP  = (function(){ try { var d = JSON.parse(localStorage.getItem(_csScopedKey('cs_del_qp')) || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();
-      _removedFavs = (function(){ try { var d = JSON.parse(localStorage.getItem(_csScopedKey('cs_del_fav')) || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();
-      _fieldVer = (function(){ try { var f = JSON.parse(localStorage.getItem(_csScopedKey('cs_fv')) || 'null'); return (f && typeof f === 'object') ? f : {}; } catch(e){ return {}; } })();
-      _lamport = parseInt(localStorage.getItem(_csScopedKey('cs_lamport')) || '0');
-      favoriteNames = new Set(JSON.parse(localStorage.getItem(_csScopedKey('cs_fav')) || '[]'));
+      _deletedRuns = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_runs') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();
+      _deletedQP  = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_qp') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();
+      _removedFavs = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_fav') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();
+      _fieldVer = (function(){ try { var f = JSON.parse(localStorage.getItem('cs_fv') || 'null'); return (f && typeof f === 'object') ? f : {}; } catch(e){ return {}; } })();
+      _lamport = parseInt(localStorage.getItem('cs_lamport') || '0');
+      favoriteNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
       // Reload progression state (cs_progress) so trips/titles/etc. reflect the import
       try {
-        var impP = JSON.parse(localStorage.getItem(_csScopedKey('cs_progress')) || 'null');
+        var impP = JSON.parse(localStorage.getItem('cs_progress') || 'null');
         if (impP && impP.v === _progressV) { Object.keys(_progress).forEach(function(k){ delete _progress[k]; }); Object.assign(_progress, _defaultProgress(), impP); }
       } catch(e){}
 
       // Re-apply settings
-      const theme = parseInt(localStorage.getItem(_csScopedKey('cs_theme')) || '0');
+      const theme = parseInt(localStorage.getItem('cs_theme') || '0');
       applyTheme(theme);
-      carbonOn = localStorage.getItem(_csScopedKey('cs_carbon')) === 'on';
+      carbonOn = localStorage.getItem('cs_carbon') === 'on';
       applyCarbon();
-      compactMode = localStorage.getItem(_csScopedKey('cs_compact')) === 'on';
+      compactMode = localStorage.getItem('cs_compact') === 'on';
       applyCompactMode();
-      soundEnabled = localStorage.getItem(_csScopedKey('cs_sound')) !== 'off';
+      soundEnabled = localStorage.getItem('cs_sound') !== 'off';
       const soundToggle = document.getElementById('soundToggle');
       if (soundToggle) soundToggle.classList.toggle('on', soundEnabled);
 
       // Reload notes textarea
-      const savedNotes = localStorage.getItem(_csScopedKey('cs_notes')) || '';
+      const savedNotes = localStorage.getItem('cs_notes') || '';
       const notesArea = document.getElementById('notesArea');
       if (notesArea) notesArea.value = savedNotes;
 
@@ -8532,7 +8441,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
 
 //  OFFLINE MODE 
 let isOffline = !navigator.onLine;
-let offlineQueue = JSON.parse(localStorage.getItem(_csScopedKey('cs_offline_queue')) || '[]'); // queued saves
+let offlineQueue = JSON.parse(localStorage.getItem('cs_offline_queue') || '[]'); // queued saves
 
 function updateOfflineBanner() {
   const b = document.getElementById('offlineBanner');
@@ -8561,7 +8470,7 @@ function flushOfflineQueue() {
   if (!offlineQueue.length || !currentUser) return;
   const n = offlineQueue.length;
   offlineQueue = [];
-  localStorage.removeItem(_csScopedKey('cs_offline_queue'));
+  localStorage.removeItem('cs_offline_queue');
   saveToCloud();
   notify('☁️ Synced ' + n + ' offline save' + (n !== 1 ? 's' : '') + ' from this device', { priority:'quiet', record:true, key:'Offline sync', icon:'☁️' });
 }
@@ -8593,9 +8502,9 @@ let micInterim  = '';
 function initNotes() {
   const area = document.getElementById('notesArea');
   if (!area) return;
-  area.value = localStorage.getItem(_csScopedKey('cs_notes')) || '';
+  area.value = localStorage.getItem('cs_notes') || '';
   area.addEventListener('input', () => {
-    localStorage.setItem(_csScopedKey('cs_notes'), area.value);
+    localStorage.setItem('cs_notes', area.value);
     saveToCloud();
   });
 
@@ -8643,7 +8552,7 @@ function initNotes() {
     }
     micInterim = interim;
     if (interim) area.value += interim;
-    localStorage.setItem(_csScopedKey('cs_notes'), area.value);
+    localStorage.setItem('cs_notes', area.value);
     saveToCloud();
     area.scrollTop = area.scrollHeight;
   };
@@ -8683,7 +8592,7 @@ function stopMic() {
   const area = document.getElementById('notesArea');
   if (micInterim && area.value.endsWith(micInterim)) {
     area.value = area.value.slice(0, -micInterim.length);
-    localStorage.setItem(_csScopedKey('cs_notes'), area.value);
+    localStorage.setItem('cs_notes', area.value);
   }
   micInterim = '';
   document.getElementById('micBtn').classList.remove('active');
@@ -8711,24 +8620,13 @@ _attachPhotoInput.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
 // IndexedDB photo storage — sidesteps localStorage 5MB limit
 
 var _idbConn = null;
-function _photoUid() { return currentUser && currentUser.uid ? String(currentUser.uid) : 'local'; }
-function _photoIdFor(car) {
-  if (!car) return '';
-  if (!car._photoId) car._photoId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('p_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2));
-  return String(car._photoId);
-}
-function _photoStoreKey(photoId, uid) { return String(uid || _photoUid()) + '|' + String(photoId || ''); }
-function _photoRefKey(ref) { return String(ref || '').indexOf('photo:') === 0 ? String(ref).slice(6) : String(ref || ''); }
-function _photoRef(photoId) { return 'photo:' + _photoStoreKey(photoId, _photoUid()); }
 function _idbOpen() {
   if (_idbConn) return Promise.resolve(_idbConn);
   return new Promise(function(res, rej) {
-    var r = indexedDB.open('CarSpotterPhotos', 4);
+    var r = indexedDB.open('CarSpotterPhotos', 3);
     r.onupgradeneeded = function(e) {
       var db = e.target.result;
       if (e.oldVersion < 1) db.createObjectStore('photos', { keyPath: 'name' });
-      // Version 4 keeps the existing store for backward compatibility. New records
-      // use uid|photoId keys; old name-keyed records are still readable as legacy.
     };
     r.onsuccess = function(e) {
       var db = e.target.result;
@@ -8739,22 +8637,18 @@ function _idbOpen() {
     r.onerror = function(e) { rej(e.target.error); };
   });
 }
-function _idbPut(photoId, data, uid) {
-  if (!data) return Promise.resolve();
-  var pid = String(photoId || '');
-  var key = _photoStoreKey(pid, uid);
+
+function _idbPut(name, data) {
   return _idbOpen().then(function(db) {
     return new Promise(function(res, rej) {
       var tx = db.transaction('photos', 'readwrite');
-      tx.objectStore('photos').put({ name: key, photoId: pid, uid: String(uid || _photoUid()), data: data, updatedAt: Date.now() });
-      tx.oncomplete = function() { _photoCacheSet(key, data); res(); };
+      tx.objectStore('photos').put({ name: name.toLowerCase(), data: data });
+      tx.oncomplete = function() { _photoCacheSet(name.toLowerCase(), data); res(); };
       tx.onerror = function(e) { rej(e.target.error); };
     });
   });
 }
-function _idbPutLegacy(name, data) {
-  return _idbOpen().then(function(db) { return new Promise(function(res, rej) { var tx=db.transaction('photos','readwrite'); tx.objectStore('photos').put({name:String(name||'').toLowerCase(),data:data,legacy:true}); tx.oncomplete=function(){res();}; tx.onerror=function(e){rej(e.target.error);}; }); });
-}
+
 function _idbGetAll() {
   return _idbOpen().then(function(db) {
     return new Promise(function(res, rej) {
@@ -8765,65 +8659,16 @@ function _idbGetAll() {
     });
   });
 }
-function _idbGet(photoId, uid) {
-  var pid = String(photoId || '');
-  var key = _photoStoreKey(pid, uid);
+
+function _idbGet(name) {
   return _idbOpen().then(function(db) {
     return new Promise(function(res, rej) {
       var tx = db.transaction('photos', 'readonly');
-      var store = tx.objectStore('photos');
-      var r = store.get(key);
-      r.onsuccess = function(e) {
-        if (r.result) { res(r.result.data); return; }
-        // Backward compatibility: v1-v3 stored photos directly under normalized car name.
-        var legacy = store.get(pid.toLowerCase());
-        legacy.onsuccess = function(ev) { res(ev.target.result ? ev.target.result.data : null); };
-        legacy.onerror = function() { res(null); };
-      };
-      r.onerror = function() { res(null); };
+      var r = tx.objectStore('photos').get(String(name || '').toLowerCase());
+      r.onsuccess = function(e) { res(e.target.result ? e.target.result.data : null); };
       r.onerror = function(e) { rej(e.target.error); };
     });
   });
-}
-function _idbDelete(photoId, uid) {
-  if (!photoId) return Promise.resolve();
-  var key = _photoStoreKey(photoId, uid);
-  return _idbOpen().then(function(db) {
-    return new Promise(function(res, rej) {
-      var tx = db.transaction('photos','readwrite');
-      tx.objectStore('photos').delete(key);
-      tx.oncomplete = function(){ delete _idbPhotoCache[key]; var i=_photoCacheOrder.indexOf(key); if(i>=0)_photoCacheOrder.splice(i,1); res(); };
-      tx.onerror = function(e){ rej(e.target.error); };
-    });
-  });
-}
-function _idbDeleteAllForUid(uid) {
-  var u = String(uid || _photoUid()) + '|';
-  return _idbGetAll().then(function(entries){
-    var doomed = entries.filter(function(e){ return e && String(e.name||'').indexOf(u) === 0; });
-    return Promise.all(doomed.map(function(e){ return _idbDelete(String(e.name).slice(u.length), uid); }));
-  });
-}
-function _deleteCloudPhoto(pid, uid) {
-  if (!storage || !pid || !uid) return Promise.resolve();
-  return storage.ref().child('users/' + String(uid) + '/photos/' + String(pid) + '.jpg').delete().catch(function(e){
-    // A missing object is already the desired state.
-    if (e && (e.code === 'storage/object-not-found' || e.code === 'storage/unauthorized')) return;
-    throw e;
-  });
-}
-function _deleteAllCloudPhotosForUid(uid) {
-  if (!storage || !uid) return Promise.resolve();
-  var root = storage.ref().child('users/' + String(uid) + '/photos');
-  function page(ref) {
-    return ref.listAll().then(function(result){
-      var dels = (result.items || []).map(function(item){ return item.delete().catch(function(){}); });
-      return Promise.all(dels).then(function(){
-        return (result.prefixes || []).reduce(function(p, sub){ return p.then(function(){ return page(sub); }); }, Promise.resolve());
-      });
-    }).catch(function(){ /* Storage may not be enabled; Firestore/local deletion still succeeds. */ });
-  }
-  return page(root);
 }
 
 function _loadIDBCache() {
@@ -8931,9 +8776,9 @@ function _stripCopy(obj) {
   }
   return obj;
 }
-function _saveRunsLocal()    { return _safeSet(_csScopedKey('cs_runs'),    JSON.stringify(_stripCopy(allRuns))); }
+function _saveRunsLocal()    { return _safeSet('cs_runs',    JSON.stringify(_stripCopy(allRuns))); }
 function _saveCurrentLocal() { return _safeSet(_csScopedKey('cs_current'), JSON.stringify(_stripCopy(currentRun))); }
-function _saveQPLocal()      { return _safeSet(_csScopedKey('cs_qp'),      JSON.stringify(_stripCopy(quickPicks))); }
+function _saveQPLocal()      { return _safeSet('cs_qp',      JSON.stringify(_stripCopy(quickPicks))); }
 
 // Deep copy with 'photo:' refs resolved back to their base64 from the IDB cache —
 // used by exports so backups contain the actual image data.
@@ -8959,8 +8804,7 @@ function _savePhoto(compressed, t) {
   if (t.type === 'run') {
     if (currentRun[t.index]) {
       currentRun[t.index].photo = compressed;
-      _photoIdFor(currentRun[t.index]);
-      _idbPut(currentRun[t.index]._photoId, compressed, _photoUid()).catch(function(){});
+      _idbPut(currentRun[t.index].name, compressed).catch(function(){});
       saveCurrentRun(); renderSpot();
       var qp = quickPicks.find(q => q.name.toLowerCase() === currentRun[t.index].name.toLowerCase());
       if (qp) { qp.photo = compressed; _saveQPLocal(); }
@@ -8969,24 +8813,22 @@ function _savePhoto(compressed, t) {
     var runIdx = allRuns.findIndex(r => r.id === t.runId);
     if (runIdx >= 0 && allRuns[runIdx].cars[t.carIndex]) {
       allRuns[runIdx].cars[t.carIndex].photo = compressed;
-      _photoIdFor(allRuns[runIdx].cars[t.carIndex]);
       allRuns[runIdx]._v = (allRuns[runIdx]._v || 0) + 1;
       _bumpVer('runs');
-      _idbPut(allRuns[runIdx].cars[t.carIndex]._photoId, compressed, _photoUid()).catch(function(){});
+      _idbPut(allRuns[runIdx].cars[t.carIndex].name, compressed).catch(function(){});
       _saveRunsLocal(); saveToCloud();
     }
   } else if (t.type === 'all') {
     var key = t.name.toLowerCase();
-    allRuns.forEach(function(run) { var hit = false; run.cars.forEach(function(car) { if (car.name.toLowerCase() === key) { car.photo = compressed; _photoIdFor(car); hit = true; } }); if (hit) run._v = (run._v || 0) + 1; });
-    currentRun.forEach(function(car) { if (car.name.toLowerCase() === key) { car.photo = compressed; _photoIdFor(car); } });
+    allRuns.forEach(function(run) { var hit = false; run.cars.forEach(function(car) { if (car.name.toLowerCase() === key) { car.photo = compressed; hit = true; } }); if (hit) run._v = (run._v || 0) + 1; });
+    currentRun.forEach(function(car) { if (car.name.toLowerCase() === key) car.photo = compressed; });
     var qp = quickPicks.find(function(q) { return q.name.toLowerCase() === key; });
     if (qp) { qp.photo = compressed; }
     _bumpVer('runs');
     // Persist the image in IndexedDB first, then write tiny 'photo:' refs to
     // localStorage so the 5MB quota is never consumed by images.
-    var allPhotoId = _photoIdFor((allRuns.flatMap ? allRuns.flatMap(function(r){return r.cars||[];}) : []).find(function(c){return c.name && c.name.toLowerCase() === key;}) || {name:t.name});
-    _idbPut(allPhotoId, compressed, _photoUid()).then(function() {
-      _photoCacheSet(_photoStoreKey(allPhotoId, _photoUid()), compressed);
+    _idbPut(t.name, compressed).then(function() {
+      _photoCacheSet(key, compressed);
       _saveRunsLocal(); _saveCurrentLocal(); _saveQPLocal();
       saveToCloud();
       showToast('📷 Photo added to all "' + t.name + '" sightings!');
@@ -8994,8 +8836,8 @@ function _savePhoto(compressed, t) {
       var de2 = document.getElementById('detailOverlay'); if (de2) de2.remove();
     }).catch(function() {
       _photoCacheSet(key, compressed);
-      _safeSet(_csScopedKey('cs_runs'), JSON.stringify(_stripCopy(allRuns)));
-      _safeSet(_csScopedKey('cs_current'), JSON.stringify(_stripCopy(currentRun)));
+      _safeSet('cs_runs', JSON.stringify(allRuns));
+      _safeSet('cs_current', JSON.stringify(currentRun));
       _saveQPLocal();
       showToast("⚠ Photo couldn't be saved permanently. Export a backup soon!");
       renderGarage(); renderHistory();
@@ -9487,7 +9329,7 @@ window.saveEditCar = function(originalName) {
 // ─────────────────────────────────────────────
 //  CAR SEARCH (built-in, no redirect)
 // ── COMPACT MODE ──
-let compactMode = localStorage.getItem(_csScopedKey('cs_compact')) === 'on';
+let compactMode = localStorage.getItem('cs_compact') === 'on';
 function applyCompactMode() {
   document.body.classList.toggle('compact-mode', compactMode);
   const btn = document.getElementById('compactToggle');
@@ -9495,7 +9337,7 @@ function applyCompactMode() {
 }
 function toggleCompactMode() {
   compactMode = !compactMode;
-  localStorage.setItem(_csScopedKey('cs_compact'), compactMode ? 'on' : 'off');
+  localStorage.setItem('cs_compact', compactMode ? 'on' : 'off');
   applyCompactMode();
   showToast(compactMode ? 'Compact mode on' : 'Compact mode off');
   _bumpVer('settings');
@@ -9506,7 +9348,7 @@ applyCompactMode();
 // ── SORT PREFERENCE ──
 function setSortPref(mode) {
   sortMode = mode;
-  localStorage.setItem(_csScopedKey('cs_sort'), mode);
+  localStorage.setItem('cs_sort', mode);
   document.querySelectorAll('.sort-pref-btn').forEach(b => b.classList.remove('active'));
   const btn = document.getElementById('spb-' + mode);
   if (btn) btn.classList.add('active');
@@ -9522,29 +9364,14 @@ function initSortPrefBtns() {
 }
 
 // ── CLEAR ALL DATA ──
-async function clearAllData() {
-  if (!confirm('Delete ALL CarSpotter data for this account? This cannot be undone.')) return;
-  if (!confirm('This will delete your synced runs, garage, Quick Picks, settings, and stored photos from this account. Continue?')) return;
-  try {
-    if (currentUser && db) {
-      await db.collection('users').doc(currentUser.uid).delete();
-    }
-    if (currentUser) {
-      await _deleteAllCloudPhotosForUid(currentUser.uid);
-      await _idbDeleteAllForUid(currentUser.uid).catch(function(){});
-      _ACCOUNT_LOCAL_KEYS.forEach(function(k){ try { localStorage.removeItem(_csScopedKey(k)); } catch(e){} });
-    } else {
-      _ACCOUNT_LOCAL_KEYS.forEach(function(k){ try { localStorage.removeItem(k); } catch(e){} });
-    }
-    allRuns = []; currentRun = []; quickPicks = []; bestFromLB = 0;
-    favoriteNames = new Set(); aliases = {}; _deletedRuns=[]; _deletedQP=[]; _removedFavs=[]; _fieldVer={}; _xpTotal=0; _progress=_defaultProgress();
-    _dirty=false;
-    renderGarage(); renderHistory(); renderSpot(); renderQPTrigger();
-    showToast('All account data cleared.');
-  } catch(e) {
-    _markDirty(true);
-    showToast('Could not fully clear cloud data: ' + (e.message || e));
-  }
+function clearAllData() {
+  if (!confirm('Delete ALL local runs, garage, and settings? This cannot be undone.')) return;
+  if (!confirm('Are you sure? Everything will be wiped locally.')) return;
+  const keys = Object.keys(localStorage).filter(k => k.startsWith('cs_'));
+  keys.forEach(k => localStorage.removeItem(k));
+  allRuns = []; currentRun = []; quickPicks = []; bestFromLB = 0;
+  renderGarage(); renderHistory(); renderSpot(); renderQPTrigger();
+  showToast('All local data cleared.');
 }
 
 // ─────────────────────────────────────────────
@@ -9724,9 +9551,9 @@ window.fillFromSearch = function(name, value, color, type) {
 
 // Seed existing achievements silently so returning users don't get toasted on first load
 (function seedAchievements() {
-  if (!localStorage.getItem(_csScopedKey('cs_ach'))) {
+  if (!localStorage.getItem('cs_ach')) {
     const earned = getUnlockedAchievements();
-    localStorage.setItem(_csScopedKey('cs_ach'), JSON.stringify(earned));
+    localStorage.setItem('cs_ach', JSON.stringify(earned));
     _prevAchievements = earned;
   }
 })();
@@ -9742,7 +9569,7 @@ function checkNewAchievements() {
   const newOnes = now.filter(id => !prev.has(id));
   if (newOnes.length) {
     _prevAchievements = now;
-    localStorage.setItem(_csScopedKey('cs_ach'), JSON.stringify(now));
+    localStorage.setItem('cs_ach', JSON.stringify(now));
     newOnes.forEach((id, i) => {
       const a = ACHIEVEMENTS.find(x=>x.id===id);
       if (a) {
@@ -10193,13 +10020,13 @@ function _defaultProgress() {
 }
 var _progress = (function(){
   try {
-    var p = JSON.parse(localStorage.getItem(_csScopedKey('cs_progress')) || 'null');
+    var p = JSON.parse(localStorage.getItem('cs_progress') || 'null');
     if (!p || p.v !== _progressV) return _defaultProgress();
     return Object.assign(_defaultProgress(), p);
   } catch(e){ return _defaultProgress(); }
 })();
 function saveProgress() {
-  try { localStorage.setItem(_csScopedKey('cs_progress'), JSON.stringify(_progress)); } catch(e){}
+  try { localStorage.setItem('cs_progress', JSON.stringify(_progress)); } catch(e){}
   if (!_applyingCloud) { _bumpVer('progression'); saveToCloud(); }
 }
 function getProgression() { return _progress; }
@@ -11465,7 +11292,7 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
 
 (function(){
   _prevAchievements = (_prevAchievements || []).filter(id => ACHIEVEMENTS.some(a => a.id === id));
-  localStorage.setItem(_csScopedKey('cs_ach'), JSON.stringify(_prevAchievements));
+  localStorage.setItem('cs_ach', JSON.stringify(_prevAchievements));
 
   function persistPendingLocation(){ if (currentSpotLocation) localStorage.setItem('cs_pending_loc', JSON.stringify(currentSpotLocation)); else localStorage.removeItem('cs_pending_loc'); }
   function renderPendingLocation(){
