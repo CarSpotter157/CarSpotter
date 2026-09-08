@@ -4597,9 +4597,18 @@ function subscribeCloud() {
     if (d.seq && d.seq === _lastLocalSeq) return;
     logSync('listener', 'seq', d.seq, 'lamport', d.lamport);
     const changed = _applyCloud(d);
-    if (changed) {
-      _saveAllLocal();
-      renderQPTrigger(); renderSpot();
+
+// Keep runs newest → oldest so newly synced runs appear
+// at the top of History.
+if (Array.isArray(allRuns)) {
+  allRuns.sort(function(a, b) {
+    return Number(b?.id || 0) - Number(a?.id || 0);
+  });
+}
+
+if (changed) {
+  _saveAllLocal();
+  renderQPTrigger(); renderSpot();
       const pg = document.querySelector('.page.active')?.id;
       if (pg === 'page-garage')  renderGarage();
       if (pg === 'page-history') renderHistory();
