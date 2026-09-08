@@ -4557,11 +4557,26 @@ async function loadFromCloud() {
       // hydration, replace it from Firestore. If there are unsynced local changes,
       // keep the existing merge/rebase behavior so offline work is not lost.
       logSync('loadFromCloud', 'apply lamport', d.lamport || 'legacy', 'dirty=' + _dirty);
-      if (!_dirty) _replaceLocalFromCloud(d);
-      else { _applyCloud(d); _saveAllLocal(); }
-      // Always converge back — the transactional rebase applies any newer cloud state first.
-      _lastSave = Date.now();
-      _txWrite({ cause: 'loadFromCloud' });
+
+if (!_dirty) {
+  _replaceLocalFromCloud(d);
+} else {
+  _applyCloud(d);
+}
+
+// Keep runs newest → oldest.
+// History displays the first batch of allRuns.
+if (Array.isArray(allRuns)) {
+  allRuns.sort(function(a, b) {
+    return Number(b?.id || 0) - Number(a?.id || 0);
+  });
+}
+
+_saveAllLocal();
+
+// Always converge back — the transactional rebase applies any newer cloud state first.
+_lastSave = Date.now();
+_txWrite({ cause: 'loadFromCloud' });
     }
     if (!_lastSave) setSyncDot('ok');
   } catch(e) { setSyncDot(''); console.error(e); }
