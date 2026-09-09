@@ -10,12 +10,25 @@
 <meta content="#0a0a0a" name="theme-color"/>
 <title>CarSpotter</title>
 <script>
+(function(){
+  function uid(){ try { return String(localStorage.getItem('cs_active_uid') || localStorage.getItem('cs_uid') || ''); } catch(e){ return ''; } }
+  function key(k){ var u=uid(); return u ? u + '_' + k : k; }
+  window._csEarlyGet = function(k, fallback){
+    try { var raw=localStorage.getItem(key(k)); return raw !== null ? raw : fallback; }
+    catch(e){ return fallback; }
+  };
+  window._csEarlyGetJSON = function(k, fallback){
+    try { var raw=window._csEarlyGet(k, null); return raw === null ? fallback : JSON.parse(raw); }
+    catch(e){ return fallback; }
+  };
+})();
+
 // Decide install-banner visibility BEFORE first paint so showing it causes no layout shift.
 (function(){
   try {
     var dismissed = localStorage.getItem('cs_install_dismissed');
     var hasData;
-    try { hasData = _csReadJSON('cs_runs', []).length > 0 || JSON.parse(localStorage.getItem('cs_current') || '[]').length > 0; } catch(e) { hasData = false; }
+    try { hasData = _csReadJSON('cs_runs', []).length > 0 || _csEarlyGetJSON('cs_current', []).length > 0; } catch(e) { hasData = false; }
     if (dismissed) return;
     if (!hasData) return;
     var standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || (window.navigator && window.navigator.standalone);
@@ -27,13 +40,13 @@
 // revealing them at runtime causes no layout shift.
 (function(){
   try {
-    var qp = JSON.parse(localStorage.getItem('cs_qp') || '[]');
+    var qp = _csEarlyGetJSON('cs_qp', []);
     if (qp.length) document.documentElement.classList.add('show-qp');
-    var favNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
+    var favNames = new Set(_csEarlyGetJSON('cs_fav', []));
     if (favNames.size) {
       var known = new Set();
       (_csReadJSON('cs_runs', [])).forEach(function(r){ (r.cars||[]).forEach(function(c){ known.add(String(c.name).toLowerCase()); }); });
-      (JSON.parse(localStorage.getItem('cs_current') || '[]')).forEach(function(c){ known.add(String(c.name).toLowerCase()); });
+      (_csReadJSON('cs_current', [])).forEach(function(c){ known.add(String(c.name).toLowerCase()); });
       var any = false;
       favNames.forEach(function(n){ if (known.has(String(n).toLowerCase())) any = true; });
       if (any) document.documentElement.classList.add('show-favs');
@@ -3814,14 +3827,14 @@ let undoStack    = null;
 let undoTimer    = null;
 let bulkMode     = false;
 let bulkSelected = new Set();
-let soundEnabled = localStorage.getItem('cs_sound') !== 'off';
-let aliases      = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
-let bestFromLB = parseInt(localStorage.getItem('cs_best_lb') || '0');
-let favoriteNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
-let currentSpotLocation = JSON.parse(localStorage.getItem('cs_pending_loc') || 'null');
-let allRuns      = JSON.parse(localStorage.getItem('cs_runs')      || '[]');
-let currentRun   = JSON.parse(localStorage.getItem('cs_current')   || '[]');
-let quickPicks   = JSON.parse(localStorage.getItem('cs_qp')        || '[]');
+let soundEnabled = _csEarlyGet('cs_sound', 'on') !== 'off';
+let aliases      = _csEarlyGetJSON('cs_aliases', {});
+let bestFromLB   = parseInt(_csEarlyGet('cs_best_lb', '0'), 10) || 0;
+let favoriteNames = new Set(_csEarlyGetJSON('cs_fav', []));
+let currentSpotLocation = _csEarlyGetJSON('cs_pending_loc', null);
+let allRuns      = _csEarlyGetJSON('cs_runs', []);
+let currentRun   = _csEarlyGetJSON('cs_current', []);
+let quickPicks   = _csEarlyGetJSON('cs_qp', []);
 let sortMode     = 'desc';
 let currentUser  = null;
 let _lastSave    = 0;
@@ -3873,6 +3886,14 @@ function _photoLazyLoad(key) {
       }).catch(function(){}).then(function() {
         _photoLoading[k] = false;
         pending--;
+        clearTimeout(_photoRerenderTimer);
+        _photoRerenderTimer = setTimeout(function(){
+          try {
+            _patchPhotosFromCache();
+            renderSpot(); renderGarage(); renderHistory();
+            if (typeof renderDiscoveries === 'function') renderDiscoveries();
+          } catch(e) {}
+        }, 0);
       });
     });
   }, 60);
@@ -4078,7 +4099,7 @@ const ACHIEVEMENTS = [
   { id:'palindrome',       icon:'PP',name:'Mirror Mirror',  desc:'Spot a car worth a palindrome ($1,212,121)', xp:300, check:(c,r)=>detectPalindromicValue(c) },
   { id:'twin_spot',        icon:'TT',name:'Double Take',    desc:'Spot the exact same car twice in one run', xp:420, check:(c,r)=>detectTwinSpot(r) },
 ];
-let _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
+let _prevAchievements = _csReadJSON('cs_ach', []);
 
 //  MERGE HELPERS — prevent data loss when cloud & local diverge 
 function _mergeRunArrays(local, cloud) {
@@ -4165,7 +4186,7 @@ function _mergeAchievements(cloudIds) {
   var changed = false;
   var s = new Set(_prevAchievements || []);
   cloudIds.forEach(function(id) { if (id && !s.has(id)) { s.add(id); changed = true; } });
-  if (changed) { _prevAchievements = Array.from(s); try { localStorage.setItem('cs_ach', JSON.stringify(_prevAchievements)); } catch(e){} }
+  if (changed) { _prevAchievements = Array.from(s); try { localStorage.setItem(_csScopedKey('cs_ach'), JSON.stringify(_prevAchievements)); } catch(e){} }
   return changed;
 }
 function _settingsMap() {
@@ -4192,7 +4213,7 @@ function _applySettings(m) {
     compactMode = m.compact === 'on';
     if (typeof applyCompactMode === 'function') applyCompactMode();
   }
-  if (m.vibe != null) { try { localStorage.setItem('cs_vibe', m.vibe); } catch(e){} }
+  if (m.vibe != null) { try { localStorage.setItem(_csScopedKey('cs_vibe'), m.vibe); } catch(e){} }
   if (m.sort != null && m.sort !== sortMode) {
     sortMode = m.sort;
     if (typeof initSortPrefBtns === 'function') initSortPrefBtns();
@@ -4250,18 +4271,22 @@ function _csScopedKey(key) {
 }
 function _csReadJSON(key, fallback) {
   try {
+    var uid = _csAccountUid();
     var scoped = _csScopedKey(key);
     var rawScoped = localStorage.getItem(scoped);
     if (rawScoped !== null) return JSON.parse(rawScoped);
+    if (uid) return fallback;
     var raw = localStorage.getItem(key);
     return raw !== null ? JSON.parse(raw) : fallback;
   } catch(e) { return fallback; }
 }
 function _csReadString(key, fallback) {
   try {
+    var uid = _csAccountUid();
     var scoped = _csScopedKey(key);
     var rawScoped = localStorage.getItem(scoped);
     if (rawScoped !== null) return rawScoped;
+    if (uid) return fallback;
     var raw = localStorage.getItem(key);
     return raw !== null ? raw : fallback;
   } catch(e) { return fallback; }
@@ -4270,24 +4295,27 @@ function _csReadString(key, fallback) {
 var _activeLocalUid = localStorage.getItem('cs_active_uid') || '';
 var _ACCOUNT_LOCAL_KEYS = [
   'cs_runs','cs_current','cs_qp','cs_fav','cs_aliases','cs_notes','cs_xp',
-  'cs_achievements','cs_progression','cs_discoveries','cs_del_runs','cs_del_qp',
-  'cs_del_fav','cs_fv','cs_sync_dirty','cs_cloud_current_ts','cs_lamport_last'
+  'cs_ach','cs_progress','cs_discoveries','cs_del_runs','cs_del_qp','cs_del_fav',
+  'cs_fv','cs_sync_dirty','cs_cloud_current_ts','cs_lamport_last','cs_best_lb',
+  'cs_theme','cs_carbon','cs_sound','cs_compact','cs_sort','cs_vibe','cs_cc_anim',
+  'cs_featured','cs_activity','cs_activity_seen','cs_pending_loc','cs_offline_queue',
+  'cs_secret_midnight'
 ];
 function _clearAccountLocalCache() {
-  _ACCOUNT_LOCAL_KEYS.forEach(function(k){ try { localStorage.removeItem(k); } catch(e){} });
-  try { _idbPhotoCache = {}; _photoLoading = {}; _photoMissing = {}; } catch(e) {}
-  // IDB photos are keyed only by car name in this version, so they cannot be
-  // safely attributed to a Firebase UID. Keep the database intact rather than
-  // deleting another account's photos; cloud data will restore the correct refs.
+  try {
+    _idbPhotoCache = {};
+    _photoCacheOrder = [];
+    _photoLoading = {};
+    _photoMissing = {};
+    _photoLazyQueue = [];
+  } catch(e) {}
 }
 function _prepareLocalCacheForUser(user) {
   var uid = user && user.uid ? String(user.uid) : '';
   if (!uid) return;
   var previous = _activeLocalUid;
-  if (previous && previous !== uid) {
+  if (previous !== uid) {
     _clearAccountLocalCache();
-    // Reset in-memory state too; otherwise renderers can briefly show Account A
-    // while Account B's Firestore document is being fetched.
     currentRun = [];
     allRuns = [];
     quickPicks = [];
@@ -4301,14 +4329,47 @@ function _prepareLocalCacheForUser(user) {
     _lastAppliedLamport = 0;
     _lastLocalSeq = '';
     if (typeof _xpTotal !== 'undefined') _xpTotal = 0;
+    if (typeof _progress !== 'undefined' && typeof _defaultProgress === 'function') _progress = _defaultProgress();
+    if (typeof _prevAchievements !== 'undefined') _prevAchievements = [];
+    if (typeof bestFromLB !== 'undefined') bestFromLB = 0;
   }
   _activeLocalUid = uid;
   try { localStorage.setItem('cs_active_uid', uid); } catch(e) {}
+
+  // Restore only this UID's local mirror before Firestore hydration.
+  try {
+    allRuns = _csReadJSON('cs_runs', []);
+    currentRun = _csReadJSON('cs_current', []);
+    quickPicks = _csReadJSON('cs_qp', []);
+    aliases = _csReadJSON('cs_aliases', {});
+    favoriteNames = new Set(_csReadJSON('cs_fav', []));
+    bestFromLB = parseInt(_csReadString('cs_best_lb', '0'), 10) || 0;
+    _deletedRuns = _csReadJSON('cs_del_runs', []);
+    _deletedQP = _csReadJSON('cs_del_qp', []);
+    _removedFavs = _csReadJSON('cs_del_fav', []);
+    _fieldVer = _csReadJSON('cs_fv', {});
+    _dirty = _csReadString('cs_sync_dirty', '0') === '1';
+    _lamport = parseInt(_csReadString('cs_lamport', '0'), 10) || 0;
+    if (typeof _xpTotal !== 'undefined') _xpTotal = parseInt(_csReadString('cs_xp', '0'), 10) || 0;
+    if (typeof _progress !== 'undefined' && typeof _defaultProgress === 'function') {
+      var lp = _csReadJSON('cs_progress', null);
+      _progress = (lp && lp.v === _progressV) ? Object.assign(_defaultProgress(), lp) : _defaultProgress();
+    }
+    if (typeof _prevAchievements !== 'undefined') _prevAchievements = _csReadJSON('cs_ach', []);
+    if (typeof activeTheme !== 'undefined') {
+      var savedTheme = parseInt(_csReadString('cs_theme', '0'), 10);
+      activeTheme = Number.isInteger(savedTheme) && savedTheme >= 0 && savedTheme < THEMES.length ? savedTheme : 0;
+    }
+    if (typeof carbonOn !== 'undefined') carbonOn = _csReadString('cs_carbon', 'off') === 'on';
+    if (typeof soundEnabled !== 'undefined') soundEnabled = _csReadString('cs_sound', 'on') !== 'off';
+    if (typeof compactMode !== 'undefined') compactMode = _csReadString('cs_compact', 'off') === 'on';
+    if (typeof sortMode !== 'undefined') sortMode = _csReadString('cs_sort', 'desc') || 'desc';
+  } catch(e) { console.warn('Account-local state restore failed', e); }
 }
 
 function importLocalData() {
   const localRuns = _csReadJSON('cs_runs', []);
-  const localCurrent = JSON.parse(localStorage.getItem('cs_current') || '[]');
+  const localCurrent = _csReadJSON('cs_current', []);
   const localQP = JSON.parse(localStorage.getItem('cs_qp') || '[]');
   const localNotes = localStorage.getItem('cs_notes') || '';
 
@@ -4333,8 +4394,8 @@ function importLocalData() {
   if (!currentRun.length && localCurrent.length) currentRun = localCurrent;
 
   // Merge notes
-  if (!localStorage.getItem('cs_notes') && localNotes) {
-    localStorage.setItem('cs_notes', localNotes);
+  if (!_csReadString('cs_notes', '') && localNotes) {
+    localStorage.setItem(_csScopedKey('cs_notes'), localNotes);
     const a = document.getElementById('notesArea');
     if (a) a.value = localNotes;
   }
@@ -4527,10 +4588,10 @@ function _replaceLocalFromCloud(c) {
   _removedFavs = (c.favorites && Array.isArray(c.favorites.removed)) ? c.favorites.removed.slice() : [];
   favoriteNames = new Set((c.favorites && Array.isArray(c.favorites.names)) ? c.favorites.names : []);
   aliases = (c.aliases && c.aliases.map && typeof c.aliases.map === 'object') ? Object.assign({}, c.aliases.map) : {};
-  if (c.notes && c.notes.text != null) { try { localStorage.setItem('cs_notes', String(c.notes.text)); } catch(e){} }
+  if (c.notes && c.notes.text != null) { try { localStorage.setItem(_csScopedKey('cs_notes'), String(c.notes.text)); } catch(e){} }
   if (c.xp && typeof c.xp.value === 'number') _xpTotal = c.xp.value;
   if (c.progression && typeof window.mergeCloudProgression === 'function') window.mergeCloudProgression(c.progression);
-  if (c.discoveries && Array.isArray(c.discoveries.items)) { try { localStorage.setItem('cs_discoveries', JSON.stringify(c.discoveries.items)); } catch(e){} }
+  if (c.discoveries && Array.isArray(c.discoveries.items)) { try { localStorage.setItem(_csScopedKey('cs_discoveries'), JSON.stringify(c.discoveries.items)); } catch(e){} }
   if (c.settings && c.settings.map) _applySettings(c.settings.map);
   _prevAchievements = (c.achievements && Array.isArray(c.achievements.ids)) ? c.achievements.ids.slice() : [];
   _fieldVer = {
@@ -4887,7 +4948,7 @@ function _applyCloud(c) {
     // it's a derived "last 10" convenience list, not authoritative data, so a
     // simple version-wins swap is enough to make it follow you across devices)
     if (c.discoveries && c.discoveries.ver != null && c.discoveries.ver > (_fieldVer.discoveries || 0) && Array.isArray(c.discoveries.items)) {
-      try { localStorage.setItem('cs_discoveries', JSON.stringify(c.discoveries.items)); } catch(e){}
+      try { localStorage.setItem(_csScopedKey('cs_discoveries'), JSON.stringify(c.discoveries.items)); } catch(e){}
       _fieldVer.discoveries = c.discoveries.ver;
       if (typeof renderDiscoveries === 'function') renderDiscoveries();
       changed = true;
@@ -4895,7 +4956,7 @@ function _applyCloud(c) {
     // xp — monotonic max (never loses XP already earned)
     if (c.xp && typeof c.xp.value === 'number' && c.xp.value > _xpTotal) {
       _xpTotal = c.xp.value;
-      try { localStorage.setItem('cs_xp', String(_xpTotal)); } catch(e){}
+      try { localStorage.setItem(_csScopedKey('cs_xp'), String(_xpTotal)); } catch(e){}
       if (typeof renderLevelBar === 'function') renderLevelBar();
       if (typeof renderTitleChip === 'function') renderTitleChip();
       _fieldVer.xp = Math.max(_fieldVer.xp || 0, c.xp.ver || 0);
@@ -5025,8 +5086,8 @@ const THEMES = [
   { name:'Retro 80s',    accent:'#ff6ec7', accent2:'#ffe600', bg:'#0d0d1a', surf:'#131325', surf2:'#1c1c35', bodyClass:'theme-retro80s', unlock:22 },
   { name:'Midnight',     accent:'#8ea2ff', accent2:'#e8b84b', bg:'#060608', surf:'#0e0e12', surf2:'#171720', bodyClass:'', id:'midnight', secret:true, unlock:30 },
 ];
-let activeTheme = parseInt(localStorage.getItem('cs_theme') || '0');
-let carbonOn    = localStorage.getItem('cs_carbon') === 'on';
+let activeTheme = parseInt(_csEarlyGet('cs_theme', '0'), 10) || 0;
+let carbonOn    = _csEarlyGet('cs_carbon', 'off') === 'on';
 function _themeUnlocked(i) {
   var t = (i==null) ? null : THEMES[i];
   var lvl = t ? t.unlock : 0;
@@ -5044,6 +5105,8 @@ function themeUnlockedAtLevel(lvl) {
 
 //  THEMES 
 function applyTheme(idx) {
+  idx = parseInt(idx, 10);
+  if (!Number.isInteger(idx) || idx < 0 || idx >= THEMES.length) idx = 0;
   const t = THEMES[idx];
   const r = document.documentElement.style;
   r.setProperty('--accent',  t.accent);
@@ -5056,7 +5119,7 @@ function applyTheme(idx) {
   document.body.classList.remove('theme-light','theme-cyberpunk','theme-retro80s');
   if (t.bodyClass) document.body.classList.add(t.bodyClass);
   activeTheme = idx;
-  localStorage.setItem('cs_theme', idx);
+  localStorage.setItem(_csScopedKey('cs_theme'), idx);
   // Update theme-color meta
   const metaTheme = document.querySelector('meta[name="theme-color"]');
   if (metaTheme) metaTheme.content = t.bg;
@@ -5647,7 +5710,6 @@ function stopFavRotation(){if(favTimer){clearInterval(favTimer);favTimer=null}}
 
 //  NAV 
 function goTo(page) {
-  if (page === 'achievements') page = 'expeditions';
   var prev = document.querySelector('.page.active');
   if (prev && prev.id==='page-spot' && page!=='spot') stopFavRotation();
   if (prev) {
@@ -6111,7 +6173,7 @@ function endRun() {
   // Update leaderboard cache if this is the new best
   if (total > bestFromLB) {
     bestFromLB = total;
-    localStorage.setItem('cs_best_lb', String(bestFromLB));
+    localStorage.setItem(_csScopedKey('cs_best_lb'), String(bestFromLB));
   }
   saveToCloud();
   currentRun = [];
@@ -7441,7 +7503,7 @@ async function fetchCarImage(carName) {
 }
 
 //  XP & LEVELS — reward every log so there's always a reason to find the next car
-let _xpTotal = parseInt(localStorage.getItem('cs_xp') || '0');
+let _xpTotal = parseInt(_csEarlyGet('cs_xp', '0'), 10) || 0;
 function xpInfo(xp) {
   var level = 1, into = 0, need = 100;
   var remaining = xp;
@@ -7450,7 +7512,7 @@ function xpInfo(xp) {
 }
 function addXP(amount) {
   _xpTotal += amount;
-  localStorage.setItem('cs_xp', String(_xpTotal));
+  localStorage.setItem(_csScopedKey('cs_xp'), String(_xpTotal));
   _bumpVer('xp');
   renderLevelBar();
   saveToCloud();
@@ -8038,6 +8100,8 @@ function fetchAndStoreRefImage(car) {
   // unresolved — fetch a reference image so "recent spots" don't stay empty.
   fetchCarImage(car.name).then(function(url) {
     if (url) {
+      var latest = car.photo;
+      if (latest && (String(latest).indexOf('data:') === 0 || String(latest).indexOf('http') === 0)) return;
       car.photo = url;
       var qp = quickPicks.find(function(q) { return q.name.toLowerCase() === car.name.toLowerCase(); });
       if (qp && !qp.photo) qp.photo = url;
@@ -8144,10 +8208,10 @@ function _toastPump() {
 //  records, achievements, rare finds, sync recoveries). Stored per-device in
 //  localStorage only — deliberately never sent to Firestore (it is ephemeral UI)
 //  and never exported (photos stay out; the feed is trivial to rebuild on import).
-var _actList = (function(){ try { var a = JSON.parse(localStorage.getItem('cs_activity') || 'null'); return Array.isArray(a) ? a : []; } catch(e){ return []; } })();
-var _actSeen = parseInt(localStorage.getItem('cs_activity_seen') || '0') || 0;
+var _actList = (function(){ try { var a = _csReadJSON('cs_activity', null); return Array.isArray(a) ? a : []; } catch(e){ return []; } })();
+var _actSeen = parseInt(_csReadString('cs_activity_seen', '0'), 10) || 0 || 0;
 var _actOpen = false;
-function _saveAct() { try { localStorage.setItem('cs_activity', JSON.stringify(_actList)); } catch(e){} }
+function _saveAct() { try { localStorage.setItem(_csScopedKey('cs_activity'), JSON.stringify(_actList)); } catch(e){} }
 function _ceremonyVisible() {
   return !!(document.querySelector('.cc-overlay') || document.querySelector('.cc-quick') ||
             document.querySelector('.evo-overlay') || document.querySelector('.title-overlay') ||
@@ -8174,7 +8238,7 @@ function recallActivity(key, text) {
 function clearActivity() {
   _actList = [];
   _actSeen = Date.now();
-  try { localStorage.setItem('cs_activity_seen', String(_actSeen)); } catch(e){}
+  try { localStorage.setItem(_csScopedKey('cs_activity_seen'), String(_actSeen)); } catch(e){}
   _saveAct();
   _updateActBadge();
   if (_actOpen) renderActivityPanel();
@@ -8202,7 +8266,7 @@ function toggleActivity(forceOpen) {
   if (want) {
     renderActivityPanel();
     _actSeen = Date.now();
-    try { localStorage.setItem('cs_activity_seen', String(_actSeen)); } catch(e){}
+    try { localStorage.setItem(_csScopedKey('cs_activity_seen'), String(_actSeen)); } catch(e){}
     _updateActBadge();
   }
 }
@@ -8265,9 +8329,16 @@ function deepStripPhotos(obj) {
 
 function exportLocalData() {
   const data = {};
+  _ACCOUNT_LOCAL_KEYS.forEach(function(key) {
+    try {
+      var raw = localStorage.getItem(_csScopedKey(key));
+      if (raw !== null) data[key] = raw;
+    } catch(e) {}
+  });
+  // Preserve genuinely global CarSpotter settings/data as well.
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key.startsWith('cs_')) {
+    if (key.startsWith('cs_') && !_ACCOUNT_LOCAL_KEYS.includes(key)) {
       data[key] = localStorage.getItem(key);
     }
   }
@@ -8306,9 +8377,15 @@ function exportLocalData() {
 
 function exportAllData() {
   const data = {};
+  _ACCOUNT_LOCAL_KEYS.forEach(function(key) {
+    try {
+      var raw = localStorage.getItem(_csScopedKey(key));
+      if (raw !== null) data[key] = raw;
+    } catch(e) {}
+  });
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key.startsWith('cs_')) {
+    if (key.startsWith('cs_') && !_ACCOUNT_LOCAL_KEYS.includes(key)) {
       data[key] = localStorage.getItem(key);
     }
   }
@@ -8347,7 +8424,7 @@ function importFromFile(input) {
       // Free the storage quota BEFORE writing anything: the photo-bearing keys are
       // rebuilt from the backup with images moved into IndexedDB as tiny refs.
       ['cs_runs','cs_current','cs_qp'].forEach(function(k) {
-        try { localStorage.removeItem(k); } catch(e) {}
+        try { localStorage.removeItem(_csScopedKey(k)); } catch(e) {}
       });
 
       let restored = 0;
@@ -8358,12 +8435,12 @@ function importFromFile(input) {
           // Move base64 photos into IndexedDB and store tiny 'photo:' refs in
           // localStorage so a photo-heavy backup fits within the storage quota.
           try {
-            _safeSet(key, JSON.stringify(_stripCopy(JSON.parse(data[key]))));
+            _safeSet(_csScopedKey(key), JSON.stringify(_stripCopy(JSON.parse(data[key]))));
           } catch(err2) {
-            _safeSet(key, data[key]);
+            _safeSet(_csScopedKey(key), data[key]);
           }
         } else {
-          _safeSet(key, data[key]);
+          _safeSet(_ACCOUNT_LOCAL_KEYS.indexOf(key) >= 0 ? _csScopedKey(key) : key, data[key]);
         }
         restored++;
       }
@@ -8374,12 +8451,12 @@ function importFromFile(input) {
       } catch(e) {}
 
       // Reload all runtime state from localStorage
-      allRuns    = JSON.parse(localStorage.getItem('cs_runs')    || '[]');
-      currentRun = JSON.parse(localStorage.getItem('cs_current') || '[]');
-      quickPicks = JSON.parse(localStorage.getItem('cs_qp')      || '[]');
-      aliases    = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
-      bestFromLB = parseInt(localStorage.getItem('cs_best_lb')   || '0');
-      _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
+      allRuns    = _csReadJSON('cs_runs', []);
+      currentRun = _csReadJSON('cs_current', []);
+      quickPicks = _csReadJSON('cs_qp', []);
+      aliases    = _csReadJSON('cs_aliases', {});
+      bestFromLB = parseInt(_csReadString('cs_best_lb', '0'), 10) || 0;
+      _prevAchievements = _csReadJSON('cs_ach', []);
       // Reload deterministic sync state too — otherwise stale in-memory tombstones
       // / field versions let auto-sync resurrect or clobber the freshly imported data.
       _deletedRuns = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_runs') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();
@@ -8387,15 +8464,15 @@ function importFromFile(input) {
       _removedFavs = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_fav') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();
       _fieldVer = (function(){ try { var f = JSON.parse(localStorage.getItem('cs_fv') || 'null'); return (f && typeof f === 'object') ? f : {}; } catch(e){ return {}; } })();
       _lamport = parseInt(localStorage.getItem('cs_lamport') || '0');
-      favoriteNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
+      favoriteNames = new Set(_csReadJSON('cs_fav', []));
       // Reload progression state (cs_progress) so trips/titles/etc. reflect the import
       try {
-        var impP = JSON.parse(localStorage.getItem('cs_progress') || 'null');
+        var impP = _csReadJSON('cs_progress', null);
         if (impP && impP.v === _progressV) { Object.keys(_progress).forEach(function(k){ delete _progress[k]; }); Object.assign(_progress, _defaultProgress(), impP); }
       } catch(e){}
 
       // Re-apply settings
-      const theme = parseInt(localStorage.getItem('cs_theme') || '0');
+      const theme = parseInt(_csReadString('cs_theme', '0'), 10) || 0;
       applyTheme(theme);
       carbonOn = localStorage.getItem('cs_carbon') === 'on';
       applyCarbon();
@@ -8465,7 +8542,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
 
 //  OFFLINE MODE 
 let isOffline = !navigator.onLine;
-let offlineQueue = JSON.parse(localStorage.getItem('cs_offline_queue') || '[]'); // queued saves
+let offlineQueue = _csReadJSON('cs_offline_queue', []); // queued saves
 
 function updateOfflineBanner() {
   const b = document.getElementById('offlineBanner');
@@ -8494,7 +8571,7 @@ function flushOfflineQueue() {
   if (!offlineQueue.length || !currentUser) return;
   const n = offlineQueue.length;
   offlineQueue = [];
-  localStorage.removeItem('cs_offline_queue');
+  localStorage.removeItem(_csScopedKey('cs_offline_queue'));
   saveToCloud();
   notify('☁️ Synced ' + n + ' offline save' + (n !== 1 ? 's' : '') + ' from this device', { priority:'quiet', record:true, key:'Offline sync', icon:'☁️' });
 }
@@ -8644,60 +8721,134 @@ _attachPhotoInput.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
 // IndexedDB photo storage — sidesteps localStorage 5MB limit
 
 var _idbConn = null;
+function _photoUid() { return currentUser && currentUser.uid ? String(currentUser.uid) : (_csAccountUid() || 'local'); }
+function _photoStoreKey(name, uid) {
+  var raw = String(name || '');
+  if (raw.indexOf('|') >= 0) return raw;
+  return String(uid || _photoUid()) + '|' + raw.toLowerCase();
+}
+function _photoCacheKey(name) {
+  var raw=String(name || '');
+  return raw.indexOf('|') >= 0 ? raw : _photoStoreKey(raw);
+}
 function _idbOpen() {
   if (_idbConn) return Promise.resolve(_idbConn);
   return new Promise(function(res, rej) {
-    var r = indexedDB.open('CarSpotterPhotos', 3);
+    var r = indexedDB.open('CarSpotterPhotos', 4);
     r.onupgradeneeded = function(e) {
-      var db = e.target.result;
-      if (e.oldVersion < 1) db.createObjectStore('photos', { keyPath: 'name' });
+      var db=e.target.result;
+      if (e.oldVersion < 1) db.createObjectStore('photos',{keyPath:'name'});
     };
     r.onsuccess = function(e) {
-      var db = e.target.result;
-      _idbConn = db;
-      db.onversionchange = function() { db.close(); _idbConn = null; };
+      var db=e.target.result;
+      _idbConn=db;
+      db.onversionchange=function(){db.close();_idbConn=null;};
       res(db);
     };
-    r.onerror = function(e) { rej(e.target.error); };
+    r.onerror=function(e){rej(e.target.error);};
   });
 }
-
-function _idbPut(name, data) {
-  return _idbOpen().then(function(db) {
-    return new Promise(function(res, rej) {
-      var tx = db.transaction('photos', 'readwrite');
-      tx.objectStore('photos').put({ name: name.toLowerCase(), data: data });
-      tx.oncomplete = function() { _photoCacheSet(name.toLowerCase(), data); res(); };
-      tx.onerror = function(e) { rej(e.target.error); };
+function _idbPut(name,data,uid) {
+  if (!data) return Promise.resolve();
+  var key=_photoStoreKey(name,uid);
+  return _idbOpen().then(function(db){
+    return new Promise(function(res,rej){
+      var tx=db.transaction('photos','readwrite');
+      tx.objectStore('photos').put({name:key,photoId:String(name||'').toLowerCase(),uid:String(uid||_photoUid()),data:data,updatedAt:Date.now()});
+      tx.oncomplete=function(){_photoCacheSet(key,data);res();};
+      tx.onerror=function(e){rej(e.target.error);};
     });
   });
+}
+function _idbMigrateLegacyToUid(uid) {
+  if (!uid) return Promise.resolve();
+  var markerKey = 'cs_photo_legacy_claimed';
+  try {
+    if (localStorage.getItem(markerKey) === String(uid)) return Promise.resolve();
+  } catch(e) {}
+  return _idbOpen().then(function(db){
+    return new Promise(function(res,rej){
+      var tx=db.transaction('photos','readwrite');
+      var store=tx.objectStore('photos');
+      var req=store.getAll();
+      req.onsuccess=function(e){
+        var all=e.target.result||[];
+        all.forEach(function(entry){
+          var name=String(entry && entry.name || '');
+          if (!name || name.indexOf('|') >= 0) return;
+          store.put({
+            name:String(uid)+'|'+name.toLowerCase(),
+            photoId:name.toLowerCase(),
+            uid:String(uid),
+            data:entry.data,
+            updatedAt:entry.updatedAt || Date.now()
+          });
+        });
+      };
+      req.onerror=function(e){rej(e.target.error);};
+      tx.oncomplete=function(){
+        try { localStorage.setItem(markerKey,String(uid)); } catch(e) {}
+        res();
+      };
+      tx.onerror=function(e){rej(e.target.error);};
+    });
+  }).catch(function(){});
 }
 
 function _idbGetAll() {
-  return _idbOpen().then(function(db) {
-    return new Promise(function(res, rej) {
-      var tx = db.transaction('photos', 'readonly');
-      var r = tx.objectStore('photos').getAll();
-      r.onsuccess = function(e) { res(e.target.result || []); };
-      r.onerror = function(e) { rej(e.target.error); };
+  var uid=_photoUid();
+  return _idbOpen().then(function(db){
+    return new Promise(function(res,rej){
+      var tx=db.transaction('photos','readonly');
+      var r=tx.objectStore('photos').getAll();
+      r.onsuccess=function(e){
+        var all=e.target.result||[];
+        res(all.filter(function(entry){return entry && String(entry.name||'').indexOf(uid+'|')===0;}));
+      };
+      r.onerror=function(e){rej(e.target.error);};
     });
   });
 }
-
-function _idbGet(name) {
-  return _idbOpen().then(function(db) {
-    return new Promise(function(res, rej) {
-      var tx = db.transaction('photos', 'readonly');
-      var r = tx.objectStore('photos').get(String(name || '').toLowerCase());
-      r.onsuccess = function(e) { res(e.target.result ? e.target.result.data : null); };
-      r.onerror = function(e) { rej(e.target.error); };
+function _idbGet(name,uid) {
+  var key=_photoStoreKey(name,uid);
+  return _idbOpen().then(function(db){
+    return new Promise(function(res,rej){
+      var tx=db.transaction('photos','readonly');
+      var r=tx.objectStore('photos').get(key);
+      r.onsuccess=function(e){res(r.result ? r.result.data : null);};
+      r.onerror=function(e){rej(e.target.error);};
     });
+  });
+}
+function _idbDelete(name,uid) {
+  var key=_photoStoreKey(name,uid);
+  return _idbOpen().then(function(db){
+    return new Promise(function(res,rej){
+      var tx=db.transaction('photos','readwrite');
+      tx.objectStore('photos').delete(key);
+      tx.oncomplete=function(){
+        delete _idbPhotoCache[key];
+        var i=_photoCacheOrder.indexOf(key); if(i>=0)_photoCacheOrder.splice(i,1);
+        res();
+      };
+      tx.onerror=function(e){rej(e.target.error);};
+    });
+  });
+}
+function _idbDeleteAllForUid(uid) {
+  var u=String(uid||_photoUid())+'|';
+  return _idbGetAll().then(function(entries){
+    return Promise.all(entries.filter(function(e){return String(e.name||'').indexOf(u)===0;})
+      .map(function(e){return _idbDelete(String(e.name).slice(u.length),uid);}));
   });
 }
 
 function _loadIDBCache() {
   if (typeof indexedDB === 'undefined') return;
-  _idbGetAll().then(function(entries) {
+  var uid = _photoUid();
+  _idbMigrateLegacyToUid(uid).then(function(){
+    return _idbGetAll();
+  }).then(function(entries) {
     // Don't pin every photo in RAM — keep only the newest few resident; the rest
     // stay in IndexedDB and are pulled back on demand by _photoLazyLoad.
     entries.slice(-Math.min(_photoCacheMax, 10)).forEach(function(e) { _photoCacheSet(e.name, e.data); });
@@ -8786,7 +8937,7 @@ function _stripCopy(obj) {
     for (var k in obj) {
       var v = obj[k];
       if (k === 'photo' && typeof v === 'string' && v.indexOf('data:') === 0) {
-        var cacheKey = String(obj.name || '').toLowerCase();
+        var cacheKey = _photoCacheKey(String(obj.name || ''));
         if (_photoCacheGet(cacheKey) !== v) {
           _photoCacheSet(cacheKey, v);
           _idbPut(String(obj.name || ''), v).catch(function() {});
@@ -8800,9 +8951,9 @@ function _stripCopy(obj) {
   }
   return obj;
 }
-function _saveRunsLocal()    { return _safeSet('cs_runs',    JSON.stringify(_stripCopy(allRuns))); }
+function _saveRunsLocal()    { return _safeSet(_csScopedKey('cs_runs'), JSON.stringify(_stripCopy(allRuns))); }
 function _saveCurrentLocal() { return _safeSet(_csScopedKey('cs_current'), JSON.stringify(_stripCopy(currentRun))); }
-function _saveQPLocal()      { return _safeSet('cs_qp',      JSON.stringify(_stripCopy(quickPicks))); }
+function _saveQPLocal()      { return _safeSet(_csScopedKey('cs_qp'), JSON.stringify(_stripCopy(quickPicks))); }
 
 // Deep copy with 'photo:' refs resolved back to their base64 from the IDB cache —
 // used by exports so backups contain the actual image data.
@@ -9353,7 +9504,7 @@ window.saveEditCar = function(originalName) {
 // ─────────────────────────────────────────────
 //  CAR SEARCH (built-in, no redirect)
 // ── COMPACT MODE ──
-let compactMode = localStorage.getItem('cs_compact') === 'on';
+let compactMode = _csEarlyGet('cs_compact', 'off') === 'on';
 function applyCompactMode() {
   document.body.classList.toggle('compact-mode', compactMode);
   const btn = document.getElementById('compactToggle');
@@ -9361,7 +9512,7 @@ function applyCompactMode() {
 }
 function toggleCompactMode() {
   compactMode = !compactMode;
-  localStorage.setItem('cs_compact', compactMode ? 'on' : 'off');
+  localStorage.setItem(_csScopedKey('cs_compact'), compactMode ? 'on' : 'off');
   applyCompactMode();
   showToast(compactMode ? 'Compact mode on' : 'Compact mode off');
   _bumpVer('settings');
@@ -9372,7 +9523,7 @@ applyCompactMode();
 // ── SORT PREFERENCE ──
 function setSortPref(mode) {
   sortMode = mode;
-  localStorage.setItem('cs_sort', mode);
+  localStorage.setItem(_csScopedKey('cs_sort'), mode);
   document.querySelectorAll('.sort-pref-btn').forEach(b => b.classList.remove('active'));
   const btn = document.getElementById('spb-' + mode);
   if (btn) btn.classList.add('active');
@@ -9388,14 +9539,28 @@ function initSortPrefBtns() {
 }
 
 // ── CLEAR ALL DATA ──
-function clearAllData() {
-  if (!confirm('Delete ALL local runs, garage, and settings? This cannot be undone.')) return;
-  if (!confirm('Are you sure? Everything will be wiped locally.')) return;
-  const keys = Object.keys(localStorage).filter(k => k.startsWith('cs_'));
-  keys.forEach(k => localStorage.removeItem(k));
-  allRuns = []; currentRun = []; quickPicks = []; bestFromLB = 0;
-  renderGarage(); renderHistory(); renderSpot(); renderQPTrigger();
-  showToast('All local data cleared.');
+async function clearAllData() {
+  if (!confirm('Delete ALL CarSpotter data for this account? This cannot be undone.')) return;
+  if (!confirm('This clears this account\'s local data and synced cloud data. Continue?')) return;
+  try {
+    if (currentUser && db) await db.collection('users').doc(currentUser.uid).delete().catch(function(){});
+    if (currentUser && typeof _idbDeleteAllForUid === 'function') await _idbDeleteAllForUid(currentUser.uid).catch(function(){});
+    _ACCOUNT_LOCAL_KEYS.forEach(function(k){ try { localStorage.removeItem(_csScopedKey(k)); } catch(e){} });
+    allRuns=[]; currentRun=[]; quickPicks=[]; bestFromLB=0;
+    favoriteNames=new Set(); aliases={}; _deletedRuns=[]; _deletedQP=[]; _removedFavs=[]; _fieldVer={};
+    _dirty=false; _lastAppliedLamport=0; _lastLocalSeq='';
+    if (typeof _xpTotal !== 'undefined') _xpTotal=0;
+    if (typeof _progress !== 'undefined' && typeof _defaultProgress === 'function') _progress=_defaultProgress();
+    if (typeof _prevAchievements !== 'undefined') _prevAchievements=[];
+    try { _idbPhotoCache={}; _photoCacheOrder=[]; _photoLoading={}; _photoMissing={}; } catch(e){}
+    renderGarage(); renderHistory(); renderSpot(); renderQPTrigger();
+    if (typeof renderAchievements === 'function') renderAchievements();
+    if (typeof renderTrips === 'function') renderTrips();
+    showToast('All account data cleared.');
+  } catch(e) {
+    _markDirty(true);
+    showToast('Could not fully clear account data: ' + (e.message || e));
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -9575,7 +9740,7 @@ window.fillFromSearch = function(name, value, color, type) {
 
 // Seed existing achievements silently so returning users don't get toasted on first load
 (function seedAchievements() {
-  if (!localStorage.getItem('cs_ach')) {
+  if (!localStorage.getItem(_csScopedKey('cs_ach'))) {
     const earned = getUnlockedAchievements();
     localStorage.setItem('cs_ach', JSON.stringify(earned));
     _prevAchievements = earned;
@@ -10044,13 +10209,13 @@ function _defaultProgress() {
 }
 var _progress = (function(){
   try {
-    var p = JSON.parse(localStorage.getItem('cs_progress') || 'null');
+    var p = _csReadJSON('cs_progress', null);
     if (!p || p.v !== _progressV) return _defaultProgress();
     return Object.assign(_defaultProgress(), p);
   } catch(e){ return _defaultProgress(); }
 })();
 function saveProgress() {
-  try { localStorage.setItem('cs_progress', JSON.stringify(_progress)); } catch(e){}
+  try { localStorage.setItem(_csScopedKey('cs_progress'), JSON.stringify(_progress)); } catch(e){}
   if (!_applyingCloud) { _bumpVer('progression'); saveToCloud(); }
 }
 function getProgression() { return _progress; }
@@ -11316,7 +11481,7 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
 
 (function(){
   _prevAchievements = (_prevAchievements || []).filter(id => ACHIEVEMENTS.some(a => a.id === id));
-  localStorage.setItem('cs_ach', JSON.stringify(_prevAchievements));
+  localStorage.setItem(_csScopedKey('cs_ach'), JSON.stringify(_prevAchievements));
 
   function persistPendingLocation(){ if (currentSpotLocation) localStorage.setItem('cs_pending_loc', JSON.stringify(currentSpotLocation)); else localStorage.removeItem('cs_pending_loc'); }
   function renderPendingLocation(){
