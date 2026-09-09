@@ -9,6 +9,7 @@
 <meta content="CarSpotter" name="apple-mobile-web-app-title"/>
 <meta content="#0a0a0a" name="theme-color"/>
 <title>CarSpotter</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0a0a'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-size='36'%3E%F0%9F%9A%97%3C/text%3E%3C/svg%3E" type="image/svg+xml">
 <script>
 // Decide install-banner visibility BEFORE first paint so showing it causes no layout shift.
 (function(){
@@ -3928,10 +3929,13 @@ function _markDirty(v) {
 // Also unlocks WebAudio on the first gesture: mobile browsers hold the AudioContext
 // suspended until a real user interaction, which is what makes sounds silently drop.
 var _userInteracted = false;
-['pointerdown','keydown','touchstart','pointerup'].forEach(function(t){
+// Browsers only allow AudioContext.resume() in the call stack of a real user
+// gesture. Do not call this from auth, initialization, or a timer.
+['pointerup','click','keydown','touchstart'].forEach(function(t){
   document.addEventListener(t, function(){ _userInteracted = true; unlockAudio(); }, { passive: true });
 });
 function unlockAudio() {
+  if (!_userInteracted) return;
   try {
     var c = getAudioCtx();
     if (c && typeof c.resume === 'function' && c.state === 'suspended') c.resume();
@@ -4300,6 +4304,10 @@ function _prepareLocalCacheForUser(user) {
     _dirty = false;
     _lastAppliedLamport = 0;
     _lastLocalSeq = '';
+    _syncedRunVersions = {};
+    _syncedRunDeletes = {};
+    _runsCursor = null;
+    _runsHasMore = true;
     if (typeof _xpTotal !== 'undefined') _xpTotal = 0;
   }
   _activeLocalUid = uid;
@@ -4476,14 +4484,12 @@ function _coreEqual(a, b) {
     var ka = JSON.parse(JSON.stringify(a));
     var kb = JSON.parse(JSON.stringify(b));
     var cur = function(o){ return JSON.stringify(_normArr((o.currentRun && o.currentRun.cars) || [], function(c){ return c.name; })); };
-    var runs = function(o){ return JSON.stringify(_normArr((o.allRuns && o.allRuns.items) || [], function(r){ return r.id; })); };
     var qp   = function(o){ return JSON.stringify(_normArr((o.quickPicks && o.quickPicks.items) || [], function(c){ return c.name; })); };
     var tomR = function(o){ return JSON.stringify(_normArr((o.deletedRuns && o.deletedRuns.ids) || [], function(x){ return String(x); })); };
     var tomQ = function(o){ return JSON.stringify(_normArr((o.deletedQP && o.deletedQP.ids) || [], function(x){ return String(x); })); };
     var fav  = function(o){ return JSON.stringify(_normArr((o.favorites && o.favorites.names) || [], function(x){ return String(x); })); };
     var ach  = function(o){ return JSON.stringify(_normArr((o.achievements && o.achievements.ids) || [], function(x){ return String(x); })); };
     if (cur(ka) !== cur(kb)) return false;
-    if (runs(ka) !== runs(kb)) return false;
     if (qp(ka) !== qp(kb)) return false;
     if (tomR(ka) !== tomR(kb)) return false;
     if (tomQ(ka) !== tomQ(kb)) return false;
@@ -4516,9 +4522,6 @@ function _replaceLocalFromCloud(c) {
   if (c.currentRun && Array.isArray(c.currentRun.cars)) currentRun = c.currentRun.cars.slice();
   else if (Array.isArray(c.currentRun)) currentRun = c.currentRun.slice();
   else currentRun = [];
-  if (c.allRuns && Array.isArray(c.allRuns.items)) allRuns = c.allRuns.items.slice();
-  else if (Array.isArray(c.allRuns)) allRuns = c.allRuns.slice();
-  else allRuns = [];
   if (c.quickPicks && Array.isArray(c.quickPicks.items)) quickPicks = c.quickPicks.items.slice();
   else if (Array.isArray(c.quickPicks)) quickPicks = c.quickPicks.slice();
   else quickPicks = [];
@@ -4534,7 +4537,7 @@ function _replaceLocalFromCloud(c) {
   if (c.settings && c.settings.map) _applySettings(c.settings.map);
   _prevAchievements = (c.achievements && Array.isArray(c.achievements.ids)) ? c.achievements.ids.slice() : [];
   _fieldVer = {
-    currentRun: c.currentRun?.ver || 0, runs: c.allRuns?.ver || 0, qp: c.quickPicks?.ver || 0,
+    currentRun: c.currentRun?.ver || 0, runs: 0, qp: c.quickPicks?.ver || 0,
     deletedRuns: c.deletedRuns?.ver || 0, deletedQP: c.deletedQP?.ver || 0,
     favorites: c.favorites?.ver || 0, aliases: c.aliases?.ver || 0, notes: c.notes?.ver || 0,
     discoveries: c.discoveries?.ver || 0, settings: c.settings?.ver || 0, achievements: c.achievements?.ver || 0,
@@ -4545,45 +4548,65 @@ function _replaceLocalFromCloud(c) {
   _saveAllLocal();
 }
 
+// Root account metadata stays small. Runs are individual documents at
+// users/{uid}/runs/{runId}; this prevents the 1 MiB user-document ceiling.
+const CLOUD_RUNS_PAGE_SIZE = 30;
+var _runsCursor = null, _runsHasMore = true, _runsLoading = false;
+var _syncedRunVersions = {};
+var _syncedRunDeletes = {};
+function _sortRunsNewestFirst() { allRuns.sort(function(a,b){ return Number(b && b.id || 0) - Number(a && a.id || 0); }); }
+function _runForCloud(run) { var copy = _diagAndSanitize('run(' + run.id + ')', { run: run }, 'write').run; copy.id = run.id; return copy; }
+function _writeRunDocs(runs, deletes) {
+  var ops = [];
+  (runs || []).forEach(function(run){ ops.push({ type:'set', run:run }); });
+  (deletes || []).forEach(function(id){ ops.push({ type:'delete', id:id }); });
+  var chain = Promise.resolve();
+  while (ops.length) (function(chunk) { chain = chain.then(function(){
+    var batch = db.batch();
+    chunk.forEach(function(op){ var ref = db.collection('users').doc(currentUser.uid).collection('runs').doc(String(op.type === 'set' ? op.run.id : op.id)); if (op.type === 'set') batch.set(ref, _runForCloud(op.run)); else batch.delete(ref); });
+    return batch.commit();
+  }); })(ops.splice(0, 400));
+  return chain;
+}
+function _syncRunsSubcollection() {
+  var deletes = _deletedRuns.filter(function(id){ return !_syncedRunDeletes[String(id)]; });
+  var changed = allRuns.filter(function(run){ return _syncedRunVersions[String(run.id)] !== (run._v || 0); });
+  if (!changed.length && !deletes.length) return Promise.resolve();
+  return _writeRunDocs(changed, deletes).then(function(){ changed.forEach(function(run){ _syncedRunVersions[String(run.id)] = run._v || 0; }); deletes.forEach(function(id){ delete _syncedRunVersions[String(id)]; _syncedRunDeletes[String(id)] = true; }); });
+}
+async function loadRunsPage(reset) {
+  if (!currentUser || _runsLoading || (!reset && !_runsHasMore)) return;
+  _runsLoading = true;
+  try {
+    if (reset) { _runsCursor = null; _runsHasMore = true; if (!_dirty) allRuns = []; }
+    var q = db.collection('users').doc(currentUser.uid).collection('runs').orderBy('id', 'desc').limit(CLOUD_RUNS_PAGE_SIZE);
+    if (_runsCursor) q = q.startAfter(_runsCursor);
+    var snap = await q.get();
+    _runsCursor = snap.docs.length ? snap.docs[snap.docs.length - 1] : _runsCursor;
+    _runsHasMore = snap.docs.length === CLOUD_RUNS_PAGE_SIZE;
+    var incoming = snap.docs.map(function(doc){ var run = doc.data(); run.id = run.id == null ? doc.id : run.id; _syncedRunVersions[String(run.id)] = run._v || 0; return run; });
+    _mergeRuns(incoming); _purgeTombstoned(); _sortRunsNewestFirst(); _saveRunsLocal();
+  } finally { _runsLoading = false; }
+}
 async function loadFromCloud() {
   if (!currentUser) return;
   setSyncDot('syncing');
   try {
-    const snap = await db.collection('users').doc(currentUser.uid).get();
-    if (snap.exists) {
-      const d = snap.data();
-      _diagRead('loadFromCloud(get)', d);
-      // A clean local cache is a mirror, not a second account. On initial account
-      // hydration, replace it from Firestore. If there are unsynced local changes,
-      // keep the existing merge/rebase behavior so offline work is not lost.
-      logSync('loadFromCloud', 'apply lamport', d.lamport || 'legacy', 'dirty=' + _dirty);
-
-if (!_dirty) {
-  _replaceLocalFromCloud(d);
-} else {
-  _applyCloud(d);
-}
-
-// Keep runs newest → oldest.
-// History displays the first batch of allRuns.
-if (Array.isArray(allRuns)) {
-  allRuns.sort(function(a, b) {
-    return Number(b?.id || 0) - Number(a?.id || 0);
-  });
-}
-
-_saveAllLocal();
-
-// Always converge back — the transactional rebase applies any newer cloud state first.
-_lastSave = Date.now();
-_txWrite({ cause: 'loadFromCloud' });
-    }
-    if (!_lastSave) setSyncDot('ok');
-  } catch(e) { setSyncDot(''); console.error(e); }
-  renderQPTrigger(); renderSpot(); renderGarage(); renderHistory();
-  fetchRefImagesForAllCars();
-  if (currentRun.length > 0)
-    setTimeout(() => notify('🚗 Run resumed — ' + currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '') + ' restored!', { priority:'major', record: true, key:'Run resumed', icon:'🚗' }), 700);
+    var snap = await db.collection('users').doc(currentUser.uid).get();
+    var d = snap.exists ? snap.data() : {};
+    _diagRead('loadFromCloud(metadata)', d);
+    // One-time migration for pre-subcollection accounts. The follow-up root write
+    // omits allRuns, permanently shrinking the legacy document.
+    var legacyRuns = d.allRuns && Array.isArray(d.allRuns.items) ? d.allRuns.items : (Array.isArray(d.allRuns) ? d.allRuns : []);
+    if (legacyRuns.length) await _writeRunDocs(legacyRuns, []);
+    if (!_dirty) _replaceLocalFromCloud(d); else _applyCloud(d);
+    await loadRunsPage(true);
+    _saveAllLocal(); _lastSave = Date.now();
+    _txWrite({ cause: legacyRuns.length ? 'migrate-runs' : 'loadFromCloud' });
+    setSyncDot('ok');
+  } catch(e) { setSyncDot(''); console.error(e); throw e; }
+  renderQPTrigger(); renderSpot(); renderGarage(); renderHistory(); fetchRefImagesForAllCars();
+  if (currentRun.length > 0) setTimeout(() => notify('🚗 Run resumed — ' + currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '') + ' restored!', { priority:'major', record:true, key:'Run resumed', icon:'🚗' }), 700);
 }
 
 function subscribeCloud() {
@@ -4632,12 +4655,22 @@ function _stripDeepPhotos(obj) {
   if (Array.isArray(obj)) {
     obj.forEach(function(item) { _stripDeepPhotos(item); });
   } else if (obj && typeof obj === 'object') {
-    if (obj.photo && typeof obj.photo === 'string' && obj.photo.indexOf('data:') === 0) {
-      _ensurePhotoIndexed(obj);
-      obj.photo = 'photo:' + obj.name.toLowerCase();
+    // Never let image bytes or remote thumbnail URLs enter Firestore. A photo:key
+    // is the only portable reference; actual bytes remain in IndexedDB (or may be
+    // resolved by Firebase Storage in a future storage-backed implementation).
+    if (obj.photo && typeof obj.photo === 'string' && obj.photo.indexOf('photo:') !== 0) {
+      if (obj.photo.indexOf('data:') === 0) _ensurePhotoIndexed(obj);
+      obj.photo = 'photo:' + String(obj.name || 'unknown').toLowerCase();
     }
     for (var k in obj) {
-      if (typeof obj[k] === 'object') _stripDeepPhotos(obj[k]);
+      var value = obj[k];
+      if (typeof value === 'string' && k !== 'photo' &&
+          (value.indexOf('data:image/') === 0 ||
+           (/^https?:\/\//i.test(value) && /(?:wikipedia|wikimedia|upload\.wiki)/i.test(value) && value.length > 180) ||
+           (value.length > 500 && /^[A-Za-z0-9+/=]+$/.test(value)))) {
+        // Thumbnail/base64 fields have no place in a Firestore record.
+        delete obj[k];
+      } else if (value && typeof value === 'object') _stripDeepPhotos(value);
     }
   }
   return obj;
@@ -4737,7 +4770,6 @@ var _sanitizedSet = typeof WeakSet !== 'undefined' ? new WeakSet() : null;
 function _buildCloudPayload() {
   var payload = {
     currentRun:   { ver: _fieldVer.currentRun || 0, cars: currentRun },
-    allRuns:      { ver: _fieldVer.runs || 0, items: allRuns },
     deletedRuns:  { ver: _fieldVer.deletedRuns || 0, ids: _deletedRuns },
     quickPicks:   { ver: _fieldVer.qp || 0, items: quickPicks || [] },
     deletedQP:    { ver: _fieldVer.deletedQP || 0, ids: _deletedQP },
@@ -4861,8 +4893,7 @@ function _applyCloud(c) {
       currentRun = [];
       changed = true;
     }
-    // allRuns — additive union, higher per-run _v wins, minus tombstones
-    if (_mergeRuns(c.allRuns && c.allRuns.items)) changed = true;
+    // Run documents are synchronized separately from users/{uid}.
     if (c.deletedRuns && Array.isArray(c.deletedRuns.ids)) {
       if (_mergeTombstones(_deletedRuns, c.deletedRuns.ids)) changed = true;
       _fieldVer.deletedRuns = Math.max(_fieldVer.deletedRuns || 0, c.deletedRuns.ver || 0);
@@ -4958,6 +4989,11 @@ function _txWriteCore(opts) {
         var san = _diagAndSanitize('txWrite(' + cause + ')#' + attempt, _buildCloudPayload(), 'write');
         tx.set(docRef, _stampCloud(san));
       });
+    }).then(function() {
+      // Do not mark the sync complete until the changed run documents have also
+      // committed. Metadata and run batches are deliberately separate so neither
+      // one can grow with account history.
+      return _syncRunsSubcollection();
     }).then(function() {
       logSync('txWrite', cause, 'ok (attempt ' + attempt + ')');
       _markDirty(false);
@@ -5165,8 +5201,7 @@ function getAudioCtx() {
     _masterComp.release.value = 0.25;
     _masterOut.connect(_masterComp);
     _masterComp.connect(_audioCtx.destination);
-    // Fire the unlock attempt immediately in case we're already running.
-    unlockAudio();
+    // Resuming is deliberately handled only by the document gesture listeners.
   }
   return _audioCtx;
 }
@@ -6960,7 +6995,7 @@ function renderHistory() {
   if (!allRuns.length) { el.innerHTML='<div class="no-history"><div style="font-size:2rem;margin-bottom:10px;opacity:0.5">📋</div><strong style="color:var(--text2);font-size:0.85rem;display:block;margin-bottom:4px">No runs yet</strong>Complete a run or spot a solo car and it will appear here</div>'; return; }
 
   const pageRuns = allRuns.slice(0, (histPage + 1) * HIST_PAGE_SIZE);
-  const hasMore  = allRuns.length > pageRuns.length;
+  const hasMore  = allRuns.length > pageRuns.length || _runsHasMore;
 
   let runCounter = allRuns.filter(r=>!r.spotted).length;
 
@@ -7016,8 +7051,14 @@ function renderHistory() {
   if (hasMore) {
     const btn = document.createElement('button');
     btn.className = 'load-more-btn';
-    btn.textContent = `Load more (${allRuns.length - pageRuns.length} remaining)`;
-    btn.onclick = () => { histPage++; renderHistory(); };
+    btn.textContent = _runsHasMore ? 'Load more history' : `Load more (${allRuns.length - pageRuns.length} remaining)`;
+    btn.onclick = async () => {
+      // Fetch only the next Firestore page; prior versions merely revealed an
+      // already-downloaded allRuns array and still loaded the full collection.
+      if (_runsHasMore) await loadRunsPage(false);
+      histPage++;
+      renderHistory();
+    };
     el.appendChild(btn);
   }
 }
