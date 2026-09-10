@@ -3040,6 +3040,17 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 @media(max-width:600px){.cs-re-grid{grid-template-columns:1fr 1fr}.cs-re-grid input:first-child{grid-column:1/-1}.cs-run-edit-card{padding:14px}.cs-run-edit-overlay{padding:10px}}
 </style>
 <style id="cs-garage-upgrade-css">
+/* Collapsible wrapper for the dashboard banner + featured-car hero — folded
+   away by default so the car list itself doesn't require scrolling past them. */
+details.cs-collapse{margin:8px 0;border:1px solid var(--glass-border);border-radius:var(--r-lg);overflow:hidden;background:var(--glass-card);}
+details.cs-collapse > summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;font-size:.62rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);}
+details.cs-collapse > summary::-webkit-details-marker{display:none;}
+details.cs-collapse > summary::marker{content:'';}
+.cs-collapse-summary{flex:1;font-weight:600;letter-spacing:0;text-transform:none;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right;}
+.cs-collapse-chev{display:inline-block;transition:transform .2s var(--ease);color:var(--muted);}
+details.cs-collapse[open] > summary .cs-collapse-chev{transform:rotate(90deg);}
+details.cs-collapse[open] > summary{border-bottom:1px solid var(--glass-border);}
+details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margin:0;border:none;border-radius:0;box-shadow:none;}
 .cs-garage-dashboard{margin:10px 0 16px;padding:16px;border:1px solid var(--glass-border);border-radius:var(--r-lg);background:linear-gradient(135deg,rgba(232,184,75,.08),rgba(255,255,255,.025));box-shadow:var(--shadow-sm);}
 .cs-gd-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:12px;}
 .cs-gd-kicker{font-size:.52rem;letter-spacing:2px;color:var(--accent);font-weight:800;text-transform:uppercase;}
@@ -3394,8 +3405,14 @@ body.theme-light .qp-dropdown{background:#f9f9f5;}
 <button class="garage-refresh-btn" id="garageRefreshBtn" onclick="refreshGarage()" title="Refresh your collection">&orarr; REFRESH</button>
 </div>
 </div>
+<details class="cs-collapse" id="gdDetails">
+<summary><span>Collection Progress</span><span class="cs-collapse-summary" id="gdSummaryText"></span><span class="cs-collapse-chev">&rsaquo;</span></summary>
 <div id="garageDashboard"></div>
-<div id="featuredSpot" style="display:none"></div>
+</details>
+<details class="cs-collapse" id="fsDetails" style="display:none">
+<summary><span>&#9733; Featured</span><span class="cs-collapse-summary" id="fsSummaryText"></span><span class="cs-collapse-chev">&rsaquo;</span></summary>
+<div id="featuredSpot"></div>
+</details>
 <div id="journeySection" style="display:none"></div>
 <div id="discSection" style="display:none">
 <div class="sec-row" style="margin:4px 0 8px;">
@@ -4642,7 +4659,16 @@ async function loadRunsPage(reset) {
   if (!currentUser || _runsLoading || (!reset && !_runsHasMore)) return;
   _runsLoading = true;
   try {
-    if (reset) { _runsCursor = null; _runsHasMore = true; if (!_dirty) allRuns = []; }
+    if (reset) {
+      _runsCursor = null;
+      _runsHasMore = true;
+      // BUGFIX: this used to wipe allRuns to [] on every normal reload (not just
+      // account switches), so only the newest CLOUD_RUNS_PAGE_SIZE runs survived
+      // the _mergeRuns() below — silently deleting older runs/cars from local
+      // storage on every app open. Account switches already clear allRuns via
+      // _prepareLocalCacheForUser(); _mergeRuns() below is additive/version-aware,
+      // so there's no need to clear anything here.
+    }
     var q = db.collection('users').doc(currentUser.uid).collection('runs').orderBy('id', 'desc').limit(CLOUD_RUNS_PAGE_SIZE);
     if (_runsCursor) q = q.startAfter(_runsCursor);
     var snap = await q.get();
@@ -6737,8 +6763,10 @@ function featuredPool(cars) {
 }
 function renderFeatured(cars) {
   var spot = document.getElementById('featuredSpot');
+  var fsWrap = document.getElementById('fsDetails');
   if (!spot) return;
-  if (!cars.length) { spot.style.display = 'none'; return; }
+  if (!cars.length) { spot.style.display = 'none'; if (fsWrap) fsWrap.style.display = 'none'; return; }
+  if (fsWrap) fsWrap.style.display = '';
   var pool = featuredPool(cars);
   if (_featuredIdx >= pool.length) _featuredIdx = 0;
   var car = pool[_featuredIdx];
@@ -6751,6 +6779,8 @@ function renderFeatured(cars) {
   var badges = '<div class="fh-badge">' + rarity.label + '</div>';
   if (car.spotCount > 1) badges += '<div class="fh-badge">Seen \u00D7' + car.spotCount + '</div>';
   if (isFavorite(car.name)) badges += '<div class="fh-badge">\u2605 Favorite</div>';
+  var fsSum = document.getElementById('fsSummaryText');
+  if (fsSum) fsSum.textContent = car.name;
   spot.style.display = 'block';
   spot.innerHTML = '<div class="featured-hero" data-tier="' + tier + '" onclick="openFeatured(decodeURIComponent(\'' + encodeURIComponent(JSON.stringify({ name: car.name, value: car.value, type: car.type, color: car.color, photo: car.photo, location: car.location, runDate: car.runDate, spotCount: car.spotCount })).replace(/'/g, '%27') + '\'))"><div class="fh-media">' + media + '<div class="fh-floor"></div></div><div class="fh-info"><div class="fh-lbl">\u2605 Featured \u00B7 ' + meta.label + '</div><div class="fh-name">' + escapeHtml(car.name) + '</div><div class="fh-meta">' + fmtFull(car.value) + ' \u00B7 ' + escapeHtml(car.runDate || '') + '</div><div class="fh-badges">' + badges + '</div></div><button class="fh-cycle" onclick="event.stopPropagation();cycleFeatured();return false;" title="Cycle featured">\u21BB</button></div>';
 }
@@ -6829,8 +6859,10 @@ function buildClusterPopup(cluster) {
 function renderGarageDashboard(cars){
   var el=document.getElementById('garageDashboard');
   if(!el) return;
+  var gdSum = document.getElementById('gdSummaryText');
   if(!cars.length){
   el.innerHTML='<div class="cs-garage-dashboard"><div class="cs-gd-top"><div><div class="cs-gd-kicker">BUILD YOUR COLLECTION</div><div class="cs-gd-title">Your garage starts with one.</div><div class="cs-gd-sub">Every spot becomes part of your collection.</div></div><div class="cs-gd-count"><b>0</b><span>cars collected</span></div></div><div class="cs-gd-track"><div class="cs-gd-fill" style="width:0%"></div></div><div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>1 car</strong></div><div class="cs-gd-actions"><button class="cs-gd-action" onclick="goTo(\'spot\')">＋ SPOT A CAR</button></div></div></div>';
+    if (gdSum) gdSum.textContent = 'No cars yet';
     return;
   }
   var milestones=[5,10,25,50,100,250,500];
@@ -6849,6 +6881,7 @@ function renderGarageDashboard(cars){
     '<div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>'+next+' cars</strong> · '+nextLabel+'</div><div class="cs-gd-actions"><button class="cs-gd-action" onclick="setGarageSortHeader(\'favorites\',document.querySelector(\'.gs-pill[data-sort=&quot;favorites&quot;]\'))">★ FAVORITES</button><button class="cs-gd-action" onclick="setGarageFilter(\'legend\',document.querySelector(\'.gf-pill[data-filter=&quot;legend&quot;]\'))">👑 LEGENDS</button></div></div>'+
     '<div class="cs-gd-chips"><div class="cs-gd-chip"><b>'+makes+'</b> makes</div><div class="cs-gd-chip"><b>'+photos+'</b> photographed</div><div class="cs-gd-chip"><b>'+favorites+'</b> favorites</div><div class="cs-gd-chip"><b>'+escapeHtml(best.name)+'</b> crown jewel</div></div>'+
     '</div>';
+  if (gdSum) gdSum.textContent = cars.length+' cars \u00B7 '+nextLabel+' to '+next;
 }
 
 function renderGarage() {
@@ -12142,6 +12175,19 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
 /* CarSpotter follow-up: editable saved runs, durable photo restore, Garage-first UX. */
 (function(){
   'use strict';
+
+  /* ── GARAGE DECLUTTER: collapsible dashboard banner + featured hero ──
+     Folded away by default so the car list is visible without scrolling
+     past them; each one remembers whether the user expanded it. */
+  ['gdDetails','fsDetails'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (!el) return;
+    var key = 'cs_open_' + id;
+    try { el.open = localStorage.getItem(key) === '1'; } catch(e) {}
+    el.addEventListener('toggle', function(){
+      try { localStorage.setItem(key, el.open ? '1' : '0'); } catch(e) {}
+    });
+  });
 
   /* ── SAVED RUN EDITOR ─────────────────────────────────────────── */
   function openRunEditor(runId){
