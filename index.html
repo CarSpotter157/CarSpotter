@@ -5,45 +5,18 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
 <meta content="yes" name="apple-mobile-web-app-capable"/>
-  <meta content="yes" name="mobile-web-app-capable"/>
 <meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="CarSpotter" name="apple-mobile-web-app-title"/>
 <meta content="#0a0a0a" name="theme-color"/>
 <title>CarSpotter</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0a0a'/%3E%3Ctext x='32' y='43' text-anchor='middle' font-size='36'%3E%F0%9F%9A%97%3C/text%3E%3C/svg%3E" type="image/svg+xml">
 <script>
-/*
- * ACCOUNT BOUNDARY — must exist before first-paint state is read.
- * Firebase auth may not have resolved yet, so a previous account's unscoped
- * local data must never be treated as the current signed-in account.
- */
-(function(){
-  function uid(){
-    try { return String(localStorage.getItem('cs_active_uid') || ''); }
-    catch(e){ return ''; }
-  }
-  function key(k){
-    var u = uid();
-    return u ? u + '_' + k : k;
-  }
-  function readJSON(k, fallback){
-    try {
-      var raw = localStorage.getItem(key(k));
-      return raw === null ? fallback : JSON.parse(raw);
-    } catch(e){ return fallback; }
-  }
-  window._csEarlyUid = uid;
-  window._csEarlyKey = key;
-  window._csEarlyGetJSON = readJSON;
-})();
-</script>
-<script>
 // Decide install-banner visibility BEFORE first paint so showing it causes no layout shift.
 (function(){
   try {
     var dismissed = localStorage.getItem('cs_install_dismissed');
     var hasData;
-    try { hasData = (_csEarlyGetJSON('cs_runs', [])).length > 0 || (_csEarlyGetJSON('cs_current', [])).length > 0; } catch(e) { hasData = false; }
+    try { hasData = JSON.parse(localStorage.getItem('cs_runs') || '[]').length > 0 || JSON.parse(localStorage.getItem('cs_current') || '[]').length > 0; } catch(e) { hasData = false; }
     if (dismissed) return;
     if (!hasData) return;
     var standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || (window.navigator && window.navigator.standalone);
@@ -55,13 +28,13 @@
 // revealing them at runtime causes no layout shift.
 (function(){
   try {
-    var qp = (_csEarlyGetJSON('cs_qp', []));
+    var qp = JSON.parse(localStorage.getItem('cs_qp') || '[]');
     if (qp.length) document.documentElement.classList.add('show-qp');
-    var favNames = new Set(_csEarlyGetJSON('cs_fav', []));
+    var favNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
     if (favNames.size) {
       var known = new Set();
-      ((_csEarlyGetJSON('cs_runs', []))).forEach(function(r){ (r.cars||[]).forEach(function(c){ known.add(String(c.name).toLowerCase()); }); });
-      ((_csEarlyGetJSON('cs_current', []))).forEach(function(c){ known.add(String(c.name).toLowerCase()); });
+      (JSON.parse(localStorage.getItem('cs_runs') || '[]')).forEach(function(r){ (r.cars||[]).forEach(function(c){ known.add(String(c.name).toLowerCase()); }); });
+      (JSON.parse(localStorage.getItem('cs_current') || '[]')).forEach(function(c){ known.add(String(c.name).toLowerCase()); });
       var any = false;
       favNames.forEach(function(n){ if (known.has(String(n).toLowerCase())) any = true; });
       if (any) document.documentElement.classList.add('show-favs');
@@ -3875,18 +3848,18 @@ function _safeJSON(raw, fallback) {
   try { var value = JSON.parse(raw); return value == null ? fallback : value; }
   catch (e) { return fallback; }
 }
-let soundEnabled = _csReadString('cs_sound', '') !== 'off';
-let aliases      = _safeJSON(_csReadString('cs_aliases', '{}') || '{}', {});
-let bestFromLB = parseInt(_csReadString('cs_best_lb', '0') || '0', 10) || 0;
-let favoriteNames = new Set(_safeJSON(_csReadString('cs_fav', '[]') || '[]', []));
-let currentSpotLocation = _safeJSON(_csReadString('cs_pending_loc', 'null') || 'null', null);
-let allRuns      = _safeJSON(_csReadString('cs_runs', '[]')      || '[]', []);
-let currentRun   = _safeJSON(_csReadString('cs_current', '[]')   || '[]', []);
-let quickPicks   = _safeJSON(_csReadString('cs_qp', '[]')        || '[]', []);
+let soundEnabled = localStorage.getItem('cs_sound') !== 'off';
+let aliases      = _safeJSON(localStorage.getItem('cs_aliases') || '{}', {});
+let bestFromLB = parseInt(localStorage.getItem('cs_best_lb') || '0');
+let favoriteNames = new Set(_safeJSON(localStorage.getItem('cs_fav') || '[]', []));
+let currentSpotLocation = _safeJSON(localStorage.getItem('cs_pending_loc') || 'null', null);
+let allRuns      = _safeJSON(localStorage.getItem('cs_runs')      || '[]', []);
+let currentRun   = _safeJSON(localStorage.getItem('cs_current')   || '[]', []);
+let quickPicks   = _safeJSON(localStorage.getItem('cs_qp')        || '[]', []);
 let sortMode     = 'desc';
 let currentUser  = null;
 let _lastSave    = 0;
-let _lastCloudTs = parseInt(_csReadString('cs_cloud_ts', '0') || '0', 10) || 0; // server-timestamp (ms) of the newest cloud doc we've applied or acknowledged
+let _lastCloudTs = parseInt(localStorage.getItem('cs_cloud_ts') || '0'); // server-timestamp (ms) of the newest cloud doc we've applied or acknowledged
 let _lastPushTs  = 0; // client-clock (ms) of the last successful currentRun push to cloud
 let syncUnsub    = null;
 let syncTimer    = null;
@@ -3940,16 +3913,16 @@ function _photoLazyLoad(key) {
 }
 
 // ── DETERMINISTIC SYNC STATE ────────────────────────────────────────
-var _lamport = parseInt(_csReadString('cs_lamport', '0') || '0', 10) || 0;                  // global logical clock (persisted, monotonic)
+var _lamport = parseInt(localStorage.getItem('cs_lamport') || '0');                  // global logical clock (persisted, monotonic)
 var _lastAppliedLamport = 0;   // lamport of the newest cloud doc we've applied for the CURRENT account (per-uid)
 function _loadLastAppliedLamport() {
-  _lastAppliedLamport = parseInt(_csReadString('cs_lamport_last', '0') || '0', 10) || 0;
+  _lastAppliedLamport = parseInt(localStorage.getItem('cs_lamport_last' + (currentUser ? '_' + currentUser.uid : '') ) || '0');
 }
-var _fieldVer = _csReadJSON('cs_fv', {}); // per-field Lamport versions
-var _deletedRuns = _csReadJSON('cs_del_runs', []); // tombstoned run ids
-var _deletedQP  = _csReadJSON('cs_del_qp', []);  // tombstoned quick-pick names (lowercase)
-var _removedFavs = _csReadJSON('cs_del_fav', []); // tombstoned favorite names
-var _dirty = _csReadString('cs_sync_dirty', '0') === '1';                           // durable "unsynced change" flag
+var _fieldVer = (function(){ try { var f = JSON.parse(localStorage.getItem('cs_fv') || 'null'); return (f && typeof f === 'object') ? f : {}; } catch(e){ return {}; } })(); // per-field Lamport versions
+var _deletedRuns = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_runs') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })(); // tombstoned run ids
+var _deletedQP  = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_qp') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();  // tombstoned quick-pick names (lowercase)
+var _removedFavs = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_fav') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })(); // tombstoned favorite names
+var _dirty = localStorage.getItem('cs_sync_dirty') === '1';                           // durable "unsynced change" flag
 var _applyingCloud = false;                                                           // guard: never echo-write while applying a cloud doc
 var _lastSyncErr = null;                                                              // {at,cause,code,message} of the most recent failed write
 var _lastSyncErrNotified = '';                                                        // dedupe key so each distinct failure notifies only once
@@ -3975,12 +3948,12 @@ function logSync() {
   try { console.log.apply(console, ['[sync]'].concat(Array.prototype.slice.call(arguments))); } catch(e) {}
 }
 function _bumpVer(key) { _lamport += 1; _fieldVer[key] = _lamport; _persistLamport(); _persistFieldVer(); return _lamport; }
-function _persistLamport() { try { localStorage.setItem(_csScopedKey('cs_lamport'), String(_lamport)); } catch(e){} }
-function _persistFieldVer() { try { localStorage.setItem(_csScopedKey('cs_fv'), JSON.stringify(_fieldVer)); } catch(e){} }
-function _persistDeleted() { try { localStorage.setItem(_csScopedKey('cs_del_runs'), JSON.stringify(_deletedRuns)); localStorage.setItem(_csScopedKey('cs_del_qp'), JSON.stringify(_deletedQP)); localStorage.setItem(_csScopedKey('cs_del_fav'), JSON.stringify(_removedFavs)); } catch(e){} }
+function _persistLamport() { try { localStorage.setItem('cs_lamport', String(_lamport)); } catch(e){} }
+function _persistFieldVer() { try { localStorage.setItem('cs_fv', JSON.stringify(_fieldVer)); } catch(e){} }
+function _persistDeleted() { try { localStorage.setItem('cs_del_runs', JSON.stringify(_deletedRuns)); localStorage.setItem('cs_del_qp', JSON.stringify(_deletedQP)); localStorage.setItem('cs_del_fav', JSON.stringify(_removedFavs)); } catch(e){} }
 function _markDirty(v) {
   _dirty = !!v;
-  try { localStorage.setItem(_csScopedKey('cs_sync_dirty'), _dirty ? '1' : '0'); } catch(e){}
+  try { localStorage.setItem('cs_sync_dirty', _dirty ? '1' : '0'); } catch(e){}
   logSync('dirty=' + _dirty);
 }
 
@@ -4142,7 +4115,7 @@ const ACHIEVEMENTS = [
   { id:'palindrome',       icon:'PP',name:'Mirror Mirror',  desc:'Spot a car worth a palindrome ($1,212,121)', xp:300, check:(c,r)=>detectPalindromicValue(c) },
   { id:'twin_spot',        icon:'TT',name:'Double Take',    desc:'Spot the exact same car twice in one run', xp:420, check:(c,r)=>detectTwinSpot(r) },
 ];
-let _prevAchievements = _csReadJSON('cs_ach', []);
+let _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
 
 //  MERGE HELPERS — prevent data loss when cloud & local diverge 
 function _mergeRunArrays(local, cloud) {
@@ -4229,13 +4202,13 @@ function _mergeAchievements(cloudIds) {
   var changed = false;
   var s = new Set(_prevAchievements || []);
   cloudIds.forEach(function(id) { if (id && !s.has(id)) { s.add(id); changed = true; } });
-  if (changed) { _prevAchievements = Array.from(s); try { localStorage.setItem(_csScopedKey('cs_ach'), JSON.stringify(_prevAchievements)); } catch(e){} }
+  if (changed) { _prevAchievements = Array.from(s); try { localStorage.setItem('cs_ach', JSON.stringify(_prevAchievements)); } catch(e){} }
   return changed;
 }
 function _settingsMap() {
   var m = { theme: activeTheme, carbon: carbonOn ? 'on' : 'off', sound: soundEnabled ? 'on' : 'off' };
   if (typeof compactMode !== 'undefined') m.compact = compactMode ? 'on' : 'off';
-  try { m.vibe = _csReadString('cs_vibe', 'on'); } catch(e){}
+  try { m.vibe = localStorage.getItem('cs_vibe') || 'on'; } catch(e){}
   if (sortMode) m.sort = sortMode;
   return m;
 }
@@ -4256,7 +4229,7 @@ function _applySettings(m) {
     compactMode = m.compact === 'on';
     if (typeof applyCompactMode === 'function') applyCompactMode();
   }
-  if (m.vibe != null) { try { localStorage.setItem(_csScopedKey('cs_vibe'), m.vibe); } catch(e){} }
+  if (m.vibe != null) { try { localStorage.setItem('cs_vibe', m.vibe); } catch(e){} }
   if (m.sort != null && m.sort !== sortMode) {
     sortMode = m.sort;
     if (typeof initSortPrefBtns === 'function') initSortPrefBtns();
@@ -4305,7 +4278,7 @@ async function signOutUser() {
 // another account" failure mode this guard prevents.
 
 function _csAccountUid() {
-  try { return String(localStorage.getItem('cs_active_uid') || ''); }
+  try { return String(localStorage.getItem('cs_active_uid') || localStorage.getItem('cs_uid') || ''); }
   catch(e) { return ''; }
 }
 function _csScopedKey(key) {
@@ -4317,9 +4290,6 @@ function _csReadJSON(key, fallback) {
     var scoped = _csScopedKey(key);
     var rawScoped = localStorage.getItem(scoped);
     if (rawScoped !== null) return JSON.parse(rawScoped);
-    // IMPORTANT: once an account exists, never fall back to the unscoped key.
-    // Unscoped keys are legacy/guest storage and can belong to another account.
-    if (_csAccountUid()) return fallback;
     var raw = localStorage.getItem(key);
     return raw !== null ? JSON.parse(raw) : fallback;
   } catch(e) { return fallback; }
@@ -4329,7 +4299,6 @@ function _csReadString(key, fallback) {
     var scoped = _csScopedKey(key);
     var rawScoped = localStorage.getItem(scoped);
     if (rawScoped !== null) return rawScoped;
-    if (_csAccountUid()) return fallback;
     var raw = localStorage.getItem(key);
     return raw !== null ? raw : fallback;
   } catch(e) { return fallback; }
@@ -4338,102 +4307,51 @@ function _csReadString(key, fallback) {
 var _activeLocalUid = localStorage.getItem('cs_active_uid') || '';
 var _ACCOUNT_LOCAL_KEYS = [
   'cs_runs','cs_current','cs_qp','cs_fav','cs_aliases','cs_notes','cs_xp',
-  'cs_ach','cs_progress','cs_discoveries','cs_del_runs','cs_del_qp','cs_del_fav',
-  'cs_fv','cs_sync_dirty','cs_cloud_current_ts','cs_cloud_ts','cs_lamport',
-  'cs_lamport_last','cs_best_lb','cs_theme','cs_sound','cs_carbon','cs_compact',
-  'cs_vibe','cs_cc_anim','cs_sort','cs_featured','cs_pending_loc','cs_offline_queue','cs_activity','cs_activity_seen','cs_sync_last_err','cs_secret_midnight'
+  'cs_achievements','cs_progression','cs_discoveries','cs_del_runs','cs_del_qp',
+  'cs_del_fav','cs_fv','cs_sync_dirty','cs_cloud_current_ts','cs_lamport_last'
 ];
 function _clearAccountLocalCache() {
-  _ACCOUNT_LOCAL_KEYS.forEach(function(k){
-    try { localStorage.removeItem(_csScopedKey(k)); } catch(e){}
-  });
-  try {
-    _idbPhotoCache = {};
-    _photoLoading = {};
-    _photoMissing = {};
-    _photoCacheOrder = [];
-  } catch(e) {}
-}
-function _resetInMemoryForAccount() {
-  currentRun = [];
-  allRuns = [];
-  quickPicks = [];
-  favoriteNames = new Set();
-  aliases = {};
-  currentSpotLocation = null;
-  _deletedRuns = [];
-  _deletedQP = [];
-  _removedFavs = [];
-  _fieldVer = {};
-  _dirty = false;
-  _lastAppliedLamport = 0;
-  _lastLocalSeq = '';
-  _syncedRunVersions = {};
-  _syncedRunDeletes = {};
-  _runsCursor = null;
-  _runsHasMore = true;
-  _runsLoading = false;
-  bestFromLB = 0;
-  if (typeof _xpTotal !== 'undefined') _xpTotal = 0;
-  if (typeof _prevAchievements !== 'undefined') _prevAchievements = [];
-  if (typeof _progress !== 'undefined') _progress = null;
-  if (typeof activeTheme !== 'undefined') activeTheme = 0;
-  if (typeof carbonOn !== 'undefined') carbonOn = false;
-  if (typeof soundEnabled !== 'undefined') soundEnabled = true;
-  if (typeof compactMode !== 'undefined') compactMode = false;
-  if (typeof sortMode !== 'undefined') sortMode = 'desc';
+  _ACCOUNT_LOCAL_KEYS.forEach(function(k){ try { localStorage.removeItem(k); } catch(e){} });
+  try { _idbPhotoCache = {}; _photoLoading = {}; _photoMissing = {}; } catch(e) {}
+  // IDB photos are keyed only by car name in this version, so they cannot be
+  // safely attributed to a Firebase UID. Keep the database intact rather than
+  // deleting another account's photos; cloud data will restore the correct refs.
 }
 function _prepareLocalCacheForUser(user) {
   var uid = user && user.uid ? String(user.uid) : '';
   if (!uid) return;
   var previous = _activeLocalUid;
-  // Keep each account's local cache on disk. We only reset RAM before loading the
-  // new UID, so switching accounts cannot leak data and cannot destroy unsynced
-  // offline data belonging to the previous account.
-  if (previous !== uid) _resetInMemoryForAccount();
-
+  if (previous && previous !== uid) {
+    _clearAccountLocalCache();
+    // Reset in-memory state too; otherwise renderers can briefly show Account A
+    // while Account B's Firestore document is being fetched.
+    currentRun = [];
+    allRuns = [];
+    quickPicks = [];
+    favoriteNames = new Set();
+    aliases = {};
+    _deletedRuns = [];
+    _deletedQP = [];
+    _removedFavs = [];
+    _fieldVer = {};
+    _dirty = false;
+    _lastAppliedLamport = 0;
+    _lastLocalSeq = '';
+    _syncedRunVersions = {};
+    _syncedRunDeletes = {};
+    _runsCursor = null;
+    _runsHasMore = true;
+    if (typeof _xpTotal !== 'undefined') _xpTotal = 0;
+  }
   _activeLocalUid = uid;
   try { localStorage.setItem('cs_active_uid', uid); } catch(e) {}
-
-  // Reload ONLY this UID's local cache. This is important when the app is
-  // opened after another account was used in the same browser.
-  currentRun = _csReadJSON('cs_current', []);
-  allRuns = _csReadJSON('cs_runs', []);
-  quickPicks = _csReadJSON('cs_qp', []);
-  aliases = _csReadJSON('cs_aliases', {});
-  favoriteNames = new Set(_csReadJSON('cs_fav', []));
-  bestFromLB = parseInt(_csReadString('cs_best_lb', '0') || '0', 10) || 0;
-  _prevAchievements = _csReadJSON('cs_ach', []);
-  _deletedRuns = _csReadJSON('cs_del_runs', []);
-  _deletedQP = _csReadJSON('cs_del_qp', []);
-  _removedFavs = _csReadJSON('cs_del_fav', []);
-  _fieldVer = _csReadJSON('cs_fv', {});
-  _dirty = _csReadString('cs_sync_dirty', '0') === '1';
-  _lamport = parseInt(_csReadString('cs_lamport', '0') || '0', 10) || 0;
-  _lastAppliedLamport = parseInt(_csReadString('cs_lamport_last', '0') || '0', 10) || 0;
-  _lastLocalSeq = '';
-  _syncedRunVersions = {};
-  _syncedRunDeletes = {};
-  _runsCursor = null;
-  _runsHasMore = true;
-  _sortRunsNewestFirst();
-  if (typeof _xpTotal !== 'undefined') _xpTotal = parseInt(_csReadString('cs_xp', '0') || '0', 10) || 0;
-  if (typeof activeTheme !== 'undefined') activeTheme = Math.max(0, Math.min((typeof THEMES !== 'undefined' ? THEMES.length - 1 : 0), parseInt(_csReadString('cs_theme', '0') || '0', 10) || 0));
-  if (typeof carbonOn !== 'undefined') carbonOn = _csReadString('cs_carbon', '') === 'on';
-  if (typeof soundEnabled !== 'undefined') soundEnabled = _csReadString('cs_sound', '') !== 'off';
-  if (typeof compactMode !== 'undefined') compactMode = _csReadString('cs_compact', '') === 'on';
-  if (typeof sortMode !== 'undefined') sortMode = _csReadString('cs_sort', 'desc') || 'desc';
-  currentSpotLocation = _csReadJSON('cs_pending_loc', null);
-  try { applyTheme(activeTheme); } catch(e) {}
-  try { if (typeof applyCarbon === 'function') applyCarbon(); } catch(e) {}
-  try { if (typeof applyCompactMode === 'function') applyCompactMode(); } catch(e) {}
-  try { if (typeof initSoundToggle === 'function') initSoundToggle(); } catch(e) {}
 }
+
 function importLocalData() {
   const localRuns = _csReadJSON('cs_runs', []);
-  const localCurrent = _csReadJSON('cs_current', []);
-  const localQP = _csReadJSON('cs_qp', []);
-  const localNotes = _csReadString('cs_notes', '');
+  const localCurrent = JSON.parse(localStorage.getItem('cs_current') || '[]');
+  const localQP = JSON.parse(localStorage.getItem('cs_qp') || '[]');
+  const localNotes = localStorage.getItem('cs_notes') || '';
 
   if (!localRuns.length && !localCurrent.length && !localQP.length) {
     alert('No local data found on this device to import.');
@@ -4456,8 +4374,8 @@ function importLocalData() {
   if (!currentRun.length && localCurrent.length) currentRun = localCurrent;
 
   // Merge notes
-  if (!_csReadString('cs_notes', '') && localNotes) {
-    localStorage.setItem(_csScopedKey('cs_notes'), localNotes);
+  if (!localStorage.getItem('cs_notes') && localNotes) {
+    localStorage.setItem('cs_notes', localNotes);
     const a = document.getElementById('notesArea');
     if (a) a.value = localNotes;
   }
@@ -4470,27 +4388,11 @@ function importLocalData() {
   notify('📥 Imported ' + newRuns.length + ' runs from this device!', { priority:'major', record: true, key:'Import', icon:'📥' });
 }
 
-var _authGeneration = 0;
-var _cloudPermissionDenied = false;
-
 auth.onAuthStateChanged(async user => {
-  var myGeneration = ++_authGeneration;
-
-  // Kill the old listener before changing account context.
-  if (syncUnsub) { try { syncUnsub(); } catch(e) {} syncUnsub = null; }
-  clearTimeout(syncTimer);
-  syncTimer = null;
-  _txChain = Promise.resolve();
-  if (_leaderboardPublishTimer) { clearTimeout(_leaderboardPublishTimer); _leaderboardPublishTimer = null; }
-
-  if (!user) {
-    currentUser = null;
-    _resetInMemoryForAccount();
-    _cloudPermissionDenied = false;
-  } else {
-    _prepareLocalCacheForUser(user);
-    currentUser = user;
-  }
+  // Establish the account boundary BEFORE loading or flushing anything.
+  // This keeps one browser's local cache from being merged into another UID.
+  if (user) _prepareLocalCacheForUser(user);
+  currentUser = user;
   var authOverlay = document.getElementById('authOverlay');
   var authLoading = document.getElementById('authLoading');
   var authContent = document.getElementById('authContent');
@@ -4505,14 +4407,14 @@ auth.onAuthStateChanged(async user => {
     _loadLastAppliedLamport();
     _lastLocalSeq = '';
     try {
-      await loadFromCloud(user.uid, myGeneration);
+      await loadFromCloud();
     } catch(e) {
       console.warn('Initial cloud load failed', e);
       setSyncDot('');
       showToast('⚠️ Could not refresh your cloud data. Check your connection.');
     }
-    if (myGeneration === _authGeneration && currentUser && currentUser.uid === user.uid && !_cloudPermissionDenied) subscribeCloud(user.uid, myGeneration);
-    if (myGeneration === _authGeneration && _dirty && !_cloudPermissionDenied) flushSyncNow();
+    subscribeCloud();
+    if (_dirty) flushSyncNow();
     checkNewAchievements();
     const localRuns = _csReadJSON('cs_runs', []);
     if (localRuns.length > 0 && !user.isAnonymous) showImportBanner(localRuns.length);
@@ -4661,16 +4563,12 @@ function _replaceLocalFromCloud(c) {
   _removedFavs = (c.favorites && Array.isArray(c.favorites.removed)) ? c.favorites.removed.slice() : [];
   favoriteNames = new Set((c.favorites && Array.isArray(c.favorites.names)) ? c.favorites.names : []);
   aliases = (c.aliases && c.aliases.map && typeof c.aliases.map === 'object') ? Object.assign({}, c.aliases.map) : {};
-  if (c.notes && c.notes.text != null) { try { localStorage.setItem(_csScopedKey('cs_notes'), String(c.notes.text)); } catch(e){} }
+  if (c.notes && c.notes.text != null) { try { localStorage.setItem('cs_notes', String(c.notes.text)); } catch(e){} }
   if (c.xp && typeof c.xp.value === 'number') _xpTotal = c.xp.value;
   if (c.progression && typeof window.mergeCloudProgression === 'function') window.mergeCloudProgression(c.progression);
-  if (c.discoveries && Array.isArray(c.discoveries.items)) { try { localStorage.setItem(_csScopedKey('cs_discoveries'), JSON.stringify(c.discoveries.items)); } catch(e){} }
+  if (c.discoveries && Array.isArray(c.discoveries.items)) { try { localStorage.setItem('cs_discoveries', JSON.stringify(c.discoveries.items)); } catch(e){} }
   if (c.settings && c.settings.map) _applySettings(c.settings.map);
   _prevAchievements = (c.achievements && Array.isArray(c.achievements.ids)) ? c.achievements.ids.slice() : [];
-  // Root metadata does not own the run history; best is recalculated after
-  // loadRunsPage() from this UID's run documents.
-  bestFromLB = 0;
-  try { localStorage.setItem(_csScopedKey('cs_best_lb'), '0'); } catch(e) {}
   _fieldVer = {
     currentRun: c.currentRun?.ver || 0, runs: 0, qp: c.quickPicks?.ver || 0,
     deletedRuns: c.deletedRuns?.ver || 0, deletedQP: c.deletedQP?.ver || 0,
@@ -4691,48 +4589,42 @@ var _syncedRunVersions = {};
 var _syncedRunDeletes = {};
 function _sortRunsNewestFirst() { allRuns.sort(function(a,b){ return Number(b && b.id || 0) - Number(a && a.id || 0); }); }
 function _runForCloud(run) { var copy = _diagAndSanitize('run(' + run.id + ')', { run: run }, 'write').run; copy.id = run.id; return copy; }
-function _writeRunDocs(runs, deletes, expectedUid, expectedGeneration) {
+function _writeRunDocs(runs, deletes) {
   var ops = [];
   (runs || []).forEach(function(run){ ops.push({ type:'set', run:run }); });
   (deletes || []).forEach(function(id){ ops.push({ type:'delete', id:id }); });
   var chain = Promise.resolve();
   while (ops.length) (function(chunk) { chain = chain.then(function(){
-    if (expectedGeneration != null && expectedGeneration !== _authGeneration) return false;
-    if (!expectedUid || !currentUser || currentUser.uid !== expectedUid) return false;
     var batch = db.batch();
-    chunk.forEach(function(op){ var ref = db.collection('users').doc(expectedUid).collection('runs').doc(String(op.type === 'set' ? op.run.id : op.id)); if (op.type === 'set') batch.set(ref, _runForCloud(op.run)); else batch.delete(ref); });
+    chunk.forEach(function(op){ var ref = db.collection('users').doc(currentUser.uid).collection('runs').doc(String(op.type === 'set' ? op.run.id : op.id)); if (op.type === 'set') batch.set(ref, _runForCloud(op.run)); else batch.delete(ref); });
     return batch.commit();
   }); })(ops.splice(0, 400));
   return chain;
 }
-function _syncRunsSubcollection(expectedUid, expectedGeneration) {
+function _syncRunsSubcollection() {
   var deletes = _deletedRuns.filter(function(id){ return !_syncedRunDeletes[String(id)]; });
   var changed = allRuns.filter(function(run){ return _syncedRunVersions[String(run.id)] !== (run._v || 0); });
   if (!changed.length && !deletes.length) return Promise.resolve();
-  return _writeRunDocs(changed, deletes, expectedUid, expectedGeneration).then(function(result){ if (result === false) return false; changed.forEach(function(run){ _syncedRunVersions[String(run.id)] = run._v || 0; }); deletes.forEach(function(id){ delete _syncedRunVersions[String(id)]; _syncedRunDeletes[String(id)] = true; }); return true; });
+  return _writeRunDocs(changed, deletes).then(function(){ changed.forEach(function(run){ _syncedRunVersions[String(run.id)] = run._v || 0; }); deletes.forEach(function(id){ delete _syncedRunVersions[String(id)]; _syncedRunDeletes[String(id)] = true; }); });
 }
 // Public leaderboard documents deliberately contain aggregate, non-sensitive
 // values only. Individual runs, cars, photos, notes, and locations stay private
 // under users/{uid} and are never copied to this collection.
 var _leaderboardPublishTimer = null;
 var _leaderboardPublishErrorShown = false;
-function _queueLeaderboardPublish(expectedUid, expectedGeneration) {
+function _queueLeaderboardPublish() {
   if (!currentUser || !window._fbReady) return;
   clearTimeout(_leaderboardPublishTimer);
-  var uid = expectedUid || (currentUser && currentUser.uid);
-  var gen = expectedGeneration == null ? _authGeneration : expectedGeneration;
-  _leaderboardPublishTimer = setTimeout(function(){ _publishLeaderboardEntry(uid, gen); }, 1200);
+  _leaderboardPublishTimer = setTimeout(_publishLeaderboardEntry, 1200);
 }
-function _publishLeaderboardEntry(expectedUid, expectedGeneration) {
-  var uid = expectedUid || (currentUser && currentUser.uid);
-  var gen = expectedGeneration == null ? _authGeneration : expectedGeneration;
-  if (!uid || !currentUser || currentUser.uid !== uid || gen !== _authGeneration || !window._fbReady || !db) return Promise.resolve(false);
+function _publishLeaderboardEntry() {
+  if (!currentUser || !window._fbReady || !db) return Promise.resolve();
   var runs = allRuns || [];
   var cars = _statsCars ? _statsCars() : runs.reduce(function(out, run){ return out.concat(run.cars || []); }, []);
   var bestRun = runs.reduce(function(best, run){ return Math.max(best, Number(run.total || 0)); }, 0);
   var totalValue = cars.reduce(function(total, car){ return total + Number(car.value || 0); }, 0);
-  return db.collection('leaderboard').doc(uid).set({
-    displayName: String((currentUser && currentUser.displayName) || 'Anonymous Spotter').slice(0, 60),
+  return db.collection('leaderboard').doc(currentUser.uid).set({
+    displayName: String(currentUser.displayName || 'Anonymous Spotter').slice(0, 60),
     bestRun: bestRun,
     totalValue: totalValue,
     totalCars: cars.length,
@@ -4746,137 +4638,74 @@ function _publishLeaderboardEntry(expectedUid, expectedGeneration) {
     }
   });
 }
-async function loadRunsPage(reset, expectedUid, expectedGeneration) {
-  var uid = expectedUid || (currentUser && currentUser.uid);
-  var gen = expectedGeneration == null ? _authGeneration : expectedGeneration;
-  if (!uid || !currentUser || currentUser.uid !== uid || gen !== _authGeneration || _runsLoading || (!reset && !_runsHasMore)) return false;
+async function loadRunsPage(reset) {
+  if (!currentUser || _runsLoading || (!reset && !_runsHasMore)) return;
   _runsLoading = true;
   try {
     if (reset) { _runsCursor = null; _runsHasMore = true; if (!_dirty) allRuns = []; }
-    var q = db.collection('users').doc(uid).collection('runs').orderBy('id', 'desc').limit(CLOUD_RUNS_PAGE_SIZE);
+    var q = db.collection('users').doc(currentUser.uid).collection('runs').orderBy('id', 'desc').limit(CLOUD_RUNS_PAGE_SIZE);
     if (_runsCursor) q = q.startAfter(_runsCursor);
     var snap = await q.get();
-    if (gen !== _authGeneration || !currentUser || currentUser.uid !== uid) return false;
     _runsCursor = snap.docs.length ? snap.docs[snap.docs.length - 1] : _runsCursor;
     _runsHasMore = snap.docs.length === CLOUD_RUNS_PAGE_SIZE;
-    var incoming = snap.docs.map(function(doc){
-      var run = doc.data();
-      run.id = run.id == null ? doc.id : run.id;
-      _syncedRunVersions[String(run.id)] = run._v || 0;
-      return run;
-    });
-    _mergeRuns(incoming);
-    _purgeTombstoned();
-    _sortRunsNewestFirst();
-    _saveRunsLocal();
-
-    // The actual best run belongs to the account's run collection, not a
-    // device-global leaderboard cache.
-    var best = allRuns.reduce(function(mx, r){
-      return !r.spotted ? Math.max(mx, Number(r.total || 0)) : mx;
-    }, 0);
-    bestFromLB = best;
-    try { localStorage.setItem(_csScopedKey('cs_best_lb'), String(best)); } catch(e) {}
-    return true;
-  } finally {
-    _runsLoading = false;
-  }
+    var incoming = snap.docs.map(function(doc){ var run = doc.data(); run.id = run.id == null ? doc.id : run.id; _syncedRunVersions[String(run.id)] = run._v || 0; return run; });
+    _mergeRuns(incoming); _purgeTombstoned(); _sortRunsNewestFirst(); _saveRunsLocal();
+  } finally { _runsLoading = false; }
 }
-
-async function loadFromCloud(expectedUid, expectedGeneration) {
-  var uid = expectedUid || (currentUser && currentUser.uid);
-  var gen = expectedGeneration == null ? _authGeneration : expectedGeneration;
-  if (!uid || !currentUser || currentUser.uid !== uid || gen !== _authGeneration) return { ok:false, stale:true };
+async function loadFromCloud() {
+  if (!currentUser) return;
   setSyncDot('syncing');
-  _cloudPermissionDenied = false;
   try {
-    var snap = await db.collection('users').doc(uid).get();
-    if (gen !== _authGeneration || !currentUser || currentUser.uid !== uid) return { ok:false, stale:true };
-
+    var snap = await db.collection('users').doc(currentUser.uid).get();
     var d = snap.exists ? snap.data() : {};
     _diagRead('loadFromCloud(metadata)', d);
-
-    if (!_dirty) _replaceLocalFromCloud(d);
-    else _applyCloud(d);
-
-    // Runs live in users/{uid}/runs/{runId}. If the rules do not allow this
-    // subcollection, surface that as a sync error instead of mixing accounts.
-    await loadRunsPage(true, uid, gen);
-    if (gen !== _authGeneration || !currentUser || currentUser.uid !== uid) return { ok:false, stale:true };
-
-    _saveAllLocal();
-    _lastSave = Date.now();
-
-    if (gen === _authGeneration && currentUser && currentUser.uid === uid) {
-      _txWrite({ cause: 'loadFromCloud', uid: uid, authGeneration: gen });
-    }
+    // One-time migration for pre-subcollection accounts. The follow-up root write
+    // omits allRuns, permanently shrinking the legacy document.
+    var legacyRuns = d.allRuns && Array.isArray(d.allRuns.items) ? d.allRuns.items : (Array.isArray(d.allRuns) ? d.allRuns : []);
+    if (legacyRuns.length) await _writeRunDocs(legacyRuns, []);
+    if (!_dirty) _replaceLocalFromCloud(d); else _applyCloud(d);
+    await loadRunsPage(true);
+    _saveAllLocal(); _lastSave = Date.now();
+    _txWrite({ cause: legacyRuns.length ? 'migrate-runs' : 'loadFromCloud' });
     setSyncDot('ok');
-    renderQPTrigger(); renderSpot(); renderGarage(); renderHistory(); fetchRefImagesForAllCars();
-
-    if (currentRun.length > 0 && gen === _authGeneration) {
-      setTimeout(function(){
-        if (gen === _authGeneration && currentUser && currentUser.uid === uid) {
-          notify('🚗 Run resumed — ' + currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '') + ' restored!', { priority:'major', record:true, key:'Run resumed', icon:'🚗' });
-        }
-      }, 700);
-    }
-    return { ok:true };
-  } catch(e) {
-    if (gen !== _authGeneration || !currentUser || currentUser.uid !== uid) return { ok:false, stale:true };
-    if (e && e.code === 'permission-denied') {
-      _cloudPermissionDenied = true;
-      setSyncDot('error');
-      console.error('Firestore permission denied for account', uid, e);
-      showToast('⚠️ Cloud sync is blocked by your Firestore rules. Your local data is safe.');
-      return { ok:false, permissionDenied:true };
-    }
-    setSyncDot('');
-    console.error('loadFromCloud failed', e);
-    throw e;
-  }
+  } catch(e) { setSyncDot(''); console.error(e); throw e; }
+  renderQPTrigger(); renderSpot(); renderGarage(); renderHistory(); fetchRefImagesForAllCars();
+  if (currentRun.length > 0) setTimeout(() => notify('🚗 Run resumed — ' + currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '') + ' restored!', { priority:'major', record:true, key:'Run resumed', icon:'🚗' }), 700);
 }
 
-function subscribeCloud(expectedUid, expectedGeneration) {
-  var uid = expectedUid || (currentUser && currentUser.uid);
-  var gen = expectedGeneration == null ? _authGeneration : expectedGeneration;
-  if (!uid || !currentUser || currentUser.uid !== uid || gen !== _authGeneration || _cloudPermissionDenied) return;
-  if (syncUnsub) { try { syncUnsub(); } catch(e) {} syncUnsub = null; }
-
-  syncUnsub = db.collection('users').doc(uid).onSnapshot(function(snap) {
-    if (gen !== _authGeneration || !currentUser || currentUser.uid !== uid) return;
+function subscribeCloud() {
+  if (!currentUser) return;
+  syncUnsub = db.collection('users').doc(currentUser.uid).onSnapshot(snap => {
     if (!snap.exists) return;
     const d = snap.data();
+    // Ignore our own echo (the doc this device just wrote). Never gate on lamport here:
+    // a rebase/converge by another device can race the phone's lower-lamport run, and
+    // those merges are additive + tombstoned, so applying every differing payload is safe.
     if (d.seq && d.seq === _lastLocalSeq) return;
     logSync('listener', 'seq', d.seq, 'lamport', d.lamport);
     const changed = _applyCloud(d);
 
-    if (Array.isArray(allRuns)) {
-      allRuns.sort(function(a, b) { return Number(b?.id || 0) - Number(a?.id || 0); });
-    }
+// Keep runs newest → oldest so newly synced runs appear
+// at the top of History.
+if (Array.isArray(allRuns)) {
+  allRuns.sort(function(a, b) {
+    return Number(b?.id || 0) - Number(a?.id || 0);
+  });
+}
 
-    if (changed && gen === _authGeneration && currentUser && currentUser.uid === uid) {
-      _saveAllLocal();
-      renderQPTrigger(); renderSpot();
+if (changed) {
+  _saveAllLocal();
+  renderQPTrigger(); renderSpot();
       const pg = document.querySelector('.page.active')?.id;
-      if (pg === 'page-garage') renderGarage();
+      if (pg === 'page-garage')  renderGarage();
       if (pg === 'page-history') renderHistory();
       if (pg === 'page-leaderboard') renderLeaderboard();
       if (pg === 'page-stats') renderStats();
-
+      // Converge: push the merged union back so other devices (and this one) stay in sync.
+      // The transactional rebase makes this safe — it never clobbers newer cloud fields.
       if (!_coreEqual(_buildCloudPayload(), d)) {
-        _txWrite({ cause: 'converge', retries: 5, uid: uid, authGeneration: gen });
+        _txWrite({ cause: 'converge', retries: 5 });
       }
-    }
-  }, function(err) {
-    if (gen !== _authGeneration || !currentUser || currentUser.uid !== uid) return;
-    console.error('Firestore snapshot listener failed', err);
-    if (err && err.code === 'permission-denied') {
-      _cloudPermissionDenied = true;
-      setSyncDot('error');
-      if (syncUnsub) { try { syncUnsub(); } catch(e) {} syncUnsub = null; }
-      showToast('⚠️ Firestore rules denied cloud sync. Local data will remain on this device.');
-    } else {
-      setSyncDot('');
     }
   });
 }
@@ -5010,11 +4839,11 @@ function _buildCloudPayload() {
     deletedRuns:  { ver: _fieldVer.deletedRuns || 0, ids: _deletedRuns },
     quickPicks:   { ver: _fieldVer.qp || 0, items: quickPicks || [] },
     deletedQP:    { ver: _fieldVer.deletedQP || 0, ids: _deletedQP },
-    notes:        { ver: _fieldVer.notes || 0, text: _csReadString('cs_notes', '') },
+    notes:        { ver: _fieldVer.notes || 0, text: localStorage.getItem('cs_notes') || '' },
     // Recent Discoveries (the trophy-case strip on Garage) used to be pure
     // localStorage and never synced at all — a device switch always showed an
     // empty/local-only list. Wired into the same version-wins sync as notes.
-    discoveries:  { ver: _fieldVer.discoveries || 0, items: (function(){ try { return JSON.parse(_csReadString('cs_discoveries', '[]') || '[]'); } catch(e) { return []; } })() },
+    discoveries:  { ver: _fieldVer.discoveries || 0, items: (function(){ try { return JSON.parse(localStorage.getItem('cs_discoveries') || '[]'); } catch(e) { return []; } })() },
     xp:           { ver: _fieldVer.xp || 0, value: _xpTotal || 0 },
     favorites:    { ver: _fieldVer.favorites || 0, names: Array.from(favoriteNames), removed: _removedFavs || [] },
     aliases:      { ver: _fieldVer.aliases || 0, map: aliases || {} },
@@ -5060,7 +4889,7 @@ function saveToCloud() {
     logSync('saveToCloud', !currentUser ? 'no user' : 'offline');
     if (!navigator.onLine) {
       offlineQueue.push(Date.now());
-      localStorage.setItem(_csScopedKey('cs_offline_queue'), JSON.stringify(offlineQueue));
+      localStorage.setItem('cs_offline_queue', JSON.stringify(offlineQueue));
       _markDirty(true);
     }
     return;
@@ -5096,7 +4925,7 @@ function _applyCloud(c) {
   var changed = false;
   _applyingCloud = true;
   try {
-    if (c.lamport) { _lastAppliedLamport = Math.max(_lastAppliedLamport, c.lamport); try { localStorage.setItem(_csScopedKey('cs_lamport_last'), String(_lastAppliedLamport)); } catch(e){} }
+    if (c.lamport) { _lastAppliedLamport = Math.max(_lastAppliedLamport, c.lamport); try { localStorage.setItem('cs_lamport_last' + (currentUser ? '_' + currentUser.uid : ''), String(_lastAppliedLamport)); } catch(e){} }
     // Backward compatibility: pre-update cloud docs stored plain arrays/strings
     // (no lamport, no per-field versions). Adopt their data via the additive merges.
     if (!c.lamport) {
@@ -5104,13 +4933,13 @@ function _applyCloud(c) {
         currentRun = c.currentRun.slice();
         _fieldVer.currentRun = Math.max(_fieldVer.currentRun || 0, 1);
         _persistFieldVer();
-        try { localStorage.setItem(_csScopedKey('cs_cloud_current_ts'), String(Date.now())); } catch(e){}
+        try { localStorage.setItem('cs_cloud_current_ts', String(Date.now())); } catch(e){}
         changed = true;
       }
       if (Array.isArray(c.allRuns)) { if (_mergeRuns(c.allRuns)) changed = true; }
       if (Array.isArray(c.quickPicks)) { if (_mergeQP(c.quickPicks)) changed = true; }
       if (typeof c.notes === 'string') {
-        try { localStorage.setItem(_csScopedKey('cs_notes'), c.notes); } catch(e){}
+        try { localStorage.setItem('cs_notes', c.notes); } catch(e){}
         var nal = document.getElementById('notesArea');
         if (nal && document.activeElement !== nal) nal.value = c.notes;
         changed = true;
@@ -5122,7 +4951,7 @@ function _applyCloud(c) {
     if (crCars && c.currentRun.ver != null && c.currentRun.ver > crv) {
       currentRun = crCars.slice();
       _fieldVer.currentRun = c.currentRun.ver;
-      try { localStorage.setItem(_csScopedKey('cs_cloud_current_ts'), String(Date.now())); } catch(e){}
+      try { localStorage.setItem('cs_cloud_current_ts', String(Date.now())); } catch(e){}
       changed = true;
     } else if (crCars && c.currentRun.ver != null && c.currentRun.ver === crv &&
                c.currentRun.ver >= 1 && crCars.length === 0 && currentRun.length > 0) {
@@ -5145,7 +4974,7 @@ function _applyCloud(c) {
     // notes — whole-field version wins
     if (c.notes && c.notes.ver != null && c.notes.ver > (_fieldVer.notes || 0)) {
       var nt = String(c.notes.text || '');
-      try { localStorage.setItem(_csScopedKey('cs_notes'), nt); } catch(e){}
+      try { localStorage.setItem('cs_notes', nt); } catch(e){}
       _fieldVer.notes = c.notes.ver;
       var na = document.getElementById('notesArea');
       if (na && document.activeElement !== na) na.value = nt;
@@ -5155,7 +4984,7 @@ function _applyCloud(c) {
     // it's a derived "last 10" convenience list, not authoritative data, so a
     // simple version-wins swap is enough to make it follow you across devices)
     if (c.discoveries && c.discoveries.ver != null && c.discoveries.ver > (_fieldVer.discoveries || 0) && Array.isArray(c.discoveries.items)) {
-      try { localStorage.setItem(_csScopedKey('cs_discoveries'), JSON.stringify(c.discoveries.items)); } catch(e){}
+      try { localStorage.setItem('cs_discoveries', JSON.stringify(c.discoveries.items)); } catch(e){}
       _fieldVer.discoveries = c.discoveries.ver;
       if (typeof renderDiscoveries === 'function') renderDiscoveries();
       changed = true;
@@ -5163,7 +4992,7 @@ function _applyCloud(c) {
     // xp — monotonic max (never loses XP already earned)
     if (c.xp && typeof c.xp.value === 'number' && c.xp.value > _xpTotal) {
       _xpTotal = c.xp.value;
-      try { localStorage.setItem(_csScopedKey('cs_xp'), String(_xpTotal)); } catch(e){}
+      try { localStorage.setItem('cs_xp', String(_xpTotal)); } catch(e){}
       if (typeof renderLevelBar === 'function') renderLevelBar();
       if (typeof renderTitleChip === 'function') renderTitleChip();
       _fieldVer.xp = Math.max(_fieldVer.xp || 0, c.xp.ver || 0);
@@ -5171,14 +5000,14 @@ function _applyCloud(c) {
     }
     // favorites — union minus removed tombstone
     if (_mergeFavorites(c.favorites && c.favorites.names, c.favorites && c.favorites.removed)) {
-      try { localStorage.setItem(_csScopedKey('cs_fav'), JSON.stringify(Array.from(favoriteNames))); } catch(e){}
+      try { localStorage.setItem('cs_fav', JSON.stringify(Array.from(favoriteNames))); } catch(e){}
       if (typeof renderHomeFav === 'function') renderHomeFav();
       if (typeof renderGarage === 'function') renderGarage();
       changed = true;
     }
     // aliases — per-key union, local wins on same-key conflict
     if (_mergeAliases(c.aliases && c.aliases.map)) {
-      try { localStorage.setItem(_csScopedKey('cs_aliases'), JSON.stringify(aliases)); } catch(e){}
+      try { localStorage.setItem('cs_aliases', JSON.stringify(aliases)); } catch(e){}
       changed = true;
     }
     // settings — whole-field version wins
@@ -5201,83 +5030,55 @@ function _applyCloud(c) {
 //  Firestore retries on contention, so a stale device's write can never silently
 //  clobber a newer field (this is what fixes End-Run reverts and delete resurrection).
 function _txWrite(opts) {
-  opts = opts || {};
-  var uid = opts.uid || (currentUser && currentUser.uid);
-  var gen = opts.authGeneration == null ? _authGeneration : opts.authGeneration;
-  if (!uid || !currentUser || currentUser.uid !== uid || gen !== _authGeneration) return Promise.resolve(false);
-  if (_cloudPermissionDenied) return Promise.resolve(false);
+  if (!currentUser) return Promise.resolve(false);
   if (!navigator.onLine) { _markDirty(true); return Promise.resolve(false); }
-
-  var run = _txChain.then(function(){
-    if (gen !== _authGeneration || !currentUser || currentUser.uid !== uid) return false;
-    return _txWriteCore(Object.assign({}, opts, {uid:uid, authGeneration:gen}));
-  });
+  // Serialize all writes on this device so rapid-fire calls (endRun's immediate
+  // flush + the achievement/XP cascade) never run two Firestore transactions at
+  // once and contend on the same doc. Each queued write still re-reads + rebases.
+  var run = _txChain.then(function(){ return _txWriteCore(opts); });
   _txChain = run.then(function(){}, function(){});
   return run;
 }
-
 function _txWriteCore(opts) {
-  opts = opts || {};
-  var uid = opts.uid;
-  var gen = opts.authGeneration;
-  if (!uid || !currentUser || currentUser.uid !== uid || gen !== _authGeneration) return Promise.resolve(false);
-
-  var docRef  = db.collection('users').doc(uid);
-  var cause   = opts.cause || 'write';
-  var maxTries = opts.retries != null ? opts.retries : 3;
+  var docRef  = db.collection('users').doc(currentUser.uid);
+  var cause   = (opts && opts.cause) || 'write';
+  var maxTries = (opts && opts.retries != null) ? opts.retries : 3;
   var attempt = 0;
-
   function tryOnce() {
-    if (gen !== _authGeneration || !currentUser || currentUser.uid !== uid) return Promise.resolve(false);
     attempt++;
     return db.runTransaction(function(tx) {
-      if (gen !== _authGeneration || !currentUser || currentUser.uid !== uid) {
-        return Promise.reject({ code:'aborted', message:'Account changed during sync.' });
-      }
       return tx.get(docRef).then(function(snap) {
-        if (gen !== _authGeneration || !currentUser || currentUser.uid !== uid) {
-          return Promise.reject({ code:'aborted', message:'Account changed during sync.' });
-        }
         var cloud = snap.exists ? snap.data() : null;
+        // Rebase: apply any newer cloud state before building our payload so we
+        // never overwrite fields another device has since updated.
         if (cloud && cloud.lamport) _applyCloud(cloud);
         var san = _diagAndSanitize('txWrite(' + cause + ')#' + attempt, _buildCloudPayload(), 'write');
         tx.set(docRef, _stampCloud(san));
       });
     }).then(function() {
-      if (gen !== _authGeneration || !currentUser || currentUser.uid !== uid) return false;
-      return _syncRunsSubcollection(uid, gen);
-    }).then(function(result) {
-      if (result === false || gen !== _authGeneration || !currentUser || currentUser.uid !== uid) return false;
+      // Do not mark the sync complete until the changed run documents have also
+      // committed. Metadata and run batches are deliberately separate so neither
+      // one can grow with account history.
+      return _syncRunsSubcollection();
+    }).then(function() {
       logSync('txWrite', cause, 'ok (attempt ' + attempt + ')');
       _markDirty(false);
       _lastSyncErr = null;
       _lastSyncErrNotified = '';
       _syncRetryN = 0;
-      _queueLeaderboardPublish(uid, gen);
+      _queueLeaderboardPublish();
       if (_syncRetryTimer) { clearTimeout(_syncRetryTimer); _syncRetryTimer = null; }
-      try { localStorage.removeItem(_csScopedKey('cs_sync_last_err')); } catch(e){}
+      try { localStorage.removeItem('cs_sync_last_err'); } catch(e){}
       setSyncDot('ok');
       _lastPushTs = Date.now();
-      try { localStorage.setItem(_csScopedKey('cs_cloud_current_ts'), String(_lastPushTs)); } catch(e){}
+      try { localStorage.setItem('cs_cloud_current_ts', String(_lastPushTs)); } catch(e){}
       return true;
     }).catch(function(err) {
-      if (gen !== _authGeneration || !currentUser || currentUser.uid !== uid) return false;
       logSync('txWrite', cause, 'FAILED (attempt ' + attempt + '):', err && err.code, err && err.message);
+      // Persist the real error so a future sync failure is diagnosable even when
+      // debug logging is off.
       _lastSyncErr = { at: Date.now(), cause: cause, code: (err && err.code) || '', message: (err && err.message) || '' };
-      try { localStorage.setItem(_csScopedKey('cs_sync_last_err'), JSON.stringify(_lastSyncErr)); } catch(e){}
-
-      if (err && err.code === 'permission-denied') {
-        _cloudPermissionDenied = true;
-        _markDirty(true);
-        setSyncDot('error');
-        if (!_lastSyncErrNotified) {
-          _lastSyncErrNotified = 'permission-denied';
-          showToast('⚠️ Firestore rules denied this account. Local changes are safe; cloud sync is paused.');
-        }
-        return false;
-      }
-      if (err && err.code === 'aborted' && gen !== _authGeneration) return false;
-
+      try { localStorage.setItem('cs_sync_last_err', JSON.stringify(_lastSyncErr)); } catch(e){}
       if (attempt < maxTries) {
         return new Promise(function(res) { setTimeout(res, 400 * attempt); }).then(tryOnce);
       }
@@ -5285,6 +5086,8 @@ function _txWriteCore(opts) {
       setSyncDot('');
       if (cause !== 'unload') {
         var errCode = (err && err.code) ? ' (' + err.code + ')' : '';
+        // Notify once per distinct error; automatic retries stay quiet so a
+        // persistent failure doesn't spam the activity log on every backoff tick.
         var errKey = cause + ':' + ((err && err.code) || '') + ':' + ((err && err.message) || '');
         if (_lastSyncErrNotified !== errKey) {
           _lastSyncErrNotified = errKey;
@@ -5325,8 +5128,8 @@ const THEMES = [
   { name:'Retro 80s',    accent:'#ff6ec7', accent2:'#ffe600', bg:'#0d0d1a', surf:'#131325', surf2:'#1c1c35', bodyClass:'theme-retro80s', unlock:22 },
   { name:'Midnight',     accent:'#8ea2ff', accent2:'#e8b84b', bg:'#060608', surf:'#0e0e12', surf2:'#171720', bodyClass:'', id:'midnight', secret:true, unlock:30 },
 ];
-let activeTheme = parseInt(_csReadString('cs_theme', '0') || '0');
-let carbonOn    = _csReadString('cs_carbon', '') === 'on';
+let activeTheme = parseInt(localStorage.getItem('cs_theme') || '0');
+let carbonOn    = localStorage.getItem('cs_carbon') === 'on';
 function _themeUnlocked(i) {
   var t = (i==null) ? null : THEMES[i];
   var lvl = t ? t.unlock : 0;
@@ -5334,7 +5137,7 @@ function _themeUnlocked(i) {
   return (lvl <= 0) || xpInfo(_xpTotal).level >= lvl;
 }
 function _secretThemeFound(id) {
-  try { return localStorage.getItem(_csScopedKey('cs_secret_' + id)) === '1'; } catch(e){ return false; }
+  try { return localStorage.getItem('cs_secret_' + id) === '1'; } catch(e){ return false; }
 }
 // New theme unlocked at this level (if any), for the level-up celebration
 function themeUnlockedAtLevel(lvl) {
@@ -5356,7 +5159,7 @@ function applyTheme(idx) {
   document.body.classList.remove('theme-light','theme-cyberpunk','theme-retro80s');
   if (t.bodyClass) document.body.classList.add(t.bodyClass);
   activeTheme = idx;
-  localStorage.setItem(_csScopedKey('cs_theme'), idx);
+  localStorage.setItem('cs_theme', idx);
   // Update theme-color meta
   const metaTheme = document.querySelector('meta[name="theme-color"]');
   if (metaTheme) metaTheme.content = t.bg;
@@ -5406,7 +5209,7 @@ function _onLogoSecretTap() {
     _secretTapLog = [];
     var midnight = THEMES.find(function(t){ return t && t.secret; });
     if (!midnight || _secretThemeFound(midnight.id)) { showToast('Others watch the road. You watch the wordmark.'); return; }
-    try { localStorage.setItem(_csScopedKey('cs_secret_' + midnight.id), '1'); } catch(e){}
+    try { localStorage.setItem('cs_secret_' + midnight.id, '1'); } catch(e){}
     applyTheme(THEMES.indexOf(midnight));
     renderThemeBar();
     playSound('crystal');
@@ -5428,7 +5231,7 @@ function initSecretThemeTap() {
 }
 function toggleCarbon() {
   carbonOn = !carbonOn;
-  localStorage.setItem(_csScopedKey('cs_carbon'), carbonOn ? 'on' : 'off');
+  localStorage.setItem('cs_carbon', carbonOn ? 'on' : 'off');
   applyCarbon();
   const btn = document.getElementById('carbonToggle');
   if (btn) btn.classList.toggle('on', carbonOn);
@@ -5717,7 +5520,7 @@ function playSound(type) {
 }
 function toggleSound() {
   soundEnabled = !soundEnabled;
-  localStorage.setItem(_csScopedKey('cs_sound'), soundEnabled ? 'on' : 'off');
+  localStorage.setItem('cs_sound', soundEnabled ? 'on' : 'off');
   const btn = document.getElementById('soundToggle');
   if (btn) btn.classList.toggle('on', soundEnabled);
   showToast(soundEnabled ? ' Sounds on' : ' Sounds off');
@@ -5835,7 +5638,7 @@ function resolveAlias(name) {
   return name;
 }
 function saveAliases() {
-  localStorage.setItem(_csScopedKey('cs_aliases'), JSON.stringify(aliases));
+  localStorage.setItem('cs_aliases', JSON.stringify(aliases));
   _bumpVer('aliases');
   updateAliasCount();
   saveToCloud();
@@ -5928,7 +5731,7 @@ function toggleFavorite(name){
   const key = String(name);
   if (favoriteNames.has(name)) { favoriteNames.delete(name); if (_removedFavs.indexOf(key) === -1) _removedFavs.push(key); }
   else { favoriteNames.add(name); _removedFavs = _removedFavs.filter(n => n !== key); }
-  try { localStorage.setItem(_csScopedKey('cs_fav'), JSON.stringify(Array.from(favoriteNames))); localStorage.setItem(_csScopedKey('cs_del_fav'), JSON.stringify(_removedFavs)); } catch(e){}
+  try { localStorage.setItem('cs_fav', JSON.stringify(Array.from(favoriteNames))); localStorage.setItem('cs_del_fav', JSON.stringify(_removedFavs)); } catch(e){}
   _bumpVer('favorites');
   renderHomeFav(); renderGarage();
   saveToCloud();
@@ -6473,7 +6276,7 @@ function endRun() {
   // Update leaderboard cache if this is the new best
   if (total > bestFromLB) {
     bestFromLB = total;
-    localStorage.setItem(_csScopedKey('cs_best_lb'), String(bestFromLB));
+    localStorage.setItem('cs_best_lb', String(bestFromLB));
   }
   saveToCloud();
   currentRun = [];
@@ -6607,11 +6410,9 @@ function getRarity(value) {
 
 //  BEST (runs only, not spotted) 
 function getBest() {
-  const runs = (allRuns || []).filter(r => !r.spotted);
-  if (runs.length) {
-    return Math.max.apply(null, runs.map(function(r){ return Number(r.total || 0); }));
-  }
-  return Number(bestFromLB || 0);
+  const runs = allRuns.filter(r => !r.spotted);
+  const localBest = runs.length ? Math.max(...runs.map(r=>r.total)) : 0;
+  return Math.max(localBest, bestFromLB);
 }
 
 //  RENDER SPOT PAGE 
@@ -6914,12 +6715,12 @@ function applyHeaderSort(cars) {
   return favs.concat(rest);
 }
 function featuredName() {
-  try { return _csReadString('cs_featured', '') || ''; } catch(e) { return ''; }
+  try { return localStorage.getItem('cs_featured') || ''; } catch(e) { return ''; }
 }
 function setFeaturedCar(name) {
   try {
-    var cur = _csReadString('cs_featured', '') || '';
-    localStorage.setItem(_csScopedKey('cs_featured'), cur === name ? '' : name);
+    var cur = localStorage.getItem('cs_featured') || '';
+    localStorage.setItem('cs_featured', cur === name ? '' : name);
   } catch(e) {}
   renderGarage();
 }
@@ -7811,7 +7612,7 @@ async function fetchCarImage(carName) {
 }
 
 //  XP & LEVELS — reward every log so there's always a reason to find the next car
-let _xpTotal = parseInt(_csReadString('cs_xp', '0') || '0');
+let _xpTotal = parseInt(localStorage.getItem('cs_xp') || '0');
 function xpInfo(xp) {
   var level = 1, into = 0, need = 100;
   var remaining = xp;
@@ -7820,7 +7621,7 @@ function xpInfo(xp) {
 }
 function addXP(amount) {
   _xpTotal += amount;
-  localStorage.setItem(_csScopedKey('cs_xp'), String(_xpTotal));
+  localStorage.setItem('cs_xp', String(_xpTotal));
   _bumpVer('xp');
   renderLevelBar();
   saveToCloud();
@@ -7859,13 +7660,13 @@ function levelUpPulse() {
 
 //  HAPTICS — tasteful buzz on supported devices
 function haptic(pattern) {
-  if (_csReadString('cs_vibe', 'on') === 'off') return;
+  if (localStorage.getItem('cs_vibe') === 'off') return;
   if (!_userInteracted) return;
   try { if (navigator.vibrate) navigator.vibrate(pattern); } catch(e) {}
 }
 function toggleVibe() {
-  var on = _csReadString('cs_vibe', 'on') !== 'off';
-  localStorage.setItem(_csScopedKey('cs_vibe'), on ? 'off' : 'on');
+  var on = localStorage.getItem('cs_vibe') !== 'off';
+  localStorage.setItem('cs_vibe', on ? 'off' : 'on');
   var btn = document.getElementById('vibeToggle');
   if (btn) btn.classList.toggle('on', !on);
   showToast(on ? ' Vibrations off' : ' Vibrations on');
@@ -7874,21 +7675,21 @@ function toggleVibe() {
 }
 function initVibeToggle() {
   var btn = document.getElementById('vibeToggle');
-  if (btn) btn.classList.toggle('on', _csReadString('cs_vibe', 'on') !== 'off');
+  if (btn) btn.classList.toggle('on', localStorage.getItem('cs_vibe') !== 'off');
 }
 
 //  COLLECTOR CARD SETTINGS — keep the reward moment configurable
-function ccAnimEnabled() { return _csReadString('cs_cc_anim', 'on') !== 'off'; }
+function ccAnimEnabled() { return localStorage.getItem('cs_cc_anim') !== 'off'; }
 function toggleCCAnim() {
-  var on = _csReadString('cs_cc_anim', 'on') !== 'off';
-  localStorage.setItem(_csScopedKey('cs_cc_anim'), on ? 'off' : 'on');
+  var on = localStorage.getItem('cs_cc_anim') !== 'off';
+  localStorage.setItem('cs_cc_anim', on ? 'off' : 'on');
   var btn = document.getElementById('ccAnimToggle');
   if (btn) btn.classList.toggle('on', !on);
   showToast(on ? ' Collector animations off' : ' Collector animations on');
 }
 function initCCAnimToggle() {
   var btn = document.getElementById('ccAnimToggle');
-  if (btn) btn.classList.toggle('on', _csReadString('cs_cc_anim', 'on') !== 'off');
+  if (btn) btn.classList.toggle('on', localStorage.getItem('cs_cc_anim') !== 'off');
 }
 
 //  TIER HELPERS — shared by card, discovery history and quick mode
@@ -7910,7 +7711,7 @@ function tierMeta(t) {
 function recordDiscovery(car, xp) {
   try {
     var list = [];
-    try { list = JSON.parse(_csReadString('cs_discoveries', '[]') || '[]'); } catch(e) { list = []; }
+    try { list = JSON.parse(localStorage.getItem('cs_discoveries') || '[]'); } catch(e) { list = []; }
     var photoRef = '';
     if (car.photo && car.photo.indexOf('data:image/') === 0) {
       var pKey = (car.name || '').toLowerCase();
@@ -7932,7 +7733,7 @@ function recordDiscovery(car, xp) {
     }
     list.unshift({ n: car.name, v: car.value || 0, t: car.type || '', r: tierOf(car.value || 0), xp: xp || 0, d: Date.now(), p: photoRef });
     if (list.length > 10) list.length = 10;
-    localStorage.setItem(_csScopedKey('cs_discoveries'), JSON.stringify(list));
+    localStorage.setItem('cs_discoveries', JSON.stringify(list));
     _bumpVer('discoveries');
     saveToCloud();
     renderDiscoveries();
@@ -7952,7 +7753,7 @@ function resolveDiscoveryPhoto(p, name) {
 }
 function clearDiscoveries() {
   if (!confirm('Clear your recent discoveries?')) return;
-  try { localStorage.removeItem(_csScopedKey('cs_discoveries')); } catch(e) {}
+  try { localStorage.removeItem('cs_discoveries'); } catch(e) {}
   _bumpVer('discoveries');
   saveToCloud();
   renderDiscoveries();
@@ -7962,7 +7763,7 @@ function renderDiscoveries() {
   var listEl  = document.getElementById('discoveriesList');
   if (!section || !listEl) return;
   var list = [];
-  try { list = JSON.parse(_csReadString('cs_discoveries', '[]') || '[]'); } catch(e) { list = []; }
+  try { list = JSON.parse(localStorage.getItem('cs_discoveries') || '[]'); } catch(e) { list = []; }
   if (!list.length) { section.style.display = 'none'; return; }
   section.style.display = '';
   var clearBtn = document.getElementById('discClearBtn');
@@ -7994,7 +7795,7 @@ function renderDiscoveries() {
 //  MODE SELECTION — full card for headliner-worthy tiers (super/hyper/legend);
 //  daily & sports get a quick, non-blocking chip. The setting fully disables it.
 function wantsFullCollectorCard(tier) {
-  if (_csReadString('cs_cc_anim', 'on') === 'off') return false;
+  if (localStorage.getItem('cs_cc_anim') === 'off') return false;
   return (tier === 'super' || tier === 'hyper' || tier === 'legend');
 }
 
@@ -8419,14 +8220,14 @@ function fetchAndStoreRefImage(car) {
       // Backfill the most recent discovery card for this car so "Recent spots"
       // don't stay image-less after the reference photo resolves.
       try {
-        var disc = JSON.parse(_csReadString('cs_discoveries', '[]') || '[]');
+        var disc = JSON.parse(localStorage.getItem('cs_discoveries') || '[]');
         var discChanged = false;
         disc = disc.map(function(rec) {
           if (String(rec.n).toLowerCase() === String(car.name).toLowerCase() &&
               (!rec.p || String(rec.p).indexOf('photo:') === 0)) { rec.p = url; discChanged = true; }
           return rec;
         });
-        if (discChanged) { localStorage.setItem(_csScopedKey('cs_discoveries'), JSON.stringify(disc)); renderDiscoveries(); }
+        if (discChanged) { localStorage.setItem('cs_discoveries', JSON.stringify(disc)); renderDiscoveries(); }
       } catch(e) {}
       clearTimeout(_refImgSaveTimer);
       _refImgSaveTimer = setTimeout(saveToCloud, 500);
@@ -8523,10 +8324,10 @@ function _toastPump() {
 //  records, achievements, rare finds, sync recoveries). Stored per-device in
 //  localStorage only — deliberately never sent to Firestore (it is ephemeral UI)
 //  and never exported (photos stay out; the feed is trivial to rebuild on import).
-var _actList = (function(){ try { var a = JSON.parse(_csReadString('cs_activity', 'null') || 'null'); return Array.isArray(a) ? a : []; } catch(e){ return []; } })();
-var _actSeen = parseInt(_csReadString('cs_activity_seen', '0') || '0') || 0;
+var _actList = (function(){ try { var a = JSON.parse(localStorage.getItem('cs_activity') || 'null'); return Array.isArray(a) ? a : []; } catch(e){ return []; } })();
+var _actSeen = parseInt(localStorage.getItem('cs_activity_seen') || '0') || 0;
 var _actOpen = false;
-function _saveAct() { try { localStorage.setItem(_csScopedKey('cs_activity'), JSON.stringify(_actList)); } catch(e){} }
+function _saveAct() { try { localStorage.setItem('cs_activity', JSON.stringify(_actList)); } catch(e){} }
 function _ceremonyVisible() {
   return !!(document.querySelector('.cc-overlay') || document.querySelector('.cc-quick') ||
             document.querySelector('.evo-overlay') || document.querySelector('.title-overlay') ||
@@ -8553,7 +8354,7 @@ function recallActivity(key, text) {
 function clearActivity() {
   _actList = [];
   _actSeen = Date.now();
-  try { localStorage.setItem(_csScopedKey('cs_activity_seen'), String(_actSeen)); } catch(e){}
+  try { localStorage.setItem('cs_activity_seen', String(_actSeen)); } catch(e){}
   _saveAct();
   _updateActBadge();
   if (_actOpen) renderActivityPanel();
@@ -8581,7 +8382,7 @@ function toggleActivity(forceOpen) {
   if (want) {
     renderActivityPanel();
     _actSeen = Date.now();
-    try { localStorage.setItem(_csScopedKey('cs_activity_seen'), String(_actSeen)); } catch(e){}
+    try { localStorage.setItem('cs_activity_seen', String(_actSeen)); } catch(e){}
     _updateActBadge();
   }
 }
@@ -8642,65 +8443,73 @@ function deepStripPhotos(obj) {
   return obj;
 }
 
-function _backupLocalStorageForAccount() {
+function exportLocalData() {
   const data = {};
-  const uid = _csAccountUid();
-  const prefix = uid ? uid + '_' : '';
-  const accountKeys = new Set(_ACCOUNT_LOCAL_KEYS.concat(['cs_pending_loc','cs_best_lb','cs_theme','cs_sound','cs_carbon','cs_compact','cs_vibe','cs_cc_anim','cs_featured','cs_activity','cs_activity_seen','cs_notes','cs_discoveries','cs_progress','cs_ach','cs_xp','cs_fav','cs_aliases','cs_runs','cs_current','cs_qp','cs_del_runs','cs_del_qp','cs_del_fav','cs_fv','cs_lamport','cs_lamport_last','cs_sync_dirty','cs_cloud_current_ts','cs_offline_queue']));
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (!key) continue;
-    if (uid && key.startsWith(prefix + 'cs_')) {
-      data[key.slice(prefix.length)] = localStorage.getItem(key);
-    } else if (!uid && key.startsWith('cs_')) {
-      data[key] = localStorage.getItem(key);
-    } else if (!uid && !key.startsWith('cs_')) {
-      continue;
-    } else if (!uid && accountKeys.has(key)) {
+    if (key.startsWith('cs_')) {
       data[key] = localStorage.getItem(key);
     }
   }
-  return data;
-}
-
-function exportLocalData() {
-  const data = _backupLocalStorageForAccount();
   // Deep-strip photos from runs, current, qp
   try {
-    if (data.cs_runs) data.cs_runs = JSON.stringify(deepStripPhotos(JSON.parse(data.cs_runs)));
-    if (data.cs_current) data.cs_current = JSON.stringify(deepStripPhotos(JSON.parse(data.cs_current)));
-    if (data.cs_qp) data.cs_qp = JSON.stringify(deepStripPhotos(JSON.parse(data.cs_qp)));
+    if (data.cs_runs) {
+      const runs = JSON.parse(data.cs_runs);
+      data.cs_runs = JSON.stringify(deepStripPhotos(runs));
+    }
+    if (data.cs_current) {
+      const cur = JSON.parse(data.cs_current);
+      data.cs_current = JSON.stringify(deepStripPhotos(cur));
+    }
+    if (data.cs_qp) {
+      const qp = JSON.parse(data.cs_qp);
+      data.cs_qp = JSON.stringify(deepStripPhotos(qp));
+    }
   } catch(e) {}
+  // Add computed garage data (no photos)
   try {
     const garage = getAllCars().map(c => ({ name: c.name, value: c.value, type: c.type, color: c.color, spotCount: c.spotCount, runDate: c.runDate }));
     data.cs_garage = JSON.stringify(garage);
   } catch(e) {}
   data.exportedAt = new Date().toISOString();
-  data.version = 22;
+  data.version = 21;
   data.includePhotos = false;
+
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'carspotter-backup-nophotos.json';
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'carspotter-backup-nophotos.json';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
   showToast('📥 Exported all data (no photos)');
 }
 
 function exportAllData() {
-  const data = _backupLocalStorageForAccount();
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('cs_')) {
+      data[key] = localStorage.getItem(key);
+    }
+  }
+  // Resolve 'photo:' refs back to their base64 data so the backup really contains
+  // every image (IndexedDB stores the data, localStorage only keeps refs).
   ['cs_runs','cs_current','cs_qp'].forEach(function(k) {
     try { data[k] = JSON.stringify(_resolvePhotosIn(JSON.parse(data[k] || '[]'))); } catch(e) {}
   });
+  // Add computed garage data with photos
   try {
     const garage = getAllCars().map(c => ({ name: c.name, value: c.value, type: c.type, color: c.color, photo: c.photo, location: c.location, spotCount: c.spotCount, runDate: c.runDate }));
     data.cs_garage = JSON.stringify(garage);
   } catch(e) {}
   data.exportedAt = new Date().toISOString();
-  data.version = 22;
+  data.version = 21;
   data.includePhotos = true;
+
   const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = 'CarSpotter_backup_full_' + new Date().toISOString().slice(0,10) + '.json';
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'CarSpotter_backup_full_' + new Date().toISOString().slice(0,10) + '.json';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(function(){ URL.revokeObjectURL(url); }, 5000);
   showToast('📥 Exported all data WITH photos — file may be large');
@@ -8714,63 +8523,83 @@ function importFromFile(input) {
     try {
       const data = JSON.parse(e.target.result);
       const hasPhotos = data.includePhotos === true;
-      const uid = _csAccountUid();
-      if (!uid) { alert('Sign in before importing a backup so it can be kept isolated to your account.'); return; }
 
-      try { await _idbDeleteAccountPhotos(uid); } catch(e) {}
-      _idbPhotoCache = {}; _photoCacheOrder = []; _photoLoading = {}; _photoMissing = {};
-
-      // Clear only this account's scoped keys. Never touch another account's cache.
-      _ACCOUNT_LOCAL_KEYS.concat(['cs_pending_loc','cs_best_lb','cs_theme','cs_sound','cs_carbon','cs_compact','cs_vibe','cs_cc_anim','cs_featured','cs_activity','cs_activity_seen','cs_notes','cs_discoveries','cs_progress','cs_ach','cs_xp']).forEach(function(k){
-        try { localStorage.removeItem(_csScopedKey(k)); } catch(e) {}
+      // Free the storage quota BEFORE writing anything: the photo-bearing keys are
+      // rebuilt from the backup with images moved into IndexedDB as tiny refs.
+      ['cs_runs','cs_current','cs_qp'].forEach(function(k) {
+        try { localStorage.removeItem(k); } catch(e) {}
       });
-      ['cs_runs','cs_current','cs_qp'].forEach(function(k){ try { localStorage.removeItem(_csScopedKey(k)); } catch(e) {} });
 
       let restored = 0;
-      for (const rawKey of Object.keys(data)) {
-        if (!rawKey.startsWith('cs_') || rawKey === 'cs_garage') continue;
-        const targetKey = _csScopedKey(rawKey);
-        if (rawKey === 'cs_runs' || rawKey === 'cs_current' || rawKey === 'cs_qp') {
-          try { _safeSet(targetKey, JSON.stringify(_stripCopy(JSON.parse(data[rawKey])))); }
-          catch(err2) { _safeSet(targetKey, data[rawKey]); }
+      for (const key of Object.keys(data)) {
+        if (!key.startsWith('cs_')) continue;
+        if (key === 'cs_garage') continue; // computed convenience field — never read
+        if (key === 'cs_runs' || key === 'cs_current' || key === 'cs_qp') {
+          // Move base64 photos into IndexedDB and store tiny 'photo:' refs in
+          // localStorage so a photo-heavy backup fits within the storage quota.
+          try {
+            _safeSet(key, JSON.stringify(_stripCopy(JSON.parse(data[key]))));
+          } catch(err2) {
+            _safeSet(key, data[key]);
+          }
         } else {
-          _safeSet(targetKey, data[rawKey]);
+          _safeSet(key, data[key]);
         }
         restored++;
       }
-      try { await Promise.all(Object.keys(_idbPhotoCache).map(k => _idbPut(k, _idbPhotoCache[k]).catch(function(){}))); } catch(e) {}
 
-      allRuns = _csReadJSON('cs_runs', []);
-      currentRun = _csReadJSON('cs_current', []);
-      quickPicks = _csReadJSON('cs_qp', []);
-      aliases = _csReadJSON('cs_aliases', {});
-      bestFromLB = parseInt(_csReadString('cs_best_lb', '0') || '0', 10) || 0;
-      _prevAchievements = _csReadJSON('cs_ach', []);
-      _deletedRuns = _csReadJSON('cs_del_runs', []);
-      _deletedQP = _csReadJSON('cs_del_qp', []);
-      _removedFavs = _csReadJSON('cs_del_fav', []);
-      _fieldVer = _csReadJSON('cs_fv', {});
-      _lamport = parseInt(_csReadString('cs_lamport', '0') || '0', 10) || 0;
-      _lastAppliedLamport = parseInt(_csReadString('cs_lamport_last', '0') || '0', 10) || 0;
-      favoriteNames = new Set(_csReadJSON('cs_fav', []));
+      // Ensure every imported photo is committed to IndexedDB before finishing.
       try {
-        var impP = JSON.parse(_csReadString('cs_progress', '{}') || 'null');
+        await Promise.all(Object.keys(_idbPhotoCache).map(k => _idbPut(k, _idbPhotoCache[k]).catch(function(){})));
+      } catch(e) {}
+
+      // Reload all runtime state from localStorage
+      allRuns    = JSON.parse(localStorage.getItem('cs_runs')    || '[]');
+      currentRun = JSON.parse(localStorage.getItem('cs_current') || '[]');
+      quickPicks = JSON.parse(localStorage.getItem('cs_qp')      || '[]');
+      aliases    = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
+      bestFromLB = parseInt(localStorage.getItem('cs_best_lb')   || '0');
+      _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
+      // Reload deterministic sync state too — otherwise stale in-memory tombstones
+      // / field versions let auto-sync resurrect or clobber the freshly imported data.
+      _deletedRuns = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_runs') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();
+      _deletedQP  = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_qp') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();
+      _removedFavs = (function(){ try { var d = JSON.parse(localStorage.getItem('cs_del_fav') || 'null'); return Array.isArray(d) ? d : []; } catch(e){ return []; } })();
+      _fieldVer = (function(){ try { var f = JSON.parse(localStorage.getItem('cs_fv') || 'null'); return (f && typeof f === 'object') ? f : {}; } catch(e){ return {}; } })();
+      _lamport = parseInt(localStorage.getItem('cs_lamport') || '0');
+      favoriteNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
+      // Reload progression state (cs_progress) so trips/titles/etc. reflect the import
+      try {
+        var impP = JSON.parse(localStorage.getItem('cs_progress') || 'null');
         if (impP && impP.v === _progressV) { Object.keys(_progress).forEach(function(k){ delete _progress[k]; }); Object.assign(_progress, _defaultProgress(), impP); }
       } catch(e){}
-      const theme = parseInt(_csReadString('cs_theme', '0') || '0', 10) || 0;
+
+      // Re-apply settings
+      const theme = parseInt(localStorage.getItem('cs_theme') || '0');
       applyTheme(theme);
-      carbonOn = _csReadString('cs_carbon', '') === 'on'; applyCarbon();
-      compactMode = _csReadString('cs_compact', '') === 'on'; applyCompactMode();
-      soundEnabled = _csReadString('cs_sound', '') !== 'off';
-      const soundToggle = document.getElementById('soundToggle'); if (soundToggle) soundToggle.classList.toggle('on', soundEnabled);
-      const savedNotes = _csReadString('cs_notes', ''); const notesArea = document.getElementById('notesArea'); if (notesArea) notesArea.value = savedNotes;
-      offlineQueue = _safeJSON(_csReadString('cs_offline_queue', '[]'), []);
-      _dirty = true; _markDirty(true);
+      carbonOn = localStorage.getItem('cs_carbon') === 'on';
+      applyCarbon();
+      compactMode = localStorage.getItem('cs_compact') === 'on';
+      applyCompactMode();
+      soundEnabled = localStorage.getItem('cs_sound') !== 'off';
+      const soundToggle = document.getElementById('soundToggle');
+      if (soundToggle) soundToggle.classList.toggle('on', soundEnabled);
+
+      // Reload notes textarea
+      const savedNotes = localStorage.getItem('cs_notes') || '';
+      const notesArea = document.getElementById('notesArea');
+      if (notesArea) notesArea.value = savedNotes;
+
+      // Refresh everything
       renderAll();
-      notify('✅ Restored ' + restored + ' data fields' + (hasPhotos ? ' WITH photos' : ' (no photos)') + ' — ' + allRuns.reduce((s,r) => s + (r.cars||[]).length, 0) + ' cars total', { priority:'major', record:true, key:'restore', icon:'✅' });
+      notify('✅ Restored ' + restored + ' data fields' +
+        (hasPhotos ? ' WITH photos' : ' (no photos)') +
+        ' — ' + allRuns.reduce((s,r) => s + (r.cars||[]).length, 0) + ' cars total', { priority:'major', record: true, key:'restore', icon:'✅' });
+      // Re-check achievements
       setTimeout(checkNewAchievements, 800);
-      saveToCloud();
-    } catch(err) { alert('Could not read backup file: ' + err.message); }
+    } catch(err) {
+      alert('Could not read backup file: ' + err.message);
+    }
   };
   reader.readAsText(file);
 }
@@ -8816,7 +8645,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
 
 //  OFFLINE MODE 
 let isOffline = !navigator.onLine;
-let offlineQueue = _safeJSON(_csReadString('cs_offline_queue', '[]'), []); // queued saves
+let offlineQueue = _safeJSON(localStorage.getItem('cs_offline_queue') || '[]', []); // queued saves
 
 function updateOfflineBanner() {
   const b = document.getElementById('offlineBanner');
@@ -8845,7 +8674,7 @@ function flushOfflineQueue() {
   if (!offlineQueue.length || !currentUser) return;
   const n = offlineQueue.length;
   offlineQueue = [];
-  localStorage.removeItem(_csScopedKey('cs_offline_queue'));
+  localStorage.removeItem('cs_offline_queue');
   saveToCloud();
   notify('☁️ Synced ' + n + ' offline save' + (n !== 1 ? 's' : '') + ' from this device', { priority:'quiet', record:true, key:'Offline sync', icon:'☁️' });
 }
@@ -8877,9 +8706,9 @@ let micInterim  = '';
 function initNotes() {
   const area = document.getElementById('notesArea');
   if (!area) return;
-  area.value = _csReadString('cs_notes', '');
+  area.value = localStorage.getItem('cs_notes') || '';
   area.addEventListener('input', () => {
-    localStorage.setItem(_csScopedKey('cs_notes'), area.value);
+    localStorage.setItem('cs_notes', area.value);
     _bumpVer('notes');
     saveToCloud();
   });
@@ -8928,7 +8757,7 @@ function initNotes() {
     }
     micInterim = interim;
     if (interim) area.value += interim;
-    localStorage.setItem(_csScopedKey('cs_notes'), area.value);
+    localStorage.setItem('cs_notes', area.value);
     _bumpVer('notes');
     saveToCloud();
     area.scrollTop = area.scrollHeight;
@@ -8969,7 +8798,7 @@ function stopMic() {
   const area = document.getElementById('notesArea');
   if (micInterim && area.value.endsWith(micInterim)) {
     area.value = area.value.slice(0, -micInterim.length);
-    localStorage.setItem(_csScopedKey('cs_notes'), area.value);
+    localStorage.setItem('cs_notes', area.value);
   }
   micInterim = '';
   document.getElementById('micBtn').classList.remove('active');
@@ -8997,16 +8826,10 @@ _attachPhotoInput.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
 // IndexedDB photo storage — sidesteps localStorage 5MB limit
 
 var _idbConn = null;
-function _photoUid() {
-  return _csAccountUid() || 'guest';
-}
-function _photoStoreKey(name, uid) {
-  return String(uid || _photoUid()) + '|' + String(name || '').toLowerCase();
-}
 function _idbOpen() {
   if (_idbConn) return Promise.resolve(_idbConn);
   return new Promise(function(res, rej) {
-    var r = indexedDB.open('CarSpotterPhotos', 4);
+    var r = indexedDB.open('CarSpotterPhotos', 3);
     r.onupgradeneeded = function(e) {
       var db = e.target.result;
       if (e.oldVersion < 1) db.createObjectStore('photos', { keyPath: 'name' });
@@ -9020,52 +8843,51 @@ function _idbOpen() {
     r.onerror = function(e) { rej(e.target.error); };
   });
 }
+
 function _idbPut(name, data) {
-  var key = _photoStoreKey(name);
   return _idbOpen().then(function(db) {
     return new Promise(function(res, rej) {
       var tx = db.transaction('photos', 'readwrite');
-      tx.objectStore('photos').put({ name:key, uid:_photoUid(), carName:String(name || '').toLowerCase(), data:data });
-      tx.oncomplete = function() { _photoCacheSet(String(name || '').toLowerCase(), data); res(); };
+      tx.objectStore('photos').put({ name: name.toLowerCase(), data: data });
+      tx.oncomplete = function() { _photoCacheSet(name.toLowerCase(), data); res(); };
       tx.onerror = function(e) { rej(e.target.error); };
     });
   });
 }
+
 function _idbGetAll() {
-  var uid = _photoUid();
   return _idbOpen().then(function(db) {
     return new Promise(function(res, rej) {
       var tx = db.transaction('photos', 'readonly');
       var r = tx.objectStore('photos').getAll();
-      r.onsuccess = function(e) {
-        res((e.target.result || []).filter(function(x){
-          return x.uid === uid;
-        }));
-      };
+      r.onsuccess = function(e) { res(e.target.result || []); };
       r.onerror = function(e) { rej(e.target.error); };
     });
   });
 }
+
 function _idbGet(name) {
-  var uid = _photoUid();
   return _idbOpen().then(function(db) {
     return new Promise(function(res, rej) {
       var tx = db.transaction('photos', 'readonly');
-      var r = tx.objectStore('photos').get(_photoStoreKey(name));
-      r.onsuccess = function(e) { res(r.result ? r.result.data : null); };
+      var r = tx.objectStore('photos').get(String(name || '').toLowerCase());
+      r.onsuccess = function(e) { res(e.target.result ? e.target.result.data : null); };
       r.onerror = function(e) { rej(e.target.error); };
     });
   });
 }
+
 function _loadIDBCache() {
   if (typeof indexedDB === 'undefined') return;
   _idbGetAll().then(function(entries) {
-    entries.slice(-Math.min(_photoCacheMax, 10)).forEach(function(e) {
-      _photoCacheSet(e.carName || e.name, e.data);
-    });
+    // Don't pin every photo in RAM — keep only the newest few resident; the rest
+    // stay in IndexedDB and are pulled back on demand by _photoLazyLoad.
+    entries.slice(-Math.min(_photoCacheMax, 10)).forEach(function(e) { _photoCacheSet(e.name, e.data); });
+    // Migrate any base64 photos still baked into localStorage out to IndexedDB as
+    // 'photo:' refs — frees the quota so later writes never throw QuotaExceededError.
     _saveRunsLocal(); _saveCurrentLocal(); _saveQPLocal();
     renderSpot(); renderGarage(); renderHistory(); renderDiscoveries();
-  }).catch(function(e){ console.warn('IndexedDB photo cache load failed', e); });
+  }).catch(function(){});
 }
 
 function _patchPhotosFromCache() {
@@ -9160,9 +8982,9 @@ function _stripCopy(obj) {
   }
   return obj;
 }
-function _saveRunsLocal()    { return _safeSet(_csScopedKey('cs_runs'),    JSON.stringify(_stripCopy(allRuns))); }
+function _saveRunsLocal()    { return _safeSet('cs_runs',    JSON.stringify(_stripCopy(allRuns))); }
 function _saveCurrentLocal() { return _safeSet(_csScopedKey('cs_current'), JSON.stringify(_stripCopy(currentRun))); }
-function _saveQPLocal()      { return _safeSet(_csScopedKey('cs_qp'),      JSON.stringify(_stripCopy(quickPicks))); }
+function _saveQPLocal()      { return _safeSet('cs_qp',      JSON.stringify(_stripCopy(quickPicks))); }
 
 // Deep copy with 'photo:' refs resolved back to their base64 from the IDB cache —
 // used by exports so backups contain the actual image data.
@@ -9713,7 +9535,7 @@ window.saveEditCar = function(originalName) {
 // ─────────────────────────────────────────────
 //  CAR SEARCH (built-in, no redirect)
 // ── COMPACT MODE ──
-let compactMode = _csReadString('cs_compact', '') === 'on';
+let compactMode = localStorage.getItem('cs_compact') === 'on';
 function applyCompactMode() {
   document.body.classList.toggle('compact-mode', compactMode);
   const btn = document.getElementById('compactToggle');
@@ -9721,7 +9543,7 @@ function applyCompactMode() {
 }
 function toggleCompactMode() {
   compactMode = !compactMode;
-  localStorage.setItem(_csScopedKey('cs_compact'), compactMode ? 'on' : 'off');
+  localStorage.setItem('cs_compact', compactMode ? 'on' : 'off');
   applyCompactMode();
   showToast(compactMode ? 'Compact mode on' : 'Compact mode off');
   _bumpVer('settings');
@@ -9732,7 +9554,7 @@ applyCompactMode();
 // ── SORT PREFERENCE ──
 function setSortPref(mode) {
   sortMode = mode;
-  localStorage.setItem(_csScopedKey('cs_sort'), mode);
+  localStorage.setItem('cs_sort', mode);
   document.querySelectorAll('.sort-pref-btn').forEach(b => b.classList.remove('active'));
   const btn = document.getElementById('spb-' + mode);
   if (btn) btn.classList.add('active');
@@ -9747,65 +9569,15 @@ function initSortPrefBtns() {
   if (btn) btn.classList.add('active');
 }
 
-// Delete only the signed-in account's IndexedDB photos. The object store is intentionally
-// shared by accounts, so a blanket clear() would be a cross-account data-loss bug.
-function _idbDeleteAccountPhotos(uid) {
-  uid = String(uid || _photoUid());
-  return _idbOpen().then(function(db) {
-    return new Promise(function(res, rej) {
-      var tx = db.transaction('photos', 'readwrite');
-      var store = tx.objectStore('photos');
-      var req = store.getAll();
-      req.onsuccess = function() {
-        (req.result || []).forEach(function(row) {
-          if (row && row.uid === uid) store.delete(row.name);
-        });
-      };
-      tx.oncomplete = function(){ res(); };
-      tx.onerror = function(e){ rej(e.target.error); };
-    });
-  });
-}
-
 // ── CLEAR ALL DATA ──
-async function clearAllData() {
-  if (!confirm('Delete ALL local runs, garage, and settings for this account? This cannot be undone.')) return;
-  if (!confirm('Are you sure? Everything will be wiped locally and from your cloud account.')) return;
-  var uid = currentUser && currentUser.uid;
-  if (!uid) { showToast('Sign in before clearing account data.'); return; }
-
-  // Clear only this UID's local state. Other accounts remain untouched.
-  _ACCOUNT_LOCAL_KEYS.forEach(function(k){ try { localStorage.removeItem(_csScopedKey(k)); } catch(e){} });
-  try {
-    Object.keys(localStorage).forEach(function(k){
-      if (k.startsWith(_csAccountUid() + '_cs_secret_')) localStorage.removeItem(k);
-    });
-  } catch(e) {}
-  _resetInMemoryForAccount();
-  try { await _idbDeleteAccountPhotos(uid); } catch(e) { console.warn('Account photo clear failed', e); }
-  try { _idbPhotoCache = {}; _photoCacheOrder = []; _photoLoading = {}; _photoMissing = {}; } catch(e) {}
-
-  var cloudFailed = false;
-  try {
-    if (db) {
-      var runsSnap = await db.collection('users').doc(uid).collection('runs').get();
-      var refs = runsSnap.docs.map(function(doc){ return doc.ref; });
-      while (refs.length) {
-        var batch = db.batch();
-        refs.splice(0, 400).forEach(function(ref){ batch.delete(ref); });
-        await batch.commit();
-      }
-      await db.collection('users').doc(uid).delete();
-    }
-  } catch(e) {
-    cloudFailed = true;
-    console.warn('Cloud clear failed', e);
-    if (e && e.code === 'permission-denied') showToast('⚠️ Firestore rules blocked cloud deletion. Local data was cleared.');
-    else showToast('⚠️ Cloud data could not be fully cleared. Local data was cleared.');
-  }
-  try { localStorage.setItem('cs_active_uid', uid); } catch(e){}
+function clearAllData() {
+  if (!confirm('Delete ALL local runs, garage, and settings? This cannot be undone.')) return;
+  if (!confirm('Are you sure? Everything will be wiped locally.')) return;
+  const keys = Object.keys(localStorage).filter(k => k.startsWith('cs_'));
+  keys.forEach(k => localStorage.removeItem(k));
+  allRuns = []; currentRun = []; quickPicks = []; bestFromLB = 0;
   renderGarage(); renderHistory(); renderSpot(); renderQPTrigger();
-  showToast(cloudFailed ? 'Account data cleared locally; cloud deletion needs attention.' : 'All data for this account was cleared.');
+  showToast('All local data cleared.');
 }
 
 // ─────────────────────────────────────────────
@@ -9985,9 +9757,9 @@ window.fillFromSearch = function(name, value, color, type) {
 
 // Seed existing achievements silently so returning users don't get toasted on first load
 (function seedAchievements() {
-  if (!_csReadString('cs_ach', '')) {
+  if (!localStorage.getItem('cs_ach')) {
     const earned = getUnlockedAchievements();
-    localStorage.setItem(_csScopedKey('cs_ach'), JSON.stringify(earned));
+    localStorage.setItem('cs_ach', JSON.stringify(earned));
     _prevAchievements = earned;
   }
 })();
@@ -10003,7 +9775,7 @@ function checkNewAchievements() {
   const newOnes = now.filter(id => !prev.has(id));
   if (newOnes.length) {
     _prevAchievements = now;
-    localStorage.setItem(_csScopedKey('cs_ach'), JSON.stringify(now));
+    localStorage.setItem('cs_ach', JSON.stringify(now));
     newOnes.forEach((id, i) => {
       const a = ACHIEVEMENTS.find(x=>x.id===id);
       if (a) {
@@ -10454,13 +10226,13 @@ function _defaultProgress() {
 }
 var _progress = (function(){
   try {
-    var p = JSON.parse(_csReadString('cs_progress', '{}') || 'null');
+    var p = JSON.parse(localStorage.getItem('cs_progress') || 'null');
     if (!p || p.v !== _progressV) return _defaultProgress();
     return Object.assign(_defaultProgress(), p);
   } catch(e){ return _defaultProgress(); }
 })();
 function saveProgress() {
-  try { localStorage.setItem(_csScopedKey('cs_progress'), JSON.stringify(_progress)); } catch(e){}
+  try { localStorage.setItem('cs_progress', JSON.stringify(_progress)); } catch(e){}
   if (!_applyingCloud) { _bumpVer('progression'); saveToCloud(); }
 }
 function getProgression() { return _progress; }
@@ -11726,9 +11498,9 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
 
 (function(){
   _prevAchievements = (_prevAchievements || []).filter(id => ACHIEVEMENTS.some(a => a.id === id));
-  localStorage.setItem(_csScopedKey('cs_ach'), JSON.stringify(_prevAchievements));
+  localStorage.setItem('cs_ach', JSON.stringify(_prevAchievements));
 
-  function persistPendingLocation(){ if (currentSpotLocation) localStorage.setItem(_csScopedKey('cs_pending_loc'), JSON.stringify(currentSpotLocation)); else localStorage.removeItem(_csScopedKey('cs_pending_loc')); }
+  function persistPendingLocation(){ if (currentSpotLocation) localStorage.setItem('cs_pending_loc', JSON.stringify(currentSpotLocation)); else localStorage.removeItem('cs_pending_loc'); }
   function renderPendingLocation(){
     var row = document.getElementById('locationChipRow');
     var btn = document.getElementById('geoBtn');
