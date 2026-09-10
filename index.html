@@ -1162,6 +1162,11 @@ html:not(.show-qp) #qpWrap{display:none;}
   background:var(--surf2);border:1px solid var(--border);
   display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;
 }
+/* Photo thumbnail and no-photo placeholder must be the exact same box —
+   previously the photo was 36px/7px radius inline vs. the placeholder's
+   38px/9px, so rows visibly changed shape depending on whether that car
+   had a photo. */
+.g-thumb{width:38px;height:38px;border-radius:9px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border);}
 .g-info{flex:1;min-width:0;}
 .g-name{font-size:0.9rem;font-weight:600;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;-webkit-line-clamp:2;word-break:break-word;}
 .g-meta{font-size:0.62rem;color:var(--text2);margin-top:3px;}
@@ -1385,7 +1390,7 @@ html:not(.show-qp) #qpWrap{display:none;}
 .collector-card .gc-xp{animation:xpChipHover 4.5s ease-in-out infinite;}
 @keyframes xpChipHover{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
 .collector-card .gc-date{font-size:0.52rem;color:var(--text2);margin-top:4px;}
-.collector-card .gc-badges{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap;}
+.collector-card .gc-badges{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap;min-height:20px;}
 .gc-evo-chip{display:inline-flex;align-items:center;margin-left:4px;font-size:0.6rem;line-height:1;}
 .collector-card.evo-bronze{--evo-ring:#cd7f32;--evo-tint:rgba(205,127,50,0.14);}
 .collector-card.evo-silver{--evo-ring:#c0c0c0;--evo-tint:rgba(192,192,192,0.14);}
@@ -7021,7 +7026,7 @@ function renderGarage() {
           '<div class="gc-name">' + escapeHtml(car.name) + (car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '') + '</div>' +
           '<div class="gc-val-row"><span class="gc-val">' + fmtFull(car.value) + '</span><span class="gc-xp">+' + rarityXP(car.value) + ' XP</span></div>' +
           '<div class="gc-date">\uD83D\uDCCD ' + escapeHtml(car.runDate || 'Saved') + '</div>' +
-          (badges || evoBadge ? '<div class="gc-badges">' + badges + evoBadge + '</div>' : '') +
+          '<div class="gc-badges">' + badges + evoBadge + '</div>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -7041,7 +7046,7 @@ el.querySelectorAll('[data-inst]').forEach(function(a){
     var nameSuffix = car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '';
     var clickAttr = ' data-inst="1" data-name="' + escapeHtml(car.name) + '"';
     var evoBadge = evoTier ? '<span class="gc-badge evo" style="color:' + evoTier.color + ';border-color:' + evoTier.color + '44">' + evoTier.icon + ' ' + evoTier.name + ' \u00D7' + ev.count + '</span>' : '';
-    return '<div class="garage-row' + (evoTier ? ' evo-row evo-' + evoTier.name.toLowerCase() : '') + '" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img style="width:36px;height:36px;border-radius:7px;object-fit:cover;margin-right:9px;flex-shrink:0;border:1px solid var(--border)" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + evoBadge + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');this.textContent=this.textContent===\'★\'?\'☆\':\'★\';" title="Toggle favorite">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit this car">✎</button><button class="g-act-btn g-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')" title="Delete this car from everywhere">✕</button></div></div>';
+    return '<div class="garage-row' + (evoTier ? ' evo-row evo-' + evoTier.name.toLowerCase() : '') + '" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img class="g-thumb" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + evoBadge + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');this.textContent=this.textContent===\'★\'?\'☆\':\'★\';" title="Toggle favorite">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit this car">✎</button><button class="g-act-btn g-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')" title="Delete this car from everywhere">✕</button></div></div>';
   }).join('');
   el.querySelectorAll('[data-inst]').forEach(function(a){
     attachCarTap(a);
