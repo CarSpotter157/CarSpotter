@@ -1715,6 +1715,7 @@ html.show-install #installBanner{display:flex;}
 }
 .lb-row:active{transform:scale(0.985);}
 .lb-row:hover{border-color:rgba(232,184,75,0.2);}
+.lb-row.lb-you{border-color:var(--accent);background:var(--adim);}
 .lb-rank{
   width:48px;height:48px;border-radius:var(--radius-xs);
   background:var(--surf2);border:1px solid var(--border2);
@@ -3654,6 +3655,14 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <span class="more-tile-icon"><svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="22"><path d="M3 12h18M3 6h18M3 18h18"></path></svg></span>
 <span class="more-tile-label">History</span>
 </button>
+<button class="more-page-tile" onclick="goTo('leaderboard')" title="See your highest-value runs and solo spots">
+<span class="more-tile-icon">🏆</span>
+<span class="more-tile-label">Leaderboard</span>
+</button>
+<button class="more-page-tile" onclick="goTo('stats')" title="See collection statistics and activity">
+<span class="more-tile-icon">📊</span>
+<span class="more-tile-label">Stats</span>
+</button>
 
 
 
@@ -3677,6 +3686,24 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 </div>
 </div>
 <!-- STATS PAGE -->
+<div class="page" id="page-stats">
+<div class="sec-row" style="margin-bottom:10px"><div><div class="sec-title">YOUR STATS</div><div class="cs-garage-subtitle">A snapshot of your collection and spotting streak.</div></div></div>
+<div class="stats-row">
+<div class="stat-box"><div class="stat-v" id="stCars">0</div><div class="stat-l">Cars Logged</div></div>
+<div class="stat-box"><div class="stat-v" id="stRuns">0</div><div class="stat-l">Runs</div></div>
+<div class="stat-box"><div class="stat-v" id="stValue">$0</div><div class="stat-l">Collection</div></div>
+</div>
+<div class="card" style="margin-bottom:12px"><div class="card-title">TOP MAKES</div><div id="stMakes"></div></div>
+<div class="card" style="margin-bottom:12px"><div class="card-title">CARS BY TYPE</div><div id="stTypes"></div></div>
+<div class="card"><div class="card-title">LAST 7 DAYS</div><div id="stActivity"></div></div>
+</div>
+
+<!-- PERSONAL LEADERBOARD PAGE -->
+<div class="page" id="page-leaderboard">
+<div class="leaderboard-topbar"><div><div class="sec-title">PUBLIC LEADERBOARD</div><div class="cs-garage-subtitle">Top CarSpotter collections, ranked by best run.</div></div></div>
+<div class="leaderboard-sub">Only display name and aggregate scores are public. Individual cars, photos, notes, and locations remain private.</div>
+<div class="leaderboard-list" id="leaderboardList"></div>
+</div>
 
 <!-- COLLECTOR BOOK PAGE -->
 
@@ -4580,6 +4607,37 @@ function _syncRunsSubcollection() {
   if (!changed.length && !deletes.length) return Promise.resolve();
   return _writeRunDocs(changed, deletes).then(function(){ changed.forEach(function(run){ _syncedRunVersions[String(run.id)] = run._v || 0; }); deletes.forEach(function(id){ delete _syncedRunVersions[String(id)]; _syncedRunDeletes[String(id)] = true; }); });
 }
+// Public leaderboard documents deliberately contain aggregate, non-sensitive
+// values only. Individual runs, cars, photos, notes, and locations stay private
+// under users/{uid} and are never copied to this collection.
+var _leaderboardPublishTimer = null;
+var _leaderboardPublishErrorShown = false;
+function _queueLeaderboardPublish() {
+  if (!currentUser || !window._fbReady) return;
+  clearTimeout(_leaderboardPublishTimer);
+  _leaderboardPublishTimer = setTimeout(_publishLeaderboardEntry, 1200);
+}
+function _publishLeaderboardEntry() {
+  if (!currentUser || !window._fbReady || !db) return Promise.resolve();
+  var runs = allRuns || [];
+  var cars = _statsCars ? _statsCars() : runs.reduce(function(out, run){ return out.concat(run.cars || []); }, []);
+  var bestRun = runs.reduce(function(best, run){ return Math.max(best, Number(run.total || 0)); }, 0);
+  var totalValue = cars.reduce(function(total, car){ return total + Number(car.value || 0); }, 0);
+  return db.collection('leaderboard').doc(currentUser.uid).set({
+    displayName: String(currentUser.displayName || 'Anonymous Spotter').slice(0, 60),
+    bestRun: bestRun,
+    totalValue: totalValue,
+    totalCars: cars.length,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  }, { merge: true }).catch(function(err) {
+    // A missing Firestore rule must not make normal private syncing look failed.
+    console.warn('Leaderboard publish unavailable', err);
+    if (!_leaderboardPublishErrorShown) {
+      _leaderboardPublishErrorShown = true;
+      showToast('Leaderboard needs its Firestore rules enabled before scores can be published.');
+    }
+  });
+}
 async function loadRunsPage(reset) {
   if (!currentUser || _runsLoading || (!reset && !_runsHasMore)) return;
   _runsLoading = true;
@@ -4641,6 +4699,8 @@ if (changed) {
       const pg = document.querySelector('.page.active')?.id;
       if (pg === 'page-garage')  renderGarage();
       if (pg === 'page-history') renderHistory();
+      if (pg === 'page-leaderboard') renderLeaderboard();
+      if (pg === 'page-stats') renderStats();
       // Converge: push the merged union back so other devices (and this one) stay in sync.
       // The transactional rebase makes this safe — it never clobbers newer cloud fields.
       if (!_coreEqual(_buildCloudPayload(), d)) {
@@ -5006,6 +5066,7 @@ function _txWriteCore(opts) {
       _lastSyncErr = null;
       _lastSyncErrNotified = '';
       _syncRetryN = 0;
+      _queueLeaderboardPublish();
       if (_syncRetryTimer) { clearTimeout(_syncRetryTimer); _syncRetryTimer = null; }
       try { localStorage.removeItem('cs_sync_last_err'); } catch(e){}
       setSyncDot('ok');
@@ -5686,6 +5747,67 @@ function renderHomeFav(){
 function startFavRotation(){if(favTimer)clearInterval(favTimer);var all=getAllCars();var favs=all.filter(function(c){return favoriteNames.has(c.name)}).sort(function(a,b){return b.value-a.value});if(favs.length<2)return;favIdx=0;var scroller=document.getElementById('favList');if(!scroller)return;favTimer=setInterval(function(){favIdx=(favIdx+1)%favs.length;var child=scroller.children[favIdx];if(child){var target=child.offsetLeft-scroller.clientWidth/2+child.clientWidth/2;scroller.scrollTo({left:Math.max(0,target),behavior:'smooth'});}},4000);}
 function stopFavRotation(){if(favTimer){clearInterval(favTimer);favTimer=null}}
 
+function _statsCars() {
+  var cars = [];
+  (allRuns || []).forEach(function(run){ (run.cars || []).forEach(function(car){ cars.push(car); }); });
+  return cars;
+}
+function _statsBars(targetId, counts, labelFor) {
+  var el = document.getElementById(targetId);
+  if (!el) return;
+  var rows = Object.keys(counts).sort(function(a,b){ return counts[b] - counts[a]; }).slice(0, 6);
+  if (!rows.length) { el.innerHTML = '<div class="st-empty">Log a car to start building your stats.</div>'; return; }
+  var max = Math.max.apply(null, rows.map(function(key){ return counts[key]; }));
+  el.innerHTML = rows.map(function(key){
+    return '<div class="st-bar-wrap"><div class="st-bar-label"><span class="st-bar-name">' + escapeHtml(labelFor(key)) + '</span><span class="st-bar-val">' + counts[key] + '</span></div><div class="st-bar-track"><div class="st-bar-fill" style="width:' + Math.round(counts[key] / max * 100) + '%"></div></div></div>';
+  }).join('');
+}
+function renderStats() {
+  var cars = _statsCars();
+  var completedRuns = (allRuns || []).filter(function(run){ return !run.spotted; });
+  var total = cars.reduce(function(sum, car){ return sum + Number(car.value || 0); }, 0);
+  var c = document.getElementById('stCars'), r = document.getElementById('stRuns'), v = document.getElementById('stValue');
+  if (c) c.textContent = cars.length;
+  if (r) r.textContent = completedRuns.length;
+  if (v) v.textContent = fmt(total);
+  var makes = {}, types = {};
+  cars.forEach(function(car){
+    var make = String(car.name || 'Unknown').trim().split(/\s+/)[0] || 'Unknown';
+    var type = String(car.type || 'Other');
+    makes[make] = (makes[make] || 0) + 1;
+    types[type] = (types[type] || 0) + 1;
+  });
+  _statsBars('stMakes', makes, function(key){ return key; });
+  _statsBars('stTypes', types, function(key){ return carTypeLabel(key); });
+  var activity = {}, labels = [], today = new Date();
+  for (var i = 6; i >= 0; i--) { var d = new Date(today); d.setHours(0,0,0,0); d.setDate(d.getDate() - i); var key = d.toISOString().slice(0,10); activity[key] = 0; labels.push(key); }
+  (allRuns || []).forEach(function(run){ var date = new Date(Number(run.id)); if (!isNaN(date)) { var key = date.toISOString().slice(0,10); if (activity[key] !== undefined) activity[key] += (run.cars || []).length; } });
+  var activityEl = document.getElementById('stActivity');
+  if (activityEl) {
+    var max = Math.max.apply(null, labels.map(function(key){ return activity[key]; }).concat([1]));
+    activityEl.innerHTML = '<div class="st-chart-bar-wrap">' + labels.map(function(key){ return '<div class="st-chart-bar" title="' + activity[key] + ' cars" style="height:' + Math.max(4, Math.round(activity[key] / max * 100)) + '%"></div>'; }).join('') + '</div><div class="st-chart-labels">' + labels.map(function(key){ return '<div class="st-chart-lbl">' + new Date(key + 'T12:00:00').toLocaleDateString(undefined,{weekday:'narrow'}) + '</div>'; }).join('') + '</div>';
+  }
+}
+async function renderLeaderboard() {
+  var el = document.getElementById('leaderboardList');
+  if (!el) return;
+  if (!currentUser || !window._fbReady || !db) { el.innerHTML = '<div class="lb-empty">Sign in online to view the public leaderboard.</div>'; return; }
+  el.innerHTML = '<div class="lb-loading">Loading leaderboard…</div>';
+  try {
+    var snap = await db.collection('leaderboard').orderBy('bestRun', 'desc').limit(50).get();
+    var ranked = snap.docs.map(function(doc){ return doc.data(); });
+    if (!ranked.length) { el.innerHTML = '<div class="lb-empty">No public scores yet. Log a run to claim the first spot.</div>'; return; }
+    el.innerHTML = ranked.map(function(entry, index){
+      var isMe = currentUser && snap.docs[index].id === currentUser.uid;
+      var name = String(entry.displayName || 'Anonymous Spotter');
+      return '<div class="lb-row' + (isMe ? ' lb-you' : '') + '" style="animation-delay:' + (index * 0.03) + 's"><div class="lb-rank' + (index < 3 ? ' top' : '') + '">' + (index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : (index + 1)) + '</div><div class="lb-main"><div class="lb-name">' + escapeHtml(name) + (isMe ? ' <span style="color:var(--accent);font-size:.62rem">YOU</span>' : '') + '</div><div class="lb-meta">' + Number(entry.totalCars || 0) + ' cars · ' + fmt(Number(entry.totalValue || 0)) + ' collection</div></div><div class="lb-score"><div class="lb-total">' + fmtFull(Number(entry.bestRun || 0)) + '</div><div class="lb-cars">best run</div></div></div>';
+    }).join('');
+  } catch (err) {
+    console.warn('Leaderboard read unavailable', err);
+    el.innerHTML = '<div class="lb-empty">The public leaderboard is unavailable until its Firestore rules are enabled.</div>';
+  }
+}
+
 //  NAV 
 function goTo(page) {
   if (page === 'achievements') page = 'expeditions';
@@ -5705,6 +5827,8 @@ function goTo(page) {
   requestAnimationFrame(() => {
     if (page==='garage')       { garagePage = 0; renderGarage(); }
     if (page==='history')      renderHistory();
+    if (page==='leaderboard')  renderLeaderboard();
+    if (page==='stats')        renderStats();
     if (page==='achievements') renderAchievements();
     if (page==='settings')     { renderThemeBar(); initSoundToggle(); initVibeToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); initSortPrefBtns(); applyCompactMode(); }
     if (page==='news')         { if (!newsLoaded) { newsLoaded=true; renderNewsSources(); } loadNews(); }
