@@ -16,7 +16,7 @@
   try {
     var dismissed = localStorage.getItem('cs_install_dismissed');
     var hasData;
-    try { hasData = _csReadJSON('cs_runs', []).length > 0 || JSON.parse(localStorage.getItem('cs_current') || '[]').length > 0; } catch(e) { hasData = false; }
+    try { hasData = JSON.parse(localStorage.getItem('cs_runs') || '[]').length > 0 || JSON.parse(localStorage.getItem('cs_current') || '[]').length > 0; } catch(e) { hasData = false; }
     if (dismissed) return;
     if (!hasData) return;
     var standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches || (window.navigator && window.navigator.standalone);
@@ -33,7 +33,7 @@
     var favNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
     if (favNames.size) {
       var known = new Set();
-      (_csReadJSON('cs_runs', [])).forEach(function(r){ (r.cars||[]).forEach(function(c){ known.add(String(c.name).toLowerCase()); }); });
+      (JSON.parse(localStorage.getItem('cs_runs') || '[]')).forEach(function(r){ (r.cars||[]).forEach(function(c){ known.add(String(c.name).toLowerCase()); }); });
       (JSON.parse(localStorage.getItem('cs_current') || '[]')).forEach(function(c){ known.add(String(c.name).toLowerCase()); });
       var any = false;
       favNames.forEach(function(n){ if (known.has(String(n).toLowerCase())) any = true; });
@@ -3815,14 +3815,20 @@ let undoStack    = null;
 let undoTimer    = null;
 let bulkMode     = false;
 let bulkSelected = new Set();
+// A damaged localStorage value must never prevent the entire app script from
+// starting. Individual data fields fall back safely and can be re-saved later.
+function _safeJSON(raw, fallback) {
+  try { var value = JSON.parse(raw); return value == null ? fallback : value; }
+  catch (e) { return fallback; }
+}
 let soundEnabled = localStorage.getItem('cs_sound') !== 'off';
-let aliases      = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
+let aliases      = _safeJSON(localStorage.getItem('cs_aliases') || '{}', {});
 let bestFromLB = parseInt(localStorage.getItem('cs_best_lb') || '0');
-let favoriteNames = new Set(JSON.parse(localStorage.getItem('cs_fav') || '[]'));
-let currentSpotLocation = JSON.parse(localStorage.getItem('cs_pending_loc') || 'null');
-let allRuns      = JSON.parse(localStorage.getItem('cs_runs')      || '[]');
-let currentRun   = JSON.parse(localStorage.getItem('cs_current')   || '[]');
-let quickPicks   = JSON.parse(localStorage.getItem('cs_qp')        || '[]');
+let favoriteNames = new Set(_safeJSON(localStorage.getItem('cs_fav') || '[]', []));
+let currentSpotLocation = _safeJSON(localStorage.getItem('cs_pending_loc') || 'null', null);
+let allRuns      = _safeJSON(localStorage.getItem('cs_runs')      || '[]', []);
+let currentRun   = _safeJSON(localStorage.getItem('cs_current')   || '[]', []);
+let quickPicks   = _safeJSON(localStorage.getItem('cs_qp')        || '[]', []);
 let sortMode     = 'desc';
 let currentUser  = null;
 let _lastSave    = 0;
@@ -6700,7 +6706,7 @@ function renderGarageDashboard(cars){
   var el=document.getElementById('garageDashboard');
   if(!el) return;
   if(!cars.length){
-    el.innerHTML='<div class="cs-garage-dashboard"><div class="cs-gd-top"><div><div class="cs-gd-kicker">BUILD YOUR COLLECTION</div><div class="cs-gd-title">Your garage starts with one.</div><div class="cs-gd-sub">Every spot becomes part of your collection.</div></div><div class="cs-gd-count"><b>0</b><span>cars collected</span></div></div><div class="cs-gd-track"><div class="cs-gd-fill" style="width:0%"></div></div><div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>1 car</strong></div><div class="cs-gd-actions"><button class="cs-gd-action" onclick="goTo("spot")">＋ SPOT A CAR</button></div></div></div>';
+  el.innerHTML='<div class="cs-garage-dashboard"><div class="cs-gd-top"><div><div class="cs-gd-kicker">BUILD YOUR COLLECTION</div><div class="cs-gd-title">Your garage starts with one.</div><div class="cs-gd-sub">Every spot becomes part of your collection.</div></div><div class="cs-gd-count"><b>0</b><span>cars collected</span></div></div><div class="cs-gd-track"><div class="cs-gd-fill" style="width:0%"></div></div><div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>1 car</strong></div><div class="cs-gd-actions"><button class="cs-gd-action" onclick="goTo(\'spot\')">＋ SPOT A CAR</button></div></div></div>';
     return;
   }
   var milestones=[5,10,25,50,100,250,500];
@@ -6716,7 +6722,7 @@ function renderGarageDashboard(cars){
   el.innerHTML='<div class="cs-garage-dashboard">'+
     '<div class="cs-gd-top"><div><div class="cs-gd-kicker">YOUR COLLECTION</div><div class="cs-gd-title">Build a garage worth showing off.</div><div class="cs-gd-sub">Keep spotting cars. Watch your collection grow.</div></div><div class="cs-gd-count"><b>'+cars.length+'</b><span>cars collected</span></div></div>'+
     '<div class="cs-gd-track"><div class="cs-gd-fill" style="width:'+pct+'%"></div></div>'+
-    '<div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>'+next+' cars</strong> · '+nextLabel+'</div><div class="cs-gd-actions"><button class="cs-gd-action" onclick="setGarageSortHeader("favorites",document.querySelector(".gs-pill[data-sort=\"favorites\"]"))">★ FAVORITES</button><button class="cs-gd-action" onclick="setGarageFilter("legend",document.querySelector(".gf-pill[data-filter=\"legend\"]"))">👑 LEGENDS</button></div></div>'+
+    '<div class="cs-gd-bottom"><div class="cs-gd-next">Next milestone: <strong>'+next+' cars</strong> · '+nextLabel+'</div><div class="cs-gd-actions"><button class="cs-gd-action" onclick="setGarageSortHeader(\'favorites\',document.querySelector(\'.gs-pill[data-sort=&quot;favorites&quot;]\'))">★ FAVORITES</button><button class="cs-gd-action" onclick="setGarageFilter(\'legend\',document.querySelector(\'.gf-pill[data-filter=&quot;legend&quot;]\'))">👑 LEGENDS</button></div></div>'+
     '<div class="cs-gd-chips"><div class="cs-gd-chip"><b>'+makes+'</b> makes</div><div class="cs-gd-chip"><b>'+photos+'</b> photographed</div><div class="cs-gd-chip"><b>'+favorites+'</b> favorites</div><div class="cs-gd-chip"><b>'+escapeHtml(best.name)+'</b> crown jewel</div></div>'+
     '</div>';
 }
@@ -8072,9 +8078,14 @@ function fetchRefImagesForAllCars() {
 
 var _imgRenderTimer = null;
 var _refImgSaveTimer = null;
+var _refImageRequested = {}; // prevents repeated network work on every render
 function fetchAndStoreRefImage(car) {
+  if (!car || !car.name) return;
+  var requestKey = String(car.name).toLowerCase();
   var cur = car.photo;
   if (cur && (String(cur).indexOf('data:') === 0 || String(cur).indexOf('http') === 0)) return;
+  if (_refImageRequested[requestKey]) return;
+  _refImageRequested[requestKey] = true;
   // A bare `photo:` ref whose cache entry is gone, or no photo at all, is still
   // unresolved — fetch a reference image so "recent spots" don't stay empty.
   fetchCarImage(car.name).then(function(url) {
@@ -8099,6 +8110,10 @@ function fetchAndStoreRefImage(car) {
       clearTimeout(_imgRenderTimer);
       _imgRenderTimer = setTimeout(function() { renderGarage(); }, 600);
     }
+  }).catch(function() {
+    // A transient network failure should remain retryable, but only after a
+    // subsequent meaningful render instead of spawning a request storm.
+    delete _refImageRequested[requestKey];
   });
 }
 
@@ -8506,7 +8521,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
 
 //  OFFLINE MODE 
 let isOffline = !navigator.onLine;
-let offlineQueue = JSON.parse(localStorage.getItem('cs_offline_queue') || '[]'); // queued saves
+let offlineQueue = _safeJSON(localStorage.getItem('cs_offline_queue') || '[]', []); // queued saves
 
 function updateOfflineBanner() {
   const b = document.getElementById('offlineBanner');
@@ -8570,6 +8585,7 @@ function initNotes() {
   area.value = localStorage.getItem('cs_notes') || '';
   area.addEventListener('input', () => {
     localStorage.setItem('cs_notes', area.value);
+    _bumpVer('notes');
     saveToCloud();
   });
 
@@ -8618,6 +8634,7 @@ function initNotes() {
     micInterim = interim;
     if (interim) area.value += interim;
     localStorage.setItem('cs_notes', area.value);
+    _bumpVer('notes');
     saveToCloud();
     area.scrollTop = area.scrollHeight;
   };
