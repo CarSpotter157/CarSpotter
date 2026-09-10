@@ -6865,7 +6865,7 @@ function renderGarage() {
     if (_userInteracted) haptic([10,20,10]);
   }
   var pgEl = document.getElementById('page-garage');
-  if (pgEl) { pgEl.classList.remove('garage-enter'); void pgEl.offsetWidth; pgEl.classList.add('garage-enter'); }
+  if (pgEl) { pgEl.classList.remove('garage-enter'); requestAnimationFrame(function(){ requestAnimationFrame(function(){ pgEl.classList.add('garage-enter'); }); }); }
   var allCars = getAllCars();
   renderGarageDashboard(allCars);
   var filtered = applyHeaderSort(applyGarageFilters(sorted(allCars)));
@@ -7641,9 +7641,8 @@ function renderLevelBar() {
   var fill = document.getElementById('levelFill');
   if (num) {
     num.classList.remove('pulse');
-    void num.offsetWidth;
     num.textContent = info.level;
-    num.classList.add('pulse');
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ num.classList.add('pulse'); }); });
   }
   if (xp) xp.textContent = info.into + ' / ' + info.need + ' XP';
   if (fill) {
@@ -7655,7 +7654,7 @@ function renderLevelBar() {
 }
 function levelUpPulse() {
   var fill = document.getElementById('levelFill');
-  if (fill) { fill.classList.remove('glow'); void fill.offsetWidth; fill.classList.add('glow'); }
+  if (fill) { fill.classList.remove('glow'); requestAnimationFrame(function(){ requestAnimationFrame(function(){ fill.classList.add('glow'); }); }); }
 }
 
 //  HAPTICS — tasteful buzz on supported devices
@@ -7943,7 +7942,7 @@ function celebrateFullCollectorCard(car, opts) {
         setTimeout(function(){ navEl.classList.remove('cc-garage-collect'); }, 1150);
         var badgeEl = document.getElementById('navGarageBadge');
         if (badgeEl && badgeEl.style.display !== 'none') {
-          badgeEl.classList.remove('pop'); void badgeEl.offsetWidth; badgeEl.classList.add('pop');
+          badgeEl.classList.remove('pop'); requestAnimationFrame(function(){ requestAnimationFrame(function(){ badgeEl.classList.add('pop'); }); });
         }
         haptic([14, 30, 60]);
         playSound('collect');
@@ -8037,8 +8036,7 @@ function popRunTotal() {
   var el = document.getElementById('runTotal');
   if (!el) return;
   el.classList.remove('pop');
-  void el.offsetWidth;
-  el.classList.add('pop');
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ el.classList.add('pop'); }); });
 }
 
 
@@ -9066,8 +9064,7 @@ function playPhotoFlash(photoUrl) {
   ov.id = 'camFlashOverlay';
   ov.innerHTML = '<div class="cf-viewfinder"><i class="cf-corner cf-tl"></i><i class="cf-corner cf-tr"></i><i class="cf-corner cf-bl"></i><i class="cf-corner cf-br"></i><div class="cf-frame"><img class="cf-shot" src="' + photoUrl + '" alt=""><div class="cf-ring"></div><div class="cf-check">&#10003;</div><div class="cf-tag">PHOTO SAVED</div></div></div><div class="cf-flash"></div>';
   document.body.appendChild(ov);
-  void ov.offsetWidth;
-  ov.classList.add('go');
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ ov.classList.add('go'); }); });
   playSound('shutter');
   haptic(25);
   setTimeout(function() { playSound('shutter'); haptic(18); }, 220);
@@ -10290,7 +10287,7 @@ function checkTitleUnlock(silent) {
   saveProgress();
   if (silent) return;
   var chip = document.getElementById('levelTitleSlot');
-  if (chip) { chip.classList.remove('new-title'); void chip.offsetWidth; chip.classList.add('new-title'); }
+  if (chip) { chip.classList.remove('new-title'); requestAnimationFrame(function(){ requestAnimationFrame(function(){ chip.classList.add('new-title'); }); }); }
   enqueueCeremony(function(done){ showTitleUp(cur, done); });
 }
 function showTitleUp(title, done) {
@@ -11895,7 +11892,7 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
       try { playSound('log'); haptic(10); } catch(e) {}
       obRender();
       var t = document.getElementById('obRunTotal');
-      if (t) { t.classList.remove('pop'); void t.offsetWidth; t.classList.add('pop'); }
+      if (t) { t.classList.remove('pop'); requestAnimationFrame(function(){ requestAnimationFrame(function(){ t.classList.add('pop'); }); }); }
     },
     endRun: function(){
       if (!OB.run.length || OB.saved) return;
@@ -12118,14 +12115,22 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
     };
   }
 
-  /* Juiciness on major existing controls — no behavior changes. */
+  /* Juiciness on major existing controls — no behavior changes.
+     PERF: previously forced a synchronous layout reflow (`void b.offsetWidth`)
+     on every single button tap, right at the moment the user expects instant
+     feedback and right before the next screen/overlay does its own render
+     work. Restarting the animation via double-rAF + a re-trigger class avoids
+     the forced synchronous reflow entirely while keeping the same visual pop. */
   document.addEventListener('click',function(e){
     try{
       var b=e.target.closest('button');
       if(!b || b.disabled) return;
       b.classList.remove('cs-juicy-pop');
-      void b.offsetWidth;
-      b.classList.add('cs-juicy-pop');
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          b.classList.add('cs-juicy-pop');
+        });
+      });
     }catch(ex){}
   },{passive:true});
 
