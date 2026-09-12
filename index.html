@@ -3805,6 +3805,7 @@ if (sessionStorage.getItem(_pendingKey) && !window.location.hash) {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-storage-compat.min.js"></script>
 <script>
 // BUGFIX: previously this block assumed the Firebase CDN scripts always load.
 // If they don't (offline first launch, ad-blocker, flaky connection, CDN outage —
@@ -3842,6 +3843,46 @@ const auth = window._fbReady ? firebase.auth() : {
   currentUser: null
 };
 const db = window._fbReady ? firebase.firestore() : null;
+// Photos: metadata (car name/value/etc.) syncs via Firestore, but the actual
+// image bytes never did — they only ever lived in this device's IndexedDB,
+// which is why a photo taken on one device never appeared on another. If
+// Storage isn't enabled for this Firebase project yet, every call below
+// fails safely (caught) and the app behaves exactly as it did before.
+var storage = null;
+try { if (window._fbReady) storage = firebase.storage(); } catch(e) { storage = null; }
+function _uploadPhotoToCloud(key, dataUrl) {
+  if (!storage || !currentUser || !key || !dataUrl) return;
+  try {
+    storage.ref('users/' + currentUser.uid + '/photos/' + key + '.jpg')
+      .putString(dataUrl, 'data_url')
+      .catch(function(e){ if (CS_SYNC_DEBUG) console.warn('Photo upload failed (Storage may not be enabled yet):', e); });
+  } catch(e) {}
+}
+function _downloadPhotoFromCloud(key) {
+  if (!storage || !currentUser || !key) return Promise.resolve(null);
+  return storage.ref('users/' + currentUser.uid + '/photos/' + key + '.jpg').getDownloadURL()
+    .then(function(url) {
+      _idbPut(key, url).catch(function(){});
+      return url;
+    })
+    .catch(function() { return null; });
+}
+// One-time-per-device push of photos that were already saved locally before
+// cloud upload existed. Without this, only brand-new photos taken after this
+// update would ever reach other devices — anything already sitting on the
+// home computer would stay stuck there.
+function _backfillPhotosToCloud() {
+  if (!storage || !currentUser) return;
+  try { if (localStorage.getItem('cs_photo_backfill_v1') === '1') return; } catch(e) {}
+  _idbGetAll().then(function(entries) {
+    (entries || []).forEach(function(entry) {
+      if (entry && entry.data && typeof entry.data === 'string' && entry.data.indexOf('data:') === 0) {
+        _uploadPhotoToCloud(entry.name, entry.data);
+      }
+    });
+    try { localStorage.setItem('cs_photo_backfill_v1', '1'); } catch(e) {}
+  }).catch(function(){});
+}
 
 // Find the OAuth client ID from Firebase auth internals
 var oauthClientId = '';
@@ -3922,16 +3963,46 @@ function _photoLazyLoad(key) {
     _photoLazyTimer = null;
     var q = _photoLazyQueue; _photoLazyQueue = [];
     var pending = q.length;
+    var gotAny = false;
     q.forEach(function(k) {
       _idbGet(k).then(function(data) {
-        if (data) _photoCacheSet(k, data);
-        else _photoMissing[k] = true;
+        if (data) { _photoCacheSet(k, data); gotAny = true; return; }
+        // Not on this device locally — this is the cross-device case (photo
+        // taken on a different device). Try fetching it from cloud Storage
+        // before giving up on it.
+        return _downloadPhotoFromCloud(k).then(function(url) {
+          if (url) { _photoCacheSet(k, url); gotAny = true; }
+          else _photoMissing[k] = true;
+        });
       }).catch(function(){}).then(function() {
         _photoLoading[k] = false;
         pending--;
+        // BUGFIX: a photo fetched from IndexedDB after the initial render used
+        // to sit in the cache unused — whatever was already on screen (which
+        // showed no photo, since it wasn't cached yet at render time) never
+        // got refreshed, so the photo appeared to "never show up" in that
+        // particular spot even though it loaded successfully in the background.
+        if (pending === 0 && gotAny) _refreshVisiblePhotos();
       });
     });
   }, 60);
+}
+
+function _refreshVisiblePhotos() {
+  try {
+    _patchPhotosFromCache();
+    var activePg = document.querySelector('.page.active');
+    if (activePg) {
+      if (activePg.id === 'page-garage') renderGarage();
+      else if (activePg.id === 'page-history') renderHistory();
+      else if (activePg.id === 'page-spot') renderSpot();
+    }
+    var qpWrap = document.getElementById('qpWrap');
+    if (qpWrap && qpWrap.style.display !== 'none') {
+      renderQPList(document.getElementById('qpSearch')?.value || '');
+    }
+    if (typeof renderHomeFav === 'function') renderHomeFav();
+  } catch(e) {}
 }
 
 // ── DETERMINISTIC SYNC STATE ────────────────────────────────────────
@@ -4438,6 +4509,7 @@ auth.onAuthStateChanged(async user => {
     subscribeCloud();
     if (_dirty) flushSyncNow();
     checkNewAchievements();
+    _backfillPhotosToCloud();
     const localRuns = _csReadJSON('cs_runs', []);
     if (localRuns.length > 0 && !user.isAnonymous) showImportBanner(localRuns.length);
   } else {
@@ -4747,6 +4819,7 @@ function _ensurePhotoIndexed(car) {
   var key = car.name.toLowerCase();
   _photoCacheSet(key, car.photo);
   _idbPut(car.name, car.photo).catch(function(){});
+  _uploadPhotoToCloud(key, car.photo);
 }
 function _stripDeepPhotos(obj) {
   if (Array.isArray(obj)) {
@@ -6001,6 +6074,11 @@ function _garageCarsForQuickPick(query) {
   return out;
 }
 function renderQPList(query) {
+  // Quick Picks previously skipped photo-cache patching entirely, so any
+  // car photo not already resolved in memory rendered as a broken image
+  // here specifically — even though the same car showed its photo fine
+  // elsewhere (Garage/History/Spot all patch before rendering).
+  _patchPhotosFromCache();
   const el = document.getElementById('qpList');
   const wrap = document.getElementById('qpWrap');
   const q  = String(query || '').toLowerCase().trim();
@@ -8520,7 +8598,8 @@ function exportLocalData() {
   showToast('📥 Exported all data (no photos)');
 }
 
-function exportAllData() {
+async function exportAllData() {
+  showToast('📦 Gathering photos for export…');
   const data = {};
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
@@ -8528,14 +8607,56 @@ function exportAllData() {
       data[key] = localStorage.getItem(key);
     }
   }
-  // Resolve 'photo:' refs back to their base64 data so the backup really contains
-  // every image (IndexedDB stores the data, localStorage only keeps refs).
+  // BUGFIX: this used to resolve 'photo:' refs only against the ~30-item
+  // in-memory photo cache, so any car outside that small warm set exported
+  // as a broken "photo:name" string instead of an actual image — on any
+  // account with more than a couple dozen photographed cars, most of the
+  // "export with photos" file didn't actually have photos. Now it loads
+  // every photo this device has in IndexedDB first (the real, uncapped
+  // local store), and for anything still missing, tries fetching it from
+  // cloud Storage — so photos taken on other devices can be included too.
+  var photoMap = {};
+  try {
+    var entries = await _idbGetAll();
+    (entries || []).forEach(function(e) { if (e && e.name) photoMap[e.name.toLowerCase()] = e.data; });
+  } catch(e) {}
+
+  var neededKeys = {};
   ['cs_runs','cs_current','cs_qp'].forEach(function(k) {
-    try { data[k] = JSON.stringify(_resolvePhotosIn(JSON.parse(data[k] || '[]'))); } catch(e) {}
+    try {
+      var arr = JSON.parse(data[k] || '[]');
+      (function scan(o){
+        if (Array.isArray(o)) { o.forEach(scan); return; }
+        if (o && typeof o === 'object') {
+          if (typeof o.photo === 'string' && o.photo.indexOf('photo:') === 0) {
+            var rk = o.photo.slice(6);
+            if (!photoMap[rk]) neededKeys[rk] = true;
+          }
+          for (var kk in o) { if (o[kk] && typeof o[kk] === 'object') scan(o[kk]); }
+        }
+      })(arr);
+    } catch(e) {}
+  });
+  var missing = Object.keys(neededKeys);
+  if (missing.length && storage && currentUser) {
+    showToast('☁️ Fetching ' + missing.length + ' photo(s) from the cloud…');
+    await Promise.all(missing.map(function(k) {
+      return _downloadPhotoFromCloud(k).then(function(url) { if (url) photoMap[k] = url; }).catch(function(){});
+    }));
+  }
+
+  ['cs_runs','cs_current','cs_qp'].forEach(function(k) {
+    try { data[k] = JSON.stringify(_resolvePhotosIn(JSON.parse(data[k] || '[]'), photoMap)); } catch(e) {}
   });
   // Add computed garage data with photos
   try {
-    const garage = getAllCars().map(c => ({ name: c.name, value: c.value, type: c.type, color: c.color, photo: c.photo, location: c.location, spotCount: c.spotCount, runDate: c.runDate }));
+    const garage = getAllCars().map(function(c) {
+      var photo = c.photo;
+      if (!photo || (typeof photo === 'string' && photo.indexOf('photo:') === 0)) {
+        photo = photoMap[c.name.toLowerCase()] || photo;
+      }
+      return { name: c.name, value: c.value, type: c.type, color: c.color, photo: photo, location: c.location, spotCount: c.spotCount, runDate: c.runDate };
+    });
     data.cs_garage = JSON.stringify(garage);
   } catch(e) {}
   data.exportedAt = new Date().toISOString();
@@ -9024,16 +9145,17 @@ function _saveQPLocal()      { return _safeSet('cs_qp',      JSON.stringify(_str
 
 // Deep copy with 'photo:' refs resolved back to their base64 from the IDB cache —
 // used by exports so backups contain the actual image data.
-function _resolvePhotosIn(obj) {
-  if (Array.isArray(obj)) return obj.map(function(x) { return _resolvePhotosIn(x); });
+function _resolvePhotosIn(obj, photoMap) {
+  if (Array.isArray(obj)) return obj.map(function(x) { return _resolvePhotosIn(x, photoMap); });
   if (obj && typeof obj === 'object') {
     var c = {};
     for (var k in obj) {
       var v = obj[k];
       if (k === 'photo' && typeof v === 'string' && v.indexOf('photo:') === 0) {
-        c[k] = _photoCacheGet(v.slice(6)) || v;
+        var refKey = v.slice(6);
+        c[k] = (photoMap && photoMap[refKey]) || _photoCacheGet(refKey) || v;
       } else if (v && typeof v === 'object') {
-        c[k] = _resolvePhotosIn(v);
+        c[k] = _resolvePhotosIn(v, photoMap);
       } else c[k] = v;
     }
     return c;
