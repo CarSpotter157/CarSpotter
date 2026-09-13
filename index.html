@@ -7919,7 +7919,7 @@ function renderDiscoveries() {
     var date = new Date(rec.d).toLocaleDateString('en-US', { month:'short', day:'numeric' });
     var safeName = escapeHtml(rec.n);
     var carData = { name: rec.n, value: rec.v || 0, type: rec.t || '', color: '', photo: img, location: null, runDate: date, spotCount: 1 };
-    var json = JSON.stringify(carData).replace(/"/g, '"');
+    var json = JSON.stringify(carData).replace(/"/g, '&quot;');
     return '<div class="disc-card" onclick="showCarInstances(' + json + ')">' +
       imgHTML +
       '<div class="disc-body">' +
