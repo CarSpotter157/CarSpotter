@@ -3381,14 +3381,10 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 <div class="page" id="page-garage">
 <div class="sec-row" style="margin-bottom:10px">
 <div><div class="sec-title">YOUR GARAGE</div><div class="cs-garage-subtitle">Every car you spot lives here.</div></div>
-<div style="display:flex;gap:6px;align-items:center;">
 <div class="garage-view-toggle">
 <button class="gv-btn active" id="gvGrid" onclick="setGarageView('grid')" title="Card view">Cards</button>
 <button class="gv-btn" id="gvList" onclick="setGarageView('list')" title="List view">☰</button>
 <button class="gv-btn" id="gvMap" onclick="setGarageView('map')" title="Map view">Map</button>
-</div>
-<button class="txt-btn" id="sortBtn" onclick="cycleSort()" title="Cycle sort order">Value &darr;</button>
-<button class="txt-btn" onclick="openCarSearch()" title="Search car specs database">🔍 Search</button>
 </div>
 </div>
 <div class="garage-sort-row">
@@ -3398,7 +3394,13 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 <button class="gs-pill" data-sort="highestXp" onclick="setGarageSortHeader('highestXp',this)" title="Sort by highest XP value">Highest XP</button>
 <button class="gs-pill" data-sort="favorites" onclick="setGarageSortHeader('favorites',this)" title="Show only favorited cars">&starf; Favorites</button>
 </div>
-<div class="stats-row">
+<!-- DECLUTTER: stats, zoom/refresh, value-sort toggle, and the specs-database
+     search were all permanently on-screen, competing with the actual car
+     list for space. Nothing removed — all tucked one click away here. -->
+<details class="cs-collapse" id="gToolsDetails">
+<summary><span>Tools</span><span class="cs-collapse-summary" id="gToolsSummaryText"></span><span class="cs-collapse-chev">&rsaquo;</span></summary>
+<div style="padding:2px 14px 14px;">
+<div class="stats-row" style="margin-top:10px">
 <div class="stat-box"><div class="stat-v" id="gCars">0</div><div class="stat-l">Cars</div></div>
 <div class="stat-box"><div class="stat-v" id="gTotal">$0</div><div class="stat-l">Total</div></div>
 <div class="stat-box"><div class="stat-v" id="gAvg">&mdash;</div><div class="stat-l">Avg</div></div>
@@ -3410,6 +3412,12 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 <button class="garage-refresh-btn" id="garageRefreshBtn" onclick="refreshGarage()" title="Refresh your collection">&orarr; REFRESH</button>
 </div>
 </div>
+<div style="display:flex;gap:6px;margin-top:10px;">
+<button class="txt-btn" id="sortBtn" onclick="cycleSort()" title="Cycle sort order">Value &darr;</button>
+<button class="txt-btn" onclick="openCarSearch()" title="Search car specs database">🔍 Specs Search</button>
+</div>
+</div>
+</details>
 <details class="cs-collapse" id="gdDetails">
 <summary><span>Collection Progress</span><span class="cs-collapse-summary" id="gdSummaryText"></span><span class="cs-collapse-chev">&rsaquo;</span></summary>
 <div id="garageDashboard"></div>
@@ -7005,6 +7013,8 @@ function renderGarage() {
   var total = allCars.reduce(function(x,c){ return x + c.value; }, 0);
   document.getElementById('gTotal').textContent = fmt(total);
   document.getElementById('gAvg').textContent = allCars.length ? fmt(total / allCars.length) : '';
+  var gToolsSum = document.getElementById('gToolsSummaryText');
+  if (gToolsSum) gToolsSum.textContent = allCars.length + ' cars \u00B7 ' + fmt(total) + ' total';
   renderFeatured(allCars);
   renderJourney(allCars);
   // Show filtered count if filter/search is active
@@ -12338,7 +12348,7 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
   /* ── GARAGE DECLUTTER: collapsible dashboard banner + featured hero ──
      Folded away by default so the car list is visible without scrolling
      past them; each one remembers whether the user expanded it. */
-  ['gdDetails','fsDetails'].forEach(function(id){
+  ['gdDetails','fsDetails','gToolsDetails'].forEach(function(id){
     var el = document.getElementById(id);
     if (!el) return;
     var key = 'cs_open_' + id;
