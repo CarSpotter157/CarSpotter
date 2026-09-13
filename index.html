@@ -3932,13 +3932,15 @@ var _idbPhotoCache = {}; // must init early — used by renders before the photo
 // keeping every photo in JS memory is what makes iOS WKWebView kill and reload the
 // page under pressure. We keep only the most recently used `_photoCacheMax` entries
 // resident and lazily re-read evicted ones from IndexedDB.
-var _photoCacheMax = 30;
+var _photoCacheMax = 80;
 var _photoCacheOrder = [];
 var _photoLazyQueue = [];
 var _photoLazyTimer = null;
 var _photoLoading = {};      // keys currently fetching / already attempted (prevents re-queue storms)
 var _photoMissing = {};      // keys confirmed absent from IDB (skip repeat reads every render)
 var _photoRerenderTimer = null;
+var _photoRefreshCount = 0;
+var _photoRefreshWindowStart = 0;
 function _photoCacheSet(key, data) {
   if (!data) return;
   _idbPhotoCache[key] = data;
@@ -3989,20 +3991,36 @@ function _photoLazyLoad(key) {
 }
 
 function _refreshVisiblePhotos() {
-  try {
-    _patchPhotosFromCache();
-    var activePg = document.querySelector('.page.active');
-    if (activePg) {
-      if (activePg.id === 'page-garage') renderGarage();
-      else if (activePg.id === 'page-history') renderHistory();
-      else if (activePg.id === 'page-spot') renderSpot();
-    }
-    var qpWrap = document.getElementById('qpWrap');
-    if (qpWrap && qpWrap.style.display !== 'none') {
-      renderQPList(document.getElementById('qpSearch')?.value || '');
-    }
-    if (typeof renderHomeFav === 'function') renderHomeFav();
-  } catch(e) {}
+  // BUGFIX: with any garage bigger than the in-memory photo cache, a render
+  // would evict photos it needed a moment ago, trigger a reload for them,
+  // and — once loaded — call right back into this function to re-render,
+  // which itself evicted a *different* set of photos and requeued another
+  // reload... an endless render loop ("garage keeps refreshing itself").
+  // A short debounce (coalesces bursts into one redraw) plus a hard cap on
+  // how many times this can auto-fire in a rolling window makes that loop
+  // impossible regardless of collection size or cache limits.
+  var now = Date.now();
+  if (now - _photoRefreshWindowStart > 8000) { _photoRefreshWindowStart = now; _photoRefreshCount = 0; }
+  _photoRefreshCount++;
+  if (_photoRefreshCount > 3) return; // stop auto-refreshing; a manual nav/action will pick up any remaining photos
+  if (_photoRerenderTimer) return;
+  _photoRerenderTimer = setTimeout(function() {
+    _photoRerenderTimer = null;
+    try {
+      _patchPhotosFromCache();
+      var activePg = document.querySelector('.page.active');
+      if (activePg) {
+        if (activePg.id === 'page-garage') renderGarage();
+        else if (activePg.id === 'page-history') renderHistory();
+        else if (activePg.id === 'page-spot') renderSpot();
+      }
+      var qpWrap = document.getElementById('qpWrap');
+      if (qpWrap && qpWrap.style.display !== 'none') {
+        renderQPList(document.getElementById('qpSearch')?.value || '');
+      }
+      if (typeof renderHomeFav === 'function') renderHomeFav();
+    } catch(e) {}
+  }, 400);
 }
 
 // ── DETERMINISTIC SYNC STATE ────────────────────────────────────────
@@ -5914,7 +5932,6 @@ async function renderLeaderboard() {
 
 //  NAV 
 function goTo(page) {
-  if (page === 'achievements') page = 'expeditions';
   var prev = document.querySelector('.page.active');
   if (prev && prev.id==='page-spot' && page!=='spot') stopFavRotation();
   if (prev) {
@@ -8688,6 +8705,7 @@ function importFromFile(input) {
       });
 
       let restored = 0;
+      var _importedFull = {};
       for (const key of Object.keys(data)) {
         if (!key.startsWith('cs_')) continue;
         if (key === 'cs_garage') continue; // computed convenience field — never read
@@ -8695,7 +8713,19 @@ function importFromFile(input) {
           // Move base64 photos into IndexedDB and store tiny 'photo:' refs in
           // localStorage so a photo-heavy backup fits within the storage quota.
           try {
-            _safeSet(key, JSON.stringify(_stripCopy(JSON.parse(data[key]))));
+            var _parsedFull = JSON.parse(data[key]);
+            // BUGFIX: this used to reload allRuns/currentRun/quickPicks straight
+            // from what was just written to localStorage — the STRIPPED,
+            // reference-only version. Whether those references displayed a
+            // photo then depended entirely on the small in-memory photo cache
+            // still holding them a moment later, which it often didn't for a
+            // backup with more photos than the cache holds (the early cars in
+            // the file got evicted while later ones in the same import were
+            // still being processed). Keeping the original, photo-complete
+            // parsed data here means the very first render after import shows
+            // every photo immediately, with no dependency on cache timing.
+            _importedFull[key] = _parsedFull;
+            _safeSet(key, JSON.stringify(_stripCopy(_parsedFull)));
           } catch(err2) {
             _safeSet(key, data[key]);
           }
@@ -8710,10 +8740,12 @@ function importFromFile(input) {
         await Promise.all(Object.keys(_idbPhotoCache).map(k => _idbPut(k, _idbPhotoCache[k]).catch(function(){})));
       } catch(e) {}
 
-      // Reload all runtime state from localStorage
-      allRuns    = JSON.parse(localStorage.getItem('cs_runs')    || '[]');
-      currentRun = JSON.parse(localStorage.getItem('cs_current') || '[]');
-      quickPicks = JSON.parse(localStorage.getItem('cs_qp')      || '[]');
+      // Reload all runtime state — prefer the photo-complete parsed data we
+      // kept above; only fall back to re-reading localStorage (which now only
+      // has stripped refs) if a key wasn't present in the backup at all.
+      allRuns    = _importedFull.cs_runs    || JSON.parse(localStorage.getItem('cs_runs')    || '[]');
+      currentRun = _importedFull.cs_current || JSON.parse(localStorage.getItem('cs_current') || '[]');
+      quickPicks = _importedFull.cs_qp      || JSON.parse(localStorage.getItem('cs_qp')      || '[]');
       aliases    = JSON.parse(localStorage.getItem('cs_aliases') || '{}');
       bestFromLB = parseInt(localStorage.getItem('cs_best_lb')   || '0');
       _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
