@@ -3427,13 +3427,15 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 <div id="featuredSpot"></div>
 </details>
 <div id="journeySection" style="display:none"></div>
-<div id="discSection" style="display:none">
+<details class="cs-collapse" id="discDetails" style="display:none">
+<summary><span>Recent Discoveries</span><span class="cs-collapse-summary" id="discSummaryText"></span><span class="cs-collapse-chev">&rsaquo;</span></summary>
+<div id="discSection">
 <div class="sec-row" style="margin:4px 0 8px;">
-<div class="sec-title">RECENT DISCOVERIES</div>
 <button class="txt-btn" id="discClearBtn" onclick="clearDiscoveries()" style="display:none">Clear</button>
 </div>
 <div class="disc-scroll" id="discoveriesList"></div>
 </div>
+</details>
 <div class="garage-search-wrap">
 <input autocomplete="off" id="garageSearch" oninput="onGarageSearch()" placeholder="Search cars..." title="Search by car name, color, or location" type="text"/>
 <button class="garage-search-clear" id="garageSearchClear" onclick="clearGarageSearch()" style="display:none" title="Clear search">✕</button>
@@ -7110,11 +7112,16 @@ function renderGarage() {
       var shine = (tier === 'super' || tier === 'hyper' || tier === 'legend') ? '<div class="gc-shine"></div>' : '';
       var make = (car.name.split(' ')[0] || '').toUpperCase();
       var badges = '';
-      if (car.spotCount > 1) badges += '<span class="gc-badge seen">Seen \u00D7' + car.spotCount + '</span>';
-      if (isFav) badges += '<span class="gc-badge fav">\u2605 Fav</span>';
-      var isFeat = (featuredName() === car.name);
+      // DECLUTTER: spot count used to appear 3 times on one card — next to
+      // the name, as a "Seen ×N" badge, and again inside the evolution badge
+      // (Silver/Gold/etc. already includes the same count). Now it's shown
+      // once: the evolution badge when the car has one, otherwise "Seen ×N".
       var ev = (typeof evolutionFor === 'function') ? evolutionFor(car.name) : null;
       var evoTier = (ev && ev.count >= 3) ? ev.tier : null;
+      if (car.spotCount > 1 && !evoTier) badges += '<span class="gc-badge seen">Seen \u00D7' + car.spotCount + '</span>';
+      // The photo overlay's star button already shows favorite status filled
+      // in — a second "Fav" text badge here was saying the same thing twice.
+      var isFeat = (featuredName() === car.name);
       var evoBadge = evoTier ? '<span class="gc-badge evo" style="color:' + evoTier.color + ';border-color:' + evoTier.color + '44">' + evoTier.icon + ' ' + evoTier.name + ' \u00D7' + ev.count + '</span>' : '';
       return '<div class="garage-card collector-card anim-stagger' + (evoTier ? ' evo-' + evoTier.name.toLowerCase() : '') + '" data-tier="' + tier + '" role="button" tabindex="0"' + clickAttr + ' style="--gc-tilt:' + tilt + 'deg;--stagger:' + Math.min(idx * 0.04, 0.5) + 's;animation-delay:var(--stagger);">' + shine +
         '<div class="gc-tier-chip">' + tierEmoji(tier) + ' ' + meta.label + (evoTier ? '<span class="gc-evo-chip">' + evoTier.icon + '</span>' : '') + '</div>' +
@@ -7128,7 +7135,7 @@ function renderGarage() {
         '</div>' +
         '<div class="gc-body">' +
           '<div class="gc-make">' + make + '</div>' +
-          '<div class="gc-name">' + escapeHtml(car.name) + (car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '') + '</div>' +
+          '<div class="gc-name">' + escapeHtml(car.name) + '</div>' +
           '<div class="gc-val-row"><span class="gc-val">' + fmtFull(car.value) + '</span><span class="gc-xp">+' + rarityXP(car.value) + ' XP</span></div>' +
           '<div class="gc-date">\uD83D\uDCCD ' + escapeHtml(car.runDate || 'Saved') + '</div>' +
           '<div class="gc-badges">' + badges + evoBadge + '</div>' +
@@ -7148,10 +7155,10 @@ el.querySelectorAll('[data-inst]').forEach(function(a){
     var rarity = getRarity(car.value);
     var ev = (typeof evolutionFor === 'function') ? evolutionFor(car.name) : null;
     var evoTier = (ev && ev.count >= 3) ? ev.tier : null;
-    var nameSuffix = car.spotCount > 1 ? ' <span style="font-size:0.6rem;color:var(--text2)">&times;' + car.spotCount + '</span>' : '';
+    var nameSuffix = '';
     var clickAttr = ' data-inst="1" data-name="' + escapeHtml(car.name) + '"';
     var evoBadge = evoTier ? '<span class="gc-badge evo" style="color:' + evoTier.color + ';border-color:' + evoTier.color + '44">' + evoTier.icon + ' ' + evoTier.name + ' \u00D7' + ev.count + '</span>' : '';
-    return '<div class="garage-row' + (evoTier ? ' evo-row evo-' + evoTier.name.toLowerCase() : '') + '" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img class="g-thumb" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + evoBadge + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');this.textContent=this.textContent===\'★\'?\'☆\':\'★\';" title="Toggle favorite">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit this car">✎</button><button class="g-act-btn g-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')" title="Delete this car from everywhere">✕</button></div></div>';
+    return '<div class="garage-row' + (evoTier ? ' evo-row evo-' + evoTier.name.toLowerCase() : '') + '" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img class="g-thumb" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 && !evoTier ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + evoBadge + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');this.textContent=this.textContent===\'★\'?\'☆\':\'★\';" title="Toggle favorite">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit this car">✎</button><button class="g-act-btn g-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')" title="Delete this car from everywhere">✕</button></div></div>';
   }).join('');
   el.querySelectorAll('[data-inst]').forEach(function(a){
     attachCarTap(a);
@@ -7902,12 +7909,16 @@ function clearDiscoveries() {
 }
 function renderDiscoveries() {
   var section = document.getElementById('discSection');
+  var wrap = document.getElementById('discDetails');
   var listEl  = document.getElementById('discoveriesList');
   if (!section || !listEl) return;
   var list = [];
   try { list = JSON.parse(localStorage.getItem('cs_discoveries') || '[]'); } catch(e) { list = []; }
-  if (!list.length) { section.style.display = 'none'; return; }
+  if (!list.length) { section.style.display = 'none'; if (wrap) wrap.style.display = 'none'; return; }
   section.style.display = '';
+  if (wrap) wrap.style.display = '';
+  var discSum = document.getElementById('discSummaryText');
+  if (discSum) discSum.textContent = list.length + ' new';
   var clearBtn = document.getElementById('discClearBtn');
   if (clearBtn) clearBtn.style.display = list.length ? '' : 'none';
   listEl.innerHTML = list.map(function(rec) {
@@ -12348,7 +12359,7 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
   /* ── GARAGE DECLUTTER: collapsible dashboard banner + featured hero ──
      Folded away by default so the car list is visible without scrolling
      past them; each one remembers whether the user expanded it. */
-  ['gdDetails','fsDetails','gToolsDetails'].forEach(function(id){
+  ['gdDetails','fsDetails','gToolsDetails','discDetails'].forEach(function(id){
     var el = document.getElementById(id);
     if (!el) return;
     var key = 'cs_open_' + id;
