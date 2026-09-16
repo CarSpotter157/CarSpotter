@@ -3394,38 +3394,22 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 <button class="gs-pill" data-sort="highestXp" onclick="setGarageSortHeader('highestXp',this)" title="Sort by highest XP value">Highest XP</button>
 <button class="gs-pill" data-sort="favorites" onclick="setGarageSortHeader('favorites',this)" title="Show only favorited cars">&starf; Favorites</button>
 </div>
-<!-- DECLUTTER: stats, zoom/refresh, value-sort toggle, and the specs-database
-     search were all permanently on-screen, competing with the actual car
-     list for space. Nothing removed — all tucked one click away here. -->
-<details class="cs-collapse" id="gToolsDetails">
-<summary><span>Tools</span><span class="cs-collapse-summary" id="gToolsSummaryText"></span><span class="cs-collapse-chev">&rsaquo;</span></summary>
-<div style="padding:2px 14px 14px;">
-<div class="stats-row" style="margin-top:10px">
+<!-- DECLUTTER: Tools, Collection Progress, and Featured sections removed
+     per request. Hidden (not deleted) so the underlying stat/zoom/sort
+     controls and featured-car logic keep working without errors. -->
+<div style="display:none">
 <div class="stat-box"><div class="stat-v" id="gCars">0</div><div class="stat-l">Cars</div></div>
 <div class="stat-box"><div class="stat-v" id="gTotal">$0</div><div class="stat-l">Total</div></div>
 <div class="stat-box"><div class="stat-v" id="gAvg">&mdash;</div><div class="stat-l">Avg</div></div>
-</div>
-<div class="garage-refresh-row">
-<span>COLLECTION VIEW</span>
-<div style="display:flex;align-items:center;gap:8px;">
-<div class="garage-zoom"><span class="garage-zoom-label">ZOOM</span><button class="garage-zoom-btn" onclick="setGarageZoom(garageZoom-1)" title="Fewer, larger cards">&minus;</button><span class="garage-zoom-val" id="garageZoomVal">3 &times;</span><button class="garage-zoom-btn" onclick="setGarageZoom(garageZoom+1)" title="More, smaller cards">+</button></div>
-<button class="garage-refresh-btn" id="garageRefreshBtn" onclick="refreshGarage()" title="Refresh your collection">&orarr; REFRESH</button>
-</div>
-</div>
-<div style="display:flex;gap:6px;margin-top:10px;">
+<span class="garage-zoom-val" id="garageZoomVal">3 &times;</span>
 <button class="txt-btn" id="sortBtn" onclick="cycleSort()" title="Cycle sort order">Value &darr;</button>
-<button class="txt-btn" onclick="openCarSearch()" title="Search car specs database">🔍 Specs Search</button>
-</div>
-</div>
-</details>
-<details class="cs-collapse" id="gdDetails">
-<summary><span>Collection Progress</span><span class="cs-collapse-summary" id="gdSummaryText"></span><span class="cs-collapse-chev">&rsaquo;</span></summary>
+<button class="garage-refresh-btn" id="garageRefreshBtn" onclick="refreshGarage()" title="Refresh your collection">&orarr; REFRESH</button>
+<span id="gToolsSummaryText"></span>
+<span id="gdSummaryText"></span>
 <div id="garageDashboard"></div>
-</details>
-<details class="cs-collapse" id="fsDetails" style="display:none">
-<summary><span>&#9733; Featured</span><span class="cs-collapse-summary" id="fsSummaryText"></span><span class="cs-collapse-chev">&rsaquo;</span></summary>
+<span id="fsSummaryText"></span>
 <div id="featuredSpot"></div>
-</details>
+</div>
 <div id="journeySection" style="display:none"></div>
 <details class="cs-collapse" id="discDetails" style="display:none">
 <summary><span>Recent Discoveries</span><span class="cs-collapse-summary" id="discSummaryText"></span><span class="cs-collapse-chev">&rsaquo;</span></summary>
@@ -7126,17 +7110,11 @@ function renderGarage() {
       return '<div class="garage-card collector-card anim-stagger' + (evoTier ? ' evo-' + evoTier.name.toLowerCase() : '') + '" data-tier="' + tier + '" role="button" tabindex="0"' + clickAttr + ' style="--gc-tilt:' + tilt + 'deg;--stagger:' + Math.min(idx * 0.04, 0.5) + 's;animation-delay:var(--stagger);">' + shine +
         '<div class="gc-tier-chip">' + tierEmoji(tier) + ' ' + meta.label + (evoTier ? '<span class="gc-evo-chip">' + evoTier.icon + '</span>' : '') + '</div>' +
         '<div class="gc-img-wrap">' + media +
-          '<div class="gc-actions">' +
-            '<button class="gc-feat' + (isFeat ? ' active' : '') + '" onclick="event.stopPropagation();setFeaturedCar(\'' + jsEscape(car.name) + '\');" title="Feature this car">\uD83D\uDC51</button>' +
-            '<button class="gc-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');renderGarage();" title="Toggle favorite">' + (isFav ? '\u2605' : '\u2606') + '</button>' +
-            '<button class="gc-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit this car">\u270E</button>' +
-            '<button class="gc-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')" title="Delete this car from everywhere">\u2715</button>' +
-          '</div>' +
         '</div>' +
         '<div class="gc-body">' +
           '<div class="gc-make">' + make + '</div>' +
           '<div class="gc-name">' + escapeHtml(car.name) + '</div>' +
-          '<div class="gc-val-row"><span class="gc-val">' + fmtFull(car.value) + '</span><span class="gc-xp">+' + rarityXP(car.value) + ' XP</span></div>' +
+          '<div class="gc-val-row"><span class="gc-val">' + fmtFull(car.value) + '</span></div>' +
           '<div class="gc-date">\uD83D\uDCCD ' + escapeHtml(car.runDate || 'Saved') + '</div>' +
           '<div class="gc-badges">' + badges + evoBadge + '</div>' +
         '</div>' +
@@ -7496,6 +7474,7 @@ function showCarInstances(car, originEl) {
     '</div></div>' +
     '<div class="detail-actions">' +
     '<button class="detail-action-btn" data-fav="' + escapeHtml(car.name) + '">' + (isFavorite(car.name) ? '★ Favorite' : '☆ Favorite') + '</button>' +
+    '<button class="detail-action-btn" onclick="event.stopPropagation();setFeaturedCar(\'' + jsEscape(car.name) + '\');this.closest(\'.detail-overlay\').remove();">👑 ' + (featuredName() === car.name ? 'Unfeature' : 'Feature') + '</button>' +
     '<a class="detail-action-btn" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Search this car">↗ Search</a>' +
     '<button class="detail-action-btn" onclick="event.stopPropagation();this.closest(\'.detail-overlay\').remove();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')">✏️ Edit</button>' +
     '<button class="detail-action-btn" onclick="event.stopPropagation();addPhotoToCar(\'' + jsEscape(car.name) + '\')">📷 Photo</button>' +
