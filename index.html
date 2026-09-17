@@ -3950,6 +3950,28 @@ function _photoCacheSet(key, data) {
 }
 function _photoCacheKey(name) { return String(name || '').toLowerCase(); }
 function _photoCacheGet(key) { return _idbPhotoCache[key] || ''; }
+// Resolve whatever's sitting in car.photo — a real data: URL, an http(s)
+// reference URL, or a 'photo:key' pointer into the IndexedDB-backed cache —
+// into something actually safe to drop into an <img src>. Never mutates the
+// car object (use _patchPhotosFromCache for that); kicks off a lazy IDB load
+// on a cache miss so the photo shows up once it's back in RAM. Every render
+// site should read photos through this instead of car.photo directly, so a
+// render never has to run after _patchPhotosFromCache to show correctly.
+function resolvePhotoSrc(car) {
+  if (!car) return '';
+  var p = car.photo;
+  if (p && typeof p === 'string' && p.indexOf('photo:') === 0) {
+    var refKey = p.slice(6);
+    var resolved = _photoCacheGet(refKey) || _photoCacheGet(_photoCacheKey(car.name));
+    if (!resolved) _photoLazyLoad(refKey || _photoCacheKey(car.name));
+    return resolved || '';
+  }
+  if (p) return p;
+  var cached = _photoCacheGet(_photoCacheKey(car.name));
+  if (cached) return cached;
+  _photoLazyLoad(_photoCacheKey(car.name));
+  return '';
+}
 function _photoLazyLoad(key) {
   if (!key || _photoLoading[key] || _photoMissing[key] || _idbPhotoCache[key]) return;
   _photoLoading[key] = true;
@@ -5858,7 +5880,7 @@ function renderHomeFav(){
   var el=document.getElementById('favList');var all=getAllCars();
   var favs=all.filter(function(c){ return favoriteNames.has(c.name); }).sort(function(a,b){return b.value-a.value});
   if(!favs.length){document.getElementById('favSection').style.display='none';return}
-  var html=favs.map(function(c){var json=JSON.stringify(c).replace(/"/g,'&quot;');var img=c.photo?'<img class="fav-item-img" src="'+c.photo+'" onerror="this.style.display='+"'none'"+'">':'<div class="fav-item-ph"><i class="fas fa-star"></i></div>';return'<div class="fav-item" onclick="showCarInstances('+json+')">'+img+'<div class="fav-item-name">'+c.name.split(' ').pop()+'</div><div class="fav-item-val">$'+((c.value||0).toLocaleString())+'</div></div>'}).join('');el.innerHTML=html;document.getElementById('favSection').style.display='block';
+  var html=favs.map(function(c){var json=JSON.stringify(c).replace(/"/g,'&quot;');var favPhotoSrc=resolvePhotoSrc(c);var img=favPhotoSrc?'<img class="fav-item-img" src="'+favPhotoSrc+'" onerror="this.style.display='+"'none'"+'">':'<div class="fav-item-ph"><i class="fas fa-star"></i></div>';return'<div class="fav-item" onclick="showCarInstances('+json+')">'+img+'<div class="fav-item-name">'+c.name.split(' ').pop()+'</div><div class="fav-item-val">$'+((c.value||0).toLocaleString())+'</div></div>'}).join('');el.innerHTML=html;document.getElementById('favSection').style.display='block';
 }
 function startFavRotation(){if(favTimer)clearInterval(favTimer);var all=getAllCars();var favs=all.filter(function(c){return favoriteNames.has(c.name)}).sort(function(a,b){return b.value-a.value});if(favs.length<2)return;favIdx=0;var scroller=document.getElementById('favList');if(!scroller)return;favTimer=setInterval(function(){favIdx=(favIdx+1)%favs.length;var child=scroller.children[favIdx];if(child){var target=child.offsetLeft-scroller.clientWidth/2+child.clientWidth/2;scroller.scrollTo({left:Math.max(0,target),behavior:'smooth'});}},4000);}
 function stopFavRotation(){if(favTimer){clearInterval(favTimer);favTimer=null}}
@@ -6121,7 +6143,8 @@ function renderQPList(query) {
     const d = document.createElement('div');
     var fromGarage = q && !quickPicks.some(function(qp){ return String(qp.name || '').toLowerCase() === String(c.name || '').toLowerCase(); });
     d.className = 'qp-item' + (qpEditMode ? ' editing' : '');
-    d.innerHTML = (c.photo ? `<img style="width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid var(--border)" src="${c.photo}" alt="">` : `<span class="qp-item-type" style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:36px;text-align:right">${carTypeLabel(c.type)}</span>`) + `<span class="qp-item-name">${c.name}</span><span class="qp-item-val">${fmtFull(c.value)}</span>` + (fromGarage ? `<span style="font-size:.48rem;color:var(--accent);letter-spacing:.7px;margin-left:auto;font-weight:800">GARAGE MATCH</span>` : `<span style="font-size:.48rem;color:var(--muted);letter-spacing:.7px;margin-left:auto">QUICK PICK</span>`) + (qpEditMode && !fromGarage ? `<button class="qp-item-del" title="Remove">✕</button>` : '');
+    var qpPhotoSrc = resolvePhotoSrc(c);
+    d.innerHTML = (qpPhotoSrc ? `<img style="width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid var(--border)" src="${qpPhotoSrc}" alt="">` : `<span class="qp-item-type" style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:36px;text-align:right">${carTypeLabel(c.type)}</span>`) + `<span class="qp-item-name">${c.name}</span><span class="qp-item-val">${fmtFull(c.value)}</span>` + (fromGarage ? `<span style="font-size:.48rem;color:var(--accent);letter-spacing:.7px;margin-left:auto;font-weight:800">GARAGE MATCH</span>` : `<span style="font-size:.48rem;color:var(--muted);letter-spacing:.7px;margin-left:auto">QUICK PICK</span>`) + (qpEditMode && !fromGarage ? `<button class="qp-item-del" title="Remove">✕</button>` : '');
     if (qpEditMode && !fromGarage) {
       d.querySelector('.qp-item-del').onclick = (e) => { e.stopPropagation(); removeQP(c.name); };
     } else {
@@ -6457,7 +6480,7 @@ function showRecap({ total, cars, headliner, isRec, prevBest }, done) {
   const delays = ['0.1s','0.24s','0.38s'];
   const podiumHTML = top3.map((c,i) => {
     const t  = tierOf(c.value || 0);
-    const ph = c.photo || (_idbPhotoCache[(c.name||'').toLowerCase()] || '');
+    const ph = resolvePhotoSrc(c);
     const media = ph
       ? '<img class="recap-p-img" src="' + ph + '" alt="" loading="lazy">'
       : '<div class="recap-p-ph">' + tierEmoji(t) + '</div>';
@@ -6576,13 +6599,14 @@ function renderSpot() {
       row.style.animation = (ri === 0 ? 'driveIn 0.34s ease both' : 'fadeUp 0.25s ease both');
       row.style.animationDelay = (ri * 0.03) + 's';
       if (isHL) row.style.borderColor = 'var(--accent)';
-      row.innerHTML = (car.photo ? '<img class="run-item-photo" src="' + car.photo + '" alt="car">' : '<div class="re" style="cursor:pointer" onclick="triggerPhotoAttach({type:\'run\',index:' + i + '})" title="Add photo">' + escapeHtml(carTypeLabel(car.type)) + '</div>') +
+      var runPhotoSrc = resolvePhotoSrc(car);
+      row.innerHTML = (runPhotoSrc ? '<img class="run-item-photo" src="' + runPhotoSrc + '" alt="car">' : '<div class="re" style="cursor:pointer" onclick="triggerPhotoAttach({type:\'run\',index:' + i + '})" title="Add photo">' + escapeHtml(carTypeLabel(car.type)) + '</div>') +
         '<div class="ri"><div class="rn">' + escapeHtml(car.name) + '</div>' +
         ((car.color || (car.location && car.location.label)) ? '<div class="rc">' + escapeHtml([car.color, car.location && car.location.label].filter(Boolean).join('  ')) + '</div>' : '') +
         '<span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' +
         (isHL ? '<div class="headliner-badge">⭐ HEADLINER</div>' : '') + '</div>' +
         '<div class="rv">' + fmtFull(car.value) + '</div>' +
-        '<button class="photo-btn-sm' + (car.photo ? ' has-photo' : '') + '" onclick="triggerPhotoAttach({type:\'run\',index:' + i + '})" title="' + (car.photo ? 'Change photo' : 'Add photo') + '">📷</button>' +
+        '<button class="photo-btn-sm' + (runPhotoSrc ? ' has-photo' : '') + '" onclick="triggerPhotoAttach({type:\'run\',index:' + i + '})" title="' + (runPhotoSrc ? 'Change photo' : 'Add photo') + '">📷</button>' +
         '<button class="star-btn ' + (isHL ? 'starred' : '') + '" onclick="toggleHeadliner(' + i + ')" title="Set as headliner">★</button>' +
         '<button class="del-btn" onclick="removeCar(' + i + ')"></button>';
       list.appendChild(row);
@@ -6867,8 +6891,9 @@ function renderFeatured(cars) {
   var tier = tierOf(car.value);
   var meta = tierMeta(tier);
   var rarity = getRarity(car.value);
-  var media = car.photo
-    ? '<img src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">'
+  var featPhotoSrc = resolvePhotoSrc(car);
+  var media = featPhotoSrc
+    ? '<img src="' + featPhotoSrc + '" alt="' + escapeHtml(car.name) + '">'
     : '<div class="fh-ph">' + tierEmoji(tier) + '</div>';
   var badges = '<div class="fh-badge">' + rarity.label + '</div>';
   if (car.spotCount > 1) badges += '<div class="fh-badge">Seen \u00D7' + car.spotCount + '</div>';
@@ -6921,7 +6946,8 @@ function clusterCars(cars) {
 
 function buildMapPopup(car) {
   var rarity = getRarity(car.value);
-  var photoHtml = car.photo ? '<img class="map-popup-photo" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' : '<div class="map-popup-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
+  var mapPopupPhotoSrc = resolvePhotoSrc(car);
+  var photoHtml = mapPopupPhotoSrc ? '<img class="map-popup-photo" src="' + mapPopupPhotoSrc + '" alt="' + escapeHtml(car.name) + '">' : '<div class="map-popup-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
   var locLabel = (car.location && car.location.label) ? escapeHtml(car.location.label) : '';
   return '<div class="map-popup-card">' +
     '<div class="map-popup-hero">' + photoHtml + '</div>' +
@@ -6939,7 +6965,8 @@ function buildClusterPopup(cluster) {
   var html = '<div style="font-family:\'Inter\',sans-serif;font-size:0.82rem;letter-spacing:1px;color:var(--text);margin-bottom:6px;">' + cluster.cars.length + ' cars here</div><div class="map-cluster-list">';
   cluster.cars.forEach(function(car) {
     var rarity = getRarity(car.value);
-    var photoHtml = car.photo ? '<img src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' : '<div style="width:40px;height:40px;border-radius:6px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;border:1px solid var(--border)">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
+    var clusterPhotoSrc = resolvePhotoSrc(car);
+    var photoHtml = clusterPhotoSrc ? '<img src="' + clusterPhotoSrc + '" alt="' + escapeHtml(car.name) + '">' : '<div style="width:40px;height:40px;border-radius:6px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;border:1px solid var(--border)">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
     var isRun = car.runDate && car.runDate.indexOf('Run') === 0;
     html += '<div class="map-cluster-item" onclick="openMapCar(decodeURIComponent(\'' + encodeURIComponent(JSON.stringify({ name: car.name, value: car.value, color: car.color, type: car.type, photo: car.photo, location: car.location })).replace(/'/g, '%27') + '\'))">' +
       photoHtml +
@@ -7089,9 +7116,10 @@ function renderGarage() {
       var isFav = isFavorite(car.name);
       var tilt = (idx % 2 === 0) ? -0.7 : 0.7;
       var clickAttr = ' data-inst="1" data-name="' + escapeHtml(car.name) + '"';
-      var photoBadge = car.photo ? (car.photo.indexOf('data:') === 0 ? '<div class="gc-photo-badge">\uD83D\uDCF7 Your Photo</div>' : '<div class="gc-photo-badge">\uD83C\uDF10 Reference</div>') : '';
-      var media = car.photo
-        ? '<img class="gc-img" loading="lazy" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' + photoBadge
+      var gcPhotoSrc = resolvePhotoSrc(car);
+      var photoBadge = gcPhotoSrc ? (gcPhotoSrc.indexOf('data:') === 0 ? '<div class="gc-photo-badge">\uD83D\uDCF7 Your Photo</div>' : '<div class="gc-photo-badge">\uD83C\uDF10 Reference</div>') : '';
+      var media = gcPhotoSrc
+        ? '<img class="gc-img" loading="lazy" src="' + gcPhotoSrc + '" alt="' + escapeHtml(car.name) + '">' + photoBadge
         : '<div class="gc-img-ph">' + tierEmoji(tier) + '</div>';
       var shine = (tier === 'super' || tier === 'hyper' || tier === 'legend') ? '<div class="gc-shine"></div>' : '';
       var make = (car.name.split(' ')[0] || '').toUpperCase();
@@ -7136,7 +7164,8 @@ el.querySelectorAll('[data-inst]').forEach(function(a){
     var nameSuffix = '';
     var clickAttr = ' data-inst="1" data-name="' + escapeHtml(car.name) + '"';
     var evoBadge = evoTier ? '<span class="gc-badge evo" style="color:' + evoTier.color + ';border-color:' + evoTier.color + '44">' + evoTier.icon + ' ' + evoTier.name + ' \u00D7' + ev.count + '</span>' : '';
-    return '<div class="garage-row' + (evoTier ? ' evo-row evo-' + evoTier.name.toLowerCase() : '') + '" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img class="g-thumb" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 && !evoTier ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + evoBadge + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');this.textContent=this.textContent===\'★\'?\'☆\':\'★\';" title="Toggle favorite">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit this car">✎</button><button class="g-act-btn g-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')" title="Delete this car from everywhere">✕</button></div></div>';
+    var gRowPhotoSrc = resolvePhotoSrc(car);
+    return '<div class="garage-row' + (evoTier ? ' evo-row evo-' + evoTier.name.toLowerCase() : '') + '" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (gRowPhotoSrc ? '<img class="g-thumb" src="' + gRowPhotoSrc + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 && !evoTier ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + evoBadge + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');this.textContent=this.textContent===\'★\'?\'☆\':\'★\';" title="Toggle favorite">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit this car">✎</button><button class="g-act-btn g-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')" title="Delete this car from everywhere">✕</button></div></div>';
   }).join('');
   el.querySelectorAll('[data-inst]').forEach(function(a){
     attachCarTap(a);
@@ -7269,10 +7298,11 @@ function renderHistory() {
 
     const carsHTML = [...entry.cars].sort((a,b)=>b.value-a.value).map(car=>{
       const isCarHL = !isSpot && entry.headliner && entry.headliner.name === car.name;
+      const histPhotoSrc = resolvePhotoSrc(car);
       return `
       <div class="hc-row-wrap">
         <a class="hc-row" href="${carUrl(car.name)}" target="_blank" rel="noopener noreferrer">
-          ${car.photo ? `<img class="hc-photo" src="${car.photo}" alt="car">` : `<span class="hc-emoji">${carTypeLabel(car.type)}</span>`}
+          ${histPhotoSrc ? `<img class="hc-photo" src="${histPhotoSrc}" alt="car">` : `<span class="hc-emoji">${carTypeLabel(car.type)}</span>`}
           <span class="hc-name">${escapeHtml(car.name)}${car.color?' <span style="font-weight:400;color:var(--text2)">· '+escapeHtml(car.color)+'</span>':''}${isCarHL?' <span style="color:var(--accent);font-size:0.6rem;letter-spacing:1px;font-weight:700">HEADLINER</span>':''}</span>
           <span class="hc-val">${fmtFull(car.value)}</span>
           <span class="hc-arrow">↗</span>
@@ -7342,7 +7372,8 @@ async function showSpecsCard(car) {
 
   // Fetch specs from Claude API and image in parallel
   // Race with a timeout so flaky mobile data can't leave the spinner hanging forever
-  var ownPhoto = car.photo && car.photo.indexOf('data:') === 0 ? car.photo : '';
+  var ownPhotoResolved = resolvePhotoSrc(car);
+  var ownPhoto = ownPhotoResolved && ownPhotoResolved.indexOf('data:') === 0 ? ownPhotoResolved : '';
   var pair = await Promise.race([
     Promise.all([ fetchCarSpecs(car.name), ownPhoto ? Promise.resolve('') : fetchCarImage(car.name) ]),
     new Promise(function(res){ setTimeout(function(){ res([null, null]); }, 8000); })
@@ -7430,10 +7461,11 @@ function showCarInstances(car, originEl) {
   var rarity = getRarity(car.value);
   var heroPhoto = null, heroBadge = '';
   for (var i = instances.length - 1; i >= 0; i--) {
-    if (instances[i].photo && instances[i].photo.indexOf('data:') === 0) { heroPhoto = instances[i].photo; heroBadge = '\uD83D\uDCF7 Your Photo'; break; }
+    var iResolved = resolvePhotoSrc(instances[i]);
+    if (iResolved && iResolved.indexOf('data:') === 0) { heroPhoto = iResolved; heroBadge = '\uD83D\uDCF7 Your Photo'; break; }
   }
-  if (!heroPhoto) { for (var j = instances.length - 1; j >= 0; j--) { if (instances[j].photo) { heroPhoto = instances[j].photo; heroBadge = '\uD83C\uDF10 Reference Photo'; break; } } }
-  if (!heroPhoto && car.photo) { heroPhoto = car.photo; heroBadge = car.photo.indexOf('data:') === 0 ? '\uD83D\uDCF7 Your Photo' : '\uD83C\uDF10 Reference Photo'; }
+  if (!heroPhoto) { for (var j = instances.length - 1; j >= 0; j--) { var jResolved = resolvePhotoSrc(instances[j]); if (jResolved) { heroPhoto = jResolved; heroBadge = '\uD83C\uDF10 Reference Photo'; break; } } }
+  if (!heroPhoto) { var carResolved = resolvePhotoSrc(car); if (carResolved) { heroPhoto = carResolved; heroBadge = carResolved.indexOf('data:') === 0 ? '\uD83D\uDCF7 Your Photo' : '\uD83C\uDF10 Reference Photo'; } }
   var heroHtml = heroPhoto
     ? '<img class="detail-hero-img" src="' + heroPhoto + '" alt="' + escapeHtml(car.name) + '">' + (heroBadge ? '<div class="detail-hero-badge">' + heroBadge + '</div>' : '')
     : '<div class="detail-hero-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
@@ -7441,8 +7473,9 @@ function showCarInstances(car, originEl) {
   var tierChip = '<div class="detail-tier-chip" style="--cc-color:' + rarity.color + '">' + tierEmoji(tier) + ' ' + rarity.label + '</div>';
   var sorted = instances.slice().reverse();
   var sightingsHtml = sorted.map(function(inst) {
-    var thumbHtml = inst.photo ? '<img class="detail-sighting-thumb" src="' + inst.photo + '" alt="">' : '<div class="detail-sighting-nophoto">' + escapeHtml(carTypeLabel(inst.type)) + '</div>';
-    var badge = inst.photo ? (inst.photo.indexOf('data:') === 0 ? '<div class="detail-sighting-badge">\uD83D\uDCF7</div>' : '<div class="detail-sighting-badge">\uD83C\uDF10</div>') : '';
+    var instPhotoSrc = resolvePhotoSrc(inst);
+    var thumbHtml = instPhotoSrc ? '<img class="detail-sighting-thumb" src="' + instPhotoSrc + '" alt="">' : '<div class="detail-sighting-nophoto">' + escapeHtml(carTypeLabel(inst.type)) + '</div>';
+    var badge = instPhotoSrc ? (instPhotoSrc.indexOf('data:') === 0 ? '<div class="detail-sighting-badge">\uD83D\uDCF7</div>' : '<div class="detail-sighting-badge">\uD83C\uDF10</div>') : '';
     var loc = (inst.location && inst.location.label) ? '<div class="detail-sighting-loc">\uD83D\uDCCD ' + escapeHtml(inst.location.label) + '</div>' : '';
     return '<div class="detail-sighting">' + thumbHtml + '<div class="detail-sighting-info"><div class="detail-sighting-date">' + escapeHtml(inst.runDate || 'Unknown') + '</div>' + loc + '</div>' + badge + '</div>';
   }).join('');
@@ -7955,7 +7988,7 @@ function celebrateFullCollectorCard(car, opts) {
     luxury:'👑', suv:'🛻', classic:'🕹️', hotrod:'🔧'
   }[car.type] || '🚘';
 
-  var photo = car.photo || (_idbPhotoCache[car.name.toLowerCase()] || '');
+  var photo = resolvePhotoSrc(car);
   if (!photo) { photo = ''; }
   else if (photo.indexOf('data:') !== 0) {
     // Prefer the user's own photo; fall back to a stock/reference image only if none exists.
@@ -8137,7 +8170,7 @@ function celebrateQuick(car, opts) {
     var el = document.createElement('div');
     el.className = 'cc-quick';
     el._ccResolve = resolve;
-    var photo = car.photo || (_idbPhotoCache[car.name.toLowerCase()] || '');
+    var photo = resolvePhotoSrc(car);
     var thumb = photo
       ? '<img class="cc-quick-thumb" src="' + photo + '" alt="">'
       : '<span class="cc-quick-emoji">' + tierEmoji(tier) + '</span>';
@@ -9088,8 +9121,16 @@ function _patchPhotosFromCache() {
       if (car.photo && typeof car.photo === 'string' && car.photo.indexOf('photo:') === 0) {
         var refKey = car.photo.slice(6);
         var ref = _photoCacheGet(refKey) || _photoCacheGet(key);
+        // BUGFIX: this used to wipe car.photo to '' on a cache miss. That
+        // destroyed the only pointer back to the real image in IndexedDB —
+        // if any save happened before the async lazy-load below finished,
+        // the 'photo:' reference was gone for good and the photo was lost
+        // permanently, even though the actual bytes were still sitting in
+        // IndexedDB untouched. Leave the reference alone; resolvePhotoSrc()
+        // is what render sites should use to get pixels on screen, so there's
+        // no need to mutate the model just to make something render.
         if (ref) car.photo = ref;
-        else { car.photo = ''; _photoLazyLoad(refKey || key); }
+        else _photoLazyLoad(refKey || key);
       } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0 &&
                  !(car.photo && car.photo.indexOf('data:') === 0) && car.photo !== cached) {
         // Prefer the user's own photo over a stock/reference image — never let a
@@ -9109,7 +9150,7 @@ function _patchPhotosFromCache() {
       var refKey = car.photo.slice(6);
       var ref = _photoCacheGet(refKey) || _photoCacheGet(key);
       if (ref) car.photo = ref;
-      else { car.photo = ''; _photoLazyLoad(refKey || key); }
+      else _photoLazyLoad(refKey || key); // keep the ref — see BUGFIX note above
     } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0 &&
                !(car.photo && car.photo.indexOf('data:') === 0) && car.photo !== cached) {
       car.photo = cached;
@@ -9126,7 +9167,7 @@ function _patchPhotosFromCache() {
       var refKey = car.photo.slice(6);
       var ref = _photoCacheGet(refKey) || _photoCacheGet(key);
       if (ref) car.photo = ref;
-      else { car.photo = ''; _photoLazyLoad(refKey || key); }
+      else _photoLazyLoad(refKey || key); // keep the ref — see BUGFIX note above
     } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0 &&
                !(car.photo && car.photo.indexOf('data:') === 0) && car.photo !== cached) {
       car.photo = cached;
@@ -11486,7 +11527,7 @@ function checkEvolutionUnlock(car) {
 
 function celebrateEvolution(car, oldTier, newTier, count, done) {
   if (document.querySelector('.evo-overlay')) { if (typeof done === 'function') done(); return; }
-  var photo = car.photo || (_idbPhotoCache[car.name.toLowerCase()] || '');
+  var photo = resolvePhotoSrc(car);
   var imgHTML = photo
     ? '<img src="' + photo + '" alt="" onerror="this.parentElement.innerHTML=\'' + tierEmoji(tierOf(car.value || 0)) + '\'">'
     : tierEmoji(tierOf(car.value || 0));
