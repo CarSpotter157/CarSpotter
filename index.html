@@ -3851,11 +3851,16 @@ try { if (window._fbReady) storage = firebase.storage(); } catch(e) { storage = 
 // the ENTIRE local collection — re-fires an upload for every single locally
 // cached photo, all of which fail again, and a failed write can itself
 // trigger another sync. That combination is what turns one bad upload into
-// thousands of failing requests a minute. One failure is enough to know
-// uploads won't work this session, so stop trying until the page reloads;
-// _photoUploadAttempted also makes sure the same key is never re-fired twice
-// in a row even before the first failure comes back.
+// thousands of failing requests a minute. Persisted to localStorage (not
+// just an in-memory flag) so a single failure — ever, on any past visit —
+// stops every future page load from even trying again, since a CORS/config
+// problem like this doesn't fix itself between reloads.
 var _photoUploadBroken = false;
+try { _photoUploadBroken = localStorage.getItem('cs_photo_upload_broken') === '1'; } catch(e) {}
+function _markPhotoUploadBroken() {
+  _photoUploadBroken = true;
+  try { localStorage.setItem('cs_photo_upload_broken', '1'); } catch(e) {}
+}
 var _photoUploadAttempted = {};
 function _uploadPhotoToCloud(key, dataUrl) {
   if (_photoUploadBroken || !storage || !currentUser || !key || !dataUrl) return;
@@ -3865,10 +3870,10 @@ function _uploadPhotoToCloud(key, dataUrl) {
     storage.ref('users/' + currentUser.uid + '/photos/' + key + '.jpg')
       .putString(dataUrl, 'data_url')
       .catch(function(e){
-        _photoUploadBroken = true;
-        if (CS_SYNC_DEBUG) console.warn('Photo upload failed — disabling cloud photo upload for this session:', e);
+        _markPhotoUploadBroken();
+        if (CS_SYNC_DEBUG) console.warn('Photo upload failed — disabling cloud photo upload permanently until Storage/CORS is fixed:', e);
       });
-  } catch(e) { _photoUploadBroken = true; }
+  } catch(e) { _markPhotoUploadBroken(); }
 }
 function _downloadPhotoFromCloud(key) {
   if (_photoUploadBroken || !storage || !currentUser || !key) return Promise.resolve(null);
