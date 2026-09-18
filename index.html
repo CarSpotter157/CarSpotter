@@ -3844,16 +3844,34 @@ const db = window._fbReady ? firebase.firestore() : null;
 // fails safely (caught) and the app behaves exactly as it did before.
 var storage = null;
 try { if (window._fbReady) storage = firebase.storage(); } catch(e) { storage = null; }
+// Circuit breaker: if Cloud Storage isn't enabled/configured for this
+// Firebase project (or its CORS rules don't allow this origin), every photo
+// upload fails identically forever. Without a breaker, every cloud sync —
+// and there can be many per minute during active use, each one re-walking
+// the ENTIRE local collection — re-fires an upload for every single locally
+// cached photo, all of which fail again, and a failed write can itself
+// trigger another sync. That combination is what turns one bad upload into
+// thousands of failing requests a minute. One failure is enough to know
+// uploads won't work this session, so stop trying until the page reloads;
+// _photoUploadAttempted also makes sure the same key is never re-fired twice
+// in a row even before the first failure comes back.
+var _photoUploadBroken = false;
+var _photoUploadAttempted = {};
 function _uploadPhotoToCloud(key, dataUrl) {
-  if (!storage || !currentUser || !key || !dataUrl) return;
+  if (_photoUploadBroken || !storage || !currentUser || !key || !dataUrl) return;
+  if (_photoUploadAttempted[key]) return;
+  _photoUploadAttempted[key] = true;
   try {
     storage.ref('users/' + currentUser.uid + '/photos/' + key + '.jpg')
       .putString(dataUrl, 'data_url')
-      .catch(function(e){ if (CS_SYNC_DEBUG) console.warn('Photo upload failed (Storage may not be enabled yet):', e); });
-  } catch(e) {}
+      .catch(function(e){
+        _photoUploadBroken = true;
+        if (CS_SYNC_DEBUG) console.warn('Photo upload failed — disabling cloud photo upload for this session:', e);
+      });
+  } catch(e) { _photoUploadBroken = true; }
 }
 function _downloadPhotoFromCloud(key) {
-  if (!storage || !currentUser || !key) return Promise.resolve(null);
+  if (_photoUploadBroken || !storage || !currentUser || !key) return Promise.resolve(null);
   return storage.ref('users/' + currentUser.uid + '/photos/' + key + '.jpg').getDownloadURL()
     .then(function(url) {
       _idbPut(key, url).catch(function(){});
