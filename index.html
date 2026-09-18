@@ -3911,7 +3911,7 @@ let bestFromLB = parseInt(localStorage.getItem('cs_best_lb') || '0');
 let favoriteNames = new Set(_safeJSON(localStorage.getItem('cs_fav') || '[]', []));
 let currentSpotLocation = _safeJSON(localStorage.getItem('cs_pending_loc') || 'null', null);
 let allRuns      = _safeJSON(localStorage.getItem('cs_runs')      || '[]', []);
-let currentRun   = _safeJSON(localStorage.getItem('cs_current')   || '[]', []);
+let currentRun   = _csReadJSON('cs_current', []);
 let quickPicks   = _safeJSON(localStorage.getItem('cs_qp')        || '[]', []);
 let sortMode     = 'desc';
 let currentUser  = null;
@@ -9274,7 +9274,7 @@ function _savePhoto(compressed, t) {
     }).catch(function() {
       _photoCacheSet(key, compressed);
       _safeSet('cs_runs', JSON.stringify(allRuns));
-      _safeSet('cs_current', JSON.stringify(currentRun));
+      _safeSet(_csScopedKey('cs_current'), JSON.stringify(currentRun));
       _saveQPLocal();
       showToast("⚠ Photo couldn't be saved permanently. Export a backup soon!");
       renderGarage(); renderHistory();
