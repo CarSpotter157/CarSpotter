@@ -9074,10 +9074,21 @@ var _idbConn = null;
 function _idbOpen() {
   if (_idbConn) return Promise.resolve(_idbConn);
   return new Promise(function(res, rej) {
-    var r = indexedDB.open('CarSpotterPhotos', 3);
+    // BUGFIX: version bumped 3->4, and the store-creation check changed from
+    // "if (e.oldVersion < 1)" to an explicit objectStoreNames check. The old
+    // condition only created the 'photos' table on a device's very first-ever
+    // open of this database — but this app existed before the photo feature
+    // did, so on any device whose IndexedDB database predates it, the table
+    // was never created. Every subsequent write silently failed (errors were
+    // swallowed by .catch(()=>{})), so photos only ever lived in transient
+    // in-memory cache — gone on reload, exactly like a temp file that was
+    // never actually saved. Bumping the version forces onupgradeneeded to run
+    // again on every device, so the objectStoreNames check gets a chance to
+    // create the table if it's missing, regardless of that device's history.
+    var r = indexedDB.open('CarSpotterPhotos', 4);
     r.onupgradeneeded = function(e) {
       var db = e.target.result;
-      if (e.oldVersion < 1) db.createObjectStore('photos', { keyPath: 'name' });
+      if (!db.objectStoreNames.contains('photos')) db.createObjectStore('photos', { keyPath: 'name' });
     };
     r.onsuccess = function(e) {
       var db = e.target.result;
@@ -9092,10 +9103,12 @@ function _idbOpen() {
 function _idbPut(name, data) {
   return _idbOpen().then(function(db) {
     return new Promise(function(res, rej) {
-      var tx = db.transaction('photos', 'readwrite');
-      tx.objectStore('photos').put({ name: name.toLowerCase(), data: data });
-      tx.oncomplete = function() { _photoCacheSet(name.toLowerCase(), data); res(); };
-      tx.onerror = function(e) { rej(e.target.error); };
+      try {
+        var tx = db.transaction('photos', 'readwrite');
+        tx.objectStore('photos').put({ name: name.toLowerCase(), data: data });
+        tx.oncomplete = function() { _photoCacheSet(name.toLowerCase(), data); res(); };
+        tx.onerror = function(e) { rej(e.target.error); };
+      } catch (e) { rej(e); }
     });
   });
 }
@@ -9103,10 +9116,12 @@ function _idbPut(name, data) {
 function _idbGetAll() {
   return _idbOpen().then(function(db) {
     return new Promise(function(res, rej) {
-      var tx = db.transaction('photos', 'readonly');
-      var r = tx.objectStore('photos').getAll();
-      r.onsuccess = function(e) { res(e.target.result || []); };
-      r.onerror = function(e) { rej(e.target.error); };
+      try {
+        var tx = db.transaction('photos', 'readonly');
+        var r = tx.objectStore('photos').getAll();
+        r.onsuccess = function(e) { res(e.target.result || []); };
+        r.onerror = function(e) { rej(e.target.error); };
+      } catch (e) { rej(e); }
     });
   });
 }
@@ -9114,10 +9129,12 @@ function _idbGetAll() {
 function _idbGet(name) {
   return _idbOpen().then(function(db) {
     return new Promise(function(res, rej) {
-      var tx = db.transaction('photos', 'readonly');
-      var r = tx.objectStore('photos').get(String(name || '').toLowerCase());
-      r.onsuccess = function(e) { res(e.target.result ? e.target.result.data : null); };
-      r.onerror = function(e) { rej(e.target.error); };
+      try {
+        var tx = db.transaction('photos', 'readonly');
+        var r = tx.objectStore('photos').get(String(name || '').toLowerCase());
+        r.onsuccess = function(e) { res(e.target.result ? e.target.result.data : null); };
+        r.onerror = function(e) { rej(e.target.error); };
+      } catch (e) { rej(e); }
     });
   });
 }
