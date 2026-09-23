@@ -2038,6 +2038,26 @@ html.show-install #installBanner{display:flex;}
 .car-ac-name{flex:1;font-weight:600;}
 .car-ac-val{font-family:'Inter',sans-serif;font-size:0.84rem;color:var(--accent);}
 
+/* ── INLINE QUICK PICKS + COLOR DROPDOWN ── */
+.car-ac-dropdown{max-height:min(340px,52vh);overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;right:auto;width:calc(200% + 14px);border-radius:0 0 var(--radius-xs) var(--radius-xs);}
+.ac-head{white-space:nowrap;display:flex;align-items:center;justify-content:space-between;padding:9px 14px 3px;font-size:.5rem;letter-spacing:2px;font-weight:800;color:var(--accent);}
+.ac-head-btn{background:none;border:none;color:var(--muted);font-size:.5rem;letter-spacing:1px;font-weight:700;cursor:pointer;padding:6px 0 6px 12px;font-family:'Inter',sans-serif;}
+.ac-head-btn:hover{color:var(--red);}
+.ac-item-thumb{width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);}
+.ac-item-emoji{min-width:28px;text-align:center;font-size:1rem;flex-shrink:0;}
+.ac-item-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ac-item-star{color:var(--accent);font-size:.7rem;margin-right:6px;}
+.ac-item-tag{font-size:.48rem;letter-spacing:.7px;font-weight:800;color:var(--accent);flex-shrink:0;}
+.ac-item-val{flex-shrink:0;}
+.ac-item-del{width:26px;height:26px;border-radius:50%;border:none;background:rgba(244,67,54,.12);color:#f44336;font-size:.7rem;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.ac-item-del:hover{background:#f44336;color:#fff;}
+.color-sel-wrap{position:relative;}
+.color-sel-wrap select{padding-left:40px;}
+.color-sel-wrap select.is-empty{color:var(--muted);font-weight:400;}
+.color-dot{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:16px;height:16px;border-radius:50%;border:1px solid rgba(255,255,255,.3);pointer-events:none;background:transparent;transition:background .15s;z-index:1;}
+.color-dot.empty{border-style:dashed;border-color:rgba(255,255,255,.22);}
+.ff select option{background:#17171b;color:#f2f2f4;}
+
 /* ── BULK ── */
 .bulk-bar{display:none;background:var(--surf);border-bottom:1px solid var(--border);padding:10px 16px;position:sticky;top:0;z-index:10;gap:10px;align-items:center;}
 .bulk-bar.active{display:flex;}
@@ -3288,7 +3308,7 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 <div class="ff">
 <label for="carName">Make / Model</label>
 <div class="car-ac-wrap" id="carAcWrap">
-<input autocomplete="off" id="carName" onblur="setTimeout(closeCarAc,180)" onfocus="onCarNameInput(this.value)" oninput="onCarNameInput(this.value)" placeholder="Ferrari 488" title="Start typing to see suggestions from the database" type="text"/>
+<input autocomplete="off" id="carName" onblur="setTimeout(closeCarAc,180)" onfocus="onCarNameInput(this.value)" oninput="onCarNameInput(this.value)" placeholder="Tap for quick picks" title="Tap to see your quick picks, or type to search" type="text"/>
 <div class="car-ac-dropdown" id="carAcDropdown"></div>
 </div>
 </div>
@@ -3299,22 +3319,45 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 </div>
 <div class="ff">
 <label for="carColor">Color</label>
-<input autocomplete="off" id="carColor" placeholder="Rosso Corsa" title="Optional &mdash; e.g. Rosso Corsa, Midnight Blue" type="text"/>
+<div class="color-sel-wrap">
+<span class="color-dot empty" id="carColorDot"></span>
+<select class="is-empty" id="carColor" onchange="updateColorDot()" title="Optional &mdash; pick the car's color">
+<option value="" selected>Color (optional)</option>
+<option value="Black" data-hex="#16161a">Black</option>
+<option value="White" data-hex="#f4f4f5">White</option>
+<option value="Silver" data-hex="#c3c7cd">Silver</option>
+<option value="Gray" data-hex="#7d828c">Gray</option>
+<option value="Charcoal" data-hex="#3a3d44">Charcoal</option>
+<option value="Red" data-hex="#dc2626">Red</option>
+<option value="Burgundy" data-hex="#7f1d2d">Burgundy</option>
+<option value="Orange" data-hex="#f97316">Orange</option>
+<option value="Yellow" data-hex="#facc15">Yellow</option>
+<option value="Gold" data-hex="#d4a72c">Gold</option>
+<option value="Bronze" data-hex="#b8743a">Bronze</option>
+<option value="Tan / Beige" data-hex="#d8c3a0">Tan / Beige</option>
+<option value="Brown" data-hex="#7a4b2a">Brown</option>
+<option value="Green" data-hex="#22a04b">Green</option>
+<option value="Dark Green" data-hex="#14532d">Dark Green</option>
+<option value="Lime" data-hex="#a3e635">Lime</option>
+<option value="Teal" data-hex="#14b8a6">Teal</option>
+<option value="Light Blue" data-hex="#7dd3fc">Light Blue</option>
+<option value="Blue" data-hex="#2563eb">Blue</option>
+<option value="Navy" data-hex="#1e3a8a">Navy</option>
+<option value="Purple" data-hex="#7c3aed">Purple</option>
+<option value="Pink" data-hex="#f472b6">Pink</option>
+<option value="Multi / Other" data-hex="#8a8f98">Multi / Other</option>
+</select>
+</div>
 </div>
 <div class="ff">
 <label for="carType">Type</label>
 <select id="carType" title="Select the car category">
 <option disabled="" selected="" value="">&mdash; Select Type &mdash;</option>
-<option value="supercar">Supercar</option>
 <option value="sports">Sports Car</option>
-<option value="muscle">Muscle Car</option>
-<option value="track">Track Car</option>
-<option value="exotic">Exotic</option>
+<option value="classic">Vintage</option>
+<option value="suv">SUV / Truck</option>
+<option value="supercar">Supercar</option>
 <option value="ev">EV</option>
-<option value="luxury">Luxury / Sedan</option>
-<option value="suv">Truck / SUV</option>
-<option value="classic">Classic / Vintage</option>
-<option value="hotrod">Hot Rod</option>
 </select>
 </div>
 </div>
@@ -3331,23 +3374,6 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
               </button>
 </div>
 <div class="location-chip-row" id="locationChipRow" style="display:none"></div>
-<!-- Quick Picks -->
-<div class="qp-wrap" id="qpWrap">
-<button class="qp-trigger" onclick="toggleQP()">
-<span>Quick Picks</span>
-<span class="qp-arrow" id="qpArrow">&dtrif;</span>
-</button>
-<div class="qp-dropdown">
-<div class="qp-header">
-<button class="qp-edit-btn" id="qpEditBtn" onclick="toggleQPEdit()" title="Edit quick picks">EDIT</button>
-<button class="qp-clear-btn" id="qpClearBtn" onclick="clearAllQP()" style="display:none" title="Remove all quick picks">CLEAR ALL</button>
-</div>
-<div class="qp-search">
-<input autocomplete="off" id="qpSearch" oninput="renderQPList(this.value)" placeholder="Search..." type="text"/>
-</div>
-<div class="qp-list" id="qpList"></div>
-</div>
-</div>
 <!-- Two action buttons: run vs spotted -->
 <div class="btn-row">
 <button class="btn-run" onclick="logRun()" title="Add this car to your active spotting session (stacks multiple cars)">+ ADD TO RUN</button>
@@ -3844,39 +3870,16 @@ const db = window._fbReady ? firebase.firestore() : null;
 // fails safely (caught) and the app behaves exactly as it did before.
 var storage = null;
 try { if (window._fbReady) storage = firebase.storage(); } catch(e) { storage = null; }
-// Circuit breaker: if Cloud Storage isn't enabled/configured for this
-// Firebase project (or its CORS rules don't allow this origin), every photo
-// upload fails identically forever. Without a breaker, every cloud sync —
-// and there can be many per minute during active use, each one re-walking
-// the ENTIRE local collection — re-fires an upload for every single locally
-// cached photo, all of which fail again, and a failed write can itself
-// trigger another sync. That combination is what turns one bad upload into
-// thousands of failing requests a minute. Persisted to localStorage (not
-// just an in-memory flag) so a single failure — ever, on any past visit —
-// stops every future page load from even trying again, since a CORS/config
-// problem like this doesn't fix itself between reloads.
-var _photoUploadBroken = false;
-try { _photoUploadBroken = localStorage.getItem('cs_photo_upload_broken') === '1'; } catch(e) {}
-function _markPhotoUploadBroken() {
-  _photoUploadBroken = true;
-  try { localStorage.setItem('cs_photo_upload_broken', '1'); } catch(e) {}
-}
-var _photoUploadAttempted = {};
 function _uploadPhotoToCloud(key, dataUrl) {
-  if (_photoUploadBroken || !storage || !currentUser || !key || !dataUrl) return;
-  if (_photoUploadAttempted[key]) return;
-  _photoUploadAttempted[key] = true;
+  if (!storage || !currentUser || !key || !dataUrl) return;
   try {
     storage.ref('users/' + currentUser.uid + '/photos/' + key + '.jpg')
       .putString(dataUrl, 'data_url')
-      .catch(function(e){
-        _markPhotoUploadBroken();
-        if (CS_SYNC_DEBUG) console.warn('Photo upload failed — disabling cloud photo upload permanently until Storage/CORS is fixed:', e);
-      });
-  } catch(e) { _markPhotoUploadBroken(); }
+      .catch(function(e){ if (CS_SYNC_DEBUG) console.warn('Photo upload failed (Storage may not be enabled yet):', e); });
+  } catch(e) {}
 }
 function _downloadPhotoFromCloud(key) {
-  if (_photoUploadBroken || !storage || !currentUser || !key) return Promise.resolve(null);
+  if (!storage || !currentUser || !key) return Promise.resolve(null);
   return storage.ref('users/' + currentUser.uid + '/photos/' + key + '.jpg').getDownloadURL()
     .then(function(url) {
       _idbPut(key, url).catch(function(){});
@@ -3934,7 +3937,7 @@ let bestFromLB = parseInt(localStorage.getItem('cs_best_lb') || '0');
 let favoriteNames = new Set(_safeJSON(localStorage.getItem('cs_fav') || '[]', []));
 let currentSpotLocation = _safeJSON(localStorage.getItem('cs_pending_loc') || 'null', null);
 let allRuns      = _safeJSON(localStorage.getItem('cs_runs')      || '[]', []);
-let currentRun   = _csReadJSON('cs_current', []);
+let currentRun   = _safeJSON(localStorage.getItem('cs_current')   || '[]', []);
 let quickPicks   = _safeJSON(localStorage.getItem('cs_qp')        || '[]', []);
 let sortMode     = 'desc';
 let currentUser  = null;
@@ -3973,28 +3976,6 @@ function _photoCacheSet(key, data) {
 }
 function _photoCacheKey(name) { return String(name || '').toLowerCase(); }
 function _photoCacheGet(key) { return _idbPhotoCache[key] || ''; }
-// Resolve whatever's sitting in car.photo — a real data: URL, an http(s)
-// reference URL, or a 'photo:key' pointer into the IndexedDB-backed cache —
-// into something actually safe to drop into an <img src>. Never mutates the
-// car object (use _patchPhotosFromCache for that); kicks off a lazy IDB load
-// on a cache miss so the photo shows up once it's back in RAM. Every render
-// site should read photos through this instead of car.photo directly, so a
-// render never has to run after _patchPhotosFromCache to show correctly.
-function resolvePhotoSrc(car) {
-  if (!car) return '';
-  var p = car.photo;
-  if (p && typeof p === 'string' && p.indexOf('photo:') === 0) {
-    var refKey = p.slice(6);
-    var resolved = _photoCacheGet(refKey) || _photoCacheGet(_photoCacheKey(car.name));
-    if (!resolved) _photoLazyLoad(refKey || _photoCacheKey(car.name));
-    return resolved || '';
-  }
-  if (p) return p;
-  var cached = _photoCacheGet(_photoCacheKey(car.name));
-  if (cached) return cached;
-  _photoLazyLoad(_photoCacheKey(car.name));
-  return '';
-}
 function _photoLazyLoad(key) {
   if (!key || _photoLoading[key] || _photoMissing[key] || _idbPhotoCache[key]) return;
   _photoLoading[key] = true;
@@ -4053,10 +4034,7 @@ function _refreshVisiblePhotos() {
         else if (activePg.id === 'page-history') renderHistory();
         else if (activePg.id === 'page-spot') renderSpot();
       }
-      var qpWrap = document.getElementById('qpWrap');
-      if (qpWrap && qpWrap.style.display !== 'none') {
-        renderQPList(document.getElementById('qpSearch')?.value || '');
-      }
+      renderQPList();
       if (typeof renderHomeFav === 'function') renderHomeFav();
     } catch(e) {}
   }, 400);
@@ -5903,7 +5881,7 @@ function renderHomeFav(){
   var el=document.getElementById('favList');var all=getAllCars();
   var favs=all.filter(function(c){ return favoriteNames.has(c.name); }).sort(function(a,b){return b.value-a.value});
   if(!favs.length){document.getElementById('favSection').style.display='none';return}
-  var html=favs.map(function(c){var json=JSON.stringify(c).replace(/"/g,'&quot;');var favPhotoSrc=resolvePhotoSrc(c);var img=favPhotoSrc?'<img class="fav-item-img" src="'+favPhotoSrc+'" onerror="this.style.display='+"'none'"+'">':'<div class="fav-item-ph"><i class="fas fa-star"></i></div>';return'<div class="fav-item" onclick="showCarInstances('+json+')">'+img+'<div class="fav-item-name">'+c.name.split(' ').pop()+'</div><div class="fav-item-val">$'+((c.value||0).toLocaleString())+'</div></div>'}).join('');el.innerHTML=html;document.getElementById('favSection').style.display='block';
+  var html=favs.map(function(c){var json=JSON.stringify(c).replace(/"/g,'&quot;');var img=c.photo?'<img class="fav-item-img" src="'+c.photo+'" onerror="this.style.display='+"'none'"+'">':'<div class="fav-item-ph"><i class="fas fa-star"></i></div>';return'<div class="fav-item" onclick="showCarInstances('+json+')">'+img+'<div class="fav-item-name">'+c.name.split(' ').pop()+'</div><div class="fav-item-val">$'+((c.value||0).toLocaleString())+'</div></div>'}).join('');el.innerHTML=html;document.getElementById('favSection').style.display='block';
 }
 function startFavRotation(){if(favTimer)clearInterval(favTimer);var all=getAllCars();var favs=all.filter(function(c){return favoriteNames.has(c.name)}).sort(function(a,b){return b.value-a.value});if(favs.length<2)return;favIdx=0;var scroller=document.getElementById('favList');if(!scroller)return;favTimer=setInterval(function(){favIdx=(favIdx+1)%favs.length;var child=scroller.children[favIdx];if(child){var target=child.offsetLeft-scroller.clientWidth/2+child.clientWidth/2;scroller.scrollTo({left:Math.max(0,target),behavior:'smooth'});}},4000);}
 function stopFavRotation(){if(favTimer){clearInterval(favTimer);favTimer=null}}
@@ -6059,32 +6037,17 @@ function saveToQP(car) {
   saveToCloud();
 }
 
-function toggleQP() {
-  qpOpen = !qpOpen;
-  if (!qpOpen) qpEditMode = false;
-  document.getElementById('qpWrap').classList.toggle('open', qpOpen);
-  if (qpOpen) {
-    renderQPList(document.getElementById('qpSearch')?.value || '');
-    updateQPEditUI();
-    setTimeout(() => document.getElementById('qpSearch').focus(), 80);
-  }
-}
-function closeQP() {
-  qpOpen = false;
-  qpEditMode = false;
-  document.getElementById('qpWrap').classList.remove('open');
-  updateQPEditUI();
-}
-function toggleQPEdit() {
-  qpEditMode = !qpEditMode;
-  renderQPList(document.getElementById('qpSearch')?.value || '');
-  updateQPEditUI();
-}
-function updateQPEditUI() {
-  const editBtn = document.getElementById('qpEditBtn');
-  const clearBtn = document.getElementById('qpClearBtn');
-  if (editBtn) { editBtn.textContent = qpEditMode ? 'DONE' : 'EDIT'; editBtn.classList.toggle('active', qpEditMode); }
-  if (clearBtn) { clearBtn.style.display = qpEditMode && quickPicks.length ? 'block' : 'none'; }
+// Quick Picks now live inside the Make / Model field (see onCarNameInput).
+// These stay as small shims so the rest of the app can keep calling them.
+function toggleQP() {}
+function closeQP() { closeCarAc(); }
+function toggleQPEdit() {}
+function updateQPEditUI() {}
+function renderQPTrigger() {}
+function renderQPList() {
+  var wrap = document.getElementById('carAcWrap');
+  var inp  = document.getElementById('carName');
+  if (wrap && inp && wrap.classList.contains('open')) onCarNameInput(inp.value);
 }
 function removeQP(name) {
   const key = String(name).toLowerCase();
@@ -6093,9 +6056,7 @@ function removeQP(name) {
   _bumpVer('deletedQP');
   _persistDeleted();
   _saveQPLocal();
-  renderQPList(document.getElementById('qpSearch')?.value || '');
-  updateQPEditUI();
-  renderQPTrigger();
+  renderQPList();
   saveToCloud();
 }
 function clearAllQP() {
@@ -6106,10 +6067,7 @@ function clearAllQP() {
   _bumpVer('deletedQP');
   _persistDeleted();
   _saveQPLocal();
-  qpEditMode = false;
-  renderQPList('');
-  updateQPEditUI();
-  renderQPTrigger();
+  closeCarAc();
   showToast('All quick picks cleared');
   saveToCloud();
 }
@@ -6129,70 +6087,7 @@ function _garageCarsForQuickPick(query) {
   (currentRun || []).forEach(add);
   return out;
 }
-function renderQPList(query) {
-  // Quick Picks previously skipped photo-cache patching entirely, so any
-  // car photo not already resolved in memory rendered as a broken image
-  // here specifically — even though the same car showed its photo fine
-  // elsewhere (Garage/History/Spot all patch before rendering).
-  _patchPhotosFromCache();
-  const el = document.getElementById('qpList');
-  const wrap = document.getElementById('qpWrap');
-  const q  = String(query || '').toLowerCase().trim();
-
-  // Quick Picks stay lightweight: the saved Quick Picks list is shown when the
-  // search is empty. Garage cars are only surfaced when their name matches what
-  // the user is typing, so we don't dump the whole garage into Quick Picks.
-  var saved = q ? quickPicks.filter(c => String(c.name || '').toLowerCase().includes(q)) : quickPicks.slice();
-  var merged = [];
-  var seen = {};
-  saved.forEach(function(c) {
-    var key = String(c.name || '').toLowerCase();
-    if (!seen[key]) { seen[key] = true; merged.push(c); }
-  });
-  if (q) {
-    _garageCarsForQuickPick(q).forEach(function(c) {
-      var key = String(c.name || '').toLowerCase();
-      if (!seen[key]) { seen[key] = true; merged.push(c); }
-    });
-  }
-
-  if (!merged.length) {
-    el.innerHTML = '<div class="qp-empty">'+(q?'No matches':'No picks yet — log some cars!')+'</div>';
-    if (wrap) wrap.style.display = q ? 'block' : (quickPicks.length ? 'block' : 'none');
-    return;
-  }
-  el.innerHTML = '';
-  merged.forEach(function(c) {
-    const d = document.createElement('div');
-    var fromGarage = q && !quickPicks.some(function(qp){ return String(qp.name || '').toLowerCase() === String(c.name || '').toLowerCase(); });
-    d.className = 'qp-item' + (qpEditMode ? ' editing' : '');
-    var qpPhotoSrc = resolvePhotoSrc(c);
-    d.innerHTML = (qpPhotoSrc ? `<img style="width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid var(--border)" src="${qpPhotoSrc}" alt="">` : `<span class="qp-item-type" style="font-size:0.55rem;color:var(--muted);letter-spacing:1px;font-weight:600;min-width:36px;text-align:right">${carTypeLabel(c.type)}</span>`) + `<span class="qp-item-name">${c.name}</span><span class="qp-item-val">${fmtFull(c.value)}</span>` + (fromGarage ? `<span style="font-size:.48rem;color:var(--accent);letter-spacing:.7px;margin-left:auto;font-weight:800">GARAGE MATCH</span>` : `<span style="font-size:.48rem;color:var(--muted);letter-spacing:.7px;margin-left:auto">QUICK PICK</span>`) + (qpEditMode && !fromGarage ? `<button class="qp-item-del" title="Remove">✕</button>` : '');
-    if (qpEditMode && !fromGarage) {
-      d.querySelector('.qp-item-del').onclick = (e) => { e.stopPropagation(); removeQP(c.name); };
-    } else {
-      d.onclick = () => {
-        document.getElementById('carName').value  = c.name;
-        document.getElementById('carValue').value = c.value;
-        document.getElementById('carColor').value = c.color||'';
-        document.getElementById('carType').value  = c.type;
-        closeQP();
-        document.getElementById('qpSearch').value = '';
-      };
-    }
-    el.appendChild(d);
-  });
-  if (wrap) wrap.style.display = 'block';
-}
-function renderQPTrigger() {
-  var wrap = document.getElementById('qpWrap');
-  var search = document.getElementById('qpSearch');
-  if (!wrap) return;
-  var q = search ? search.value.trim() : '';
-  wrap.style.display = (quickPicks.length || q) ? 'block' : 'none';
-}
 document.addEventListener('click', e => {
-  if (qpOpen && !document.getElementById('qpWrap').contains(e.target)) closeQP();
   if (_actOpen && !document.getElementById('actPanel').contains(e.target) && !document.getElementById('actBell').contains(e.target)) {
     toggleActivity(0);
   }
@@ -6261,7 +6156,7 @@ function _logGuard(sig) {
 function clearInputs() {
   document.getElementById('carName').value  = '';
   document.getElementById('carValue').value = '';
-  document.getElementById('carColor').value = '';
+  setCarColor('');
 }
 
 //  LOG TO RUN 
@@ -6503,7 +6398,7 @@ function showRecap({ total, cars, headliner, isRec, prevBest }, done) {
   const delays = ['0.1s','0.24s','0.38s'];
   const podiumHTML = top3.map((c,i) => {
     const t  = tierOf(c.value || 0);
-    const ph = resolvePhotoSrc(c);
+    const ph = c.photo || (_idbPhotoCache[(c.name||'').toLowerCase()] || '');
     const media = ph
       ? '<img class="recap-p-img" src="' + ph + '" alt="" loading="lazy">'
       : '<div class="recap-p-ph">' + tierEmoji(t) + '</div>';
@@ -6622,14 +6517,13 @@ function renderSpot() {
       row.style.animation = (ri === 0 ? 'driveIn 0.34s ease both' : 'fadeUp 0.25s ease both');
       row.style.animationDelay = (ri * 0.03) + 's';
       if (isHL) row.style.borderColor = 'var(--accent)';
-      var runPhotoSrc = resolvePhotoSrc(car);
-      row.innerHTML = (runPhotoSrc ? '<img class="run-item-photo" src="' + runPhotoSrc + '" alt="car">' : '<div class="re" style="cursor:pointer" onclick="triggerPhotoAttach({type:\'run\',index:' + i + '})" title="Add photo">' + escapeHtml(carTypeLabel(car.type)) + '</div>') +
+      row.innerHTML = (car.photo ? '<img class="run-item-photo" src="' + car.photo + '" alt="car">' : '<div class="re" style="cursor:pointer" onclick="triggerPhotoAttach({type:\'run\',index:' + i + '})" title="Add photo">' + escapeHtml(carTypeLabel(car.type)) + '</div>') +
         '<div class="ri"><div class="rn">' + escapeHtml(car.name) + '</div>' +
         ((car.color || (car.location && car.location.label)) ? '<div class="rc">' + escapeHtml([car.color, car.location && car.location.label].filter(Boolean).join('  ')) + '</div>' : '') +
         '<span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' +
         (isHL ? '<div class="headliner-badge">⭐ HEADLINER</div>' : '') + '</div>' +
         '<div class="rv">' + fmtFull(car.value) + '</div>' +
-        '<button class="photo-btn-sm' + (runPhotoSrc ? ' has-photo' : '') + '" onclick="triggerPhotoAttach({type:\'run\',index:' + i + '})" title="' + (runPhotoSrc ? 'Change photo' : 'Add photo') + '">📷</button>' +
+        '<button class="photo-btn-sm' + (car.photo ? ' has-photo' : '') + '" onclick="triggerPhotoAttach({type:\'run\',index:' + i + '})" title="' + (car.photo ? 'Change photo' : 'Add photo') + '">📷</button>' +
         '<button class="star-btn ' + (isHL ? 'starred' : '') + '" onclick="toggleHeadliner(' + i + ')" title="Set as headliner">★</button>' +
         '<button class="del-btn" onclick="removeCar(' + i + ')"></button>';
       list.appendChild(row);
@@ -6914,9 +6808,8 @@ function renderFeatured(cars) {
   var tier = tierOf(car.value);
   var meta = tierMeta(tier);
   var rarity = getRarity(car.value);
-  var featPhotoSrc = resolvePhotoSrc(car);
-  var media = featPhotoSrc
-    ? '<img src="' + featPhotoSrc + '" alt="' + escapeHtml(car.name) + '">'
+  var media = car.photo
+    ? '<img src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">'
     : '<div class="fh-ph">' + tierEmoji(tier) + '</div>';
   var badges = '<div class="fh-badge">' + rarity.label + '</div>';
   if (car.spotCount > 1) badges += '<div class="fh-badge">Seen \u00D7' + car.spotCount + '</div>';
@@ -6969,8 +6862,7 @@ function clusterCars(cars) {
 
 function buildMapPopup(car) {
   var rarity = getRarity(car.value);
-  var mapPopupPhotoSrc = resolvePhotoSrc(car);
-  var photoHtml = mapPopupPhotoSrc ? '<img class="map-popup-photo" src="' + mapPopupPhotoSrc + '" alt="' + escapeHtml(car.name) + '">' : '<div class="map-popup-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
+  var photoHtml = car.photo ? '<img class="map-popup-photo" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' : '<div class="map-popup-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
   var locLabel = (car.location && car.location.label) ? escapeHtml(car.location.label) : '';
   return '<div class="map-popup-card">' +
     '<div class="map-popup-hero">' + photoHtml + '</div>' +
@@ -6988,8 +6880,7 @@ function buildClusterPopup(cluster) {
   var html = '<div style="font-family:\'Inter\',sans-serif;font-size:0.82rem;letter-spacing:1px;color:var(--text);margin-bottom:6px;">' + cluster.cars.length + ' cars here</div><div class="map-cluster-list">';
   cluster.cars.forEach(function(car) {
     var rarity = getRarity(car.value);
-    var clusterPhotoSrc = resolvePhotoSrc(car);
-    var photoHtml = clusterPhotoSrc ? '<img src="' + clusterPhotoSrc + '" alt="' + escapeHtml(car.name) + '">' : '<div style="width:40px;height:40px;border-radius:6px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;border:1px solid var(--border)">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
+    var photoHtml = car.photo ? '<img src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' : '<div style="width:40px;height:40px;border-radius:6px;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;border:1px solid var(--border)">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
     var isRun = car.runDate && car.runDate.indexOf('Run') === 0;
     html += '<div class="map-cluster-item" onclick="openMapCar(decodeURIComponent(\'' + encodeURIComponent(JSON.stringify({ name: car.name, value: car.value, color: car.color, type: car.type, photo: car.photo, location: car.location })).replace(/'/g, '%27') + '\'))">' +
       photoHtml +
@@ -7139,10 +7030,9 @@ function renderGarage() {
       var isFav = isFavorite(car.name);
       var tilt = (idx % 2 === 0) ? -0.7 : 0.7;
       var clickAttr = ' data-inst="1" data-name="' + escapeHtml(car.name) + '"';
-      var gcPhotoSrc = resolvePhotoSrc(car);
-      var photoBadge = gcPhotoSrc ? (gcPhotoSrc.indexOf('data:') === 0 ? '<div class="gc-photo-badge">\uD83D\uDCF7 Your Photo</div>' : '<div class="gc-photo-badge">\uD83C\uDF10 Reference</div>') : '';
-      var media = gcPhotoSrc
-        ? '<img class="gc-img" loading="lazy" src="' + gcPhotoSrc + '" alt="' + escapeHtml(car.name) + '">' + photoBadge
+      var photoBadge = car.photo ? (car.photo.indexOf('data:') === 0 ? '<div class="gc-photo-badge">\uD83D\uDCF7 Your Photo</div>' : '<div class="gc-photo-badge">\uD83C\uDF10 Reference</div>') : '';
+      var media = car.photo
+        ? '<img class="gc-img" loading="lazy" src="' + car.photo + '" alt="' + escapeHtml(car.name) + '">' + photoBadge
         : '<div class="gc-img-ph">' + tierEmoji(tier) + '</div>';
       var shine = (tier === 'super' || tier === 'hyper' || tier === 'legend') ? '<div class="gc-shine"></div>' : '';
       var make = (car.name.split(' ')[0] || '').toUpperCase();
@@ -7187,8 +7077,7 @@ el.querySelectorAll('[data-inst]').forEach(function(a){
     var nameSuffix = '';
     var clickAttr = ' data-inst="1" data-name="' + escapeHtml(car.name) + '"';
     var evoBadge = evoTier ? '<span class="gc-badge evo" style="color:' + evoTier.color + ';border-color:' + evoTier.color + '44">' + evoTier.icon + ' ' + evoTier.name + ' \u00D7' + ev.count + '</span>' : '';
-    var gRowPhotoSrc = resolvePhotoSrc(car);
-    return '<div class="garage-row' + (evoTier ? ' evo-row evo-' + evoTier.name.toLowerCase() : '') + '" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (gRowPhotoSrc ? '<img class="g-thumb" src="' + gRowPhotoSrc + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 && !evoTier ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + evoBadge + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');this.textContent=this.textContent===\'★\'?\'☆\':\'★\';" title="Toggle favorite">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit this car">✎</button><button class="g-act-btn g-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')" title="Delete this car from everywhere">✕</button></div></div>';
+    return '<div class="garage-row' + (evoTier ? ' evo-row evo-' + evoTier.name.toLowerCase() : '') + '" role="button" tabindex="0"' + clickAttr + ' style="animation-delay:' + (idx * 0.03) + 's"><div class="g-rank">' + (sortMode !== 'alpha' ? '#' + (idx + 1) : '') + '</div>' + (car.photo ? '<img class="g-thumb" src="' + car.photo + '" alt="car">' : '<div class="g-emoji">' + escapeHtml(carTypeLabel(car.type)) + '</div>') + '<div class="g-info"><div class="g-name">' + escapeHtml(car.name) + nameSuffix + '</div><div class="g-meta">' + escapeHtml([car.color, car.location && car.location.label, car.runDate].filter(Boolean).join('  ')) + '</div><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="rarity-pill" style="color:' + rarity.color + ';background:' + rarity.bg + ';border-color:' + rarity.color + '33">' + rarity.label + '</span>' + (car.spotCount > 1 && !evoTier ? '<span class="g-spotted-count">SEEN ' + car.spotCount + 'x</span>' : '') + evoBadge + '</div></div><div class="g-val">' + fmtFull(car.value) + '</div><div class="g-actions"><button class="g-fav" onclick="event.stopPropagation();toggleFavorite(\'' + jsEscape(car.name) + '\');this.textContent=this.textContent===\'★\'?\'☆\':\'★\';" title="Toggle favorite">' + (isFavorite(car.name) ? '★' : '☆') + '</button><button class="g-act-btn g-edit" onclick="event.stopPropagation();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')" title="Edit this car">✎</button><button class="g-act-btn g-del" onclick="event.stopPropagation();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')" title="Delete this car from everywhere">✕</button></div></div>';
   }).join('');
   el.querySelectorAll('[data-inst]').forEach(function(a){
     attachCarTap(a);
@@ -7321,11 +7210,10 @@ function renderHistory() {
 
     const carsHTML = [...entry.cars].sort((a,b)=>b.value-a.value).map(car=>{
       const isCarHL = !isSpot && entry.headliner && entry.headliner.name === car.name;
-      const histPhotoSrc = resolvePhotoSrc(car);
       return `
       <div class="hc-row-wrap">
         <a class="hc-row" href="${carUrl(car.name)}" target="_blank" rel="noopener noreferrer">
-          ${histPhotoSrc ? `<img class="hc-photo" src="${histPhotoSrc}" alt="car">` : `<span class="hc-emoji">${carTypeLabel(car.type)}</span>`}
+          ${car.photo ? `<img class="hc-photo" src="${car.photo}" alt="car">` : `<span class="hc-emoji">${carTypeLabel(car.type)}</span>`}
           <span class="hc-name">${escapeHtml(car.name)}${car.color?' <span style="font-weight:400;color:var(--text2)">· '+escapeHtml(car.color)+'</span>':''}${isCarHL?' <span style="color:var(--accent);font-size:0.6rem;letter-spacing:1px;font-weight:700">HEADLINER</span>':''}</span>
           <span class="hc-val">${fmtFull(car.value)}</span>
           <span class="hc-arrow">↗</span>
@@ -7395,8 +7283,7 @@ async function showSpecsCard(car) {
 
   // Fetch specs from Claude API and image in parallel
   // Race with a timeout so flaky mobile data can't leave the spinner hanging forever
-  var ownPhotoResolved = resolvePhotoSrc(car);
-  var ownPhoto = ownPhotoResolved && ownPhotoResolved.indexOf('data:') === 0 ? ownPhotoResolved : '';
+  var ownPhoto = car.photo && car.photo.indexOf('data:') === 0 ? car.photo : '';
   var pair = await Promise.race([
     Promise.all([ fetchCarSpecs(car.name), ownPhoto ? Promise.resolve('') : fetchCarImage(car.name) ]),
     new Promise(function(res){ setTimeout(function(){ res([null, null]); }, 8000); })
@@ -7484,11 +7371,10 @@ function showCarInstances(car, originEl) {
   var rarity = getRarity(car.value);
   var heroPhoto = null, heroBadge = '';
   for (var i = instances.length - 1; i >= 0; i--) {
-    var iResolved = resolvePhotoSrc(instances[i]);
-    if (iResolved && iResolved.indexOf('data:') === 0) { heroPhoto = iResolved; heroBadge = '\uD83D\uDCF7 Your Photo'; break; }
+    if (instances[i].photo && instances[i].photo.indexOf('data:') === 0) { heroPhoto = instances[i].photo; heroBadge = '\uD83D\uDCF7 Your Photo'; break; }
   }
-  if (!heroPhoto) { for (var j = instances.length - 1; j >= 0; j--) { var jResolved = resolvePhotoSrc(instances[j]); if (jResolved) { heroPhoto = jResolved; heroBadge = '\uD83C\uDF10 Reference Photo'; break; } } }
-  if (!heroPhoto) { var carResolved = resolvePhotoSrc(car); if (carResolved) { heroPhoto = carResolved; heroBadge = carResolved.indexOf('data:') === 0 ? '\uD83D\uDCF7 Your Photo' : '\uD83C\uDF10 Reference Photo'; } }
+  if (!heroPhoto) { for (var j = instances.length - 1; j >= 0; j--) { if (instances[j].photo) { heroPhoto = instances[j].photo; heroBadge = '\uD83C\uDF10 Reference Photo'; break; } } }
+  if (!heroPhoto && car.photo) { heroPhoto = car.photo; heroBadge = car.photo.indexOf('data:') === 0 ? '\uD83D\uDCF7 Your Photo' : '\uD83C\uDF10 Reference Photo'; }
   var heroHtml = heroPhoto
     ? '<img class="detail-hero-img" src="' + heroPhoto + '" alt="' + escapeHtml(car.name) + '">' + (heroBadge ? '<div class="detail-hero-badge">' + heroBadge + '</div>' : '')
     : '<div class="detail-hero-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
@@ -7496,9 +7382,8 @@ function showCarInstances(car, originEl) {
   var tierChip = '<div class="detail-tier-chip" style="--cc-color:' + rarity.color + '">' + tierEmoji(tier) + ' ' + rarity.label + '</div>';
   var sorted = instances.slice().reverse();
   var sightingsHtml = sorted.map(function(inst) {
-    var instPhotoSrc = resolvePhotoSrc(inst);
-    var thumbHtml = instPhotoSrc ? '<img class="detail-sighting-thumb" src="' + instPhotoSrc + '" alt="">' : '<div class="detail-sighting-nophoto">' + escapeHtml(carTypeLabel(inst.type)) + '</div>';
-    var badge = instPhotoSrc ? (instPhotoSrc.indexOf('data:') === 0 ? '<div class="detail-sighting-badge">\uD83D\uDCF7</div>' : '<div class="detail-sighting-badge">\uD83C\uDF10</div>') : '';
+    var thumbHtml = inst.photo ? '<img class="detail-sighting-thumb" src="' + inst.photo + '" alt="">' : '<div class="detail-sighting-nophoto">' + escapeHtml(carTypeLabel(inst.type)) + '</div>';
+    var badge = inst.photo ? (inst.photo.indexOf('data:') === 0 ? '<div class="detail-sighting-badge">\uD83D\uDCF7</div>' : '<div class="detail-sighting-badge">\uD83C\uDF10</div>') : '';
     var loc = (inst.location && inst.location.label) ? '<div class="detail-sighting-loc">\uD83D\uDCCD ' + escapeHtml(inst.location.label) + '</div>' : '';
     return '<div class="detail-sighting">' + thumbHtml + '<div class="detail-sighting-info"><div class="detail-sighting-date">' + escapeHtml(inst.runDate || 'Unknown') + '</div>' + loc + '</div>' + badge + '</div>';
   }).join('');
@@ -8011,7 +7896,7 @@ function celebrateFullCollectorCard(car, opts) {
     luxury:'👑', suv:'🛻', classic:'🕹️', hotrod:'🔧'
   }[car.type] || '🚘';
 
-  var photo = resolvePhotoSrc(car);
+  var photo = car.photo || (_idbPhotoCache[car.name.toLowerCase()] || '');
   if (!photo) { photo = ''; }
   else if (photo.indexOf('data:') !== 0) {
     // Prefer the user's own photo; fall back to a stock/reference image only if none exists.
@@ -8193,7 +8078,7 @@ function celebrateQuick(car, opts) {
     var el = document.createElement('div');
     el.className = 'cc-quick';
     el._ccResolve = resolve;
-    var photo = resolvePhotoSrc(car);
+    var photo = car.photo || (_idbPhotoCache[car.name.toLowerCase()] || '');
     var thumb = photo
       ? '<img class="cc-quick-thumb" src="' + photo + '" alt="">'
       : '<span class="cc-quick-emoji">' + tierEmoji(tier) + '</span>';
@@ -9074,21 +8959,10 @@ var _idbConn = null;
 function _idbOpen() {
   if (_idbConn) return Promise.resolve(_idbConn);
   return new Promise(function(res, rej) {
-    // BUGFIX: version bumped 3->4, and the store-creation check changed from
-    // "if (e.oldVersion < 1)" to an explicit objectStoreNames check. The old
-    // condition only created the 'photos' table on a device's very first-ever
-    // open of this database — but this app existed before the photo feature
-    // did, so on any device whose IndexedDB database predates it, the table
-    // was never created. Every subsequent write silently failed (errors were
-    // swallowed by .catch(()=>{})), so photos only ever lived in transient
-    // in-memory cache — gone on reload, exactly like a temp file that was
-    // never actually saved. Bumping the version forces onupgradeneeded to run
-    // again on every device, so the objectStoreNames check gets a chance to
-    // create the table if it's missing, regardless of that device's history.
-    var r = indexedDB.open('CarSpotterPhotos', 4);
+    var r = indexedDB.open('CarSpotterPhotos', 3);
     r.onupgradeneeded = function(e) {
       var db = e.target.result;
-      if (!db.objectStoreNames.contains('photos')) db.createObjectStore('photos', { keyPath: 'name' });
+      if (e.oldVersion < 1) db.createObjectStore('photos', { keyPath: 'name' });
     };
     r.onsuccess = function(e) {
       var db = e.target.result;
@@ -9103,12 +8977,10 @@ function _idbOpen() {
 function _idbPut(name, data) {
   return _idbOpen().then(function(db) {
     return new Promise(function(res, rej) {
-      try {
-        var tx = db.transaction('photos', 'readwrite');
-        tx.objectStore('photos').put({ name: name.toLowerCase(), data: data });
-        tx.oncomplete = function() { _photoCacheSet(name.toLowerCase(), data); res(); };
-        tx.onerror = function(e) { rej(e.target.error); };
-      } catch (e) { rej(e); }
+      var tx = db.transaction('photos', 'readwrite');
+      tx.objectStore('photos').put({ name: name.toLowerCase(), data: data });
+      tx.oncomplete = function() { _photoCacheSet(name.toLowerCase(), data); res(); };
+      tx.onerror = function(e) { rej(e.target.error); };
     });
   });
 }
@@ -9116,12 +8988,10 @@ function _idbPut(name, data) {
 function _idbGetAll() {
   return _idbOpen().then(function(db) {
     return new Promise(function(res, rej) {
-      try {
-        var tx = db.transaction('photos', 'readonly');
-        var r = tx.objectStore('photos').getAll();
-        r.onsuccess = function(e) { res(e.target.result || []); };
-        r.onerror = function(e) { rej(e.target.error); };
-      } catch (e) { rej(e); }
+      var tx = db.transaction('photos', 'readonly');
+      var r = tx.objectStore('photos').getAll();
+      r.onsuccess = function(e) { res(e.target.result || []); };
+      r.onerror = function(e) { rej(e.target.error); };
     });
   });
 }
@@ -9129,12 +8999,10 @@ function _idbGetAll() {
 function _idbGet(name) {
   return _idbOpen().then(function(db) {
     return new Promise(function(res, rej) {
-      try {
-        var tx = db.transaction('photos', 'readonly');
-        var r = tx.objectStore('photos').get(String(name || '').toLowerCase());
-        r.onsuccess = function(e) { res(e.target.result ? e.target.result.data : null); };
-        r.onerror = function(e) { rej(e.target.error); };
-      } catch (e) { rej(e); }
+      var tx = db.transaction('photos', 'readonly');
+      var r = tx.objectStore('photos').get(String(name || '').toLowerCase());
+      r.onsuccess = function(e) { res(e.target.result ? e.target.result.data : null); };
+      r.onerror = function(e) { rej(e.target.error); };
     });
   });
 }
@@ -9161,16 +9029,8 @@ function _patchPhotosFromCache() {
       if (car.photo && typeof car.photo === 'string' && car.photo.indexOf('photo:') === 0) {
         var refKey = car.photo.slice(6);
         var ref = _photoCacheGet(refKey) || _photoCacheGet(key);
-        // BUGFIX: this used to wipe car.photo to '' on a cache miss. That
-        // destroyed the only pointer back to the real image in IndexedDB —
-        // if any save happened before the async lazy-load below finished,
-        // the 'photo:' reference was gone for good and the photo was lost
-        // permanently, even though the actual bytes were still sitting in
-        // IndexedDB untouched. Leave the reference alone; resolvePhotoSrc()
-        // is what render sites should use to get pixels on screen, so there's
-        // no need to mutate the model just to make something render.
         if (ref) car.photo = ref;
-        else _photoLazyLoad(refKey || key);
+        else { car.photo = ''; _photoLazyLoad(refKey || key); }
       } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0 &&
                  !(car.photo && car.photo.indexOf('data:') === 0) && car.photo !== cached) {
         // Prefer the user's own photo over a stock/reference image — never let a
@@ -9190,7 +9050,7 @@ function _patchPhotosFromCache() {
       var refKey = car.photo.slice(6);
       var ref = _photoCacheGet(refKey) || _photoCacheGet(key);
       if (ref) car.photo = ref;
-      else _photoLazyLoad(refKey || key); // keep the ref — see BUGFIX note above
+      else { car.photo = ''; _photoLazyLoad(refKey || key); }
     } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0 &&
                !(car.photo && car.photo.indexOf('data:') === 0) && car.photo !== cached) {
       car.photo = cached;
@@ -9207,7 +9067,7 @@ function _patchPhotosFromCache() {
       var refKey = car.photo.slice(6);
       var ref = _photoCacheGet(refKey) || _photoCacheGet(key);
       if (ref) car.photo = ref;
-      else _photoLazyLoad(refKey || key); // keep the ref — see BUGFIX note above
+      else { car.photo = ''; _photoLazyLoad(refKey || key); }
     } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0 &&
                !(car.photo && car.photo.indexOf('data:') === 0) && car.photo !== cached) {
       car.photo = cached;
@@ -9314,7 +9174,7 @@ function _savePhoto(compressed, t) {
     }).catch(function() {
       _photoCacheSet(key, compressed);
       _safeSet('cs_runs', JSON.stringify(allRuns));
-      _safeSet(_csScopedKey('cs_current'), JSON.stringify(currentRun));
+      _safeSet('cs_current', JSON.stringify(currentRun));
       _saveQPLocal();
       showToast("⚠ Photo couldn't be saved permanently. Export a backup soon!");
       renderGarage(); renderHistory();
@@ -9684,8 +9544,8 @@ function acceptVoiceFill() {
   const p = voiceFillPending;
   document.getElementById('carName').value  = p.name  || '';
   document.getElementById('carValue').value = p.value || '';
-  document.getElementById('carColor').value = p.color || '';
-  if (p.type) document.getElementById('carType').value = p.type;
+  setCarColor(p.color);
+  if (p.type) setCarType(p.type, p.name);
   dismissVoiceFill();
   showToast(' Form filled!');
 }
@@ -10014,8 +9874,8 @@ window.fillFromSearch = function(name, value, color, type) {
   document.getElementById('carSearchOverlay')?.remove();
   document.getElementById('carName').value  = name;
   document.getElementById('carValue').value = value;
-  document.getElementById('carColor').value = color || '';
-  document.getElementById('carType').value  = type || 'supercar';
+  setCarColor(color);
+  setCarType(type || 'supercar', name);
   goTo('spot');
   showToast('✅ Form filled — review and log!');
 };
@@ -10231,35 +10091,147 @@ const CAR_AC_DB = [
 
 let acIdx = -1;
 
+// ── INLINE QUICK PICKS ───────────────────────────────────────────
+// One field does it all: tap Make / Model to see your quick picks, type to
+// filter them (saved picks first, then garage matches, then the database).
+var _acItems = [];
+function _acRank(name, q) {
+  var n = String(name || '').toLowerCase();
+  if (n.indexOf(q) === 0) return 0;
+  if (n.indexOf(' ' + q) !== -1) return 1;
+  return (q.length >= 2 && n.indexOf(q) !== -1) ? 2 : -1;
+}
+function _buildAcItems(query) {
+  var q = String(query || '').toLowerCase().trim();
+  var out = [], seen = {};
+  function push(c, src) {
+    var key = String(c.name || '').toLowerCase();
+    if (!key || seen[key]) return;
+    seen[key] = true;
+    out.push({ name:c.name, value:(c.value != null ? c.value : c.val), color:c.color, type:c.type, photo:c.photo, src:src });
+  }
+  if (!q) { quickPicks.slice(0, 8).forEach(function(c) { push(c, 'qp'); }); return out; }
+  function ranked(list, src) {
+    list.map(function(c) { return { c:c, r:_acRank(c.name, q) }; })
+        .filter(function(x) { return x.r >= 0; })
+        .sort(function(a, b) { return a.r - b.r; })
+        .forEach(function(x) { push(x.c, src); });
+  }
+  ranked(quickPicks, 'qp');
+  ranked(_garageCarsForQuickPick(q), 'garage');
+  ranked(CAR_AC_DB, 'db');
+  return out.slice(0, 8);
+}
+
 function onCarNameInput(val) {
-  const wrap = document.getElementById('carAcWrap');
-  const drop = document.getElementById('carAcDropdown');
-  if (!val || val.length < 2) { closeCarAc(); return; }
-  const q = val.toLowerCase();
-  const matches = CAR_AC_DB.filter(c => c.name.toLowerCase().includes(q)).slice(0, 8);
-  if (!matches.length) { closeCarAc(); return; }
+  var wrap = document.getElementById('carAcWrap');
+  var drop = document.getElementById('carAcDropdown');
+  if (!wrap || !drop) return;
+  try { _patchPhotosFromCache(); } catch (e) {}
+  _acItems = _buildAcItems(val);
+  if (!_acItems.length) { closeCarAc(); return; }
   acIdx = -1;
-  drop.innerHTML = matches.map((c,i) => `
-    <div class="ac-item" data-idx="${i}" onmousedown="selectAcItem(${i})" data-name="${c.name.replace(/"/g,'&quot;')}" data-val="${c.val}" data-type="${c.type}">
-      <span class="ac-item-emoji">${c.type}</span>
-      <span class="ac-item-name">${c.name}</span>
-      <span class="ac-item-val">${fmt(c.val)}</span>
-    </div>`).join('');
+  var head = String(val || '').trim() ? '' :
+    '<div class="ac-head"><span>★ QUICK PICKS</span><button type="button" class="ac-head-btn" onmousedown="event.preventDefault();clearAllQP()">CLEAR ALL</button></div>';
+  drop.innerHTML = head + _acItems.map(function(c, i) {
+    var okPhoto = typeof c.photo === 'string' && (c.photo.indexOf('data:') === 0 || c.photo.indexOf('http') === 0);
+    var lead = okPhoto
+      ? '<img class="ac-item-thumb" src="' + escapeHtml(c.photo) + '" alt="">'
+      : '<span class="ac-item-emoji">' + carTypeLabel(normalizeCarType(c.type, c.name)) + '</span>';
+    var star = c.src === 'qp' ? '<span class="ac-item-star">★</span>' : '';
+    var tag  = c.src === 'garage' ? '<span class="ac-item-tag">GARAGE</span>' : '';
+    var del  = c.src === 'qp'
+      ? '<button type="button" class="ac-item-del" title="Remove quick pick" onmousedown="event.preventDefault();event.stopPropagation();removeAcQP(' + i + ')">✕</button>' : '';
+    return '<div class="ac-item" data-idx="' + i + '" onmousedown="event.preventDefault();selectAcItem(' + i + ')">' +
+      lead + '<span class="ac-item-name">' + star + escapeHtml(c.name) + '</span>' + tag +
+      '<span class="ac-item-val">' + (c.value ? fmt(c.value) : '') + '</span>' + del + '</div>';
+  }).join('');
   wrap.classList.add('open');
 }
 
+function removeAcQP(i) {
+  var it = _acItems[i];
+  if (it) removeQP(it.name);
+}
+
 function selectAcItem(idx) {
-  const item = document.querySelector(`.ac-item[data-idx="${idx}"]`);
-  if (!item) return;
-  document.getElementById('carName').value  = item.dataset.name;
-  document.getElementById('carValue').value = item.dataset.val;
-  document.getElementById('carType').value  = item.dataset.type;
+  var it = _acItems[idx];
+  if (!it) return;
+  document.getElementById('carName').value = it.name;
+  if (it.value) document.getElementById('carValue').value = it.value;
+  if (it.src !== 'db') setCarColor(it.color || '');   // saved cars carry their own color
+  setCarType(it.type, it.name);
+  clearFieldError('carValue');
   closeCarAc();
-  document.getElementById('carValue').focus();
+  // Everything is filled in: drop the keyboard so the ADD buttons are in reach.
+  if (document.getElementById('carValue').value) document.getElementById('carName').blur();
+  else document.getElementById('carValue').focus();
 }
 
 function closeCarAc() {
   document.getElementById('carAcWrap')?.classList.remove('open');
+}
+
+// ── COLOR DROPDOWN ───────────────────────────────────────────────
+var _COLOR_SYN = { rosso:'red', giallo:'yellow', blu:'blue', nero:'black', bianco:'white', verde:'green', arancio:'orange', grigio:'gray', grey:'gray', argento:'silver' };
+function _guessColorHex(v) {
+  var s = String(v).toLowerCase();
+  Object.keys(_COLOR_SYN).forEach(function(k) { if (s.indexOf(k) !== -1) s += ' ' + _COLOR_SYN[k]; });
+  var sel = document.getElementById('carColor'), best = '', hex = '#8a8f98';
+  Array.from(sel.options).forEach(function(o) {
+    if (!o.dataset.hex || o.dataset.custom) return;
+    o.value.toLowerCase().split(/\s*\/\s*/).forEach(function(w) {
+      if (w.length > best.length && s.indexOf(w) !== -1) { best = w; hex = o.dataset.hex; }
+    });
+  });
+  return hex;
+}
+function updateColorDot() {
+  var sel = document.getElementById('carColor'), dot = document.getElementById('carColorDot');
+  if (!sel || !dot) return;
+  var o = sel.options[sel.selectedIndex];
+  var hex = o && o.dataset.hex;
+  dot.style.background = hex || 'transparent';
+  dot.classList.toggle('empty', !hex);
+  sel.classList.toggle('is-empty', !sel.value);
+}
+// Programmatic fills (quick picks, voice, search) can carry any color text, so
+// anything not in the list is added as a one-off option instead of being lost.
+function setCarColor(v) {
+  var sel = document.getElementById('carColor');
+  if (!sel) return;
+  v = String(v || '').trim();
+  Array.from(sel.querySelectorAll('option[data-custom]')).forEach(function(o) { o.remove(); });
+  if (v) {
+    var match = Array.from(sel.options).find(function(o) { return o.value.toLowerCase() === v.toLowerCase(); });
+    if (match) v = match.value;
+    else {
+      var o = document.createElement('option');
+      o.value = v; o.textContent = v; o.dataset.custom = '1'; o.dataset.hex = _guessColorHex(v);
+      sel.insertBefore(o, sel.options[1] || null);
+    }
+  }
+  sel.value = v;
+  updateColorDot();
+}
+updateColorDot();
+window.addEventListener('pageshow', updateColorDot);
+
+// ── CAR TYPE (five choices) ──────────────────────────────────────
+// Older data and the autocomplete DB use extra types (muscle, exotic, luxury…);
+// fold them into the five the form offers.
+var _TYPE_NORM = { supercar:'supercar', exotic:'supercar', hypercar:'supercar', sports:'sports', muscle:'sports', track:'sports', luxury:'sports', sedan:'sports', classic:'classic', vintage:'classic', hotrod:'classic', suv:'suv', truck:'suv', ev:'ev', electric:'ev' };
+var _TYPE_LEGACY_EMOJI = { '🏎':'supercar', '🚗':'sports', '🐎':'sports', '🏁':'sports', '🔥':'supercar', '⚡':'ev' };
+var _SUV_NAME_RE = /cullinan|bentayga|urus|cayenne|macan|escalade|range rover|defender|g[- ]?wagon|g63|\bx[567]\b|\bgl[esc]\b|f-?150|raptor|cybertruck|bronco|tahoe|suburban|4runner|land cruiser|\bsuv\b|\btruck\b/i;
+function normalizeCarType(t, name) {
+  var raw = String(t || '').replace(/\uFE0F/g, '').trim();
+  if ((!raw || raw.toLowerCase() === 'luxury') && _SUV_NAME_RE.test(String(name || ''))) return 'suv';
+  return _TYPE_LEGACY_EMOJI[raw] || _TYPE_NORM[raw.toLowerCase()] || '';
+}
+function setCarType(t, name) {
+  var sel = document.getElementById('carType');
+  var key = normalizeCarType(t, name);
+  if (sel && key) sel.value = key;
 }
 
 // Keyboard navigation for autocomplete
@@ -10341,8 +10313,8 @@ function runSmartCmd() {
       if (parsed.action === 'log') {
         document.getElementById('carName').value  = parsed.name  || '';
         document.getElementById('carValue').value = parsed.value || '';
-        document.getElementById('carColor').value = parsed.color || '';
-        if (parsed.type) document.getElementById('carType').value = parsed.type;
+        setCarColor(parsed.color);
+        if (parsed.type) setCarType(parsed.type, parsed.name);
         goTo('spot');
         showToast('🚗 Form filled — review & tap "+ TO RUN"');
         input.value = '';
@@ -11567,7 +11539,7 @@ function checkEvolutionUnlock(car) {
 
 function celebrateEvolution(car, oldTier, newTier, count, done) {
   if (document.querySelector('.evo-overlay')) { if (typeof done === 'function') done(); return; }
-  var photo = resolvePhotoSrc(car);
+  var photo = car.photo || (_idbPhotoCache[car.name.toLowerCase()] || '');
   var imgHTML = photo
     ? '<img src="' + photo + '" alt="" onerror="this.parentElement.innerHTML=\'' + tierEmoji(tierOf(car.value || 0)) + '\'">'
     : tierEmoji(tierOf(car.value || 0));
