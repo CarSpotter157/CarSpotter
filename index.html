@@ -2043,7 +2043,8 @@ html.show-install #installBanner{display:flex;}
 .ac-head{white-space:nowrap;display:flex;align-items:center;justify-content:space-between;padding:9px 14px 3px;font-size:.5rem;letter-spacing:2px;font-weight:800;color:var(--accent);}
 .ac-head-btn{background:none;border:none;color:var(--muted);font-size:.5rem;letter-spacing:1px;font-weight:700;cursor:pointer;padding:6px 0 6px 12px;font-family:'Inter',sans-serif;}
 .ac-head-btn:hover{color:var(--red);}
-.ac-item-thumb{width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);}
+.ac-item-thumb{width:46px;height:32px;border-radius:7px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);background:rgba(255,255,255,.04);}
+.ac-item-thumb.ac-ph{display:flex;align-items:center;justify-content:center;color:var(--muted);}
 .ac-item-emoji{min-width:28px;text-align:center;font-size:1rem;flex-shrink:0;}
 .ac-item-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .ac-item-star{color:var(--accent);font-size:.7rem;margin-right:6px;}
@@ -10123,6 +10124,48 @@ function _buildAcItems(query) {
   return out.slice(0, 8);
 }
 
+// ── THUMBNAILS ───────────────────────────────────────────────────
+// Own photo → cached photo → cached reference photo; anything still missing is
+// fetched in the background (3 at a time) and swapped into its row in place.
+var _AC_PH_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15.5l1.6-4.6A2 2 0 017.5 9.5h9a2 2 0 011.9 1.4l1.6 4.6"/><path d="M3 15.5h18v3H3z"/><circle cx="7.5" cy="18.5" r="1.2"/><circle cx="16.5" cy="18.5" r="1.2"/></svg>';
+var _acImgRequested = {}, _acImgTimer = null;
+function _isImgSrc(p) { return typeof p === 'string' && (p.indexOf('data:') === 0 || p.indexOf('http') === 0); }
+function _acPhotoFor(c) {
+  if (_isImgSrc(c.photo)) return c.photo;
+  var key = _photoCacheKey(c.name);
+  var cached = _photoCacheGet(key);
+  if (_isImgSrc(cached)) return cached;
+  var ref = _csGet('img:' + String(c.name).toLowerCase().trim());
+  if (_isImgSrc(ref)) return ref;
+  _photoLazyLoad(key);   // the user's own photo may still be in IndexedDB
+  return '';
+}
+function _acApplyThumb(k, url) {
+  document.querySelectorAll('#carAcDropdown .ac-ph').forEach(function(el) {
+    if (el.dataset.nm !== k) return;
+    var img = document.createElement('img');
+    img.className = 'ac-item-thumb'; img.alt = ''; img.src = url;
+    img.onerror = function() { img.style.opacity = 0; };
+    el.replaceWith(img);
+  });
+}
+function _acQueueImages() {
+  clearTimeout(_acImgTimer);
+  _acImgTimer = setTimeout(function() {
+    var todo = _acItems.filter(function(c) {
+      return !_acPhotoFor(c) && !_acImgRequested[String(c.name).toLowerCase().trim()];
+    });
+    var i = 0;
+    function worker() {
+      if (i >= todo.length) return;
+      var c = todo[i++], k = String(c.name).toLowerCase().trim();
+      _acImgRequested[k] = true;
+      return fetchCarImage(c.name).then(function(url) { if (url) _acApplyThumb(k, url); }).catch(function() {}).then(worker);
+    }
+    worker(); worker(); worker();
+  }, 250);
+}
+
 function onCarNameInput(val) {
   var wrap = document.getElementById('carAcWrap');
   var drop = document.getElementById('carAcDropdown');
@@ -10134,10 +10177,10 @@ function onCarNameInput(val) {
   var head = String(val || '').trim() ? '' :
     '<div class="ac-head"><span>★ QUICK PICKS</span><button type="button" class="ac-head-btn" onmousedown="event.preventDefault();clearAllQP()">CLEAR ALL</button></div>';
   drop.innerHTML = head + _acItems.map(function(c, i) {
-    var okPhoto = typeof c.photo === 'string' && (c.photo.indexOf('data:') === 0 || c.photo.indexOf('http') === 0);
-    var lead = okPhoto
-      ? '<img class="ac-item-thumb" src="' + escapeHtml(c.photo) + '" alt="">'
-      : '<span class="ac-item-emoji">' + carTypeLabel(normalizeCarType(c.type, c.name)) + '</span>';
+    var photo = _acPhotoFor(c);
+    var lead = photo
+      ? '<img class="ac-item-thumb" src="' + escapeHtml(photo) + '" alt="" onerror="this.style.opacity=0">'
+      : '<span class="ac-item-thumb ac-ph" data-nm="' + escapeHtml(String(c.name).toLowerCase().trim()) + '">' + _AC_PH_SVG + '</span>';
     var star = c.src === 'qp' ? '<span class="ac-item-star">★</span>' : '';
     var tag  = c.src === 'garage' ? '<span class="ac-item-tag">GARAGE</span>' : '';
     var del  = c.src === 'qp'
@@ -10147,6 +10190,7 @@ function onCarNameInput(val) {
       '<span class="ac-item-val">' + (c.value ? fmt(c.value) : '') + '</span>' + del + '</div>';
   }).join('');
   wrap.classList.add('open');
+  _acQueueImages();
 }
 
 function removeAcQP(i) {
