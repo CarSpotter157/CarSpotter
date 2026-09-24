@@ -111,13 +111,81 @@
   --ease-release:  cubic-bezier(0.18,1.2,0.3,1);
   --ease-hero:     cubic-bezier(0.22,1,0.36,1);
 }
-/* Light theme */
+/* ── LIGHT THEME ──────────────────────────────────────────────────
+   A warm paper surface (not a straight invert of the dark palette):
+   soft off-white base, ink text, and a muted bronze accent that still
+   reads as CarSpotter's gold without glowing on a bright background. */
 body.theme-light {
-  --bg:#f5f4ef; --surf:#ffffff; --surf2:#eae9e3; --surf3:#dddcd5;
-  --border:#e0dfd8; --border2:#ccc; --text:#18181a; --text2:#6b6b72; --muted:#b0b0b8;
-  --green:#34c759; --red:#ff3b30; --shadow:0 2px 10px rgba(0,0,0,0.08);
-  --glass-card:rgba(255,255,255,0.72);
+  --bg:#f7f4ee; --surf:#ffffff; --surf2:#efece3; --surf3:#e5e0d3;
+  --border:#e5e1d4; --border2:#d8d2c0; --text:#221f19; --text2:#6d6659; --muted:#a39c8c;
+  --green:#1f9d52; --red:#d8392a;
+  --shadow:     0 2px 14px rgba(90,70,40,0.08);
+  --shadow-sm:  0 1px 6px rgba(90,70,40,0.06);
+  --shadow-lg:  0 10px 34px rgba(90,70,40,0.12);
+  --glass:      rgba(255,255,255,0.82);
+  --glass-border: rgba(40,30,10,0.08);
+  --glass-card: rgba(255,255,255,0.86);
 }
+/* Chrome bars: the dark blurred glass only works over a dark canvas, so
+   here they become warm frosted-white bars instead of a leftover black strip. */
+body.theme-light .app-header,
+body.theme-light .bottom-nav { background:rgba(247,244,238,0.86); }
+body.theme-light .app-header::after,
+body.theme-light .score-banner::after,
+body.theme-light .record-card::before,
+body.theme-light .journey-card::before,
+body.theme-light .recap-card::after,
+body.theme-light .btn-end::after { opacity:0.14; }
+/* Form fields, pill chips and buttons that were painted a fixed dark grey
+   need a light-mode equivalent instead of near-invisible text-on-dark. */
+body.theme-light .ff input,
+body.theme-light .ff select,
+body.theme-light .btn-spot,
+body.theme-light .photo-btn,
+body.theme-light .geo-btn,
+body.theme-light .re,
+body.theme-light .gf-pill,
+body.theme-light .gs-pill,
+body.theme-light .garage-view-toggle { background:rgba(20,15,5,0.045); }
+body.theme-light .ff input:focus,
+body.theme-light .ff select:focus { background:rgba(255,255,255,0.9); }
+body.theme-light .ff input::placeholder { color:#a39c8c; }
+body.theme-light .ff select option { background:#ffffff; color:#221f19; }
+body.theme-light .gc-search { background:rgba(20,15,5,0.5); }
+body.theme-light .btn-run,
+body.theme-light .nav-badge,
+body.theme-light .map-picker-confirm,
+body.theme-light .gv-btn.active,
+body.theme-light .ge-btn,
+body.theme-light .hist-rec,
+body.theme-light .modal-save-btn,
+body.theme-light .recap-record-tag,
+body.theme-light .recap-btn,
+body.theme-light .user-avatar-ph,
+body.theme-light .act-badge,
+body.theme-light .tutor-step-badge,
+body.theme-light .tutor-btn-primary,
+body.theme-light .ob-btn,
+body.theme-light .oc-check,
+body.theme-light .obg-yours,
+body.theme-light .map-log-btn,
+body.theme-light .map-popup-btn,
+body.theme-light .map-cluster,
+body.theme-light .specs-close-btn,
+body.theme-light .car-search-btn,
+body.theme-light .csr-fill-btn,
+body.theme-light .trip-create-btn,
+body.theme-light .trip-livebar .tlb-name .tlb-live,
+body.theme-light .trip-livebar .tlb-btn--end,
+body.theme-light .cs-re-save,
+body.theme-light .book-make-card.complete::after { color:#fff9ef; }
+body.theme-light .color-dot { border-color:rgba(20,15,5,.28); }
+body.theme-light .color-dot.empty { border-color:rgba(20,15,5,.2); }
+body.theme-light .garage-pull-indicator { background:rgba(255,255,255,.92); }
+body.theme-light .map-picker-overlay { background:#f7f4ee; }
+/* The full-bleed celebration screens (level up, records, evolutions, the
+   collector-title ceremony...) stay theatrically dark in every theme, the
+   same way a photo flash or a Wrapped-style recap does on any app. */
 body.theme-cyberpunk {
   --bg:#06000f; --surf:#0e0020; --surf2:#160030; --surf3:#1c003c;
   --border:#2a005a; --border2:#3d0080; --text:#f0f0ff; --text2:#9966ff; --muted:#441188;
@@ -5263,7 +5331,7 @@ const THEMES = [
   { name:'Inferno',      accent:'#fb923c', accent2:'#f43f5e', bg:'#0c0a09', surf:'#1c1410', surf2:'#261c16', bodyClass:'', unlock:7 },
   { name:'Cobalt',       accent:'#60a5fa', accent2:'#a78bfa', bg:'#080c14', surf:'#0f1624', surf2:'#181e30', bodyClass:'', unlock:9 },
   { name:'Acid',         accent:'#a3e635', accent2:'#facc15', bg:'#090a05', surf:'#131505', surf2:'#1b1d08', bodyClass:'', unlock:12 },
-  { name:'Light',        accent:'#ffa94d', accent2:'#ff6a3d', bg:'#f5f5f0', surf:'#ffffff', surf2:'#eae9e3', bodyClass:'theme-light', unlock:15 },
+  { name:'Light',        accent:'#b8722e', accent2:'#c4432f', bg:'#f7f4ee', surf:'#ffffff', surf2:'#efece3', bodyClass:'theme-light', unlock:15 },
   { name:'Cyberpunk',    accent:'#bf00ff', accent2:'#00ffee', bg:'#08001a', surf:'#100028', surf2:'#180040', bodyClass:'theme-cyberpunk', unlock:18 },
   { name:'Retro 80s',    accent:'#ff6ec7', accent2:'#ffe600', bg:'#0d0d1a', surf:'#131325', surf2:'#1c1c35', bodyClass:'theme-retro80s', unlock:22 },
   { name:'Midnight',     accent:'#8ea2ff', accent2:'#e8b84b', bg:'#060608', surf:'#0e0e12', surf2:'#171720', bodyClass:'', id:'midnight', secret:true, unlock:30 },
