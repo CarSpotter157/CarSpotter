@@ -3383,7 +3383,7 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 <div class="ff">
 <label for="carName">Make / Model</label>
 <div class="car-ac-wrap" id="carAcWrap">
-<input autocomplete="off" id="carName" onblur="setTimeout(closeCarAc,180)" onfocus="onCarNameInput(this.value)" oninput="onCarNameInput(this.value)" placeholder="Tap for quick picks" title="Tap to see your quick picks, or type to search" type="text"/>
+<input autocomplete="off" id="carName" onblur="onCarNameBlur(this)" onfocus="onCarNameInput(this.value)" oninput="onCarNameInput(this.value)" placeholder="Tap for quick picks" title="Tap to see your quick picks, or type to search" type="text"/>
 <div class="car-ac-dropdown" id="carAcDropdown"></div>
 </div>
 </div>
@@ -10371,6 +10371,22 @@ function selectAcItem(idx) {
 function closeCarAc() {
   document.getElementById('carAcWrap')?.classList.remove('open');
 }
+// Keyboard dismissal fires a blur even though the user just wants to scroll
+// the list. If there's text typed, keep the list open through that blur —
+// only the outside-tap listener below (or picking a result) should close it.
+function onCarNameBlur(el) {
+  setTimeout(function() {
+    if (!el.value.trim()) closeCarAc();
+  }, 180);
+}
+document.addEventListener('touchstart', function(e) {
+  var wrap = document.getElementById('carAcWrap');
+  if (wrap && wrap.classList.contains('open') && !wrap.contains(e.target)) closeCarAc();
+}, { passive: true });
+document.addEventListener('click', function(e) {
+  var wrap = document.getElementById('carAcWrap');
+  if (wrap && wrap.classList.contains('open') && !wrap.contains(e.target)) closeCarAc();
+});
 
 // ── COLOR DROPDOWN ───────────────────────────────────────────────
 var _COLOR_SYN = { rosso:'red', giallo:'yellow', blu:'blue', nero:'black', bianco:'white', verde:'green', arancio:'orange', grigio:'gray', grey:'gray', argento:'silver' };
