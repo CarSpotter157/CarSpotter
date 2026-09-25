@@ -3969,8 +3969,14 @@ function _downloadPhotoFromCloud(key) {
   if (!storage || !currentUser || !key) return Promise.resolve(null);
   return storage.ref('users/' + currentUser.uid + '/photos/' + key + '.jpg').getDownloadURL()
     .then(function(url) {
-      _idbPut(key, url).catch(function(){});
-      return url;
+      // BUGFIX: don't let a cloud URL pointer overwrite real local base64 bytes
+      // already sitting in IndexedDB — the URL is only meant as a fallback for
+      // devices that never had the original photo file.
+      return _idbGet(key).then(function(existing) {
+        var hasRealLocal = existing && typeof existing === 'string' && existing.indexOf('data:') === 0;
+        if (!hasRealLocal) _idbPut(key, url).catch(function(){});
+        return hasRealLocal ? existing : url;
+      }).catch(function() { _idbPut(key, url).catch(function(){}); return url; });
     })
     .catch(function() { return null; });
 }
@@ -9221,6 +9227,39 @@ function _patchPhotosFromCache() {
   currentRun.forEach(_patchOnePhoto);
   quickPicks.forEach(_patchOnePhoto);
 }
+
+// One-time manual repair: some cars ended up with a blank photo field even
+// though the real image is still sitting in IndexedDB under their name (the
+// ref got dropped somewhere along the way instead of the data). Run
+// repairMissingPhotos() from the console to reattach them directly from
+// IndexedDB, bypassing the bounded in-memory cache and any stale "missing"
+// flag from earlier in the session.
+function repairMissingPhotos() {
+  return _idbGetAll().then(function(entries) {
+    var byName = {};
+    (entries || []).forEach(function(e) { if (e && e.name && e.data) byName[e.name] = e.data; });
+    var fixed = 0;
+    function tryFix(car) {
+      if (!car || !car.name) return;
+      var hasPhoto = car.photo && (car.photo.indexOf('data:') === 0 || car.photo.indexOf('http') === 0 || car.photo.indexOf('photo:') === 0);
+      if (hasPhoto) return;
+      var data = byName[String(car.name).toLowerCase().trim()];
+      if (data) { car.photo = data; _photoCacheSet(String(car.name).toLowerCase().trim(), data); fixed++; }
+    }
+    allRuns.forEach(function(run) { (run.cars || []).forEach(tryFix); });
+    currentRun.forEach(tryFix);
+    quickPicks.forEach(tryFix);
+    if (fixed) {
+      _saveRunsLocal(); _saveCurrentLocal(); _saveQPLocal();
+      if (typeof _dirty !== 'undefined') { _dirty = true; try { localStorage.setItem('cs_sync_dirty','1'); } catch(e){} }
+      if (typeof flushSyncNow === 'function') flushSyncNow();
+      renderGarage(); renderHistory(); renderSpot();
+    }
+    console.log('[repairMissingPhotos] reattached ' + fixed + ' photo(s) from IndexedDB.');
+    return fixed;
+  });
+}
+window.repairMissingPhotos = repairMissingPhotos;
 
 function _safeSet(key, val) {
   try { localStorage.setItem(key, val); return true; } catch(e) {
