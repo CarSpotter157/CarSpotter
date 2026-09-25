@@ -9134,7 +9134,7 @@ var _idbConn = null;
 function _idbOpen() {
   if (_idbConn) return Promise.resolve(_idbConn);
   return new Promise(function(res, rej) {
-    var r = indexedDB.open('CarSpotterPhotos', 3);
+    var r = indexedDB.open('CarSpotterPhotos');
     r.onupgradeneeded = function(e) {
       var db = e.target.result;
       if (e.oldVersion < 1) db.createObjectStore('photos', { keyPath: 'name' });
