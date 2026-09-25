@@ -689,6 +689,11 @@ html.cs-hidden .levelup-star,.html.cs-hidden .recap-record-tag.pop{animation-pla
   background:conic-gradient(from 0deg,#f5c842,#ff5733,#c084fc,#60a5fa,#4ade80,#f5c842);
   filter:blur(7px);animation:ccRainbowSpin 3.5s linear infinite;
 }
+.cc-frame-ring{
+  position:absolute;inset:-4px;border-radius:calc(var(--r-xl) + 4px);z-index:-1;pointer-events:none;opacity:0.95;
+  background:var(--cc-frame,linear-gradient(135deg,var(--border2),var(--border)));
+  filter:drop-shadow(0 0 16px var(--cc-frame-glow,transparent));
+}
 .cc-inner{
   position:relative;width:100%;height:100%;z-index:1;
   transform-style:preserve-3d;
@@ -914,6 +919,7 @@ html.cs-hidden .levelup-star,.html.cs-hidden .recap-record-tag.pop{animation-pla
 .levelup-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent-d),var(--accent));transition:width 0.8s ease;width:0;}
 .levelup-bar-lbl{font-size:0.58rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
 .levelup-reward{width:min(300px,80vw);margin:2px auto 14px;padding:12px 14px;border:1px solid var(--glass-border);border-radius:var(--r-md);background:rgba(255,255,255,0.03);}
+.levelup-reward-count{font-size:0.52rem;font-weight:800;letter-spacing:2px;color:#f5c842;text-transform:uppercase;margin:2px 0 10px;}
 .levelup-earned{font-family:'Inter',sans-serif;font-size:0.68rem;font-weight:800;letter-spacing:2px;color:var(--accent);}
 .levelup-earned-name{font-family:'Inter',sans-serif;font-size:1.05rem;font-weight:800;letter-spacing:1px;margin-top:6px;text-transform:uppercase;}
 .levelup-earned-sub{font-size:0.56rem;color:var(--text2);letter-spacing:1px;margin-top:4px;}
@@ -3616,6 +3622,18 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <button class="toggle-pill" id="carbonToggle" onclick="toggleCarbon()" title="Toggle carbon fiber visual effect"><div class="toggle-knob"></div></button>
 </div>
 </div>
+<!-- Card Frames -->
+<div class="card setting-card">
+<div class="setting-head">
+<div class="setting-icon">Frame</div>
+<div class="setting-copy">
+<div class="card-title">COLLECTOR CARD FRAME</div>
+<div class="setting-desc">Level up to unlock new finishes for the card that pops when you log a car.</div>
+</div>
+</div>
+<div class="theme-bar" id="frameBar"></div>
+<div id="frameName" style="font-size:0.6rem;color:var(--muted);letter-spacing:1px;margin-top:8px;">Classic</div>
+</div>
 <!-- Offline Status -->
 <div class="card setting-card">
 <div class="setting-head">
@@ -4027,6 +4045,13 @@ var _photoLazyQueue = [];
 var _photoLazyTimer = null;
 var _photoLoading = {};      // keys currently fetching / already attempted (prevents re-queue storms)
 var _photoMissing = {};      // keys confirmed absent from IDB (skip repeat reads every render)
+// BUGFIX (photo loss on reload): while a photo is still being pulled from IndexedDB,
+// _patchPhotosFromCache() blanks car.photo to '' so nothing broken renders. If any
+// save fired in that window, that blank got written to localStorage and permanently
+// wiped the real photo reference. This map remembers "car name -> pending photo key"
+// for anything currently blanked so _stripCopy() can restore the real ref instead of
+// persisting the placeholder empty string.
+var _pendingPhotoRefs = {};
 var _photoRerenderTimer = null;
 var _photoRefreshCount = 0;
 var _photoRefreshWindowStart = 0;
@@ -4063,7 +4088,14 @@ function _photoLazyLoad(key) {
         // before giving up on it.
         return _downloadPhotoFromCloud(k).then(function(url) {
           if (url) { _photoCacheSet(k, url); gotAny = true; }
-          else _photoMissing[k] = true;
+          else {
+            _photoMissing[k] = true;
+            // Truly not found anywhere — stop treating it as pending so a save
+            // is free to persist the (now genuinely correct) empty photo.
+            Object.keys(_pendingPhotoRefs).forEach(function(nameKey) {
+              if (_pendingPhotoRefs[nameKey] === k) delete _pendingPhotoRefs[nameKey];
+            });
+          }
         });
       }).catch(function(){}).then(function() {
         _photoLoading[k] = false;
@@ -5407,6 +5439,64 @@ function selectTheme(idx) {
   _bumpVer('settings');
   saveToCloud();
 }
+
+//  CARD FRAMES — a second, faster-paced level-reward track (unlocks every couple of
+//  levels, interleaved with theme unlocks) so leveling up almost always hands you
+//  something new. Frames dress up the collector-card border/glow on every log.
+var CARD_FRAMES = [
+  { id:'classic',  name:'Classic',  css:'linear-gradient(135deg,var(--border2),var(--border))',            glow:'rgba(255,255,255,0.06)', unlock:0  },
+  { id:'chrome',   name:'Chrome',   css:'linear-gradient(135deg,#e8ecf1,#9aa5b1,#e8ecf1)',                  glow:'rgba(200,210,225,0.35)', unlock:2  },
+  { id:'carbon',   name:'Carbon',   css:'repeating-linear-gradient(45deg,#1a1a1c,#1a1a1c 4px,#0c0c0d 4px,#0c0c0d 8px)', glow:'rgba(0,0,0,0.5)', unlock:3 },
+  { id:'gold',     name:'Gold',     css:'linear-gradient(135deg,#fff6d8,#e8b84b,#a8791f,#f5d98a)',          glow:'rgba(232,184,75,0.45)',  unlock:6  },
+  { id:'neon',     name:'Neon',     css:'linear-gradient(135deg,#00ffe0,#7a5cff,#ff2ec4)',                  glow:'rgba(122,92,255,0.5)',   unlock:8  },
+  { id:'racing',   name:'Racing',   css:'linear-gradient(135deg,#ff453a,#fff,#ff453a)',                     glow:'rgba(255,69,58,0.45)',   unlock:10 },
+  { id:'holo',     name:'Holo',     css:'linear-gradient(120deg,#ff8bd6,#9adcff,#c6ff8b,#ff8bd6)',          glow:'rgba(154,220,255,0.5)',  unlock:13 },
+  { id:'obsidian', name:'Obsidian', css:'linear-gradient(135deg,#3b0764,#020617,#3b0764)',                  glow:'rgba(139,92,246,0.4)',   unlock:17 },
+  { id:'aurora',   name:'Aurora',   css:'linear-gradient(120deg,#34c759,#60a5fa,#a78bfa,#34c759)',          glow:'rgba(96,165,250,0.5)',   unlock:20 },
+  { id:'prism',    name:'Prism',    css:'linear-gradient(120deg,#f5c842,#ff5733,#c084fc,#60a5fa,#f5c842)',  glow:'rgba(245,200,66,0.5)',   unlock:25 }
+];
+let activeFrame = parseInt(localStorage.getItem('cs_frame') || '0');
+function _frameUnlocked(i) {
+  var f = (i==null) ? null : CARD_FRAMES[i];
+  var lvl = f ? f.unlock : 0;
+  return (lvl <= 0) || xpInfo(_xpTotal).level >= lvl;
+}
+// New frame unlocked at this level (if any), for the level-up celebration
+function frameUnlockedAtLevel(lvl) {
+  for (var i = 1; i < CARD_FRAMES.length; i++) if (CARD_FRAMES[i].unlock === lvl) return CARD_FRAMES[i];
+  return null;
+}
+function applyFrame(idx) {
+  activeFrame = idx;
+  localStorage.setItem('cs_frame', idx);
+  document.documentElement.style.setProperty('--cc-frame', CARD_FRAMES[idx].css);
+  document.documentElement.style.setProperty('--cc-frame-glow', CARD_FRAMES[idx].glow);
+}
+function renderFrameBar() {
+  const bar = document.getElementById('frameBar');
+  if (!bar) return;
+  bar.innerHTML = CARD_FRAMES.map((f,i) => {
+    const locked = !_frameUnlocked(i);
+    const unlockLabel = locked ? `<span class="theme-lock">LV ${f.unlock}</span>` : '';
+    return `<div class="theme-swatch${i===activeFrame?' active':''}${locked?' locked':''}"
+      style="background:${f.css};box-shadow:0 0 0 3px var(--border);"
+      onclick="selectFrame(${i})" title="${f.name}${locked ? ' (Unlocks at Level '+f.unlock+')' : ''}">${unlockLabel}</div>`;
+  }).join('');
+  const nameEl = document.getElementById('frameName');
+  if (nameEl) nameEl.textContent = CARD_FRAMES[activeFrame].name;
+}
+function selectFrame(idx) {
+  if (!_frameUnlocked(idx)) {
+    showToast('🔒 Unlock at Level ' + CARD_FRAMES[idx].unlock + ' by earning XP');
+    return;
+  }
+  applyFrame(idx);
+  renderFrameBar();
+  _bumpVer('settings');
+  saveToCloud();
+}
+applyFrame(activeFrame);
+
 //  SECRET THEME DISCOVERY — tap the CarSpotter wordmark 5 times within 2s.
 var _secretTapLog = [];
 function _onLogoSecretTap() {
@@ -6037,7 +6127,7 @@ function goTo(page) {
     if (page==='leaderboard')  renderLeaderboard();
     if (page==='stats')        renderStats();
     if (page==='achievements') renderAchievements();
-    if (page==='settings')     { renderThemeBar(); initSoundToggle(); initVibeToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); initSortPrefBtns(); applyCompactMode(); }
+    if (page==='settings')     { renderThemeBar(); renderFrameBar(); initSoundToggle(); initVibeToggle(); initCarbonToggle(); updateAliasCount(); refreshOfflineStatus(); initSortPrefBtns(); applyCompactMode(); }
     if (page==='news')         { if (!newsLoaded) { newsLoaded=true; renderNewsSources(); } loadNews(); }
     if (page==='trips')        renderTrips();
     if (page==='spot')         { renderHomeFav(); setTimeout(startFavRotation, 250); }
@@ -8000,6 +8090,7 @@ function celebrateFullCollectorCard(car, opts) {
     card.className = 'cc-card';
     card.setAttribute('data-tier', tier);
     card.innerHTML =
+      '<div class="cc-frame-ring"></div>' +
       '<div class="cc-glow" data-tier="' + tier + '"></div>' +
       (tier === 'legend' ? '<div class="cc-rainbow"></div>' : '') +
       '<div class="cc-inner">' +
@@ -8278,13 +8369,16 @@ function celebrateLevelUp(info, done) {
   var t = titleForXP(_xpTotal);
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var unlockedTheme = themeUnlockedAtLevel(info.level);
+  var unlockedFrame = frameUnlockedAtLevel(info.level);
   recordActivity('levelup', (unlockedTheme ? '🎨 ' : '⭐ ') + 'Reached Level ' + info.level + ' — ' + t.name + (unlockedTheme ? ' · ' + unlockedTheme.name + ' theme unlocked' : ''), { icon: unlockedTheme ? '🎨' : '⭐' });
-  // Expanded reward stack: theme, title milestone, milestone bonus XP, and the rank row.
-  var TITLE_UNLOCK_LEVELS = [4, 5, 6, 7, 9, 11, 12, 13, 15, 16];
-  var bonusXP = (info.level % 5 === 0) ? info.level * 25 : 0;
+  // Reward stack: theme, card frame, milestone bonus XP, and a fallback rank row.
+  // Title changes get their own dedicated "Promotion Earned" overlay (checkTitleUnlock)
+  // so they're never announced twice for the same level-up.
+  var bonusXP = (info.level % 3 === 0) ? info.level * 30 : 0;
+  if (bonusXP) addXP(bonusXP);
   var rewardRows = [];
   if (unlockedTheme) rewardRows.push({ c: unlockedTheme.accent, tag: '🎨 NEW THEME UNLOCKED', name: unlockedTheme.name, sub: 'Tap to continue — apply it in Settings → Theme' });
-  if (TITLE_UNLOCK_LEVELS.indexOf(info.level) !== -1) rewardRows.push({ c: '', tag: t.emoji + ' TITLE EARNED', name: t.name.toUpperCase(), sub: 'A brand-new spotter rank to wear with pride' });
+  if (unlockedFrame) rewardRows.push({ c: '#f5c842', tag: '🎴 NEW CARD FRAME UNLOCKED', name: unlockedFrame.name, sub: 'Dresses up every collector card from now on — pick it in Settings' });
   if (bonusXP) rewardRows.push({ c: '#60a5fa', tag: '⚡ MILESTONE BONUS', name: '+' + bonusXP + ' XP', sub: 'Reaching Level ' + info.level + ' credits a one-time bonus' });
   if (!rewardRows.length) rewardRows.push({ c: '', tag: '🏷️ RANK ' + info.level + ' REACHED', name: t.name.toUpperCase(), sub: info.into + ' / ' + info.need + ' XP until the next rank — keep spotting!' });
   var rewardHTML = rewardRows.map(function(r) {
@@ -8292,6 +8386,7 @@ function celebrateLevelUp(info, done) {
       '<div class="levelup-earned-name" style="' + (r.c ? 'color:' + r.c : '') + '">' + r.name + '</div>' +
       '<div class="levelup-earned-sub" style="color:var(--muted)">' + r.sub + '</div>';
   }).join('<div style="height:1px;background:var(--glass-border);margin:8px 0"></div>');
+  var rewardCountBadge = rewardRows.length > 1 ? ('<div class="levelup-reward-count">' + rewardRows.length + ' REWARDS UNLOCKED</div>') : '';
   var overlay = document.createElement('div');
   overlay.className = 'levelup-overlay' + (reduced ? '' : ' stage-anticipate');
   overlay.innerHTML =
@@ -8300,6 +8395,7 @@ function celebrateLevelUp(info, done) {
       '<div class="levelup-eyebrow">New Rank Reached</div>' +
       '<div class="levelup-num" id="levelUpNum">0</div>' +
       '<div class="levelup-sub">' + t.name.toUpperCase() + '</div>' +
+      rewardCountBadge +
       '<div class="levelup-reward" id="levelUpReward">' + rewardHTML + '</div>' +
       '<div class="levelup-bar"><div class="levelup-fill" id="levelUpFill"></div></div>' +
       '<div class="levelup-bar-lbl" id="levelUpBarLbl"></div>' +
@@ -8308,6 +8404,9 @@ function celebrateLevelUp(info, done) {
   overlay.onclick = function() {
     if (unlockedTheme && _themeUnlocked(THEMES.indexOf(unlockedTheme))) {
       try { applyTheme(THEMES.indexOf(unlockedTheme)); renderThemeBar(); } catch(e){}
+    }
+    if (unlockedFrame) {
+      try { applyFrame(CARD_FRAMES.indexOf(unlockedFrame)); renderFrameBar(); } catch(e){}
     }
     if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
     if (typeof done === 'function') done();
@@ -8321,10 +8420,11 @@ function celebrateLevelUp(info, done) {
     playSound('crystal');
     haptic([40,30,60,30,80]);
     animateValue(document.getElementById('levelUpNum'), 0, info.level, function(n) { return Math.round(n); }, 700);
+    var barInfo = xpInfo(_xpTotal); // re-read after any milestone bonus XP was just granted
     var fill = document.getElementById('levelUpFill');
-    setTimeout(function() { if (fill) fill.style.width = Math.round((info.into / info.need) * 100) + '%'; }, 300);
+    setTimeout(function() { if (fill) fill.style.width = Math.round((barInfo.into / barInfo.need) * 100) + '%'; }, 300);
     var lbl = document.getElementById('levelUpBarLbl');
-    if (lbl) lbl.textContent = info.into + ' / ' + info.need + ' XP to Level ' + (info.level + 1);
+    if (lbl) lbl.textContent = barInfo.into + ' / ' + barInfo.need + ' XP to Level ' + (barInfo.level + 1);
   }, reduced ? 0 : 450);
   renderLevelBar();
 }
@@ -9089,63 +9189,37 @@ function _loadIDBCache() {
   }).catch(function(){});
 }
 
+// Shared per-car patch logic (was triplicated across allRuns/currentRun/quickPicks,
+// which is how the three copies drifted). Also the fix for the photo-loss bug: instead
+// of destructively blanking car.photo while IndexedDB is still loading, it records the
+// pending ref in _pendingPhotoRefs so a save that lands mid-load can't wipe it out.
+function _patchOnePhoto(car) {
+  var key = _photoCacheKey(car.name);
+  var nameKey = String(car.name || '').toLowerCase();
+  var cached = _photoCacheGet(key);
+  if (car.photo && typeof car.photo === 'string' && car.photo.indexOf('photo:') === 0) {
+    var refKey = car.photo.slice(6);
+    var ref = _photoCacheGet(refKey) || _photoCacheGet(key);
+    if (ref) { car.photo = ref; delete _pendingPhotoRefs[nameKey]; }
+    else { _pendingPhotoRefs[nameKey] = refKey || key; car.photo = ''; _photoLazyLoad(refKey || key); }
+  } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0 &&
+             !(car.photo && car.photo.indexOf('data:') === 0) && car.photo !== cached) {
+    // Prefer the user's own photo over a stock/reference image — never let a
+    // stale cache entry replace a freshly-attached in-memory photo.
+    car.photo = cached;
+    delete _pendingPhotoRefs[nameKey];
+  } else if (!car.photo && cached) {
+    car.photo = cached;
+    delete _pendingPhotoRefs[nameKey];
+  } else if (!car.photo && !cached) {
+    _photoLazyLoad(key);
+  }
+}
 function _patchPhotosFromCache() {
   if (!_idbPhotoCache) return;
-  allRuns.forEach(function(run) {
-    (run.cars||[]).forEach(function(car) {
-      var key = _photoCacheKey(car.name);
-      var cached = _photoCacheGet(key);
-      if (car.photo && typeof car.photo === 'string' && car.photo.indexOf('photo:') === 0) {
-        var refKey = car.photo.slice(6);
-        var ref = _photoCacheGet(refKey) || _photoCacheGet(key);
-        if (ref) car.photo = ref;
-        else { car.photo = ''; _photoLazyLoad(refKey || key); }
-      } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0 &&
-                 !(car.photo && car.photo.indexOf('data:') === 0) && car.photo !== cached) {
-        // Prefer the user's own photo over a stock/reference image — never let a
-        // stale cache entry replace a freshly-attached in-memory photo.
-        car.photo = cached;
-      } else if (!car.photo && cached) {
-        car.photo = cached;
-      } else if (!car.photo && !cached) {
-        _photoLazyLoad(key);
-      }
-    });
-  });
-  currentRun.forEach(function(car) {
-    var key = _photoCacheKey(car.name);
-    var cached = _photoCacheGet(key);
-    if (car.photo && typeof car.photo === 'string' && car.photo.indexOf('photo:') === 0) {
-      var refKey = car.photo.slice(6);
-      var ref = _photoCacheGet(refKey) || _photoCacheGet(key);
-      if (ref) car.photo = ref;
-      else { car.photo = ''; _photoLazyLoad(refKey || key); }
-    } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0 &&
-               !(car.photo && car.photo.indexOf('data:') === 0) && car.photo !== cached) {
-      car.photo = cached;
-    } else if (!car.photo && cached) {
-      car.photo = cached;
-    } else if (!car.photo && !cached) {
-      _photoLazyLoad(key);
-    }
-  });
-  quickPicks.forEach(function(car) {
-    var key = _photoCacheKey(car.name);
-    var cached = _photoCacheGet(key);
-    if (car.photo && typeof car.photo === 'string' && car.photo.indexOf('photo:') === 0) {
-      var refKey = car.photo.slice(6);
-      var ref = _photoCacheGet(refKey) || _photoCacheGet(key);
-      if (ref) car.photo = ref;
-      else { car.photo = ''; _photoLazyLoad(refKey || key); }
-    } else if (cached && typeof cached === 'string' && cached.indexOf('data:') === 0 &&
-               !(car.photo && car.photo.indexOf('data:') === 0) && car.photo !== cached) {
-      car.photo = cached;
-    } else if (!car.photo && cached) {
-      car.photo = cached;
-    } else if (!car.photo && !cached) {
-      _photoLazyLoad(key);
-    }
-  });
+  allRuns.forEach(function(run) { (run.cars||[]).forEach(_patchOnePhoto); });
+  currentRun.forEach(_patchOnePhoto);
+  quickPicks.forEach(_patchOnePhoto);
 }
 
 function _safeSet(key, val) {
@@ -9173,6 +9247,11 @@ function _stripCopy(obj) {
           _idbPut(String(obj.name || ''), v).catch(function() {});
         }
         c[k] = 'photo:' + cacheKey;
+      } else if (k === 'photo' && !v && _pendingPhotoRefs[String(obj.name || '').toLowerCase()]) {
+        // BUGFIX: photo is blank only because IndexedDB hasn't finished loading it
+        // yet (see _patchOnePhoto) — never persist that placeholder over a photo
+        // that's actually still saved. Write the real ref back instead.
+        c[k] = 'photo:' + _pendingPhotoRefs[String(obj.name || '').toLowerCase()];
       } else if (v && typeof v === 'object') {
         c[k] = _stripCopy(v);
       } else c[k] = v;
@@ -9975,7 +10054,12 @@ function checkNewAchievements() {
   if (newOnes.length) {
     _prevAchievements = now;
     localStorage.setItem('cs_ach', JSON.stringify(now));
-    newOnes.forEach((id, i) => {
+    // Collect every achievement earned by this one action and show them together —
+    // logging a single car used to be able to stack several full-screen celebrations
+    // back to back (one per achievement). One combined moment reads as one reward,
+    // not a pile of popups for one action.
+    var earned = [];
+    newOnes.forEach((id) => {
       const a = ACHIEVEMENTS.find(x=>x.id===id);
       if (a) {
         // Grant the one-time XP reward and bank the claim in the unified collection.
@@ -9984,21 +10068,25 @@ function checkNewAchievements() {
           addXP(a.xp || 0);
           saveProgress();
         }
-        setTimeout(() => celebrateAchievement(a), i * 3000);
         recordActivity('achievement', a.icon + ' ' + a.name + ' unlocked' + (a.xp ? ' · +' + a.xp + ' XP' : ''), { icon: a.icon });
+        earned.push(a);
       }
     });
+    if (earned.length) celebrateAchievements(earned);
   }
 }
 
 // Achievements celebrate through the same moment engine as expeditions/titles.
-function celebrateAchievement(ach) {
+// Always a single overlay, even when several achievements unlocked at once.
+function celebrateAchievements(list) {
+  var totalXP = list.reduce(function(s, a) { return s + (a.xp || 0); }, 0);
+  var multi = list.length > 1;
   enqueueMoment({
-    emoji: ach.icon,
-    eyebrow: 'Logged in the Logbook',
-    title: ach.name,
-    desc: '+' + (ach.xp || 0) + ' XP awarded.',
-    sub: ach.desc,
+    emoji: list[0].icon,
+    eyebrow: multi ? list.length + ' Achievements Unlocked' : 'Logged in the Logbook',
+    title: multi ? list.map(function(a){ return a.name; }).join(' · ') : list[0].name,
+    desc: '+' + totalXP + ' XP awarded.',
+    sub: multi ? list.map(function(a){ return a.icon + ' ' + a.name; }).join('  ') : list[0].desc,
     colors: ['#60a5fa', '#c084fc', '#fff', '#f5c842'],
     particles: 14
   });
@@ -11498,7 +11586,18 @@ function checkMilestones(car) {
   }
   if (fired.length) {
     saveProgress();
-    fired.forEach(function(m, i){ setTimeout(function(){ showMilestoneToast(m); }, i * 2200); });
+    // Combine anything earned by the same action into one moment — enqueueMoment
+    // already queues moments back-to-back on its own, so multiple milestones from
+    // one log don't need to be staggered into separate popups.
+    if (fired.length === 1) showMilestoneToast(fired[0]);
+    else enqueueMoment({
+      emoji: fired[0].icon,
+      eyebrow: fired.length + ' Rare Discoveries',
+      title: fired.map(function(m){ return m.title; }).join(' · '),
+      desc: fired.map(function(m){ return m.icon + ' ' + m.title; }).join('  '),
+      colors: ['#f5c842', '#ffd75e', '#fff', '#ff5733'],
+      particles: 20
+    });
   }
 }
 function showMilestoneToast(m) {
