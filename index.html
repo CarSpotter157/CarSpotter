@@ -3956,9 +3956,17 @@ const db = window._fbReady ? firebase.firestore() : null;
 // Storage isn't enabled for this Firebase project yet, every call below
 // fails safely (caught) and the app behaves exactly as it did before.
 var storage = null;
+var _photoUploadAttempted = {};
+var _CLOUD_PHOTO_UPLOAD_DISABLED = true;
 try { if (window._fbReady) storage = firebase.storage(); } catch(e) { storage = null; }
 function _uploadPhotoToCloud(key, dataUrl) {
+  // DISABLED: Storage's CORS config doesn't currently allow this origin, so
+  // every attempt fails with a blocked preflight — flip this back on once
+  // that's fixed on the Firebase Storage bucket side (see the CORS note).
+  if (_CLOUD_PHOTO_UPLOAD_DISABLED) return;
   if (!storage || !currentUser || !key || !dataUrl) return;
+  if (_photoUploadAttempted[key]) return;
+  _photoUploadAttempted[key] = true;
   try {
     storage.ref('users/' + currentUser.uid + '/photos/' + key + '.jpg')
       .putString(dataUrl, 'data_url')
@@ -4911,7 +4919,14 @@ async function loadFromCloud() {
     if (!_dirty) _replaceLocalFromCloud(d); else _applyCloud(d);
     await loadRunsPage(true);
     _saveAllLocal(); _lastSave = Date.now();
-    _txWrite({ cause: legacyRuns.length ? 'migrate-runs' : 'loadFromCloud' });
+    // BUGFIX (garage flicker): this used to write back to Firestore on every
+    // single load, even when nothing had changed. That extra write could nudge
+    // the live listener into re-applying data and re-rendering the garage,
+    // producing a visible "glitch" every sync cycle. Only write back when a
+    // migration happened or the payload actually differs from the cloud copy.
+    if (legacyRuns.length || !_coreEqual(_buildCloudPayload(), d)) {
+      _txWrite({ cause: legacyRuns.length ? 'migrate-runs' : 'loadFromCloud' });
+    }
     setSyncDot('ok');
   } catch(e) { setSyncDot(''); console.error(e); throw e; }
   renderQPTrigger(); renderSpot(); renderGarage(); renderHistory(); fetchRefImagesForAllCars();
