@@ -1309,7 +1309,7 @@ html:not(.show-qp) #qpWrap{display:none;}
   will-change:transform;
 }
 .garage-card.anim-stagger{animation:gcFloatIn 0.55s var(--spring) both;animation-delay:var(--stagger,0s);}
-@keyframes gcFloatIn{0%{opacity:0;transform:translateY(18px) scale(0.96) rotateX(6deg);}60%{opacity:1;}100%{opacity:1;transform:translateY(0) scale(1) rotateX(0);}}
+@keyframes gcFloatIn{0%{opacity:0;transform:translateY(18px) scale(0.96);}60%{opacity:1;}100%{opacity:1;transform:translateY(0) scale(1);}}
 .garage-card:hover{border-color:rgba(232,184,75,0.25);box-shadow:var(--shadow-lg);transform:translateY(-5px) rotateX(3deg) rotateY(-2deg);}
 .garage-card:active{transform:translateY(1px) scale(0.96);box-shadow:var(--shadow);transition-duration:0.1s;transition-timing-function:var(--ease-press);}
 .gc-img-wrap{width:100%;height:150px;overflow:hidden;background:var(--surf2);position:relative;}
@@ -1317,7 +1317,7 @@ html:not(.show-qp) #qpWrap{display:none;}
 .gc-img{width:100%;height:100%;object-fit:cover;transition:transform 0.6s var(--ease);}
 .garage-card:hover .gc-img{transform:scale(1.12);}
 .gc-img-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.8rem;background:linear-gradient(135deg,var(--surf3),var(--surf2));}
-.gc-photo-badge{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font-size:0.4rem;font-weight:600;padding:3px 9px;border-radius:6px;letter-spacing:0.3px;pointer-events:none;white-space:nowrap;border:1px solid rgba(255,255,255,0.08);}
+.gc-photo-badge{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,0.85);color:#fff;font-size:0.4rem;font-weight:600;padding:3px 9px;border-radius:6px;letter-spacing:0.3px;pointer-events:none;white-space:nowrap;border:1px solid rgba(255,255,255,0.08);}
 .gc-body{padding:16px 16px 18px;}
 .gc-name{font-size:0.88rem;font-weight:600;margin-bottom:2px;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden;-webkit-line-clamp:2;word-break:break-word;letter-spacing:-0.2px;}
 .gc-val{font-family:'Inter',sans-serif;font-size:1.05rem;color:var(--accent);letter-spacing:0.5px;}
@@ -4974,6 +4974,17 @@ async function loadFromCloud() {
     if (legacyRuns.length) await _writeRunDocs(legacyRuns, []);
     if (!_dirty) _replaceLocalFromCloud(d); else _applyCloud(d);
     await loadRunsPage(true);
+    // BUGFIX (missing cars after account switch): runs live in a paginated
+    // subcollection (30/page) for document-size reasons. _prepareLocalCacheForUser
+    // correctly clears the local cache on an account switch, but this call used to
+    // stop after that first page — so only your 30 most recent runs came back
+    // automatically, and everything older sat behind the manual "Load more
+    // history" button in History, looking deleted. Keep paging until Firestore
+    // says there's nothing left, so a fresh sign-in (or switching back to an
+    // account) always restores the full collection without a manual click. A
+    // page cap just guards against an unexpected infinite loop, not normal use.
+    var _loadGuard = 0;
+    while (_runsHasMore && _loadGuard < 200) { await loadRunsPage(false); _loadGuard++; }
     _saveAllLocal(); _lastSave = Date.now();
     // BUGFIX (garage flicker): this used to write back to Firestore on every
     // single load, even when nothing had changed. That extra write could nudge
@@ -7286,7 +7297,8 @@ function renderGarage() {
       // in — a second "Fav" text badge here was saying the same thing twice.
       var isFeat = (featuredName() === car.name);
       var evoBadge = evoTier ? '<span class="gc-badge evo" style="color:' + evoTier.color + ';border-color:' + evoTier.color + '44">' + evoTier.icon + ' ' + evoTier.name + ' \u00D7' + ev.count + '</span>' : '';
-      return '<div class="garage-card collector-card anim-stagger' + (evoTier ? ' evo-' + evoTier.name.toLowerCase() : '') + '" data-tier="' + tier + '" role="button" tabindex="0"' + clickAttr + ' style="--gc-tilt:' + tilt + 'deg;--stagger:' + Math.min(idx * 0.04, 0.5) + 's;animation-delay:var(--stagger);">' + shine +
+      var animate = idx < 16;
+      return '<div class="garage-card collector-card' + (animate ? ' anim-stagger' : '') + (evoTier ? ' evo-' + evoTier.name.toLowerCase() : '') + '" data-tier="' + tier + '" role="button" tabindex="0"' + clickAttr + ' style="--gc-tilt:' + tilt + 'deg;' + (animate ? '--stagger:' + Math.min(idx * 0.04, 0.5) + 's;animation-delay:var(--stagger);' : '') + '">' + shine +
         '<div class="gc-tier-chip">' + tierEmoji(tier) + ' ' + meta.label + (evoTier ? '<span class="gc-evo-chip">' + evoTier.icon + '</span>' : '') + '</div>' +
         '<div class="gc-img-wrap">' + media +
         '</div>' +
