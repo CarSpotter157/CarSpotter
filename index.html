@@ -3335,17 +3335,30 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 .gc-img-wrap::after{border-radius:inherit;}
 .gc-photo-badge{font-size:.36rem;padding:2px 7px;}
 .gc-body{
-  flex:0 0 auto;padding:7px 6px 8px;text-align:center;
+  flex:0 0 auto;padding:6px 6px 7px;text-align:center;
   border-top:1px solid var(--glass-border);
 }
 .collector-card .gc-body{border-top-color:var(--cc-color);}
-.gc-make{text-align:center;}
-.gc-name{font-size:.7rem;text-align:center;-webkit-line-clamp:1;margin-bottom:1px;}
+.gc-make{display:none;}
+.gc-name{font-size:.72rem;text-align:center;-webkit-line-clamp:1;margin-bottom:1px;}
 .gc-val-row{justify-content:center;}
-.gc-val{font-size:.82rem;}
+.gc-val{font-size:.86rem;}
 .gc-date{display:none;}
-.gc-badges{justify-content:center;min-height:0;margin-top:4px;}
+.gc-badges{position:absolute;top:8px;right:8px;left:auto;margin:0;min-height:0;z-index:2;justify-content:flex-end;max-width:62%;}
 .collector-card .gc-tier-chip{border-radius:999px;font-size:.4rem;padding:3px 7px 3px 6px;}
+/* Mobile-first: this is a phone-sized card grid, so default to two big
+   cards per row (not a squeezed three) and let the art breathe. */
+.garage-grid{grid-template-columns:repeat(var(--garage-cols,2),minmax(0,1fr));gap:10px;}
+.garage-grid[data-zoom="1"]{--garage-cols:1;}
+.garage-grid[data-zoom="2"]{--garage-cols:2;}
+.garage-grid[data-zoom="3"]{--garage-cols:2;}
+.garage-grid[data-zoom="4"]{--garage-cols:3;}
+.garage-grid[data-zoom="5"]{--garage-cols:3;}
+@media(min-width:700px){
+  .garage-grid[data-zoom="3"]{--garage-cols:3;}
+  .garage-grid[data-zoom="4"]{--garage-cols:4;}
+  .garage-grid[data-zoom="5"]{--garage-cols:5;}
+}
 </style>
 <script>window.CS_SYNC_REPAIR_BUILD='2026-09-07-final';</script>
 </head>
