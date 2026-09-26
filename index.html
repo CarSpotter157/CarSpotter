@@ -3265,7 +3265,8 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 /* Settings: clearer section separation */
 #page-settings .setting-card{border-radius:16px;margin-bottom:12px;}
 #page-settings .setting-head{padding:16px 18px 11px;}
-#page-settings .setting-icon{min-width:48px;color:var(--muted);}
+#page-settings .setting-icon{min-width:26px;color:var(--text2);font-size:1.05rem;text-align:center;padding-top:0;}
+#page-settings .setting-head{gap:12px;}
 #page-settings .setting-desc{font-size:.66rem;}
 #page-settings .card-title{margin-bottom:7px;}
 .setting-link{min-height:48px;transition:background .35s var(--ease),color .35s var(--ease);}
@@ -3447,7 +3448,7 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 <div class="color-sel-wrap">
 <span class="color-dot empty" id="carColorDot"></span>
 <select class="is-empty" id="carColor" onchange="updateColorDot()" title="Optional &mdash; pick the car's color">
-<option value="" selected>Color (optional)</option>
+<option value="" selected>Color</option>
 <option value="Black" data-hex="#16161a">Black</option>
 <option value="White" data-hex="#f4f4f5">White</option>
 <option value="Silver" data-hex="#c3c7cd">Silver</option>
@@ -3477,7 +3478,7 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 <div class="ff">
 <label for="carType">Type</label>
 <select id="carType" title="Select the car category">
-<option disabled="" selected="" value="">&mdash; Select Type &mdash;</option>
+<option disabled="" selected="" value="">Select Type</option>
 <option value="sports">Sports Car</option>
 <option value="classic">Vintage</option>
 <option value="suv">SUV / Truck</option>
@@ -3662,7 +3663,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <div class="sec-title" style="margin-bottom:14px">Settings</div> <!-- Themes -->
 <div class="card setting-card">
 <div class="setting-head">
-<div class="setting-icon">Theme</div>
+<div class="setting-icon">🎨</div>
 <div class="setting-copy">
 <div class="card-title">THEME</div>
 <div class="setting-desc">Tune CarSpotter''s look with bold palettes, then add carbon fiber texture for extra depth.</div>
@@ -3680,7 +3681,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <!-- Card Frames -->
 <div class="card setting-card">
 <div class="setting-head">
-<div class="setting-icon">Frame</div>
+<div class="setting-icon">🖼️</div>
 <div class="setting-copy">
 <div class="card-title">COLLECTOR CARD FRAME</div>
 <div class="setting-desc">Level up to unlock new finishes for the card that pops when you log a car.</div>
@@ -3692,7 +3693,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <!-- Offline Status -->
 <div class="card setting-card">
 <div class="setting-head">
-<div class="setting-icon">Sync</div>
+<div class="setting-icon">☁️</div>
 <div class="setting-copy">
 <div class="card-title">SYNC &amp; OFFLINE</div>
 <div class="setting-desc">Every run saves on-device first, then syncs to the cloud when you are back online.</div>
@@ -3707,7 +3708,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <!-- Sound FX -->
 <div class="card setting-card">
 <div class="setting-head">
-<div class="setting-icon">Audio</div>
+<div class="setting-icon">🔊</div>
 <div class="setting-copy">
 <div class="card-title">SOUND EFFECTS</div>
 <div class="setting-desc">Keep the app quiet or add feedback when you log cars and finish runs.</div>
@@ -3729,7 +3730,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <!-- Aliases -->
 <div class="card setting-card">
 <div class="setting-head">
-<div class="setting-icon">Names</div>
+<div class="setting-icon">🏷️</div>
 <div class="setting-copy">
 <div class="card-title">CAR NICKNAMES</div>
 <div class="setting-desc">Map abbreviations to full names so your stats and garage stay tidy. Example: GT3 RS -&gt; Porsche 911 GT3 RS.</div>
@@ -3742,7 +3743,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 </div>
 <div class="card setting-card">
 <div class="setting-head">
-<div class="setting-icon">Guide</div>
+<div class="setting-icon">📖</div>
 <div class="setting-copy">
 <div class="card-title">HELP &amp; ONBOARDING</div>
 <div class="setting-desc">Replay the interactive walkthrough &mdash; practice logging a run, explore a demo Garage, and see why signing in matters. Uses demo data only; nothing touches your real collection.</div>
@@ -3756,7 +3757,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <!-- Default Sort -->
 <div class="card setting-card">
 <div class="setting-head">
-<div class="setting-icon">Sort</div>
+<div class="setting-icon">↕️</div>
 <div class="setting-copy">
 <div class="card-title">DEFAULT GARAGE SORT</div>
 <div class="setting-desc">Choose how your garage is ordered when you open it.</div>
@@ -3771,7 +3772,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <!-- Compact mode -->
 <div class="card setting-card">
 <div class="setting-head">
-<div class="setting-icon">View</div>
+<div class="setting-icon">🔲</div>
 <div class="setting-copy">
 <div class="card-title">COMPACT GARAGE</div>
 <div class="setting-desc">Shrink garage rows to fit more cars on screen at once.</div>
@@ -3785,7 +3786,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <!-- Data -->
 <div class="card setting-card">
 <div class="setting-head">
-<div class="setting-icon">Data</div>
+<div class="setting-icon">💾</div>
 <div class="setting-copy">
 <div class="card-title">EXPORT &amp; BACKUP</div>
 <div class="setting-desc">Download all your runs, garage, aliases, settings as JSON. Import later to restore.</div>
@@ -3899,7 +3900,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <div class="trip-create" id="tripCreateCard">
 <div class="tc-title">START A ROAD TRIP</div>
 <div class="trip-form-row">
-<input autocomplete="off" id="tripNameInput" placeholder="Trip name (e.g. Tail of the Dragon)" type="text"/>
+<input autocomplete="off" id="tripNameInput" placeholder="Trip name" type="text"/>
 <select id="tripEmojiSelect">
 <option value="🛣️">🛣️ Highway</option>
 <option value="⛰️">⛰️ Mountains</option>
@@ -7652,7 +7653,6 @@ function showCarInstances(car, originEl) {
     '</div></div>' +
     '<div class="detail-actions">' +
     '<button class="detail-action-btn" data-fav="' + escapeHtml(car.name) + '">' + (isFavorite(car.name) ? '★ Favorite' : '☆ Favorite') + '</button>' +
-    '<button class="detail-action-btn" onclick="event.stopPropagation();setFeaturedCar(\'' + jsEscape(car.name) + '\');this.closest(\'.detail-overlay\').remove();">👑 ' + (featuredName() === car.name ? 'Unfeature' : 'Feature') + '</button>' +
     '<a class="detail-action-btn" href="' + carUrl(car.name) + '" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="Search this car">↗ Search</a>' +
     '<button class="detail-action-btn" onclick="event.stopPropagation();this.closest(\'.detail-overlay\').remove();openEditCarModal(\'' + encodeURIComponent(JSON.stringify(car)) + '\')">✏️ Edit</button>' +
     '<button class="detail-action-btn" onclick="event.stopPropagation();addPhotoToCar(\'' + jsEscape(car.name) + '\')">📷 Photo</button>' +
