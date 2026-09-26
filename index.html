@@ -422,14 +422,15 @@ html.cs-hidden .levelup-star,.html.cs-hidden .recap-record-tag.pop{animation-pla
   transition:all 0.35s var(--spring-soft);
 }
 .nav-btn.active .nav-icon{transform:translateY(-2px) scale(1.15);filter:drop-shadow(0 0 8px rgba(232,184,75,0.3));}
-.nav-btn.active::before{
-  content:'';
-  position:absolute;top:0;left:28%;right:28%;
-  height:2.5px;background:linear-gradient(90deg,transparent,var(--accent) 20%,var(--accent) 80%,transparent);
-  border-radius:0 0 3px 3px;
-  opacity:0.9;
-  transition:all 0.3s var(--ease);
+.nav-slide{
+  position:absolute;top:0;height:2.5px;width:34px;
+  background:linear-gradient(90deg,transparent,var(--accent) 15%,var(--accent) 85%,transparent);
+  border-radius:0 0 4px 4px;
+  box-shadow:0 1px 12px 1px rgba(232,184,75,0.6);
+  opacity:0;pointer-events:none;will-change:transform,width;z-index:1;
+  transition:transform 0.5s var(--spring-soft), width 0.4s var(--spring-soft), opacity 0.25s var(--ease);
 }
+.nav-slide.ready{opacity:0.95;}
 .nav-icon{width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
 .nav-btn.active .nav-icon svg{stroke:var(--accent);filter:drop-shadow(0 0 4px rgba(232,184,75,0.2));}
 .nav-label{font-size:0.43rem;letter-spacing:2px;text-transform:uppercase;font-weight:600;transition:all 0.3s var(--ease);opacity:0.5;}
@@ -3926,6 +3927,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <button class="undo-btn" onclick="doUndo()">&larrhk; UNDO</button>
 </div>
 <nav class="bottom-nav" id="bottomNav">
+<span class="nav-slide" id="navSlide" aria-hidden="true"></span>
 <!-- desktop logo injected by JS -->
 <button class="nav-btn active" id="nav-spot" onclick="goTo('spot')">
 <span class="nav-icon"><svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="20"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle><line x1="12" x2="12" y1="2" y2="5"></line><line x1="12" x2="12" y1="19" y2="22"></line><line x1="2" x2="5" y1="12" y2="12"></line><line x1="19" x2="22" y1="12" y2="12"></line></svg></span>
@@ -4974,17 +4976,6 @@ async function loadFromCloud() {
     if (legacyRuns.length) await _writeRunDocs(legacyRuns, []);
     if (!_dirty) _replaceLocalFromCloud(d); else _applyCloud(d);
     await loadRunsPage(true);
-    // BUGFIX (missing cars after account switch): runs live in a paginated
-    // subcollection (30/page) for document-size reasons. _prepareLocalCacheForUser
-    // correctly clears the local cache on an account switch, but this call used to
-    // stop after that first page — so only your 30 most recent runs came back
-    // automatically, and everything older sat behind the manual "Load more
-    // history" button in History, looking deleted. Keep paging until Firestore
-    // says there's nothing left, so a fresh sign-in (or switching back to an
-    // account) always restores the full collection without a manual click. A
-    // page cap just guards against an unexpected infinite loop, not normal use.
-    var _loadGuard = 0;
-    while (_runsHasMore && _loadGuard < 200) { await loadRunsPage(false); _loadGuard++; }
     _saveAllLocal(); _lastSave = Date.now();
     // BUGFIX (garage flicker): this used to write back to Firestore on every
     // single load, even when nothing had changed. That extra write could nudge
@@ -4995,9 +4986,29 @@ async function loadFromCloud() {
       _txWrite({ cause: legacyRuns.length ? 'migrate-runs' : 'loadFromCloud' });
     }
     setSyncDot('ok');
+    // Paint with the first page right away — don't make first load wait on
+    // someone's entire history. This is also what LCP is timing: the favorites
+    // strip's <img> can't even start loading until this fires.
+    renderQPTrigger(); renderSpot(); renderGarage(); renderHistory(); fetchRefImagesForAllCars();
+    if (currentRun.length > 0) setTimeout(() => notify('🚗 Run resumed — ' + currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '') + ' restored!', { priority:'major', record:true, key:'Run resumed', icon:'🚗' }), 700);
+    // BUGFIX (missing cars after account switch): runs live in a paginated
+    // subcollection (30/page) for document-size reasons. _prepareLocalCacheForUser
+    // correctly clears the local cache on an account switch, but this used to
+    // stop after that first page — so only your 30 most recent runs came back
+    // automatically, and everything older sat behind the manual "Load more
+    // history" button, looking deleted. Keep paging in the background until
+    // Firestore says there's nothing left, then refresh once more, so a fresh
+    // sign-in always restores the full collection without blocking first paint
+    // or requiring a manual click. Page cap just guards an unexpected loop.
+    (async function backfillRemainingRuns() {
+      var guard = 0;
+      while (_runsHasMore && guard < 200) { await loadRunsPage(false); guard++; }
+      if (guard > 0) {
+        _saveAllLocal();
+        renderQPTrigger(); renderSpot(); renderGarage(); renderHistory(); fetchRefImagesForAllCars();
+      }
+    })();
   } catch(e) { setSyncDot(''); console.error(e); throw e; }
-  renderQPTrigger(); renderSpot(); renderGarage(); renderHistory(); fetchRefImagesForAllCars();
-  if (currentRun.length > 0) setTimeout(() => notify('🚗 Run resumed — ' + currentRun.length + ' car' + (currentRun.length !== 1 ? 's' : '') + ' restored!', { priority:'major', record:true, key:'Run resumed', icon:'🚗' }), 700);
 }
 
 function subscribeCloud() {
@@ -6128,7 +6139,7 @@ function renderHomeFav(){
   var el=document.getElementById('favList');var all=getAllCars();
   var favs=all.filter(function(c){ return favoriteNames.has(c.name); }).sort(function(a,b){return b.value-a.value});
   if(!favs.length){document.getElementById('favSection').style.display='none';return}
-  var html=favs.map(function(c){var json=JSON.stringify(c).replace(/"/g,'&quot;');var img=c.photo?'<img class="fav-item-img" src="'+c.photo+'" onerror="this.style.display='+"'none'"+'">':'<div class="fav-item-ph"><i class="fas fa-star"></i></div>';return'<div class="fav-item" onclick="showCarInstances('+json+')">'+img+'<div class="fav-item-name">'+c.name.split(' ').pop()+'</div><div class="fav-item-val">$'+((c.value||0).toLocaleString())+'</div></div>'}).join('');el.innerHTML=html;document.getElementById('favSection').style.display='block';
+  var html=favs.map(function(c){var json=JSON.stringify(c).replace(/"/g,'&quot;');var img=c.photo?'<img class="fav-item-img" width="115" height="70" decoding="async" src="'+c.photo+'" onerror="this.style.display='+"'none'"+'">':'<div class="fav-item-ph"><i class="fas fa-star"></i></div>';return'<div class="fav-item" onclick="showCarInstances('+json+')">'+img+'<div class="fav-item-name">'+c.name.split(' ').pop()+'</div><div class="fav-item-val">$'+((c.value||0).toLocaleString())+'</div></div>'}).join('');el.innerHTML=html;document.getElementById('favSection').style.display='block';
 }
 function startFavRotation(){if(favTimer)clearInterval(favTimer);var all=getAllCars();var favs=all.filter(function(c){return favoriteNames.has(c.name)}).sort(function(a,b){return b.value-a.value});if(favs.length<2)return;favIdx=0;var scroller=document.getElementById('favList');if(!scroller)return;favTimer=setInterval(function(){favIdx=(favIdx+1)%favs.length;var child=scroller.children[favIdx];if(child){var target=child.offsetLeft-scroller.clientWidth/2+child.clientWidth/2;scroller.scrollTo({left:Math.max(0,target),behavior:'smooth'});}},4000);}
 function stopFavRotation(){if(favTimer){clearInterval(favTimer);favTimer=null}}
@@ -6195,6 +6206,27 @@ async function renderLeaderboard() {
 }
 
 //  NAV 
+function _positionNavSlide(navBtn) {
+  var slide = document.getElementById('navSlide');
+  var bar = document.getElementById('bottomNav');
+  if (!slide || !bar || !navBtn) return;
+  var barRect = bar.getBoundingClientRect();
+  var btnRect = navBtn.getBoundingClientRect();
+  if (!btnRect.width) return; // nav not laid out yet (e.g. display:none ancestor)
+  var w = 34;
+  var center = (btnRect.left - barRect.left) + btnRect.width / 2;
+  slide.style.width = w + 'px';
+  slide.style.transform = 'translateX(' + Math.round(center - w / 2) + 'px)';
+  slide.classList.add('ready');
+}
+window.addEventListener('resize', function() {
+  var active = document.querySelector('.nav-btn.active');
+  if (active) _positionNavSlide(active);
+});
+requestAnimationFrame(function(){ requestAnimationFrame(function(){
+  var active = document.querySelector('.nav-btn.active') || document.getElementById('nav-spot');
+  if (active) _positionNavSlide(active);
+}); });
 function goTo(page) {
   var prev = document.querySelector('.page.active');
   if (prev && prev.id==='page-spot' && page!=='spot') stopFavRotation();
@@ -6205,7 +6237,7 @@ function goTo(page) {
   const pageEl = document.getElementById('page-'+page);
   if (pageEl) pageEl.classList.add('active');
   const navEl = document.getElementById('nav-'+page);
-  if (navEl) navEl.classList.add('active');
+  if (navEl) { navEl.classList.add('active'); _positionNavSlide(navEl); }
   closeQP();
   updatePageTransition(page);
   // Defer heavy rendering to next frame so INP stays fast
