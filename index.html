@@ -1154,19 +1154,27 @@ html:not(.show-qp) #qpWrap{display:none;}
 .stat-l{font-size:0.46rem;color:var(--muted);letter-spacing:1.8px;text-transform:uppercase;margin-top:4px;font-weight:600;}
 
 /* ── GARAGE ── */
-.garage-search-wrap{position:relative;margin-bottom:12px;}
-.garage-search-wrap input{
+.garage-search-wrap{display:flex;gap:8px;margin-bottom:12px;}
+.gsw-input{position:relative;flex:1;min-width:0;}
+.gsw-input input{
   width:100%;background:var(--surf);border:1px solid var(--border);
   border-radius:var(--radius-sm);color:var(--text);font-size:0.9rem;
   padding:11px 38px 11px 14px;outline:none;
   transition:border-color 0.15s;font-family:'Inter',sans-serif;
 }
-.garage-search-wrap input:focus{border-color:var(--accent);}
+.gsw-input input:focus{border-color:var(--accent);}
 .garage-search-clear{
   position:absolute;right:12px;top:50%;transform:translateY(-50%);
   background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.8rem;transition:color 0.15s;
 }
 .garage-search-clear:hover{color:var(--red);}
+.garage-sort-select{
+  flex-shrink:0;max-width:112px;background:var(--surf);border:1px solid var(--border);
+  border-radius:var(--radius-sm);color:var(--text2);font-size:0.62rem;font-weight:700;
+  letter-spacing:0.3px;padding:0 10px;outline:none;cursor:pointer;font-family:'Inter',sans-serif;
+  transition:border-color 0.15s;
+}
+.garage-sort-select:focus{border-color:var(--accent);}
 
 .garage-filter-row{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px;padding-bottom:2px;scroll-snap-type:x mandatory;}
 .garage-filter-row::-webkit-scrollbar{display:none;}
@@ -3309,6 +3317,35 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 @media(prefers-reduced-motion:reduce){
   .page-enter-forward,.page-enter-back,.page-enter-garage,.page-enter-achievements,.page-enter-trips,.card,.more-page-tile,.hist-item,.garage-card.anim-stagger,.cc-card.collecting,.cc-collected,.cc-quick,.cc-quick-thumb,.cc-quick-emoji,.cc-quick-ring,.nav-badge.pop{animation-duration:.01ms!important;}
 }
+
+/* ── TRADING CARD SHAPE: give garage cards a real card silhouette ──
+   Classic trading-card ratio (~5:7) with a colored frame/bezel around
+   the art, and a slim nameplate instead of a tall text block. */
+.garage-card{
+  display:flex;flex-direction:column;
+  aspect-ratio:5/7;
+  border-radius:16px;
+  border-width:2px;
+  padding:6px;
+}
+.garage-grid .gc-img-wrap,.gc-img-wrap{
+  flex:1 1 auto!important;height:auto!important;min-height:0;
+  border-radius:11px;
+}
+.gc-img-wrap::after{border-radius:inherit;}
+.gc-photo-badge{font-size:.36rem;padding:2px 7px;}
+.gc-body{
+  flex:0 0 auto;padding:7px 6px 8px;text-align:center;
+  border-top:1px solid var(--glass-border);
+}
+.collector-card .gc-body{border-top-color:var(--cc-color);}
+.gc-make{text-align:center;}
+.gc-name{font-size:.7rem;text-align:center;-webkit-line-clamp:1;margin-bottom:1px;}
+.gc-val-row{justify-content:center;}
+.gc-val{font-size:.82rem;}
+.gc-date{display:none;}
+.gc-badges{justify-content:center;min-height:0;margin-top:4px;}
+.collector-card .gc-tier-chip{border-radius:999px;font-size:.4rem;padding:3px 7px 3px 6px;}
 </style>
 <script>window.CS_SYNC_REPAIR_BUILD='2026-09-07-final';</script>
 </head>
@@ -3488,13 +3525,6 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 <button class="gv-btn" id="gvMap" onclick="setGarageView('map')" title="Map view">Map</button>
 </div>
 </div>
-<div class="garage-sort-row">
-<button class="gs-pill active" data-sort="allCars" onclick="setGarageSortHeader('allCars',this)" title="Show all cars, favorites first">All Cars</button>
-<button class="gs-pill" data-sort="recent" onclick="setGarageSortHeader('recent',this)" title="Sort by most recently spotted">Recent</button>
-<button class="gs-pill" data-sort="rarest" onclick="setGarageSortHeader('rarest',this)" title="Sort by rarity tier (Legend &rarr; Daily)">Rarest</button>
-<button class="gs-pill" data-sort="highestXp" onclick="setGarageSortHeader('highestXp',this)" title="Sort by highest XP value">Highest XP</button>
-<button class="gs-pill" data-sort="favorites" onclick="setGarageSortHeader('favorites',this)" title="Show only favorited cars">&starf; Favorites</button>
-</div>
 <!-- DECLUTTER: Tools, Collection Progress, and Featured sections removed
      per request. Hidden (not deleted) so the underlying stat/zoom/sort
      controls and featured-car logic keep working without errors. -->
@@ -3511,7 +3541,10 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 <span id="fsSummaryText"></span>
 <div id="featuredSpot"></div>
 </div>
-<div id="journeySection" style="display:none"></div>
+<details class="cs-collapse" id="journeyDetails" style="display:none">
+<summary><span>Your Journey</span><span class="cs-collapse-summary" id="journeySummaryText"></span><span class="cs-collapse-chev">&rsaquo;</span></summary>
+<div id="journeySection"></div>
+</details>
 <details class="cs-collapse" id="discDetails" style="display:none">
 <summary><span>Recent Discoveries</span><span class="cs-collapse-summary" id="discSummaryText"></span><span class="cs-collapse-chev">&rsaquo;</span></summary>
 <div id="discSection">
@@ -3522,8 +3555,17 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 </div>
 </details>
 <div class="garage-search-wrap">
+<div class="gsw-input">
 <input autocomplete="off" id="garageSearch" oninput="onGarageSearch()" placeholder="Search cars..." title="Search by car name, color, or location" type="text"/>
 <button class="garage-search-clear" id="garageSearchClear" onclick="clearGarageSearch()" style="display:none" title="Clear search">✕</button>
+</div>
+<select class="garage-sort-select" id="garageSortSelect" onchange="setGarageSortHeader(this.value)" title="Sort cars">
+<option value="allCars">All Cars</option>
+<option value="recent">Recent</option>
+<option value="rarest">Rarest</option>
+<option value="highestXp">Highest XP</option>
+<option value="favorites">★ Favorites</option>
+</select>
 </div>
 <div class="garage-filter-row" id="garageFilterRow">
 <button class="gf-pill active" data-filter="all" onclick="setGarageFilter('all',this)" title="Show all cars">All</button>
@@ -7003,15 +7045,17 @@ function cycleFeatured() { _featuredIdx++; renderGarage(); }
 function openFeatured(json) { try { showCarInstances(JSON.parse(json)); } catch(e) {} }
 function renderJourney(cars) {
   var sec = document.getElementById('journeySection');
+  var wrap = document.getElementById('journeyDetails');
   if (!sec) return;
-  if (!cars.length) { sec.style.display = 'none'; return; }
+  if (!cars.length) { if (wrap) wrap.style.display = 'none'; return; }
   var total = cars.reduce(function(s,c){ return s + c.value; }, 0);
   var best = cars.slice().sort(function(a,b){ return b.value-a.value; })[0];
   var favCount = cars.filter(function(c){ return isFavorite(c.name); }).length;
   var info = xpInfo(_xpTotal);
-  sec.style.display = 'block';
+  if (wrap) wrap.style.display = 'block';
+  var sumEl = document.getElementById('journeySummaryText');
+  if (sumEl) sumEl.textContent = cars.length + ' cars \u00B7 ' + fmt(total) + ' \u00B7 Lvl ' + info.level;
   sec.innerHTML =
-    '<div class="sec-row" style="margin:6px 0 8px;"><div class="sec-title">YOUR JOURNEY</div></div>' +
     '<div class="journey-grid">' +
     '<div class="journey-card" style="animation-delay:0.05s"><div class="journey-ico">\uD83C\uDFC1</div><div class="journey-lbl">Collection</div><div class="journey-val"><b>' + cars.length + '</b> car' + (cars.length !== 1 ? 's' : '') + '</div><div class="journey-sub">' + favCount + ' favorite' + (favCount !== 1 ? 's' : '') + '</div></div>' +
     '<div class="journey-card" style="animation-delay:0.1s"><div class="journey-ico">\uD83D\uDCB0</div><div class="journey-lbl">Value</div><div class="journey-val">' + fmt(total) + '</div><div class="journey-sub">' + fmtFull(total) + '</div></div>' +
@@ -12672,7 +12716,7 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
   /* ── GARAGE DECLUTTER: collapsible dashboard banner + featured hero ──
      Folded away by default so the car list is visible without scrolling
      past them; each one remembers whether the user expanded it. */
-  ['gdDetails','fsDetails','gToolsDetails','discDetails'].forEach(function(id){
+  ['gdDetails','fsDetails','gToolsDetails','discDetails','journeyDetails'].forEach(function(id){
     var el = document.getElementById(id);
     if (!el) return;
     var key = 'cs_open_' + id;
