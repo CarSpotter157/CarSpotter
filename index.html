@@ -1605,12 +1605,41 @@ html:not(.show-qp) #qpWrap{display:none;}
   .version-tag{opacity:0.9;font-size:0.5rem;color:var(--text2);}
 }
 
-/* ── DETAIL MODAL ── */
-.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.78);z-index:99991;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.2s var(--ease);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
-.detail-card{width:100%;max-width:480px;background:var(--surf);border-top:1px solid var(--glass-border);border-radius:var(--radius-xl) var(--radius-xl) 0 0;overflow:hidden;animation:slideUpRecap 0.3s cubic-bezier(0.34,1.56,0.64,1);max-height:88vh;overflow-y:auto;padding-bottom:30px;box-shadow:0 -8px 40px rgba(0,0,0,0.25);}
-.detail-overlay.origin{animation:none;}
-.detail-overlay.origin .detail-card{animation:detailFromCard 0.42s var(--spring) both;transform-origin:var(--origin-x,50%) var(--origin-y,100%);}
-@keyframes detailFromCard{0%{opacity:0;transform:translateY(0) scale(0.55);}60%{opacity:1;transform:scale(1.05);}100%{opacity:1;transform:scale(1);}}
+/* ── DETAIL MODAL — card launch/spin reveal ── */
+.detail-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:99991;display:flex;align-items:center;justify-content:center;padding:24px 16px;animation:fadeIn 0.25s var(--ease);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);}
+.detail-card{position:relative;width:100%;max-width:480px;background:var(--surf);border:1px solid var(--glass-border);border-radius:var(--radius-xl);overflow:hidden;max-height:88vh;overflow-y:auto;padding-bottom:30px;box-shadow:0 20px 60px rgba(0,0,0,0.5);perspective:900px;}
+/* Card frame reuses the collector-card tier/evo styling so the reveal shows off the same rarity frame as the garage grid. */
+.detail-card.collector-card{border-color:var(--cc-color) !important;box-shadow:0 0 50px var(--cc-glow),0 20px 60px rgba(0,0,0,0.55) !important;}
+.detail-card.collector-card:hover,.detail-card.collector-card:active{transform:none !important;}
+.detail-card.collector-card .gc-shine{z-index:1;}
+/* Pre-flip: only the hero face is visible while the card is mid-flight (spinning in from the grid). */
+.detail-card.card-preflip{overflow:hidden;}
+.detail-card.card-preflip .detail-close,
+.detail-card.card-preflip .detail-tier-chip,
+.detail-card.card-preflip .detail-reveal{opacity:0;}
+.detail-close{transition:opacity 0.25s ease 0.05s,background 0.2s var(--ease),transform 0.2s var(--ease);}
+.detail-tier-chip{transition:opacity 0.3s ease 0.08s;}
+/* Landed: content fades/slides up into place, staggered. */
+.detail-reveal{transition:opacity 0.2s ease;}
+.detail-reveal>*{opacity:0;transform:translateY(14px);}
+.detail-card.revealed .detail-reveal{opacity:1;}
+.detail-card.revealed .detail-reveal>*{animation:dcRevealUp 0.42s cubic-bezier(0.34,1.56,0.64,1) both;}
+.detail-card.revealed .detail-reveal>*:nth-child(1){animation-delay:0.02s;}
+.detail-card.revealed .detail-reveal>*:nth-child(2){animation-delay:0.08s;}
+.detail-card.revealed .detail-reveal>*:nth-child(3){animation-delay:0.14s;}
+.detail-card.revealed .detail-reveal>*:nth-child(4){animation-delay:0.2s;}
+.detail-card.revealed .detail-reveal>*:nth-child(n+5){animation-delay:0.24s;}
+@keyframes dcRevealUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+/* Simple pop-in used when there's no origin card to launch from (e.g. opening from Featured/Discovery). */
+.detail-card.pop-in{animation:dcPopIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;}
+@keyframes dcPopIn{0%{opacity:0;transform:scale(0.4) rotate(-6deg);}60%{opacity:1;transform:scale(1.06) rotate(2deg);}100%{opacity:1;transform:scale(1) rotate(0);}}
+/* Landing-impact ring, spawned in JS around the card's rect at the moment it lands. */
+.thud-ring{position:fixed;pointer-events:none;z-index:99993;box-sizing:border-box;opacity:0.85;}
+@media (prefers-reduced-motion: reduce){
+  .detail-card.pop-in{animation:none !important;opacity:1;transform:none;}
+  .detail-card.revealed .detail-reveal>*{animation:none !important;opacity:1;transform:none;}
+  .thud-ring{display:none !important;}
+}
 .detail-hero{position:relative;width:100%;height:260px;overflow:hidden;background:var(--surf2);}
 .detail-hero-img{width:100%;height:100%;object-fit:cover;}
 .detail-hero-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:5rem;background:linear-gradient(135deg,var(--surf2),var(--surf3));}
@@ -7741,7 +7770,9 @@ function showCarInstances(car, originEl) {
     ? '<img class="detail-hero-img" src="' + heroPhoto + '" alt="' + escapeHtml(car.name) + '">' + (heroBadge ? '<div class="detail-hero-badge">' + heroBadge + '</div>' : '')
     : '<div class="detail-hero-ph">' + escapeHtml(carTypeLabel(car.type)) + '</div>';
   var tier = tierOf(car.value);
-  var tierChip = '<div class="detail-tier-chip" style="--cc-color:' + rarity.color + '">' + tierEmoji(tier) + ' ' + rarity.label + '</div>';
+  var ev = (typeof evolutionFor === 'function') ? evolutionFor(car.name) : null;
+  var evoTier = (ev && ev.count >= 3) ? ev.tier : null;
+  var tierChip = '<div class="detail-tier-chip">' + tierEmoji(tier) + ' ' + rarity.label + (evoTier ? '<span class="gc-evo-chip">' + evoTier.icon + '</span>' : '') + '</div>';
   var sorted = instances.slice().reverse();
   var sightingsHtml = sorted.map(function(inst) {
     var thumbHtml = inst.photo ? '<img class="detail-sighting-thumb" src="' + inst.photo + '" alt="">' : '<div class="detail-sighting-nophoto">' + escapeHtml(carTypeLabel(inst.type)) + '</div>';
@@ -7758,17 +7789,15 @@ function showCarInstances(car, originEl) {
   var overlay = document.createElement('div');
   overlay.className = 'detail-overlay';
   overlay.id = 'detailOverlay';
-  if (originEl) {
-    var r = originEl.getBoundingClientRect();
-    overlay.style.setProperty('--origin-x', (r.left + r.width / 2) + 'px');
-    overlay.style.setProperty('--origin-y', (r.top + r.height / 2) + 'px');
-    overlay.classList.add('origin');
-  }
   overlay.onclick = function() { overlay.remove(); };
   var card = document.createElement('div');
-  card.className = 'detail-card';
+  card.className = 'detail-card collector-card card-preflip';
+  card.setAttribute('data-tier', tier);
+  if (evoTier) card.classList.add('evo-' + evoTier.name.toLowerCase());
   card.innerHTML =
+    '<div class="gc-shine"></div>' +
     '<div class="detail-hero">' + heroHtml + tierChip + '<button class="detail-close" onclick="this.closest(\'.detail-overlay\').remove()">&times;</button></div>' +
+    '<div class="detail-reveal">' +
     '<div class="detail-info"><div class="detail-name">' + escapeHtml(car.name) + '</div>' + chipRow +
     '<div class="detail-stats">' +
     '<div class="detail-stat"><div class="detail-stat-label">Value</div><div class="detail-stat-val" style="color:var(--accent)">' + fmtFull(car.value) + '</div></div>' +
@@ -7783,7 +7812,8 @@ function showCarInstances(car, originEl) {
     '<button class="detail-action-btn detail-action-del" onclick="event.stopPropagation();this.closest(\'.detail-overlay\').remove();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')">✕ Delete</button>' +
     '</div>' +
     '<div class="detail-section-title">Sighting History</div>' +
-    '<div class="detail-sightings">' + sightingsHtml + '</div>';
+    '<div class="detail-sightings">' + sightingsHtml + '</div>' +
+    '</div>';
   card.addEventListener('click', function(e) {
     var t = e.target.closest('[data-fav]');
     if (!t) return;
@@ -7792,6 +7822,91 @@ function showCarInstances(car, originEl) {
   });
   overlay.appendChild(card);
   document.body.appendChild(overlay);
+  launchDetailCard(overlay, card, originEl);
+}
+
+// Animates the detail card in from the tapped garage-card: it lifts off the grid, spins
+// fast through the air, and lands center-screen with a bouncy "thud" before its content
+// (buttons, stats, sighting history) fades in on top of the still-spinning-fresh card frame.
+function launchDetailCard(overlay, card, originEl) {
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var animOn = (typeof ccAnimEnabled !== 'function') || ccAnimEnabled();
+
+  function reveal() {
+    card.classList.remove('card-preflip');
+    card.classList.add('landed');
+    spawnThudRing(overlay, card);
+    requestAnimationFrame(function() { requestAnimationFrame(function() { card.classList.add('revealed'); }); });
+  }
+
+  if (!originEl || reduced || !animOn) {
+    card.classList.remove('card-preflip');
+    if (reduced || !animOn) { reveal(); return; }
+    card.classList.add('pop-in');
+    setTimeout(reveal, 260);
+    return;
+  }
+
+  requestAnimationFrame(function() {
+    var toRect = card.getBoundingClientRect();
+    var fromRect = originEl.getBoundingClientRect();
+    if (!toRect.width || !toRect.height || !fromRect.width || !fromRect.height) { card.classList.remove('card-preflip'); reveal(); return; }
+    var dx = (fromRect.left + fromRect.width / 2) - (toRect.left + toRect.width / 2);
+    var dy = (fromRect.top + fromRect.height / 2) - (toRect.top + toRect.height / 2);
+    var sx = Math.min(Math.max(fromRect.width / toRect.width, 0.06), 1);
+    var sy = Math.min(Math.max(fromRect.height / toRect.height, 0.06), 1);
+    var dur = 620;
+    var start = null;
+    card.style.transformOrigin = '50% 50%';
+    card.style.willChange = 'transform';
+    // Set the launch position synchronously (same frame) so the card never flashes at full size.
+    card.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ') rotate(0deg)';
+    card.offsetHeight; // force reflow before we start stepping the animation
+    function frame(ts) {
+      if (!start) start = ts;
+      var t = Math.min((ts - start) / dur, 1);
+      var posT = 1 - Math.pow(1 - t, 3);
+      var spinT = 1 - Math.pow(1 - t, 4);
+      var rot = 1080 * spinT; // three fast, decelerating spins — lands visually upright
+      var curX = dx * (1 - posT);
+      var curY = dy * (1 - posT);
+      var curSX = sx + (1 - sx) * posT;
+      var curSY = sy + (1 - sy) * posT;
+      var bounce = 1;
+      if (t > 0.78) {
+        var bt = (t - 0.78) / 0.22;
+        bounce = 1 + Math.sin(bt * Math.PI) * 0.06 * (1 - bt);
+      }
+      card.style.transform = 'translate(' + curX + 'px,' + curY + 'px) scale(' + (curSX * bounce) + ',' + (curSY * bounce) + ') rotate(' + rot + 'deg)';
+      if (t < 1) { requestAnimationFrame(frame); }
+      else { card.style.transform = ''; card.style.willChange = ''; reveal(); }
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+// A quick impact ring, sized to the landed card, in the card's own tier color.
+function spawnThudRing(overlay, card) {
+  try {
+    var r = card.getBoundingClientRect();
+    var cs = getComputedStyle(card);
+    var color = cs.getPropertyValue('--cc-color').trim() || 'rgba(255,255,255,.6)';
+    var ring = document.createElement('div');
+    ring.className = 'thud-ring';
+    ring.style.left = r.left + 'px';
+    ring.style.top = r.top + 'px';
+    ring.style.width = r.width + 'px';
+    ring.style.height = r.height + 'px';
+    ring.style.borderRadius = cs.borderRadius;
+    ring.style.border = '2px solid ' + color;
+    overlay.appendChild(ring);
+    requestAnimationFrame(function() {
+      ring.style.transition = 'transform .5s cubic-bezier(.2,.8,.3,1), opacity .5s ease';
+      ring.style.transform = 'scale(1.07)';
+      ring.style.opacity = '0';
+    });
+    setTimeout(function() { ring.remove(); }, 600);
+  } catch (e) {}
 }
 
 const _csCacheK = 'cs_lk_v1';
