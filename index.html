@@ -1631,8 +1631,8 @@ html:not(.show-qp) #qpWrap{display:none;}
 .detail-card.revealed .detail-reveal>*:nth-child(n+5){animation-delay:0.24s;}
 @keyframes dcRevealUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
 /* Simple pop-in used when there's no origin card to launch from (e.g. opening from Featured/Discovery). */
-.detail-card.pop-in{animation:dcPopIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;}
-@keyframes dcPopIn{0%{opacity:0;transform:scale(0.4) rotate(-6deg);}60%{opacity:1;transform:scale(1.06) rotate(2deg);}100%{opacity:1;transform:scale(1) rotate(0);}}
+.detail-card.pop-in{animation:dcPopIn 0.42s cubic-bezier(0.34,1.56,0.64,1) both;}
+@keyframes dcPopIn{0%{opacity:0;transform:scale(0.4);}60%{opacity:1;transform:scale(1.06);}100%{opacity:1;transform:scale(1);}}
 /* Landing-impact ring, spawned in JS around the card's rect at the moment it lands. */
 .thud-ring{position:fixed;pointer-events:none;z-index:99993;box-sizing:border-box;opacity:0.85;}
 @media (prefers-reduced-motion: reduce){
@@ -1640,7 +1640,7 @@ html:not(.show-qp) #qpWrap{display:none;}
   .detail-card.revealed .detail-reveal>*{animation:none !important;opacity:1;transform:none;}
   .thud-ring{display:none !important;}
 }
-.detail-hero{position:relative;width:100%;height:260px;overflow:hidden;background:var(--surf2);}
+.detail-hero{position:relative;width:100%;aspect-ratio:1/1;max-height:60vh;overflow:hidden;background:var(--surf2);}
 .detail-hero-img{width:100%;height:100%;object-fit:cover;}
 .detail-hero-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:5rem;background:linear-gradient(135deg,var(--surf2),var(--surf3));}
 .detail-hero-badge{position:absolute;bottom:12px;left:12px;background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font-size:0.48rem;font-weight:600;padding:5px 12px;border-radius:7px;letter-spacing:0.3px;border:1px solid rgba(255,255,255,0.08);}
@@ -7825,9 +7825,9 @@ function showCarInstances(car, originEl) {
   launchDetailCard(overlay, card, originEl);
 }
 
-// Animates the detail card in from the tapped garage-card: it lifts off the grid, spins
-// fast through the air, and lands center-screen with a bouncy "thud" before its content
-// (buttons, stats, sighting history) fades in on top of the still-spinning-fresh card frame.
+// Animates the detail card in from the tapped garage-card: it lifts off the grid and lands
+// center-screen with a bouncy "slam" before its content (buttons, stats, sighting history)
+// fades in on top of the now-landed card frame.
 function launchDetailCard(overlay, card, originEl) {
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var animOn = (typeof ccAnimEnabled !== 'function') || ccAnimEnabled();
@@ -7836,7 +7836,7 @@ function launchDetailCard(overlay, card, originEl) {
     card.classList.remove('card-preflip');
     card.classList.add('landed');
     spawnThudRing(overlay, card);
-    requestAnimationFrame(function() { requestAnimationFrame(function() { card.classList.add('revealed'); }); });
+    requestAnimationFrame(function() { card.classList.add('revealed'); });
   }
 
   if (!originEl || reduced || !animOn) {
@@ -7855,29 +7855,27 @@ function launchDetailCard(overlay, card, originEl) {
     var dy = (fromRect.top + fromRect.height / 2) - (toRect.top + toRect.height / 2);
     var sx = Math.min(Math.max(fromRect.width / toRect.width, 0.06), 1);
     var sy = Math.min(Math.max(fromRect.height / toRect.height, 0.06), 1);
-    var dur = 620;
+    var dur = 420;
     var start = null;
     card.style.transformOrigin = '50% 50%';
     card.style.willChange = 'transform';
     // Set the launch position synchronously (same frame) so the card never flashes at full size.
-    card.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ') rotate(0deg)';
+    card.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')';
     card.offsetHeight; // force reflow before we start stepping the animation
     function frame(ts) {
       if (!start) start = ts;
       var t = Math.min((ts - start) / dur, 1);
       var posT = 1 - Math.pow(1 - t, 3);
-      var spinT = 1 - Math.pow(1 - t, 4);
-      var rot = 1080 * spinT; // three fast, decelerating spins — lands visually upright
       var curX = dx * (1 - posT);
       var curY = dy * (1 - posT);
       var curSX = sx + (1 - sx) * posT;
       var curSY = sy + (1 - sy) * posT;
       var bounce = 1;
-      if (t > 0.78) {
-        var bt = (t - 0.78) / 0.22;
-        bounce = 1 + Math.sin(bt * Math.PI) * 0.06 * (1 - bt);
+      if (t > 0.72) {
+        var bt = (t - 0.72) / 0.28;
+        bounce = 1 + Math.sin(bt * Math.PI) * 0.08 * (1 - bt);
       }
-      card.style.transform = 'translate(' + curX + 'px,' + curY + 'px) scale(' + (curSX * bounce) + ',' + (curSY * bounce) + ') rotate(' + rot + 'deg)';
+      card.style.transform = 'translate(' + curX + 'px,' + curY + 'px) scale(' + (curSX * bounce) + ',' + (curSY * bounce) + ')';
       if (t < 1) { requestAnimationFrame(frame); }
       else { card.style.transform = ''; card.style.willChange = ''; reveal(); }
     }
