@@ -3410,6 +3410,21 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
   .garage-grid[data-zoom="4"]{--garage-cols:4;}
   .garage-grid[data-zoom="5"]{--garage-cols:5;}
 }
+
+/* Trip journal metadata: optional details stay quiet until a spotter needs them. */
+.trip-notes-input{display:block;width:100%;min-height:72px;resize:vertical;box-sizing:border-box;margin:0 0 10px;padding:11px 12px;background:var(--surf2);border:1px solid var(--border2);border-radius:var(--radius-xs);color:var(--text);font:inherit;font-size:.82rem;line-height:1.45;outline:none}
+.trip-notes-input:focus,.trip-form-row input:focus{border-color:var(--accent)}
+.trip-journal-meta{margin:8px 0 14px;color:var(--text2);font-size:.78rem;line-height:1.55}
+.trip-journal-meta strong{color:var(--text);font-weight:600}
+.trip-journal-notes{margin-top:8px;white-space:pre-wrap}
+.trip-edit-form{display:grid;gap:10px;margin:14px 0}
+.trip-edit-form input,.trip-edit-form textarea{box-sizing:border-box;width:100%;padding:11px 12px;background:var(--surf2);border:1px solid var(--border2);border-radius:var(--radius-xs);color:var(--text);font:inherit;font-size:.85rem;outline:none}
+.trip-edit-form textarea{min-height:100px;resize:vertical}
+@media(max-width:520px){.trip-date-row{grid-template-columns:1fr 1fr}.trip-form-row{gap:8px}}
+
+.car-history-map-wrap{padding:0 20px 14px}
+.car-history-map{width:100%;height:220px;overflow:hidden;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surf2)}
+.car-history-map-note{padding:12px 20px;color:var(--text2);font-size:.72rem;line-height:1.5}
 </style>
 <script>window.CS_SYNC_REPAIR_BUILD='2026-09-07-final';</script>
 </head>
@@ -3950,8 +3965,8 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <div class="trip-create" id="tripCreateCard">
 <div class="tc-title">START A ROAD TRIP</div>
 <div class="trip-form-row">
-<input autocomplete="off" id="tripNameInput" placeholder="Trip name" type="text"/>
-<select id="tripEmojiSelect">
+<input autocomplete="off" id="tripNameInput" placeholder="Trip name" type="text" maxlength="80"/>
+<select id="tripEmojiSelect" aria-label="Trip icon">
 <option value="🛣️">🛣️ Highway</option>
 <option value="⛰️">⛰️ Mountains</option>
 <option value="🌊">🌊 Coast</option>
@@ -3962,7 +3977,13 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <option value="🎢">🎢 Twisty Road</option>
 </select>
 </div>
-<button class="trip-create-btn" onclick="createTrip()">LAUNCH TRIP</button>
+<div class="trip-form-row trip-date-row">
+<input id="tripStartDate" type="date" aria-label="Trip start date"/>
+<input id="tripEndDate" type="date" aria-label="Trip end date"/>
+</div>
+<div class="trip-form-row"><input id="tripVenueInput" placeholder="Location or venue (optional)" maxlength="120" aria-label="Location or venue"/></div>
+<textarea id="tripNotesInput" class="trip-notes-input" placeholder="A note about this outing (optional)" maxlength="1000" aria-label="Trip notes"></textarea>
+<button class="trip-create-btn" onclick="createTrip()">CREATE TRIP</button>
 </div>
 <div class="sec-row" style="margin-bottom:10px">
 <div class="sec-title">YOUR TRIPS</div>
@@ -7780,6 +7801,9 @@ function showCarInstances(car, originEl) {
     var loc = (inst.location && inst.location.label) ? '<div class="detail-sighting-loc">\uD83D\uDCCD ' + escapeHtml(inst.location.label) + '</div>' : '';
     return '<div class="detail-sighting">' + thumbHtml + '<div class="detail-sighting-info"><div class="detail-sighting-date">' + escapeHtml(inst.runDate || 'Unknown') + '</div>' + loc + '</div>' + badge + '</div>';
   }).join('');
+  var mappedInstances = sorted.filter(function(inst){ return inst.location && isFinite(Number(inst.location.lat)) && isFinite(Number(inst.location.lng)); });
+  var historyMapId = 'carHistoryMap-' + Math.random().toString(36).slice(2,9);
+  var mapHtml = mappedInstances.length ? '<div class="detail-section-title">Sighting Map · ' + mappedInstances.length + ' located encounter' + (mappedInstances.length===1?'':'s') + '</div><div class="car-history-map-wrap"><div class="car-history-map" id="' + historyMapId + '" aria-label="Map of car sightings"></div></div>' : '<div class="car-history-map-note">No locations saved for these encounters. You can log sightings without sharing precise location.</div>';
   var chipRow = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">' +
     '<span class="gc-badge" style="color:' + rarity.color + ';border-color:' + rarity.color + '44;background:' + rarity.bg + '">' + tierEmoji(tier) + ' ' + rarity.label + '</span>' +
     '<span class="gc-badge xp">+' + rarityXP(car.value) + ' XP</span>' +
@@ -7789,7 +7813,7 @@ function showCarInstances(car, originEl) {
   var overlay = document.createElement('div');
   overlay.className = 'detail-overlay';
   overlay.id = 'detailOverlay';
-  overlay.onclick = function() { overlay.remove(); };
+  overlay.onclick = function(e) { if (e.target === overlay) { if (window._csCarHistoryMap) { try{window._csCarHistoryMap.remove();}catch(ex){} window._csCarHistoryMap=null; } overlay.remove(); } };
   var card = document.createElement('div');
   card.className = 'detail-card collector-card card-preflip';
   card.setAttribute('data-tier', tier);
@@ -7812,6 +7836,7 @@ function showCarInstances(car, originEl) {
     '<button class="detail-action-btn detail-action-del" onclick="event.stopPropagation();this.closest(\'.detail-overlay\').remove();deleteCarEverywhere(\'' + jsEscape(car.name) + '\')">✕ Delete</button>' +
     '</div>' +
     '<div class="detail-section-title">Sighting History</div>' +
+    mapHtml +
     '<div class="detail-sightings">' + sightingsHtml + '</div>' +
     '</div>';
   card.addEventListener('click', function(e) {
@@ -7823,6 +7848,27 @@ function showCarInstances(car, originEl) {
   overlay.appendChild(card);
   document.body.appendChild(overlay);
   launchDetailCard(overlay, card, originEl);
+  if (mappedInstances.length) setTimeout(function(){
+    var mapEl = document.getElementById(historyMapId);
+    if (!mapEl) return;
+    if (!window.L) { mapEl.innerHTML = '<div style="padding:18px;color:var(--text2);font-size:.75rem">Map unavailable offline. Encounter dates and locations remain listed below.</div>'; return; }
+    try {
+      if (window._csCarHistoryMap) { window._csCarHistoryMap.remove(); window._csCarHistoryMap = null; }
+      var map = L.map(mapEl, { zoomControl:true, attributionControl:true, scrollWheelZoom:false });
+      window._csCarHistoryMap = map;
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OpenStreetMap', maxZoom:19 }).addTo(map);
+      var bounds = [];
+      mappedInstances.forEach(function(inst){
+        var lat = Number(inst.location.lat), lng = Number(inst.location.lng), point = [lat,lng]; bounds.push(point);
+        var details = '<strong>' + escapeHtml(inst.runDate || 'Sighting') + '</strong>' + (inst.location.label ? '<br>' + escapeHtml(inst.location.label) : '') + (inst.photo ? '<br><span>' + (String(inst.photo).indexOf('data:')===0 ? 'Your photo' : 'Reference photo') + '</span>' : '');
+        L.marker(point).addTo(map).bindPopup(details);
+      });
+      if (bounds.length === 1) map.setView(bounds[0], 13); else map.fitBounds(bounds, {padding:[20,20], maxZoom:14});
+      setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} },100);
+      overlay.addEventListener('click',function(e){ if((e.target===overlay || e.target.closest('.detail-action-btn')) && window._csCarHistoryMap===map){map.remove();window._csCarHistoryMap=null;} });
+      card.querySelector('.detail-close').addEventListener('click',function(){ if(window._csCarHistoryMap===map){map.remove();window._csCarHistoryMap=null;} });
+    } catch(e) { mapEl.innerHTML = '<div style="padding:18px;color:var(--text2);font-size:.75rem">Could not load this sighting map.</div>'; }
+  }, 180);
 }
 
 // Animates the detail card in from the tapped garage-card: it lifts off the grid and lands
@@ -11614,12 +11660,21 @@ function createTrip() {
   var emoEl  = document.getElementById('tripEmojiSelect');
   var name = (nameEl.value || '').trim();
   if (!name) { showToast('Give your trip a name!'); nameEl.focus(); return; }
-  var trip = { id: Date.now(), name: name, emoji: emoEl.value, created: Date.now(), runIds: [], total: 0, carCount: 0 };
+  var startDateEl = document.getElementById('tripStartDate');
+  var endDateEl = document.getElementById('tripEndDate');
+  var startDate = startDateEl && startDateEl.value || new Date().toISOString().slice(0,10);
+  var endDate = endDateEl && endDateEl.value || startDate;
+  if (endDate < startDate) { showToast('Trip end date must be on or after the start date.'); endDateEl.focus(); return; }
+  var venueEl = document.getElementById('tripVenueInput');
+  var notesEl = document.getElementById('tripNotesInput');
+  var trip = { id: Date.now() + '-' + Math.random().toString(36).slice(2,7), name: name, emoji: emoEl.value, created: Date.now(), startDate: startDate, endDate: endDate, venue: venueEl ? venueEl.value.trim() : '', notes: notesEl ? notesEl.value.trim() : '', runIds: [], total: 0, carCount: 0 };
   _progress.trips.unshift(trip);
   _progress.activeTripVer = _bumpVer('progression'); // mark this active-trip choice as newest
   _progress.activeTripId = trip.id; // launching a trip starts collection immediately
   saveProgress();
   nameEl.value = '';
+  if (startDateEl) startDateEl.value = ''; if (endDateEl) endDateEl.value = '';
+  if (venueEl) venueEl.value = ''; if (notesEl) notesEl.value = '';
   renderTrips();
   renderTripLiveBar();
   playSound('log');
@@ -11777,6 +11832,44 @@ function celebrateTripEnd(trip, done) {
   setTimeout(function(){ overlay.classList.add('stage-2'); playSound('stamp'); playSound('collect'); haptic([30, 40, 30]); }, 1150);
   setTimeout(close, 6500);
 }
+function _tripDateLabel(t) {
+  if (t && t.startDate) {
+    var start = new Date(t.startDate + 'T12:00:00');
+    var end = new Date((t.endDate || t.startDate) + 'T12:00:00');
+    var fmtDate = function(d){ return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); };
+    return fmtDate(start) + ((t.endDate && t.endDate !== t.startDate) ? ' – ' + fmtDate(end) : '');
+  }
+  return t && t.created ? new Date(t.created).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : 'Date not set';
+}
+function openTripEditor(id) {
+  var t = tripById(id); if (!t) return;
+  var old = document.querySelector('.trip-edit-overlay'); if (old) old.remove();
+  var overlay = document.createElement('div'); overlay.className = 'trip-detail-sheet trip-edit-overlay';
+  overlay.onclick = function(e){ if(e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = '<div class="trip-detail-panel"><div class="book-make-head"><div class="bml">✎</div><div class="bmt"><div class="td-name">Edit trip</div><div class="bm-sub">Update the outing details anytime</div></div><button class="book-close" aria-label="Close" type="button">×</button></div>' +
+    '<div class="trip-edit-form"><label>Title<input id="tripEditName" maxlength="80"></label><label>Start date<input id="tripEditStart" type="date"></label><label>End date<input id="tripEditEnd" type="date"></label><label>Location or venue<input id="tripEditVenue" maxlength="120"></label><label>Notes<textarea id="tripEditNotes" maxlength="1000"></textarea></label></div>' +
+    '<button class="trip-create-btn" type="button" id="tripEditSave">SAVE DETAILS</button></div>';
+  document.body.appendChild(overlay);
+  overlay.querySelector('#tripEditName').value = t.name || '';
+  overlay.querySelector('#tripEditStart').value = t.startDate || (t.created ? new Date(t.created).toISOString().slice(0,10) : '');
+  overlay.querySelector('#tripEditEnd').value = t.endDate || t.startDate || '';
+  overlay.querySelector('#tripEditVenue').value = t.venue || '';
+  overlay.querySelector('#tripEditNotes').value = t.notes || '';
+  overlay.querySelector('.book-close').onclick = function(){ overlay.remove(); };
+  overlay.querySelector('#tripEditSave').onclick = function(){
+    var name = overlay.querySelector('#tripEditName').value.trim();
+    var start = overlay.querySelector('#tripEditStart').value;
+    var end = overlay.querySelector('#tripEditEnd').value || start;
+    if (!name) { showToast('Trip title is required.'); return; }
+    if (start && end && end < start) { showToast('End date must be on or after the start date.'); return; }
+    t.name = name; t.startDate = start; t.endDate = end;
+    t.venue = overlay.querySelector('#tripEditVenue').value.trim();
+    t.notes = overlay.querySelector('#tripEditNotes').value.trim();
+    saveProgress(); overlay.remove();
+    var detail = document.querySelector('.trip-detail-sheet:not(.trip-edit-overlay)'); if (detail) detail.remove();
+    renderTrips(); renderTripLiveBar(); showToast('Trip details saved.');
+  };
+}
 function renderTrips() {
   var hero = document.getElementById('tripHero');
   var totalTrips = _progress.trips.length;
@@ -11799,7 +11892,8 @@ function renderTrips() {
       '<div class="tr-ico">' + t.emoji + '</div>' +
       '<div class="tr-body">' +
         '<div class="tr-name">' + escapeHtml(t.name) + '</div>' +
-        '<div class="tr-meta">' + (t.runIds.length) + ' run' + (t.runIds.length === 1 ? '' : 's') + ' · ' + (t.carCount || 0) + ' cars' + (active ? ' · collecting now' : '') + '</div>' +
+        '<div class="tr-meta">' + escapeHtml(_tripDateLabel(t)) + ' · ' + (t.runIds || []).length + ' run' + ((t.runIds || []).length === 1 ? '' : 's') + ' · ' + (t.carCount || 0) + ' cars' + (active ? ' · collecting now' : '') + '</div>' +
+        (t.venue ? '<div class="tr-meta">📍 ' + escapeHtml(t.venue) + '</div>' : '') +
         (active ? '<div class="tr-active-tag">ACTIVE — COLLECTING CARS</div>' : '') +
       '</div>' +
       '<div class="tr-val">' + fmt(t.total || 0) + '</div>' +
@@ -11828,9 +11922,11 @@ function openTripDetail(id) {
       '<div class="book-make-head">' +
         '<div class="bml">' + t.emoji + '</div>' +
         '<div class="bmt"><div class="td-name">' + escapeHtml(t.name) + '</div>' +
-        '<div class="bm-sub">' + new Date(t.created).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) + '</div></div>' +
+        '<div class="bm-sub">' + escapeHtml(_tripDateLabel(t)) + '</div></div>' +
         '<button class="book-close" onclick="this.closest(\'.trip-detail-sheet\').remove()">&times;</button>' +
       '</div>' +
+      '<div class="trip-journal-meta">' + (t.venue ? '<div><strong>Place</strong> · ' + escapeHtml(t.venue) + '</div>' : '') + (t.notes ? '<div class="trip-journal-notes">' + escapeHtml(t.notes) + '</div>' : '') + '</div>' +
+      '<button class="detail-action-btn" style="margin:0 20px 14px;width:calc(100% - 40px)" onclick="event.stopPropagation();openTripEditor(\'' + t.id + '\')">✎ Edit trip details</button>' +
       '<div class="td-stats">' +
         '<div class="td-stat"><div class="ts-v">' + fmt(t.total || 0) + '</div><div class="ts-l">Total</div></div>' +
         '<div class="td-stat"><div class="ts-v">' + (t.carCount || 0) + '</div><div class="ts-l">Cars</div></div>' +
@@ -12298,6 +12394,7 @@ window.renderExpeditions = renderExpeditions;
 window.renderTrips = renderTrips;
 window.createTrip = createTrip;
 window.openTripDetail = openTripDetail;
+window.openTripEditor = openTripEditor;
 window.setActiveTrip = setActiveTrip;
 window.deleteTrip = deleteTrip;
 window.openMakeSheet = openMakeSheet;
