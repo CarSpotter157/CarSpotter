@@ -3464,8 +3464,16 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 <!-- Persistent road-trip running indicator — shown on every page while a trip is active -->
 <div class="trip-livebar" id="tripLiveBar" style="display:none"></div>
 <div class="pages">
+<!-- HOME DASHBOARD -->
+<div class="page active" id="page-home">
+  <section class="cs-home-hero"><div><div class="cs-home-kicker">CARSPOTTER</div><h1>Your CarSpotter</h1><p>Every spot adds to your story.</p></div><button class="btn-spot" onclick="goTo('spot')">＋ Spot a Car</button></section>
+  <section class="cs-home-collection"><div><span class="cs-home-kicker">YOUR GARAGE</span><strong id="homeUnique">0</strong><span>unique models</span></div><button class="txt-btn" onclick="goTo('garage')">View Garage →</button></section>
+  <section class="cs-home-stats" aria-label="Collection statistics"><div><strong id="homeSightings">0</strong><span>Total sightings</span></div><div><strong id="homeMakes">0</strong><span>Manufacturers</span></div><div><strong id="homeTrips">0</strong><span>Trips</span></div></section>
+  <section class="cs-home-section"><div class="sec-row"><div><div class="sec-title">RECENTLY SPOTTED</div><div class="cs-garage-subtitle">Your latest sightings</div></div><button class="txt-btn" onclick="goTo('garage')">View all →</button></div><div class="cs-home-recent" id="homeRecent"></div></section>
+  <section class="cs-home-section cs-home-trip"><div><div class="sec-title">YOUR TRIPS</div><div class="cs-garage-subtitle" id="homeTripSummary">Outings and meets, in one place.</div></div><button class="txt-btn" onclick="goTo('trips')">Open Trips →</button></section>
+</div>
 <!-- SPOT PAGE -->
-<div class="page active" id="page-spot">
+<div class="page" id="page-spot">
 <div class="install-banner" id="installBanner">
 <div class="install-text"><strong>Install as app:</strong> Share &rarr; Add to Home Screen (iPhone) &middot; Install icon in Chrome (PC)</div>
 <button class="install-close" onclick="dismissInstall()">✕</button>
@@ -3495,9 +3503,18 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 </div>
 <div class="card">
 <div class="card-title">Log a Car</div>
+<div class="cs-vpic-picker">
+<div class="cs-vpic-heading">VEHICLE CATALOG <span id="csVpicStatus" role="status">Loading NHTSA vPIC…</span></div>
+<div class="cs-vpic-grid">
+<div class="ff"><label for="csMake">Manufacturer</label><input id="csMake" list="csMakeOptions" autocomplete="off" placeholder="Search manufacturers"><datalist id="csMakeOptions"></datalist></div>
+<div class="ff"><label for="csModel">Model</label><input id="csModel" list="csModelOptions" autocomplete="off" placeholder="Select a manufacturer first" disabled><datalist id="csModelOptions"></datalist></div>
+<div class="ff"><label for="csYear">Year (optional)</label><select id="csYear" disabled><option value="">Select a model first</option></select></div>
+</div>
+<div class="cs-vpic-note">NHTSA vPIC covers many US makes and models from 1981 onward. Factory specifications, generation and trim are not consistently available without a VIN. If the catalog has no match, enter the vehicle name below.</div>
+</div>
 <div class="form-grid">
 <div class="ff">
-<label for="carName">Make / Model</label>
+<label for="carName">Vehicle name <span class="ff-hint">Manual fallback or catalog selection</span></label>
 <div class="car-ac-wrap" id="carAcWrap">
 <input autocomplete="off" id="carName" onblur="onCarNameBlur(this)" onfocus="onCarNameInput(this.value)" oninput="onCarNameInput(this.value)" placeholder="Tap for quick picks" title="Tap to see your quick picks, or type to search" type="text"/>
 <div class="car-ac-dropdown" id="carAcDropdown"></div>
@@ -3552,6 +3569,10 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 </select>
 </div>
 </div>
+<div class="form-grid cs-spot-extra">
+<div class="ff"><label for="carSpottedAt">Date and time spotted</label><input id="carSpottedAt" type="datetime-local" aria-label="Date and time spotted"></div>
+<div class="ff"><label for="carNotes">Notes (optional)</label><textarea id="carNotes" rows="2" maxlength="500" placeholder="Anything you noticed about this car"></textarea></div>
+</div>
 <!-- Photo + Location row -->
 <div id="photoPreviewWrap" style="display:none"></div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
@@ -3567,8 +3588,8 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 <div class="location-chip-row" id="locationChipRow" style="display:none"></div>
 <!-- Two action buttons: run vs spotted -->
 <div class="btn-row">
-<button class="btn-run" onclick="logRun()" title="Add this car to your active spotting session (stacks multiple cars)">+ ADD TO RUN</button>
-<button class="btn-spot" onclick="logSpotted()" title="Save this single car directly to your garage without a session">SAVE SOLO</button>
+<button class="btn-run" onclick="logRun()" title="Add this sighting to the active spotting session">ADD TO SESSION</button>
+<button class="btn-spot" onclick="logSpotted()" title="Save this sighting directly to your collection">SAVE SPOT</button>
 </div>
 <div class="btn-hint-row">
 <span>Stacks into the active run (below)</span>
@@ -3582,14 +3603,14 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 </div><!-- /dsk-col left -->
 <div class="dsk-col">
 <div class="sec-row">
-<div class="sec-title">CURRENT RUN</div>
+<div class="sec-title">CURRENT SESSION</div>
 <button class="txt-btn" onclick="clearRun()" title="Remove all cars from this run">Clear</button>
 </div>
 <div id="runList">
 <div class="empty-run"><span class="ei" style="font-size:1.4rem;display:block;margin-bottom:6px;opacity:0.3">&rarr;</span>Add cars to start a run</div>
 </div>
 <div id="endWrap" style="display:none">
-<button class="btn-end" onclick="endRun()">End Run &amp; Save</button>
+<button class="btn-end" onclick="endRun()">Finish Session &amp; Save</button>
 </div>
 </div><!-- /dsk-col right -->
 </div><!-- /dsk-cols -->
@@ -3654,8 +3675,8 @@ details.cs-collapse .cs-garage-dashboard,details.cs-collapse #featuredSpot{margi
 <button class="gf-pill" data-filter="track" onclick="setGarageFilter('track',this)" title="Filter track cars">🏁 Track</button>
 <button class="gf-pill" data-filter="exotic" onclick="setGarageFilter('exotic',this)" title="Filter exotic cars">🔥 Exotic</button>
 <button class="gf-pill" data-filter="ev" onclick="setGarageFilter('ev',this)" title="Filter EVs">⚡ EV</button>
-<button class="gf-pill" data-filter="legend" onclick="setGarageFilter('legend',this)" title="Filter $1M+ legends">👑 Legend+</button>
-<button class="gf-pill" data-filter="hypercar" onclick="setGarageFilter('hypercar',this)" title="Filter $500K+ hypercars">🚀 Hyper+</button>
+<button class="gf-pill" data-filter="legend" onclick="setGarageFilter('legend',this)" title="Filter legendary cars">👑 Legends</button>
+<button class="gf-pill" data-filter="hypercar" onclick="setGarageFilter('hypercar',this)" title="Filter hypercars">🚀 Hypercars</button>
 </div>
 <div id="garageList">
 <div class="empty-garage"><div style="font-size:2.5rem;margin-bottom:12px;opacity:0.5">🚗</div><strong style="color:var(--text2);font-size:0.85rem;display:block;margin-bottom:4px">Your garage is empty</strong><span style="color:var(--muted)">Log your first car from the Spot tab &mdash; use "+ ADD TO RUN" for a session or "SAVE SOLO" for a single car</span></div>
@@ -3897,9 +3918,9 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
 
 
-<button class="more-page-tile" onclick="goTo('trips')" title="Create and track road trip journeys">
+<button class="more-page-tile" onclick="goTo('trips')" title="Create and manage spotting trips">
 <span class="more-tile-icon"><svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="22"><path d="M12 2v6"></path><path d="M4.93 10.93a1.43 1.43 0 0 0-2.85 0 1.43 1.43 0 0 0 0 2.85 1.43 1.43 0 0 0 0 2.85 1.43 1.43 0 0 0 0 2.85 1.43 1.43 0 0 0 2.85 0"></path><path d="M19.07 10.93a1.43 1.43 0 0 1 2.85 0 1.43 1.43 0 0 1 0 2.85 1.43 1.43 0 0 1 0 2.85 1.43 1.43 0 0 1 0 2.85 1.43 1.43 0 0 1-2.85 0"></path><path d="M14 22l-5-3 5-3v6z"></path><path d="M14 2v3"></path><path d="M12 2h4"></path><path d="M12 5H9.5a2.5 2.5 0 0 0 0 5H12"></path></svg></span>
-<span class="more-tile-label">Road Trips</span>
+<span class="more-tile-label">Trips</span>
 </button>
 <button class="more-page-tile" onclick="goTo('history')" title="View completed runs and solo spots">
 <span class="more-tile-icon"><svg fill="none" height="22" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="22"><path d="M3 12h18M3 6h18M3 18h18"></path></svg></span>
@@ -3911,7 +3932,7 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 </button>
 <button class="more-page-tile" onclick="goTo('stats')" title="See collection statistics and activity">
 <span class="more-tile-icon">📊</span>
-<span class="more-tile-label">Stats</span>
+<span class="more-tile-label">Progress</span>
 </button>
 
 
@@ -3937,13 +3958,13 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 </div>
 <!-- STATS PAGE -->
 <div class="page" id="page-stats">
-<div class="sec-row" style="margin-bottom:10px"><div><div class="sec-title">YOUR STATS</div><div class="cs-garage-subtitle">A snapshot of your collection and spotting streak.</div></div></div>
+<div class="sec-row" style="margin-bottom:10px"><div><div class="sec-title">PROGRESS</div><div class="cs-garage-subtitle">A snapshot of your collection and spotting activity.</div></div></div>
 <div class="stats-row">
-<div class="stat-box"><div class="stat-v" id="stCars">0</div><div class="stat-l">Cars Logged</div></div>
-<div class="stat-box"><div class="stat-v" id="stRuns">0</div><div class="stat-l">Runs</div></div>
-<div class="stat-box"><div class="stat-v" id="stValue">$0</div><div class="stat-l">Collection</div></div>
+<div class="stat-box"><div class="stat-v" id="stCars">0</div><div class="stat-l">Unique Models</div></div>
+<div class="stat-box"><div class="stat-v" id="stRuns">0</div><div class="stat-l">Sightings</div></div>
+<div class="stat-box"><div class="stat-v" id="stValue">0</div><div class="stat-l">Manufacturers</div></div>
 </div>
-<div class="card" style="margin-bottom:12px"><div class="card-title">TOP MAKES</div><div id="stMakes"></div></div>
+<div class="card" style="margin-bottom:12px"><div class="card-title">MANUFACTURERS</div><div id="stMakes"></div></div>
 <div class="card" style="margin-bottom:12px"><div class="card-title">CARS BY TYPE</div><div id="stTypes"></div></div>
 <div class="card"><div class="card-title">LAST 7 DAYS</div><div id="stActivity"></div></div>
 </div>
@@ -3999,7 +4020,8 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <nav class="bottom-nav" id="bottomNav">
 <span class="nav-slide" id="navSlide" aria-hidden="true"></span>
 <!-- desktop logo injected by JS -->
-<button class="nav-btn active" id="nav-spot" onclick="goTo('spot')">
+<button class="nav-btn active" id="nav-home" onclick="goTo('home')"><span class="nav-icon">⌂</span><span class="nav-label">Home</span></button>
+<button class="nav-btn" id="nav-spot" onclick="goTo('spot')">
 <span class="nav-icon"><svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="20"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle><line x1="12" x2="12" y1="2" y2="5"></line><line x1="12" x2="12" y1="19" y2="22"></line><line x1="2" x2="5" y1="12" y2="12"></line><line x1="19" x2="22" y1="12" y2="12"></line></svg></span>
 <span class="nav-label">Spot</span>
 </button>
@@ -4008,10 +4030,11 @@ Jot notes here &mdash; switch to Spot tab to log them."></textarea>
 <span class="nav-label">Garage</span>
 <span class="nav-badge" id="navGarageBadge" style="display:none">0</span>
 </button>
-<button class="nav-btn" id="nav-voice" onclick="goTo('voice')">
+<button class="nav-btn" id="nav-trips" onclick="goTo('trips')">
 <span class="nav-icon"><svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewbox="0 0 24 24" width="20"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="23"></line><line x1="8" x2="16" y1="23" y2="23"></line></svg></span>
-<span class="nav-label">Notes</span>
+<span class="nav-label">Trips</span>
 </button>
+<button class="nav-btn" id="nav-stats" onclick="goTo('stats')"><span class="nav-icon">↗</span><span class="nav-label">Progress</span></button>
 <button class="nav-btn" id="nav-more" onclick="goTo('more')">
 <span class="nav-icon"><svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="20"><circle cx="5" cy="12" fill="currentColor" r="1.3" stroke="none"></circle><circle cx="12" cy="12" fill="currentColor" r="1.3" stroke="none"></circle><circle cx="19" cy="12" fill="currentColor" r="1.3" stroke="none"></circle></svg></span>
 <span class="nav-label">More</span>
@@ -4455,10 +4478,6 @@ const ACHIEVEMENTS = [
   { id:'muscle_fan',   icon:'V8', name:'Muscle Head',      desc:'Log 5 Muscle Cars',             xp:120, check:(c,r)=>c.filter(x=>x.type==='muscle').length>=5 },
   { id:'classic_fan',  icon:'CL', name:'Classic Collector',desc:'Log 3 Classic Cars',            xp:120, check:(c,r)=>c.filter(x=>x.type==='classic').length>=3 },
   { id:'suv_driver',   icon:'UV', name:'Utility Player',   desc:'Log 3 SUVs',                   xp:100, check:(c,r)=>c.filter(x=>x.type==='suv').length>=3 },
-  { id:'half_mil',     icon:'½M', name:'Half a Milly',     desc:'Single run over $500K',         xp:200, check:(c,r)=>r.some(x=>!x.spotted&&x.total>=500000) },
-  { id:'millionaire',  icon:'1M', name:'Millionaire Run',  desc:'Single run over $1M',           xp:400, check:(c,r)=>r.some(x=>!x.spotted&&x.total>=1000000) },
-  { id:'legend_spot',  icon:'LG', name:'Legend Spotter',   desc:'Spot a Legend ($1M+) car',     xp:250, check:(c,r)=>c.some(x=>x.value>=1000000) },
-  { id:'hypercar',     icon:'HC', name:'Hypercar Hunter',  desc:'Spot a Hypercar ($500K+)',      xp:180, check:(c,r)=>c.some(x=>x.value>=500000) },
   { id:'five_makes',   icon:'5M', name:'Make Explorer',    desc:'Spot 5 different makes',        xp:100, check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=5 },
   { id:'ten_makes',    icon:'10M',name:'Globe Trotter',    desc:'Spot 10 different makes',       xp:220, check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=10 },
   { id:'twenty_makes', icon:'20M',name:'Marque Museum',    desc:'Spot 20 different makes',       xp:450, check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=20 },
@@ -4474,17 +4493,10 @@ const ACHIEVEMENTS = [
   { id:'twentyfive_makes',icon:'M25',name:'World Garage',  desc:'Spot 25 different makes',       xp:600, check:(c,r)=>new Set(c.map(x=>x.name.split(' ')[0].toLowerCase())).size>=25 },
   { id:'ev_collector', icon:'EV', name:'Electric Dreams',  desc:'Log 10 EVs',                    xp:250, check:(c,r)=>c.filter(x=>x.type==='ev').length>=10 },
   { id:'muscle_master',icon:'MU', name:'Muscle Master',    desc:'Log 10 muscle cars',            xp:250, check:(c,r)=>c.filter(x=>x.type==='muscle').length>=10 },
-  { id:'supercar_stack',icon:'SC',name:'Supercar Stack',   desc:'Log 20 supercars or exotics',   xp:500, check:(c,r)=>c.filter(x=>x.value>=150000).length>=20 },
   { id:'photo_twenty', icon:'P20',name:'Rolling Gallery',  desc:'Log 20 cars with photos',       xp:400, check:(c,r)=>c.filter(x=>x.photo).length>=20 },
-  { id:'hyper_fleet',  icon:'H8', name:'Hyper Fleet',      desc:'Spot 8 hypercars ($500K+)',     xp:600, check:(c,r)=>c.filter(x=>x.value>=500000).length>=8 },
-  { id:'legend_trio',  icon:'L3', name:'Legend Trio',      desc:'Spot 3 legend cars ($1M+)',     xp:750, check:(c,r)=>c.filter(x=>x.value>=1000000).length>=3 },
-  { id:'two_mil_run',  icon:'2M', name:'Two Million Club', desc:'Complete a run over $2M',       xp:800, check:(c,r)=>r.some(x=>!x.spotted&&x.total>=2000000) },
-  { id:'three_mil_run',icon:'3M', name:'Unicorn Run',      desc:'Complete a run over $3M',       xp:1200,check:(c,r)=>r.some(x=>!x.spotted&&x.total>=3000000) },
-  { id:'double_legend_run',icon:'2L',name:'Royal Convoy',  desc:'Log 2 legend cars in one run',  xp:1000,check:(c,r)=>r.some(x=>!x.spotted&&(x.cars||[]).filter(car=>car.value>=1000000).length>=2) },
   { id:'three_generations',icon:'3G',name:'Time Machine Tamer', desc:'Spot 3 generations of the same model', xp:800, check:(c,r)=>detectThreeGenerations(c) },
   { id:'brand_bouquet',    icon:'5M',name:'Brand Bouquet',  desc:'Spot 5 different makes in one run', xp:260, check:(c,r)=>detectFiveMakesInOneRun(r) },
   { id:'rainbow_run',      icon:'RC',name:'Rainbow Run',    desc:'Catch 4 different car colors in one run', xp:220, check:(c,r)=>detectRainbowRun(r) },
-  { id:'palindrome',       icon:'PP',name:'Mirror Mirror',  desc:'Spot a car worth a palindrome ($1,212,121)', xp:300, check:(c,r)=>detectPalindromicValue(c) },
   { id:'twin_spot',        icon:'TT',name:'Double Take',    desc:'Spot the exact same car twice in one run', xp:420, check:(c,r)=>detectTwinSpot(r) },
 ];
 let _prevAchievements = JSON.parse(localStorage.getItem('cs_ach') || '[]');
@@ -6403,7 +6415,7 @@ function fmtFull(n) {
   if (_currencyFmt) return _currencyFmt.full.format(Math.round(n));
   return '$'+Math.round(n).toLocaleString();
 }
-function carUrl(name) { return 'https://www.google.com/search?q='+encodeURIComponent(name+' car specs price'); }
+function carUrl(name) { return 'https://www.google.com/search?q='+encodeURIComponent(name+' car specifications'); }
 
 //  QUICK PICKS 
 function carExistsAnywhere(name) {
@@ -6540,6 +6552,8 @@ function getInputs() {
     value: parseFloat(valueInput),
     color: sanitizeText(document.getElementById('carColor').value),
     type:  document.getElementById('carType').value,
+    notes: sanitizeText(document.getElementById('carNotes')?.value || ''),
+    ts: document.getElementById('carSpottedAt')?.value ? new Date(document.getElementById('carSpottedAt').value).getTime() : Date.now(),
   };
 }
 // Debounce identical rapid submissions (double-tap on a log button) so a car is
@@ -6555,6 +6569,8 @@ function _logGuard(sig) {
 function clearInputs() {
   document.getElementById('carName').value  = '';
   document.getElementById('carValue').value = '';
+  if (document.getElementById('carNotes')) document.getElementById('carNotes').value = '';
+  if (document.getElementById('carSpottedAt')) document.getElementById('carSpottedAt').value = new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
   setCarColor('');
 }
 
@@ -6574,7 +6590,7 @@ function logRun() {
   var prevHL = headlinerIdx;
   var isFirst = !carExistsAnywhere(name);
   var photo = getPhotoAndClear();
-  var car = attachPendingLocation({ name:name, value:input.value, color:input.color, type:input.type, ts:Date.now(), ...(photo ? {photo} : {}) });
+  var car = attachPendingLocation({ name:name, value:input.value, color:input.color, type:input.type, ts:input.ts, ...(input.notes ? {notes:input.notes} : {}), ...(photo ? {photo} : {}) });
   currentRun.push(car);
   _lastSpottedName = name;
   saveToQP(car);
@@ -6588,9 +6604,9 @@ function logRun() {
   playSound('log');
   rewardLog(car, true, { isFirst: isFirst });
   if (car.value >= 500000) {
-    recordActivity('find', '🔥 ' + tierMeta(tierOf(car.value)).label + ': ' + name + ' worth ' + fmtFull(car.value) + ' logged!', { icon: '🔥' });
+    recordActivity('find', '🔥 ' + tierMeta(tierOf(car.value)).label + ': ' + name + ' spotted!', { icon: '🔥' });
   } else if (car.value >= 150000 && isFirst) {
-    recordActivity('find', '✨ First-ever spot of ' + name + ' (' + fmtFull(car.value) + ')', { icon: '✨' });
+    recordActivity('find', '✨ First-ever spot of ' + name, { icon: '✨' });
   }
   pushUndo('run', { run: prevRun, headlinerIdx: prevHL }, input.type + ' ' + name + ' removed');
   notify('Discovery Recorded — ' + name + ' added to this run.', { priority:'quiet', group:'logrun' });
@@ -6610,7 +6626,7 @@ function logSpotted() {
   if (!_logGuard(input.name + '|' + input.value + '|' + input.color + '|' + input.type)) return;
   var name = resolveAlias(input.name);
   var photo = getPhotoAndClear();
-  var car = attachPendingLocation({ name:name, value:input.value, color:input.color, type:input.type, ts:Date.now(), ...(photo ? {photo} : {}) });
+  var car = attachPendingLocation({ name:name, value:input.value, color:input.color, type:input.type, ts:input.ts, ...(input.notes ? {notes:input.notes} : {}), ...(photo ? {photo} : {}) });
   saveToQP(car);
   var prevRuns = JSON.parse(JSON.stringify(allRuns));
   var prevBestCar = garageBestValue();
@@ -6625,9 +6641,9 @@ function logSpotted() {
   playSound('log');
   rewardLog(car, false, { mode:'solo', isFirst: isFirst, isBest: input.value > prevBestCar });
   if (car.value >= 500000) {
-    recordActivity('find', '🔥 ' + tierMeta(tierOf(car.value)).label + ': ' + name + ' worth ' + fmtFull(car.value) + ' discovered!', { icon: '🔥' });
+    recordActivity('find', '🔥 ' + tierMeta(tierOf(car.value)).label + ': ' + name + ' discovered!', { icon: '🔥' });
   } else if (car.value >= 150000 && isFirst) {
-    recordActivity('find', '✨ First-ever spot of ' + name + ' (' + fmtFull(car.value) + ')', { icon: '✨' });
+    recordActivity('find', '✨ First-ever spot of ' + name, { icon: '✨' });
   }
   pushUndo('history', prevRuns, input.type + ' ' + name + ' removed');
   clearInputs();
@@ -6694,9 +6710,9 @@ function showUnicornAlert(total, done) {
   }
 
   overlay.innerHTML += `
-    <div class="unicorn-emoji" style="font-family:'Inter',sans-serif;font-size:4rem;letter-spacing:4px;color:var(--accent)">$1M</div>
+    <div class="unicorn-emoji" style="font-family:'Inter',sans-serif;font-size:4rem;letter-spacing:4px;color:var(--accent)">RARE</div>
     <div class="unicorn-title">UNICORN RUN</div>
-    <div class="unicorn-sub">You just crossed $1,000,000</div>
+    <div class="unicorn-sub">A remarkable spotting session</div>
     <div class="unicorn-total">${fmtFull(total)}</div>
     <div class="unicorn-dismiss">Tap anywhere to continue</div>`;
   overlay.onclick = () => { if (overlay.parentNode) overlay.remove(); if (typeof done === 'function') done(); };
@@ -6816,7 +6832,7 @@ function showRecap({ total, cars, headliner, isRec, prevBest }, done) {
   const stats = [
     { v: cars.length, l: 'Cars' },
     { v: fmtFull(total), l: 'Total' },
-    { v: bestCar ? fmtFull(bestCar.value) : '$0', l: 'Best' },
+    { v: bestCar ? fmtFull(bestCar.value) : '', l: 'Best' },
     { v: '+'+xp, l: 'XP' }
   ];
 
@@ -6829,7 +6845,7 @@ function showRecap({ total, cars, headliner, isRec, prevBest }, done) {
       <div class="recap-handle"></div>
       <div class="recap-label">${isRec ? 'NEW PERSONAL RECORD' : 'RUN COMPLETE'}</div>
       <div class="recap-tier" style="color:${tier.color}">${tier.icon} ${tier.label}</div>
-      <div class="recap-total" id="recapTotalNum">$0</div>
+      <div class="recap-total" id="recapTotalNum"></div>
       ${isRec ? '<div class="recap-record-tag pop">🏆 NEW RECORD</div>' : `<div class="recap-meta">${cars.length} car${cars.length!==1?'s':''} · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div>`}
       ${xp ? '<div class="recap-xp">⭐ +' + xp + ' XP earned this run</div>' : ''}
       ${podiumHTML ? `
@@ -7824,7 +7840,6 @@ function showCarInstances(car, originEl) {
     '<div class="detail-reveal">' +
     '<div class="detail-info"><div class="detail-name">' + escapeHtml(car.name) + '</div>' + chipRow +
     '<div class="detail-stats">' +
-    '<div class="detail-stat"><div class="detail-stat-label">Value</div><div class="detail-stat-val" style="color:var(--accent)">' + fmtFull(car.value) + '</div></div>' +
     '<div class="detail-stat"><div class="detail-stat-label">Rarity</div><div class="detail-stat-val" style="color:' + rarity.color + '">' + rarity.label + '</div></div>' +
     '<div class="detail-stat"><div class="detail-stat-label">Sightings</div><div class="detail-stat-val">' + instances.length + '</div></div>' +
     '</div></div>' +
@@ -9279,8 +9294,8 @@ function renderAll() {
 }
 
 //  ENTER KEYS 
-document.getElementById('carName').addEventListener('keydown',  e=>{ if(e.key==='Enter') document.getElementById('carValue').focus(); });
-document.getElementById('carValue').addEventListener('keydown', e=>{ if(e.key==='Enter') logRun(); });
+document.getElementById('carName').addEventListener('keydown',  e=>{ if(e.key==='Enter'){e.preventDefault();document.getElementById('carColor').focus();} });
+document.getElementById('carValue').addEventListener('keydown', e=>{ if(e.key==='Enter') logSpotted(); });
 
 //  INIT 
 // Auth state change handles data load — just bootstrap UI
@@ -10068,7 +10083,7 @@ function smartVoiceFill() {
     voiceFillPending = parsed;
     const bar = document.getElementById('voiceFillBar');
     document.getElementById('voiceFillText').textContent =
-      `${parsed.type} ${parsed.name}${parsed.color ? ' · ' + parsed.color : ''} · $${Number(parsed.value).toLocaleString()}`;
+      `${parsed.type} ${parsed.name}${parsed.color ? ' · ' + parsed.color : ''}`;
     bar.classList.add('show');
     // Switch to spot tab so user can see the fill bar
     goTo('spot');
@@ -10387,7 +10402,6 @@ window.runCarSearch = async function(query) {
         ${s.weight     ? `<div class="csr-cell"><div class="csr-cell-lbl">Weight</div><div class="csr-cell-val">${s.weight}</div><div class="csr-cell-unit">lbs</div></div>` : ''}
       </div>
       ${wikiUrl ? `<a href="${wikiUrl}" target="_blank" rel="noopener" class="csr-wiki-link">Wikipedia ↗</a>` : ''}
-      <a href="${'https://www.google.com/search?q=' + encodeURIComponent(query + ' average market price car')}" target="_blank" rel="noopener" class="csr-google-link">💲 Avg market price on Google ↗</a>
       <button class="csr-fill-btn" onclick="fillFromSearch('${jsEscape(query)}',${guessVal},'','${guessType}')">➕ LOG THIS CAR</button>
     </div>`;
   } else if (wikiSummary || wikiImg) {
@@ -10398,7 +10412,6 @@ window.runCarSearch = async function(query) {
       <div class="csr-name">${escapeHtml(query)}</div>
       ${wikiSummary ? `<div class="csr-tagline">${escapeHtml(wikiSummary)}</div>` : ''}
       ${wikiUrl ? `<a href="${wikiUrl}" target="_blank" rel="noopener" class="csr-wiki-link">Read more on Wikipedia ↗</a>` : ''}
-      <a href="${'https://www.google.com/search?q=' + encodeURIComponent(query + ' average market price car')}" target="_blank" rel="noopener" class="csr-google-link">💲 Avg market price on Google ↗</a>
       <button class="csr-fill-btn" onclick="fillFromSearch('${jsEscape(query)}',${guessVal},'','${guessType}')">➕ LOG THIS CAR</button>
     </div>`;
   } else {
@@ -10893,7 +10906,7 @@ function _parseSmartCmd(cmd) {
   }
   var totalVal = allRuns.reduce(function(s,r){ return s + (r.cars||[]).reduce(function(x,car){ return x + (car.value||0); },0); }, 0);
   if (/total value|worth|how much/.test(c)) {
-    return { action:'toast', msg: 'Your garage is worth ' + fmt(totalVal) + ' across ' + totalCars + ' cars!' };
+    return { action:'toast', msg: 'Prices are recorded per Trip. Your collection has ' + totalCars + ' sightings.' };
   }
 
   // Navigation
@@ -11481,8 +11494,8 @@ var EXPEDITIONS = [
   { id:'german_4',    name:'German Precision',    icon:'🇩🇪', desc:'Spot 4 German machines',          goal:4,  xp:120, check:function(c){ return c.filter(function(x){ return /^(porsche|bmw|mercedes|audi|vw)/i.test(x.name); }).length; } },
   { id:'muscle_4',    name:'Muscle Mayhem',       icon:'🇺🇸', desc:'Spot 4 American muscle cars',     goal:4,  xp:120, check:function(c){ return c.filter(function(x){ return x.type === 'muscle'; }).length; } },
   { id:'ev_4',        name:'Electric Dreams',     icon:'⚡',  desc:'Spot 4 EVs',                      goal:4,  xp:120, check:function(c){ return c.filter(function(x){ return x.type === 'ev'; }).length; } },
-  { id:'hyper_1',     name:'Hypercar Hunt',       icon:'🔥',  desc:'Spot a $500K+ hypercar',          goal:1,  xp:300, check:function(c){ return c.filter(function(x){ return x.value >= 500000; }).length; } },
-  { id:'legend_1',    name:'Legend Seeker',       icon:'👑',  desc:'Spot a $1M+ legend',              goal:1,  xp:500, check:function(c){ return c.filter(function(x){ return x.value >= 1000000; }).length; } },
+  { id:'hyper_1',     name:'Hypercar Hunt',       icon:'🔥',  desc:'Spot a rare hypercar',             goal:1,  xp:300, check:function(c){ return c.filter(function(x){ return x.value >= 500000; }).length; } },
+  { id:'legend_1',    name:'Legend Seeker',       icon:'👑',  desc:'Spot an iconic automotive legend', goal:1,  xp:500, check:function(c){ return c.filter(function(x){ return x.value >= 1000000; }).length; } },
   { id:'super_3',     name:'Supercar Squadron',   icon:'🏎️', desc:'Spot 3 Supercars',                 goal:3,  xp:150, check:function(c){ return c.filter(function(x){ return x.type === 'supercar' || (x.value >= 150000 && x.value < 500000); }).length; } },
   { id:'luxury_2',    name:'First Class',         icon:'🎩',  desc:'Spot 2 Luxury cars',              goal:2,  xp:90,  check:function(c){ return c.filter(function(x){ return x.type === 'luxury'; }).length; } },
   { id:'classic_2',   name:'Time Machine',        icon:'🕹️', desc:'Spot 2 Classic cars',              goal:2,  xp:90,  check:function(c){ return c.filter(function(x){ return x.type === 'classic'; }).length; } },
@@ -12028,9 +12041,9 @@ function checkMilestones(car) {
   if (!_progress.milestones.cars_25 && all.length >= 25) { _progress.milestones.cars_25 = Date.now(); fired.push({ id:'cars_25', icon:'🎉', title:'Quarter Century', desc:'25 cars spotted.' }); }
   if (!_progress.milestones.cars_50 && all.length >= 50) { _progress.milestones.cars_50 = Date.now(); fired.push({ id:'cars_50', icon:'🎖️', title:'Half Century', desc:'50 cars — a serious collection.' }); }
   // First legend
-  if (!_progress.milestones.first_legend && car && car.value >= 1000000) { _progress.milestones.first_legend = Date.now(); fired.push({ id:'first_legend', icon:'👑', title:'Legend Sighted!', desc:'A $1M+ masterpiece joins the garage.' }); }
+  if (!_progress.milestones.first_legend && car && car.value >= 1000000) { _progress.milestones.first_legend = Date.now(); fired.push({ id:'first_legend', icon:'👑', title:'Legend Sighted!', desc:'An iconic masterpiece joins the garage.' }); }
   // First hyper
-  if (!_progress.milestones.first_hyper && car && car.value >= 500000 && car.value < 1000000) { _progress.milestones.first_hyper = Date.now(); fired.push({ id:'first_hyper', icon:'🔥', title:'Hypercar Down!', desc:'$500K+ spotted in the wild.' }); }
+  if (!_progress.milestones.first_hyper && car && car.value >= 500000 && car.value < 1000000) { _progress.milestones.first_hyper = Date.now(); fired.push({ id:'first_hyper', icon:'🔥', title:'Hypercar Down!', desc:'A rare hypercar spotted in the wild.' }); }
   // First completed make — each marque gets its own full ceremony
   var stats = bookMakeStats();
   var completed = stats.filter(function(s){ return s.found === s.total && s.total > 0; }).length;
@@ -13003,7 +13016,7 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
           var car=entry&&entry.cars&&entry.cars[0];
           var gain=car&&typeof rarityXP==='function'?rarityXP(car.value||0):0;
           lensFeedback('✓','DISCOVERY SAVED',gain?'+'+gain+' XP · Added to Garage':'Added to Garage',false);
-          if(entry && car && car.value>=1000000) lensFeedback('👑','LEGENDARY DISCOVERY','That one was worth '+fmtFull(car.value),true);
+          if(entry && car && car.value>=1000000) lensFeedback('👑','LEGENDARY DISCOVERY','A remarkable vehicle added to your collection.',true);
         }
       },60);
       return result;
@@ -13247,54 +13260,115 @@ window.checkEvolutionUnlock = checkEvolutionUnlock;
 })();
 </script>
 <script defer="" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<!-- Spot flow redesign: intentionally additive so the existing account, cloud sync,
-     Garage and history renderers remain the source of truth for saved sightings. -->
 <style>
-#csSpotFlow{display:none;overflow:auto;height:100%;padding:18px 18px calc(var(--nav-h) + env(safe-area-inset-bottom) + 18px);-webkit-overflow-scrolling:touch}
-#page-spot.cs-flow-active .dsk-cols{display:none!important}#page-spot.cs-flow-active #csSpotFlow{display:block}
-.cs-spot-flow{max-width:540px;margin:0 auto;animation:fadeUp .28s var(--ease) both}.cs-spot-head{margin:4px 0 20px}.cs-spot-head h1{font-size:28px;letter-spacing:-.8px}.cs-spot-head p{color:var(--text2);margin-top:6px}.cs-capture-card,.cs-identify-card{background:var(--surf);border:1px solid var(--border2);border-radius:var(--r-lg);padding:16px;box-shadow:var(--shadow-sm)}
-.cs-capture-stage{min-height:260px;border:1px dashed var(--border2);background:linear-gradient(145deg,var(--surf2),rgba(232,184,75,.07));border-radius:18px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:12px}.cs-capture-empty{text-align:center;padding:28px;color:var(--text2)}.cs-capture-icon{width:54px;height:54px;margin:0 auto 13px;border-radius:18px;background:var(--adim);color:var(--accent);display:grid;place-items:center;font-size:22px}.cs-capture-title{font-weight:700;color:var(--text);font-size:16px}.cs-capture-empty small{display:block;margin-top:6px;line-height:1.45}.cs-capture-preview{width:100%;height:280px;object-fit:contain;background:#050505}.cs-flow-btn{min-height:50px;border-radius:14px;border:1px solid var(--border2);font:inherit;font-weight:700;display:flex;align-items:center;justify-content:center;gap:9px;width:100%;cursor:pointer}.cs-flow-primary{color:#17130a;background:var(--accent);border-color:var(--accent)}.cs-flow-secondary{background:var(--surf2);color:var(--text)}.cs-flow-quiet{background:transparent;color:var(--text2)}.cs-photo-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}.cs-no-photo{margin-top:12px}.cs-continue{margin-top:12px}.cs-preview-tools{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}.cs-preview-tools .cs-flow-btn{min-height:44px;font-size:13px}.cs-step{color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px}.cs-step-head{display:flex;gap:12px;align-items:center;margin-bottom:18px}.cs-step-head h2{font-size:21px;letter-spacing:-.4px}.cs-step-thumb{width:48px;height:48px;object-fit:cover;border-radius:12px;border:1px solid var(--border2);margin-left:auto}.cs-back{background:none;border:0;color:var(--text2);font:inherit;padding:0 0 12px;cursor:pointer}.cs-fields{display:grid;gap:13px}.cs-field label{display:block;font-size:12px;font-weight:700;margin:0 0 7px;color:var(--text2)}.cs-field input,.cs-field select,.cs-field textarea{width:100%;min-height:48px;border:1px solid var(--border2);border-radius:12px;background:var(--surf2);color:var(--text);font:inherit;padding:0 12px}.cs-field textarea{padding:12px;resize:vertical;min-height:80px}.cs-field select:disabled{opacity:.45}.cs-field-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.cs-unknown{font-size:13px;text-align:left;justify-content:flex-start;margin-top:2px}.cs-specs{margin-top:4px;border:1px solid var(--border);border-radius:13px;padding:12px;background:rgba(232,184,75,.045)}.cs-specs summary{cursor:pointer;font-weight:700;font-size:13px}.cs-specs-body{font-size:13px;color:var(--text2);line-height:1.5;padding-top:9px}.cs-save-error{display:none;color:#ff8d86;background:rgba(255,69,58,.1);border:1px solid rgba(255,69,58,.3);border-radius:10px;padding:10px;font-size:13px}.cs-success{text-align:center;padding:40px 8px}.cs-success .cs-capture-icon{font-size:25px;background:rgba(52,199,89,.14);color:var(--green)}.cs-success h2{margin-bottom:8px}.cs-success p{color:var(--text2);margin-bottom:24px}.cs-success-actions{display:grid;gap:10px}
-@media (max-width:390px){#csSpotFlow{padding-left:16px;padding-right:16px}.cs-capture-stage{min-height:238px}.cs-field-grid{grid-template-columns:1fr}.cs-photo-actions{grid-template-columns:1fr}.cs-preview-tools{grid-template-columns:1fr 1fr}.cs-preview-tools .cs-flow-btn:last-child{grid-column:1/-1}}
+#page-home{max-width:1120px;margin:0 auto;width:100%;}
+.cs-home-hero{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:12px 0 22px}
+.cs-home-hero h1{font-size:clamp(1.7rem,4vw,2.5rem);margin:5px 0;font-weight:800;letter-spacing:-.04em}
+.cs-home-hero p{color:var(--text2);margin:0;font-size:.9rem}
+.cs-home-kicker{display:block;color:var(--accent);font-size:.58rem;font-weight:800;letter-spacing:2px}
+.cs-home-collection{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 22px;border:1px solid var(--glass-border);border-radius:var(--r-lg);background:linear-gradient(115deg,var(--surf2),var(--surf));box-shadow:var(--shadow);margin-bottom:12px}
+.cs-home-collection strong{font-size:2.4rem;display:block;line-height:1.1;margin:5px 0;font-variant-numeric:tabular-nums}
+.cs-home-collection span:last-child{font-size:.76rem;color:var(--text2)}
+.cs-home-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:24px}
+.cs-home-stats>div{background:var(--surf);border:1px solid var(--border);border-radius:var(--r-md);padding:13px 15px}
+.cs-home-stats strong{display:block;font-size:1.25rem;font-variant-numeric:tabular-nums}
+.cs-home-stats span{font-size:.62rem;color:var(--muted)}
+.cs-home-section{margin:18px 0 24px}
+.cs-home-recent{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:10px}
+.cs-home-recent-card{overflow:hidden;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surf)}
+.cs-home-recent-card img,.cs-home-recent-placeholder{width:100%;height:110px;object-fit:cover;display:flex;align-items:center;justify-content:center;background:var(--surf2);font-size:1.8rem}
+.cs-home-recent-card div:last-child{padding:10px}.cs-home-recent-card b{display:block;font-size:.78rem}.cs-home-recent-card span{font-size:.63rem;color:var(--muted)}
+.cs-home-trip{display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--surf);border:1px solid var(--border);border-radius:var(--r-md);padding:16px}
+#page-spot .score-banner,#page-spot #carValue,#page-spot label[for="carValue"],#page-spot #carValueHint{display:none!important}
+.edit-car-modal .edit-field:has(#editCarValue),.cs-run-edit-overlay [data-f="value"],#page-settings .setting-card:has(#spb-desc){display:none!important}
+@media(max-width:560px){.cs-home-hero{align-items:flex-start;flex-direction:column}.cs-home-hero .btn-spot{width:100%}.cs-home-recent{grid-template-columns:repeat(2,minmax(0,1fr))}.cs-home-stats>div{padding:11px 8px}.cs-home-stats span{font-size:.55rem}}
 </style>
-<div id="csSpotFlow" aria-live="polite"></div>
 <script>
-/* Photo-first Spot flow.  It saves through the app's established runs/cloud
-   structure rather than creating a parallel database. */
+// CarSpotter refinement layer: retain the existing app, authentication, storage and sync.
 (function(){
-  'use strict';
-  var state={step:1,photo:'',make:'',model:'',year:'',trim:'',manual:false,saving:false};
-  var page=document.getElementById('page-spot'), host=document.getElementById('csSpotFlow');
-  if(!page||!host) return;
-  /* The host is declared near the end of the document so it can load after
-     the legacy app; place it inside the Spot page before applying its CSS. */
-  page.appendChild(host);
-  function esc(v){return typeof escapeHtml==='function'?escapeHtml(v):String(v||'');}
-  function catalog(){return typeof CAR_AC_DB!=='undefined'&&Array.isArray(CAR_AC_DB)?CAR_AC_DB:[];}
-  function makes(){var s={};catalog().forEach(function(c){var n=String(c.name||'').trim();if(n)s[n.split(/\s+/)[0]]=1;});return Object.keys(s).sort();}
-  function models(){var p=state.make+' ';var o={};catalog().forEach(function(c){var n=String(c.name||'');if(n.indexOf(p)===0)o[n.slice(p.length)]=c;});return o;}
-  function selected(){var n=(state.make+' '+state.model).trim();return catalog().find(function(c){return c.name===n;})||null;}
-  function opts(items,placeholder,current){return '<option value="">'+placeholder+'</option>'+items.map(function(v){return '<option value="'+esc(v)+'" '+(v===current?'selected':'')+'>'+esc(v)+'</option>';}).join('');}
-  function render(){
-    page.classList.add('cs-flow-active');
-    if(state.step===3){host.innerHTML='<section class="cs-spot-flow cs-success"><div class="cs-capture-icon"><i class="fa-solid fa-check"></i></div><h2>Spot saved</h2><p>Your sighting is now in your Garage and spotting history.</p><div class="cs-success-actions"><button class="cs-flow-btn cs-flow-primary" id="csAnother">Spot Another Car</button><button class="cs-flow-btn cs-flow-secondary" id="csHome">Return Home</button></div></section>';bind();return;}
-    if(state.step===1){var capture=state.photo?'<img class="cs-capture-preview" src="'+esc(state.photo)+'" alt="Selected car photo">':'<div class="cs-capture-empty"><div class="cs-capture-icon"><i class="fa-solid fa-camera"></i></div><div class="cs-capture-title">Capture the car</div><small>Take a photo now or choose one from your gallery.</small></div>';host.innerHTML='<section class="cs-spot-flow"><header class="cs-spot-head"><h1>Spot a Car</h1><p>Capture your latest sighting.</p></header><div class="cs-capture-card"><div class="cs-capture-stage">'+capture+'</div>'+(state.photo?'<div class="cs-preview-tools"><button class="cs-flow-btn cs-flow-secondary" data-file="camera"><i class="fa-solid fa-camera"></i> Retake</button><button class="cs-flow-btn cs-flow-secondary" data-file="gallery"><i class="fa-regular fa-image"></i> Replace</button><button class="cs-flow-btn cs-flow-quiet" id="csRemove">Remove</button></div><button class="cs-flow-btn cs-flow-primary cs-continue" id="csContinue">Continue</button>':'<div class="cs-photo-actions"><button class="cs-flow-btn cs-flow-primary" data-file="camera"><i class="fa-solid fa-camera"></i> Take Photo</button><button class="cs-flow-btn cs-flow-secondary" data-file="gallery"><i class="fa-regular fa-image"></i> Choose from Gallery</button></div><button class="cs-flow-btn cs-flow-secondary cs-no-photo" id="csNoPhoto">Continue with No Photo</button>')+'</div></section>';bind();return;}
-    var ms=makes(), modelNames=Object.keys(models()).sort(), car=selected();
-    var photo=state.photo?'<img class="cs-step-thumb" src="'+esc(state.photo)+'" alt="Selected car photo">':'';
-    var manual='<button type="button" class="cs-flow-btn cs-flow-quiet cs-unknown" id="csManual">'+(state.manual?'Use the vehicle catalog instead':'Can’t find the car? Enter it manually')+'</button>';
-    var identification=state.manual?'<div class="cs-field"><label for="csManualName">Vehicle name</label><input id="csManualName" value="'+esc(state.model)+'" placeholder="e.g., Ford Mustang GT"></div><div class="cs-field"><label for="csManualType">Vehicle type (optional)</label><select id="csManualType">'+opts(['sports','classic','suv','supercar','ev'],'Select type',state.trim)+'</select></div>'+manual:'<div class="cs-field"><label for="csMake">Manufacturer</label><input id="csMake" list="csMakeList" value="'+esc(state.make)+'" placeholder="Search manufacturers"><datalist id="csMakeList">'+ms.map(function(v){return '<option value="'+esc(v)+'">';}).join('')+'</datalist></div><div class="cs-field"><label for="csModel">Model</label><input id="csModel" list="csModelList" '+(!state.make?'disabled':'')+' value="'+esc(state.model)+'" placeholder="'+(state.make?'Search models':'Select manufacturer first')+'"><datalist id="csModelList">'+modelNames.map(function(v){return '<option value="'+esc(v)+'">';}).join('')+'</datalist></div><div class="cs-field-grid"><div class="cs-field"><label for="csYear">Year</label><select id="csYear" '+(!state.model?'disabled':'')+'>'+opts(car?['Not specified']:[],state.model?'Not specified':'Select model first',state.year)+'</select></div><div class="cs-field"><label for="csTrim">Generation / Trim <span style="font-weight:400">(optional)</span></label><input id="csTrim" '+(!state.model?'disabled':'')+' value="'+esc(state.trim)+'" placeholder="Optional"></div></div>'+manual;
-    var specs=car?'<details class="cs-specs"><summary>Available factory details</summary><div class="cs-specs-body">Catalog category: '+esc(car.type||'Not specified')+'. Estimated value is retained internally only for the app’s existing collection scoring; it is not shown or requested here.</div></details>':'';
-    host.innerHTML='<section class="cs-spot-flow"><button class="cs-back" id="csBack"><i class="fa-solid fa-arrow-left"></i> Back to photo</button><div class="cs-step">Step 2 of 2 — Identify the car</div><div class="cs-step-head"><h2>Identify the car</h2>'+photo+'</div><div class="cs-identify-card"><div class="cs-fields">'+identification+specs+'<div class="cs-field"><label for="csColor">Color</label><input id="csColor" placeholder="Optional" value="'+esc(state.color||'')+'"></div><div class="cs-field"><label for="csDate">Date and time spotted</label><input id="csDate" type="datetime-local" value="'+esc(state.date||localDateTime())+'"></div><div class="cs-field"><label for="csLocation">Location</label><input id="csLocation" placeholder="Optional" value="'+esc(state.location||'')+'"></div><div class="cs-field"><label for="csNotes">Notes</label><textarea id="csNotes" placeholder="Optional">'+esc(state.notes||'')+'</textarea></div><div class="cs-save-error" id="csSaveError"></div><button class="cs-flow-btn cs-flow-primary" id="csSave">Save Spot</button></div></div></section>';bind();
-  }
-  function localDateTime(){var d=new Date(),z=function(n){return String(n).padStart(2,'0')};return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())+'T'+z(d.getHours())+':'+z(d.getMinutes());}
-  function readDetail(){['Color','Date','Location','Notes'].forEach(function(k){var e=document.getElementById('cs'+k);if(e)state[k.toLowerCase()]=e.value;});}
-  function choose(kind){var input=document.createElement('input');input.type='file';input.accept='image/*';if(kind==='camera')input.capture='environment';input.onchange=function(){var f=input.files&&input.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){var im=new Image();im.onload=function(){var max=1000,w=im.width,h=im.height;if(w>max||h>max){if(w>h){h=Math.round(h*max/w);w=max}else{w=Math.round(w*max/h);h=max}}var c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);state.photo=c.toDataURL('image/jpeg',.72);render()};im.onerror=function(){state.photo=e.target.result;render()};im.src=e.target.result};r.readAsDataURL(f)};input.click();}
-  function save(){readDetail();var name=state.manual?String(state.model||'').trim():(state.make+' '+state.model).trim();if(!name){error('Select a manufacturer and model, or enter the vehicle manually.');return}if(state.saving)return;state.saving=true;var btn=document.getElementById('csSave');if(btn){btn.disabled=true;btn.textContent='Saving…'}try{var car=selected()||{}, value=Number(car.val!=null?car.val:car.value)||0, type=state.manual?(state.trim||'sports'):(car.type||'sports'), spottedAt=state.date?new Date(state.date).getTime():Date.now();var spot={name:name,value:value,color:state.color||'',type:type,ts:spottedAt,notes:state.notes||'',year:state.year||'',trim:state.trim||'',specVerified:!!selected()};if(state.location)spot.location={label:state.location};if(state.photo){spot.photo=state.photo;if(typeof _idbPut==='function')_idbPut(name,state.photo).catch(function(){})}var entry={id:Date.now(),date:new Date(spottedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),total:value,spotted:true,_v:1,cars:[spot]};allRuns.unshift(entry);if(typeof _bumpVer==='function')_bumpVer('runs');if(typeof _saveRunsLocal==='function')_saveRunsLocal();if(typeof saveToCloud==='function')saveToCloud();if(typeof flushSyncNow==='function')flushSyncNow();if(typeof saveToQP==='function')saveToQP(spot);if(typeof renderGarage==='function')renderGarage();if(typeof renderHistory==='function')renderHistory();state.step=3;state.saving=false;render()}catch(e){state.saving=false;if(btn){btn.disabled=false;btn.textContent='Save Spot'}error('Could not save your sighting. Your details are still here — please try again.')}}
-  function error(msg){var e=document.getElementById('csSaveError');if(e){e.textContent=msg;e.style.display='block'}}
-  function bind(){host.querySelectorAll('[data-file]').forEach(function(b){b.onclick=function(){choose(b.dataset.file)}});var q=function(id){return document.getElementById(id)};if(q('csNoPhoto'))q('csNoPhoto').onclick=function(){state.step=2;render()};if(q('csContinue'))q('csContinue').onclick=function(){state.step=2;render()};if(q('csRemove'))q('csRemove').onclick=function(){state.photo='';render()};if(q('csBack'))q('csBack').onclick=function(){readDetail();state.step=1;render()};if(q('csMake')){q('csMake').onchange=q('csMake').onblur=function(){if(this.value!==state.make){state.make=this.value;state.model='';state.year='';state.trim='';render()}}}if(q('csModel')){q('csModel').onchange=q('csModel').onblur=function(){if(this.value!==state.model){state.model=this.value;state.year='';state.trim='';render()}}}if(q('csTrim'))q('csTrim').oninput=function(){state.trim=this.value};if(q('csManual'))q('csManual').onclick=function(){state.manual=!state.manual;state.model='';state.trim='';render()};if(q('csManualName'))q('csManualName').oninput=function(){state.model=this.value};if(q('csManualType'))q('csManualType').onchange=function(){state.trim=this.value};if(q('csSave'))q('csSave').onclick=save;if(q('csAnother'))q('csAnother').onclick=function(){state={step:1,photo:'',make:'',model:'',year:'',trim:'',manual:false,saving:false};render()};if(q('csHome'))q('csHome').onclick=function(){if(typeof goTo==='function')goTo('garage')};}
-  window.csOpenSpotFlow=function(){state.step=1;state.saving=false;render()};
-  var oldGoTo=window.goTo; if(typeof oldGoTo==='function')window.goTo=function(dest){var r=oldGoTo.apply(this,arguments);if(dest==='spot')setTimeout(function(){state.step=1;state.saving=false;render()},0);return r};
-  render();
+  var _fmtMoney=fmt, _fmtMoneyFull=fmtFull, _tripPriceContext=false;
+  fmt=function(n){return _tripPriceContext?_fmtMoney(n):'';};
+  fmtFull=function(n){return _tripPriceContext?_fmtMoneyFull(n):'';};
+  // A spot's value field remains in the stored schema for old data compatibility,
+  // but the general Spot workflow no longer asks for a price.
+  getInputs=function(){var dt=document.getElementById('carSpottedAt'),ts=dt&&dt.value?new Date(dt.value).getTime():Date.now();return {name:sanitizeText(document.getElementById('carName').value),value:null,color:sanitizeText(document.getElementById('carColor').value),type:document.getElementById('carType').value,notes:sanitizeText(document.getElementById('carNotes')&&document.getElementById('carNotes').value||''),ts:Number.isFinite(ts)?ts:Date.now()};};
+  function cars(){var base=typeof getAllCars==='function'?getAllCars():[],seen=new Set(base.map(function(c){return String(c.name||'').toLowerCase();}));(currentRun||[]).forEach(function(c){var k=String(c.name||'').toLowerCase();if(k&&!seen.has(k)){base.push(Object.assign({spotCount:1,instances:[c]},c));seen.add(k);}});return base;}
+  function makeName(n){var s=String(n||'').trim(),lower=s.toLowerCase(),known=['Aston Martin','Alfa Romeo','Land Rover','Rolls-Royce','Mercedes-Benz','Mercedes Benz','Maserati','Mini'];var match=known.find(function(m){return lower.indexOf(m.toLowerCase()+' ')===0||lower===m.toLowerCase();});return match||s.split(/\s+/)[0]||'';}
+  window.renderHome=function(){
+    var unique=cars(), sightings=(allRuns||[]).reduce(function(n,r){return n+(r.cars||[]).length;},0)+(currentRun||[]).length;
+    var makes=new Set(unique.map(function(c){return makeName(c.name).toLowerCase();}).filter(Boolean));
+    document.getElementById('homeUnique').textContent=unique.length;
+    document.getElementById('homeSightings').textContent=sightings;
+    document.getElementById('homeMakes').textContent=makes.size;
+    document.getElementById('homeTrips').textContent=(_progress.trips||[]).length;
+    var recent=[];(allRuns||[]).forEach(function(r){(r.cars||[]).forEach(function(c){recent.push({car:c,ts:Number(c.ts)||Number(r.id)||0});});});(currentRun||[]).forEach(function(c){recent.push({car:c,ts:Number(c.ts)||0});});
+    recent.sort(function(a,b){return b.ts-a.ts;});
+    var slot=document.getElementById('homeRecent');
+    slot.innerHTML=recent.slice(0,6).map(function(x){var c=x.car, photo=c.photo||'';return '<article class="cs-home-recent-card">'+(photo?'<img src="'+escapeAttr(photo)+'" alt="'+escapeAttr(c.name)+'" loading="lazy">':'<div class="cs-home-recent-placeholder">🚘</div>')+'<div><b>'+escapeHtml(c.name||'Vehicle')+'</b><span>'+escapeHtml([c.color,new Date(x.ts).toLocaleDateString()].filter(Boolean).join(' · '))+'</span></div></article>';}).join('')||'<div class="empty-run">No spots yet. Your sightings will appear here.</div>';
+    var trips=_progress.trips||[];document.getElementById('homeTripSummary').textContent=trips.length?trips.length+' trip'+(trips.length===1?'':'s')+' saved · latest: '+trips[0].name:'Create a trip for a meet, show, or spotting outing.';
+  };
+  var _goTo=goTo;
+  goTo=function(page){if(page==='progress')page='stats';_goTo(page);if(page==='home')requestAnimationFrame(renderHome);};
+  var _renderAll=renderAll;
+  renderAll=function(){_renderAll.apply(this,arguments);renderHome();};
+  var _renderStats=renderStats;
+  renderStats=function(){
+    _renderStats.apply(this,arguments);
+    var unique=cars(), sightings=(allRuns||[]).reduce(function(n,r){return n+(r.cars||[]).length;},0)+(currentRun||[]).length;
+    var makes=new Set(unique.map(function(c){return makeName(c.name).toLowerCase();}).filter(Boolean));
+    document.getElementById('stCars').textContent=unique.length;
+    document.getElementById('stRuns').textContent=sightings;
+    document.getElementById('stValue').textContent=makes.size;
+  };
+  var _tripById=tripById;
+  tripById=function(id){var t=_tripById(id);if(t){if(!Array.isArray(t.runIds))t.runIds=[];if(!t.prices||typeof t.prices!=='object')t.prices={};}return t;};
+  // Keep the old Trips data intact. New prices live on a trip and a specific sighting.
+  function tripPriceKey(runId,index){return String(runId)+':'+String(index);}
+  function setTripPrice(tripId,runId,index,value){var t=tripById(tripId);if(!t)return;t.prices=t.prices||{};var key=tripPriceKey(runId,index),v=String(value).trim();if(v===''){delete t.prices[key];}else{var n=Number(v);if(!Number.isFinite(n)||n<0)return;t.prices[key]={amount:n,kind:'estimate',updatedAt:Date.now()};}saveProgress();openTripDetail(tripId);}
+  window.setTripPrice=setTripPrice;
+  window.addExistingTripRun=function(tripId,runId){var t=tripById(tripId);if(!t)return;if(t.runIds.some(function(x){return String(x)===String(runId);}))return;var r=(allRuns||[]).find(function(x){return String(x.id)===String(runId);});if(!r)return;t.runIds.push(r.id);t.carCount=t.runIds.reduce(function(n,id){var x=(allRuns||[]).find(function(q){return String(q.id)===String(id);});return n+(x?(x.cars||[]).length:0);},0);saveProgress();renderTrips();openTripDetail(tripId);};
+  window.removeTripRun=function(tripId,runId){var t=tripById(tripId);if(!t)return;t.runIds=t.runIds.filter(function(x){return String(x)!==String(runId);});Object.keys(t.prices||{}).forEach(function(k){if(k.indexOf(String(runId)+':')===0)delete t.prices[k];});t.carCount=t.runIds.reduce(function(n,id){var x=(allRuns||[]).find(function(q){return String(q.id)===String(id);});return n+(x?(x.cars||[]).length:0);},0);saveProgress();renderTrips();openTripDetail(tripId);};
+  renderTrips=function(){
+    var trips=_progress.trips||[],hero=document.getElementById('tripHero'),list=document.getElementById('tripList');
+    hero.innerHTML='<div><div class="th-title">TRIPS</div><div class="th-sub">'+trips.length+' outing'+(trips.length===1?'':'s')+' logged</div></div><div class="th-stats"><div class="th-stat"><div class="ts-v">'+trips.reduce(function(n,t){return n+(t.carCount||0);},0)+'</div><div class="ts-l">Sightings</div></div></div>';
+    if(!trips.length){list.innerHTML='<div class="trip-empty">No trips yet. Create one for a car meet, show, or spotting outing.</div>';return;}
+    list.innerHTML=trips.map(function(t,i){var active=String(_progress.activeTripId)===String(t.id);return '<div class="trip-card '+(active?'active':'')+'" style="animation-delay:'+(i*.04)+'s" onclick="openTripDetail(\''+t.id+'\')"><div class="tr-ico">'+escapeHtml(t.emoji||'🛣️')+'</div><div class="tr-body"><div class="tr-name">'+escapeHtml(t.name)+'</div><div class="tr-meta">'+escapeHtml(_tripDateLabel(t))+' · '+(t.runIds||[]).length+' outing record'+((t.runIds||[]).length===1?'':'s')+' · '+(t.carCount||0)+' sightings</div>'+(t.venue?'<div class="tr-meta">📍 '+escapeHtml(t.venue)+'</div>':'')+(active?'<div class="tr-active-tag">ACTIVE — COLLECTING CARS</div>':'')+'</div><button class="tr-del" title="Delete trip" onclick="event.stopPropagation();deleteTrip(\''+t.id+'\')">🗑</button></div>';}).join('');
+  };
+  openTripDetail=function(id){
+    var t=tripById(id);if(!t)return;var old=document.querySelector('.trip-detail-sheet');if(old)old.remove();
+    var panel=document.createElement('div');panel.className='trip-detail-sheet';panel.onclick=function(e){if(e.target===panel)panel.remove();};
+    var rows='';(t.runIds||[]).forEach(function(rid){var r=(allRuns||[]).find(function(x){return String(x.id)===String(rid);});if(!r)return;rows+='<div class="trip-linked-run"><div class="trip-linked-head"><strong>'+escapeHtml(r.date||'Saved spotting session')+'</strong><button type="button" onclick="removeTripRun(\''+t.id+'\',\''+rid+'\')">Remove session</button></div>';(r.cars||[]).forEach(function(c,i){var price=t.prices&&t.prices[tripPriceKey(rid,i)];rows+='<div class="trip-run-row"><div style="min-width:0;flex:1"><div class="trr-name">'+escapeHtml(c.name||'Vehicle')+'</div><div class="trr-meta">'+escapeHtml(c.color||'')+'</div></div><label class="trr-price-field"><span>Optional estimate</span><input type="number" min="0" step="100" inputmode="decimal" placeholder="Add price" value="'+(price?escapeAttr(price.amount):'')+'" onchange="setTripPrice(\''+t.id+'\',\''+rid+'\','+i+',this.value)"></label></div>';});rows+='</div>';});
+    var prices=Object.keys(t.prices||{}).map(function(k){return Number(t.prices[k]&&t.prices[k].amount)||0;}).filter(function(n){return n>=0;});var total=prices.reduce(function(a,b){return a+b;},0);
+    _tripPriceContext=true;var totalLabel=prices.length?_fmtMoneyFull(total)+' estimated total':'No estimates recorded';_tripPriceContext=false;
+    panel.innerHTML='<div class="trip-detail-panel"><div class="book-make-head"><div class="bml">'+escapeHtml(t.emoji||'🛣️')+'</div><div class="bmt"><div class="td-name">'+escapeHtml(t.name)+'</div><div class="bm-sub">'+escapeHtml(_tripDateLabel(t))+'</div></div><button class="book-close" onclick="this.closest(\'.trip-detail-sheet\').remove()">×</button></div><div class="trip-journal-meta">'+(t.venue?'<div><strong>Place</strong> · '+escapeHtml(t.venue)+'</div>':'')+(t.notes?'<div class="trip-journal-notes">'+escapeHtml(t.notes)+'</div>':'')+'</div><button class="detail-action-btn" style="margin:0 20px 14px;width:calc(100% - 40px)" onclick="openTripEditor(\''+t.id+'\')">✎ Edit trip details</button><div class="td-stats"><div class="td-stat"><div class="ts-v">'+(t.carCount||0)+'</div><div class="ts-l">Sightings</div></div><div class="td-stat"><div class="ts-v" style="font-size:.8rem">'+totalLabel+'</div><div class="ts-l">Entered estimates</div></div></div><div style="display:flex;gap:8px;margin-bottom:16px"><button class="trip-create-btn" onclick="'+(String(_progress.activeTripId)===String(t.id)?'endTrip()':'setActiveTrip(\''+t.id+'\')')+';document.querySelector(\'.trip-detail-sheet\').remove();renderTrips()">'+(String(_progress.activeTripId)===String(t.id)?'END TRIP':'START COLLECTING')+'</button><button class="tr-del" onclick="deleteTrip(\''+t.id+'\');document.querySelector(\'.trip-detail-sheet\').remove()">DELETE</button></div><p class="trr-meta">Prices are optional user-entered estimates, not verified sale prices.</p>'+(rows||'<div class="trip-empty">No sightings linked yet. Start collecting and save a spot.</div>')+'</div>';
+    var availableRuns=(allRuns||[]).filter(function(r){return !(t.runIds||[]).some(function(existing){return String(existing)===String(r.id);});});
+    if(availableRuns.length){var picker=document.createElement('div');picker.className='trip-add-existing';var select=document.createElement('select');select.setAttribute('aria-label','Choose a saved spotting session to add to this trip');availableRuns.forEach(function(r){var option=document.createElement('option');option.value=r.id;option.textContent=(r.date||'Saved session')+' · '+(r.cars||[]).length+' sightings';select.appendChild(option);});var add=document.createElement('button');add.type='button';add.textContent='Add saved session';add.onclick=function(){addExistingTripRun(t.id,select.value);};picker.appendChild(select);picker.appendChild(add);var detail=panel.querySelector('.trip-detail-panel'),first=detail.querySelector('.trip-linked-run');if(first)detail.insertBefore(picker,first);else detail.appendChild(picker);}
+    document.body.appendChild(panel);
+  };
+  // Remove the old live-run money summary: legacy trip totals came from general spot values.
+  renderTripLiveBar=function(){var bar=document.getElementById('tripLiveBar'),t=_progress.activeTripId?tripById(_progress.activeTripId):null;if(!bar)return;if(!t){bar.style.display='none';bar.innerHTML='';return;}bar.style.display='flex';bar.innerHTML='<div class="tlb-ico">'+escapeHtml(t.emoji||'🛣️')+'</div><div class="tlb-body"><div class="tlb-name"><span class="tlb-live">TRIP ACTIVE</span>'+escapeHtml(t.name)+'</div><div class="tlb-meta">'+(t.carCount||0)+' sightings logged</div></div><div class="tlb-actions"><button class="tlb-btn tlb-btn--view" onclick="goTo(\'trips\')">View</button><button class="tlb-btn tlb-btn--end" onclick="endTrip()">End Trip</button></div>';};
+  var _saveTripPrice=setTripPrice;
+  // Home and Trips refresh after collection mutations and cloud hydration.
+  var _oldAttach=attachRunToTrip;attachRunToTrip=function(run){_oldAttach(run);renderHome();};
+  document.addEventListener('change',function(e){if(e.target&&e.target.matches('.trr-price-field input'))renderHome();});
+  document.addEventListener('click',function(e){if(e.target.closest('#nav-home'))renderHome();});
+  var spottedAtInput=document.getElementById('carSpottedAt');if(spottedAtInput&&!spottedAtInput.value)spottedAtInput.value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
+  (function initNhtsaCatalog(){
+    var base='https://vpic.nhtsa.dot.gov/api/vehicles/',makeEl=document.getElementById('csMake'),modelEl=document.getElementById('csModel'),yearEl=document.getElementById('csYear'),status=document.getElementById('csVpicStatus'),makeList=document.getElementById('csMakeOptions'),modelList=document.getElementById('csModelOptions');
+    if(!makeEl||!modelEl||!yearEl)return;
+    function getJSON(path){return fetch(base+path,{headers:{Accept:'application/json'}}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}).then(function(x){if(!x||!Array.isArray(x.Results))throw new Error('Unexpected response');return x.Results;});}
+    function options(list,values){list.textContent='';values.forEach(function(v){var o=document.createElement('option');o.value=v;list.appendChild(o);});}
+    function setYearOptions(){yearEl.textContent='';var first=document.createElement('option');first.value='';first.textContent='Choose a year (optional)';yearEl.appendChild(first);for(var y=new Date().getFullYear();y>=1981;y--){var o=document.createElement('option');o.value=String(y);o.textContent=String(y);yearEl.appendChild(o);}yearEl.disabled=false;}
+    function syncName(){var make=makeEl.value.trim(),model=modelEl.value.trim();if(!make||!model)return;document.getElementById('carName').value=make+' '+model+(yearEl.value?' '+yearEl.value:'');}
+    function loadModels(){var make=makeEl.value.trim();modelEl.value='';modelEl.disabled=true;yearEl.textContent='';var wait=document.createElement('option');wait.value='';wait.textContent='Select a model first';yearEl.appendChild(wait);yearEl.disabled=true;options(modelList,[]);if(!make){status.textContent='Choose or type a manufacturer.';return;}status.textContent='Loading '+make+' models…';getJSON('GetModelsForMake/'+encodeURIComponent(make)+'?format=json').then(function(rows){var names=Array.from(new Set(rows.map(function(r){return r.Model_Name;}).filter(Boolean))).sort();options(modelList,names);modelEl.disabled=false;status.textContent=names.length?names.length+' catalog models found.':'No catalog models found; use manual entry.';}).catch(function(){modelEl.disabled=false;status.textContent='Catalog unavailable. Manual entry is ready.';});}
+    makeEl.addEventListener('change',loadModels);makeEl.addEventListener('blur',function(){if(makeEl.value.trim()&&!modelEl.disabled&&!modelList.options.length)loadModels();});
+    modelEl.addEventListener('change',function(){if(!modelEl.value.trim())return;setYearOptions();syncName();});
+    yearEl.addEventListener('change',function(){syncName();var make=makeEl.value.trim(),year=yearEl.value,model=modelEl.value.trim();if(!make||!year||!model)return;status.textContent='Checking '+year+' model availability…';getJSON('GetModelsForMakeYear/make/'+encodeURIComponent(make)+'/modelyear/'+encodeURIComponent(year)+'?format=json').then(function(rows){var ok=rows.some(function(r){return String(r.Model_Name||'').toLowerCase()===model.toLowerCase();});status.textContent=ok?'Catalog match: '+year+' '+make+' '+model+'.':'This year/model is not listed by vPIC; verify the name or continue with manual entry.';}).catch(function(){status.textContent='Year check unavailable; you can still save the spot.';});});
+    status.textContent='Loading vehicle catalog…';getJSON('GetAllMakes?format=json').then(function(rows){var names=Array.from(new Set(rows.map(function(r){return r.Make_Name;}).filter(Boolean))).sort();options(makeList,names);status.textContent=names.length+' manufacturers available. Search or use manual entry.';}).catch(function(){status.textContent='Vehicle catalog unavailable. Manual entry is ready.';});
+  })();
+  setTimeout(function(){renderHome();renderTrips();renderTripLiveBar();},0);
 })();
 </script>
+<style>.cs-vpic-picker{padding:12px;margin:0 0 12px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--surf2)}.cs-vpic-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.57rem;font-weight:800;letter-spacing:1.4px;color:var(--text2);margin-bottom:9px}.cs-vpic-heading span{font-size:.58rem;font-weight:500;letter-spacing:0;color:var(--muted);text-align:right}.cs-vpic-grid{display:grid;grid-template-columns:1fr 1fr 112px;gap:8px}.cs-vpic-grid input,.cs-vpic-grid select,.cs-spot-extra input,.cs-spot-extra textarea{width:100%;box-sizing:border-box;min-height:42px;padding:9px 10px;background:var(--surf);color:var(--text);border:1px solid var(--border2);border-radius:8px;font:inherit;font-size:.75rem}.cs-vpic-grid input:disabled,.cs-vpic-grid select:disabled{opacity:.55}.cs-vpic-note{font-size:.58rem;line-height:1.5;color:var(--muted);margin-top:8px}.cs-spot-extra{margin-top:4px}.cs-spot-extra textarea{resize:vertical}.trr-price-field{display:flex;flex-direction:column;gap:3px;color:var(--muted);font-size:.52rem;letter-spacing:.5px;min-width:112px}.trr-price-field input{width:112px;min-height:38px;background:var(--surf);border:1px solid var(--border2);border-radius:8px;padding:7px;color:var(--text);font:inherit;font-size:.72rem;letter-spacing:0}.trip-linked-run{border:1px solid var(--border);border-radius:12px;padding:8px 10px;margin:8px 0}.trip-linked-head{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);font-size:.62rem;padding:4px 2px}.trip-linked-head button{background:transparent;border:0;color:var(--red);font:inherit;cursor:pointer}.trip-add-existing{display:flex;gap:8px;margin:8px 20px 14px}.trip-add-existing select{flex:1;min-width:0;background:var(--surf2);color:var(--text);border:1px solid var(--border2);border-radius:8px;padding:9px;font:inherit;font-size:.68rem}.trip-add-existing button{background:var(--surf2);color:var(--text);border:1px solid var(--border2);border-radius:8px;padding:8px;font:inherit;font-size:.62rem;cursor:pointer}@media(max-width:560px){.cs-vpic-grid{grid-template-columns:1fr}.cs-vpic-heading{align-items:flex-start;flex-direction:column}.cs-vpic-heading span{text-align:left}}</style>
 </body>
 </html>
